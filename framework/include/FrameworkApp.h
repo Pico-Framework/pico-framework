@@ -3,8 +3,47 @@
 
 class FrameworkApp {
 public:
+
+    // Call initRoutes() in the constructor to set up the routes
+    // This ensures that the routes are set up before the server starts
+    // and the application runs.
+    // You can also choose to initialize routes in a separate method
+    // if you prefer to keep the constructor clean.
+    // However, for simplicity, we are calling initRoutes() here.
+    // This allows you to easily modify the routes in one place
+    // and keep the constructor focused on initializing the server.
+    // Note: The router is passed to the server constructor,
+    // so it can handle incoming requests based on the defined routes.
+    // The server will use the router to match requests to the appropriate route handlers.
+    // The router is a key component of the server, as it defines how   
+    // the server responds to different HTTP methods and paths.
     virtual ~FrameworkApp() = default;
+    
+    // add your routes here
+    // Example: Adding a simple GET route
+    // This route responds to GET requests at the root path "/"
+    // and sends a simple text response.
+    // You can replace this with your own logic or controller methods.
+    // Note: The lambda function captures 'this' to access the class instance
+    // and its members if needed.
+    // You can also use member functions instead of lambdas if preferred.
+    // For example, you could have a method like:
+    // void handleRoot(Request &req, Response &res) { ... }
+    // and then bind it like this:
+    // router.addRoute("GET", "/", std::bind(&App::handleRoot, this, std::placeholders::_1, std::placeholders::_2));
     virtual void initRoutes() = 0;
+   
+    // Start the HTTP server
+    // This method initializes the server and starts listening for incoming requests.
+    // The server will use the defined routes to handle requests
+    // and send appropriate responses based on the HTTP method and path.
+    // The server will run indefinitely, processing requests as they come in.
+    // Note: You may want to add error handling or logging here
+    // to monitor the server's status and any issues that arise.
+    // For example, you could log the server's status to the console
+    // or to a file for later analysis.
+    // then enter your unlimited loop to process requests
+    // and keep the server running.
     virtual void run() = 0;
 };
 
