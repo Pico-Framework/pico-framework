@@ -12,7 +12,12 @@
 #define FRAMEWORK_APP_H
 #pragma once
 
+#include "Router.h"
+#include "HttpServer.h"
+//#include "FrameworkManager.h" // Include the framework manager for task management
 #include "FrameworkTask.h" // Include the base task class
+
+class FrameworkManager;
 
 class FrameworkApp : public FrameworkTask {
 
@@ -22,8 +27,8 @@ class FrameworkApp : public FrameworkTask {
     // The derived classes will implement the start(), initRoutes(), and run() methods
     // to define the application's behavior and routing logic.
 public:
-    FrameworkApp(const char* name = "AppTask", uint16_t stackSize = 2048, UBaseType_t priority = 1);
-
+    //FrameworkApp(const char* name = "AppTask", uint16_t stackSize = 2048, UBaseType_t priority = 1);
+    FrameworkApp(int port, const char* name, uint16_t stackSize = 2048, UBaseType_t priority = 1);
 
     // Call initRoutes() in the constructor to set up the routes
     // This ensures that the routes are set up before the server starts
@@ -56,7 +61,7 @@ public:
     // The start method is typically called before the run() method
     // to ensure that the application is fully initialized
     // and ready to handle requests when the server starts.
-    virtual void start() = 0; // Initialize the application
+    virtual void start(); // Initialize the application
     
     // add your routes here
     // Example: Adding a simple GET route
@@ -84,6 +89,12 @@ public:
     // then enter your unlimited loop to process requests
     // and keep the server running.
     virtual void run() = 0;
+
+    protected:
+        Router router;
+        HttpServer server;
+        FrameworkManager* manager;
+
 };
 
 #endif // FRAMEWORK_APP_H
