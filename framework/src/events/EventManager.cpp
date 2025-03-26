@@ -9,7 +9,7 @@
  * 
  */
 #include "EventManager.h"
-#include "FreeRTOSTask.h" // Include your Task class header
+#include "FrameworkTask.h" // Include your Task class header
 #include "pico/stdlib.h" 
 #include "FreeRTOS.h"
 #include "task.h"
@@ -20,7 +20,7 @@ EventManager::EventManager(size_t queueSize) {
     eventQueue_ = xQueueCreate(queueSize, sizeof(Event));
 }
 
-void EventManager::subscribe(uint32_t eventMask, Task* task) {
+void EventManager::subscribe(uint32_t eventMask, FrameworkTask* task) {
     subscribers_.push_back({ eventMask, task });
 }
 

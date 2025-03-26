@@ -19,7 +19,7 @@
 #include "queue.h"
 
 // Forward declaration of your Task wrapper class
-class Task;
+class FrameworkTask;
 
 enum class EventType : uint8_t {
     None = 0,
@@ -40,7 +40,7 @@ public:
     explicit EventManager(size_t queueSize = 10);
 
     // Subscribe a task to specific events (eventMask is a bitmask of 1 << EventType)
-    void subscribe(uint32_t eventMask, Task* task);
+    void subscribe(uint32_t eventMask, FrameworkTask* task);
 
     // Post an event to the queue and notify all relevant subscribers
     void postEvent(const Event& event);
@@ -54,7 +54,7 @@ public:
 private:
     struct Subscriber {
         uint32_t eventMask;
-        Task* task;
+        FrameworkTask* task;
     };
 
     std::vector<Subscriber> subscribers_;

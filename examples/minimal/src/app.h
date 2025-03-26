@@ -4,15 +4,22 @@
 #include "HttpServer.h"
 #include "Router.h"
 #include "FrameworkApp.h"
+#include "FrameworkManager.h"
+
+#include <memory>
 
 class App : public FrameworkApp {
 public:
     App(int port);
+    void start() override;
     void initRoutes() override;
     void run() override;
+    virtual ~App() = default;
 
 private:
-    HttpServer server;
+    int port;
+    std::unique_ptr<HttpServer> server;
+    std::unique_ptr<FrameworkManager> manager;
     Router router;
 };
 

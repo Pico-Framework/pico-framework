@@ -35,6 +35,9 @@ bool FileHandler::init() {
 }
 
 void FileHandler::listDirectory(const char *path) {
+    if(!mounted) {
+        init();
+    }
     printf("Listing directory: %s\n", path);
     char pcWriteBuffer[128] = {0};
     FF_FindData_t xFindStruct;
@@ -93,6 +96,9 @@ std::string getMimeType(const std::string& filePath) {
 
 
 bool FileHandler::serveFile(Response &res, const char *uri) {
+    if(!mounted) {
+        init();
+    }
     char filepath[128];
     snprintf(filepath, sizeof(filepath), "/sd0%s", uri);
     FF_FILE* file = ff_fopen(filepath, "r");
@@ -146,7 +152,7 @@ bool FileHandler::serveFile(Response &res, const char *uri) {
 }
 
 HttpFileServer::HttpFileServer() {
-    fileHandler.init();
+    //fileHandler.init(); // changed to lazy init to avoid startup issues
 }
 
 void HttpFileServer::handle_list_directory(Request &req, Response &res, const std::vector<std::string> &params){

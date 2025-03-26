@@ -17,11 +17,11 @@
 #include "task.h"
 #include "queue.h"
 
-class Task {
+class FrameworkTask {
 
     public:
-    Task(const char* name, uint16_t stackSize = 1024, UBaseType_t priority = 1);
-    virtual ~Task();
+    FrameworkTask(const char* name, uint16_t stackSize = 1024, UBaseType_t priority = 1);
+    virtual ~FrameworkTask();
 
     bool start();
     void suspend();

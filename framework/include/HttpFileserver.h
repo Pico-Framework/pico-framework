@@ -26,6 +26,7 @@ public:
     bool init();
     void listDirectory(const char *path);
     bool serveFile(Response &res, const char* uri);
+    bool mounted = false;
 
 };
 

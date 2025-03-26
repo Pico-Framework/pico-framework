@@ -40,6 +40,8 @@ target_sources(pico_framework
         #src/main.cpp 
         #src/system_manager.cpp
         src/FrameworkManager.cpp
+        src/FrameworkTask.cpp
+        src/FrameworkApp.cpp
         src/http/HttpServer.cpp
         src/http/HttpRequest.cpp
         src/http/HttpResponse.cpp
