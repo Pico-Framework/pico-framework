@@ -8,12 +8,12 @@ if (DEFINED ENV{WIFI_PASSWORD} AND (NOT WIFI_PASSWORD))
 endif()
 
 # Framework library
-add_executable(pico_framework)
+add_library(pico_framework)
 
 # Set C++ standard
 target_compile_features(pico_framework PUBLIC cxx_std_17)
 
-target_compile_definitions(pico_framework PRIVATE
+target_compile_definitions(pico_framework PUBLIC
         WIFI_SSID=\"${WIFI_SSID}\"
         WIFI_PASSWORD=\"${WIFI_PASSWORD}\"
         CYW43_HOST_NAME="Pico-Framework"
@@ -37,9 +37,9 @@ add_definitions(-DJWT_SECRET="${JWT_SECRET_VALUE}")
 # Source files (organized by domain)
 target_sources(pico_framework
     PRIVATE
-        src/main.cpp 
-        src/app.cpp
-        src/system_manager.cpp
+        #src/main.cpp 
+        #src/system_manager.cpp
+        src/FrameworkManager.cpp
         src/http/HttpServer.cpp
         src/http/HttpRequest.cpp
         src/http/HttpResponse.cpp
@@ -55,14 +55,12 @@ target_sources(pico_framework
 )
 
 
-target_link_libraries(pico_framework
+target_link_libraries(pico_framework PUBLIC
         pico_async_context_freertos
         FreeRTOS-Kernel-Heap4
         pico_stdlib
         hardware_i2c
         hardware_pwm
-        #hardware_pio # SDIO
-        #hardware_dma # SDIO
         hardware_spi
         pico_cyw43_arch_lwip_sys_freertos
         hardware_rtc
@@ -77,6 +75,8 @@ target_include_directories(pico_framework
     PUBLIC
         ${CMAKE_CURRENT_SOURCE_DIR}/include
         ${CMAKE_CURRENT_SOURCE_DIR}/include/port
+        ${FREERTOS_KERNEL_PATH}/include
+        ${FREERTOS_KERNEL_PATH}/portable/ThirdParty/GCC/RP2040/include
         ${CMAKE_CURRENT_SOURCE_DIR}/lib/FreeRTOS-FAT-CLI-for-RPi-Pico/src/FreeRTOS+FAT+CLI/include
         ${CMAKE_CURRENT_SOURCE_DIR}/lib/FreeRTOS-FAT-CLI-for-RPi-Pico/src/FreeRTOS+FAT+CLI/portable/RP2040
         ${CMAKE_CURRENT_SOURCE_DIR}/lib/FreeRTOS-FAT-CLI-for-RPi-Pico/src/Lab-Project-FreeRTOS-FAT/include
@@ -88,6 +88,12 @@ set_source_files_properties(
         PROPERTIES
         COMPILE_OPTIONS "-Wno-unused-result"
         )
+
+# These are needed to avoid warnings from the FreeRTOS+FAT code
+include_directories(
+    ${FREERTOS_KERNEL_PATH}/include
+    ${FREERTOS_KERNEL_PATH}/portable/ThirdParty/GCC/RP2040/include
+)
 
 #add_subdirectory(lib/FreeRTOS-FAT-CLI-for-RPi-Pico/src/FreeRTOS+FAT+CLI) doesn't work - can't find the source path for e.g. ../Lab-Project-FreeRTOS-FAT/ff_crc.c
 add_subdirectory(lib)

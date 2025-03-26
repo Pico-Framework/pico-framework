@@ -2,9 +2,9 @@
 #ifndef SYSTEM_MANAGER_HPP
 #define SYSTEM_MANAGER_HPP
 
-#include "network.h"
-#include "ntpClient.h"
-#include "app.h"
+#include "Network.h"
+#include "NtpClient.h"
+#include "FrameworkApp.h"
 
 #define NETWORK_STACK_SIZE 512
 
@@ -16,7 +16,7 @@ public:
 private:
     static void network_task(void* params);
     static void app_task(void* params);
-    App app;
+    FrameworkApp app;
     Network network;
     NTPClient ntpClient;
     TaskHandle_t networkTaskHandle;

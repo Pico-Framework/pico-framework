@@ -1,4 +1,10 @@
 # had to add these here as add subdirectory compains with relatve paths
+if(NOT DEFINED FREERTOS_KERNEL_PATH)
+    set(FREERTOS_KERNEL_PATH $ENV{FREERTOS_KERNEL_PATH})
+endif()
+
+message(STATUS "FREERTOS_KERNEL_PATH BUILDING FreeRTOS+FAT+CLI = ${FREERTOS_KERNEL_PATH}")
+
 add_library(FreeRTOS+FAT+CLI)
 
 message("Current source directory: ${CMAKE_CURRENT_SOURCE_DIR}")
@@ -42,7 +48,6 @@ target_sources(FreeRTOS+FAT+CLI PRIVATE
 )
 target_link_libraries(FreeRTOS+FAT+CLI PRIVATE
         cmsis_core
-        FreeRTOS-Kernel
         FreeRTOS-Kernel-Heap4
         hardware_adc
         hardware_clocks
@@ -59,9 +64,10 @@ target_link_libraries(FreeRTOS+FAT+CLI PRIVATE
 )
 
 target_include_directories(FreeRTOS+FAT+CLI PRIVATE    
-        ${CMAKE_SOURCE_DIR}/framework/include/port
-        FreeRTOS-FAT-CLI-for-RPi-Pico/src/Lab-Project-FreeRTOS-FAT/include/
-        FreeRTOS-FAT-CLI-for-RPi-Pico/src/FreeRTOS+FAT+CLI/portable/RP2040/
-        FreeRTOS-FAT-CLI-for-RPi-Pico/src/FreeRTOS+FAT+CLI/include 
-    
+    ${CMAKE_SOURCE_DIR}/framework/include/port
+    ${FREERTOS_KERNEL_PATH}/include
+    ${FREERTOS_KERNEL_PATH}/portable/ThirdParty/GCC/RP2040/include
+    FreeRTOS-FAT-CLI-for-RPi-Pico/src/Lab-Project-FreeRTOS-FAT/include/
+    FreeRTOS-FAT-CLI-for-RPi-Pico/src/FreeRTOS+FAT+CLI/portable/RP2040/
+    FreeRTOS-FAT-CLI-for-RPi-Pico/src/FreeRTOS+FAT+CLI/include 
 )
