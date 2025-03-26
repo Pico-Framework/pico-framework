@@ -8,6 +8,9 @@
  * @copyright Copyright (c) 2025
  * 
  */
+
+#include "FrameworkManager.h"
+#include "FrameworkApp.h" 
 #include <iostream>
 #include "utility.h"  // If needed
 #include "Task.h"     // If needed

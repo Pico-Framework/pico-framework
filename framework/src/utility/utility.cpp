@@ -8,6 +8,8 @@
  * @copyright Copyright (c) 2025
  * 
  */
+
+#include "utility.h" 
 #include "FreeRTOS.h"
 #include "task.h"
 #include <stdio.h>

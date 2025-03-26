@@ -8,6 +8,8 @@
  * @copyright Copyright (c) 2025
  * 
  */
+
+#include "MultipartParser.h"
 #include "ff_stdio.h"
 #include "lwip/sockets.h"
 #include <iostream>

@@ -8,6 +8,8 @@
  * @copyright Copyright (c) 2025
  * 
  */
+
+#include "HttpServer.h" 
 #include <lwip/sockets.h>
 #include <lwip/netif.h>
 #include <lwip/ip4_addr.h>

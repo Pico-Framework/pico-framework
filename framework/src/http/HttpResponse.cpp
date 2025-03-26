@@ -8,6 +8,8 @@
  * @copyright Copyright (c) 2025
  * 
  */
+
+#include "HttpResponse.h" 
 #include <sstream>
 #include <lwip/sockets.h>
 #include <cstring>

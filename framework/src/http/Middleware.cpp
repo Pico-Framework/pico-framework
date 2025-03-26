@@ -8,6 +8,8 @@
  * @copyright Copyright (c) 2025
  * 
  */
+
+#include "Middleware.h" 
 #include <iostream>
 
 Middleware authMiddleware = [](Request &req, Response &res, const std::vector<std::string> &params) {
