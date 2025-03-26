@@ -1,4 +1,13 @@
-#include "HttpResponse.h"
+/**
+ * @file HttpResponse.cpp
+ * @author Ian Archbell
+ * @brief 
+ * @version 0.1
+ * @date 2025-03-26
+ * 
+ * @copyright Copyright (c) 2025
+ * 
+ */
 #include <sstream>
 #include <lwip/sockets.h>
 #include <cstring>

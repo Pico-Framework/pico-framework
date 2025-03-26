@@ -1,4 +1,13 @@
-#include <algorithm>  // For std::equal and rbegin/rend
+/**
+ * @file HttpFileserver.cpp
+ * @author Ian Archbell
+ * @brief 
+ * @version 0.1
+ * @date 2025-03-26
+ * 
+ * @copyright Copyright (c) 2025
+ * 
+ */
 #include "HttpFileserver.h"
 #include <ff_utils.h>
 #include <ff_stdio.h>

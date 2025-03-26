@@ -1,3 +1,13 @@
+/**
+ * @file Network.cpp
+ * @author Ian Archbell
+ * @brief 
+ * @version 0.1
+ * @date 2025-03-26
+ * 
+ * @copyright Copyright (c) 2025
+ * 
+ */
 #include <pico/cyw43_arch.h>
 
 #include <lwip/ip4_addr.h>

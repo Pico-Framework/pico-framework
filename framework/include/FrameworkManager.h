@@ -1,5 +1,16 @@
+/**
+ * @file FrameworkManager.h
+ * @author Ian Archbell
+ * @brief 
+ * @version 0.1
+ * @date 2025-03-26
+ * 
+ * @copyright Copyright (c) 2025
+ * 
+ */
 #ifndef FRAMEWORK_MANAGER_H
 #define FRAMEWORK_MANAGER_H
+#pragma once
 
 #include "FrameworkApp.h"
 #include "FreeRTOS.h"

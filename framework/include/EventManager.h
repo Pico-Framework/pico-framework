@@ -1,3 +1,16 @@
+/**
+ * @file EventManager.h
+ * @author Ian Archbell
+ * @brief 
+ * @version 0.1
+ * @date 2025-03-26
+ * 
+ * @copyright Copyright (c) 2025
+ * 
+ */
+
+#ifndef EVENT_MANAGER_H
+#define EVENT_MANAGER_H
 #pragma once
 
 #include <vector>
@@ -47,3 +60,5 @@ private:
     std::vector<Subscriber> subscribers_;
     QueueHandle_t eventQueue_;
 };
+
+#endif // EVENT_MANAGER_H

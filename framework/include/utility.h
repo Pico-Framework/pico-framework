@@ -1,5 +1,18 @@
+/**
+ * @file utility.h
+ * @author Ian Archbell
+ * @brief 
+ * @version 0.1
+ * @date 2025-03-26
+ * 
+ * @copyright Copyright (c) 2025
+ * 
+ */
+
 #ifndef UTILITY_H        
 #define UTILITY_H   
+#pragma once
+
 #include <string>
 #include <cstring>
 

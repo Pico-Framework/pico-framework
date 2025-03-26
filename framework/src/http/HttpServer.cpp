@@ -1,4 +1,13 @@
-#include "HttpServer.h"
+/**
+ * @file HttpServer.cpp
+ * @author Ian Archbell
+ * @brief 
+ * @version 0.1
+ * @date 2025-03-26
+ * 
+ * @copyright Copyright (c) 2025
+ * 
+ */
 #include <lwip/sockets.h>
 #include <lwip/netif.h>
 #include <lwip/ip4_addr.h>

@@ -1,4 +1,18 @@
+/**
+ * @file FreeRTOSTask.h
+ * @author Ian Archbell
+ * @brief 
+ * @version 0.1
+ * @date 2025-03-26
+ * 
+ * @copyright Copyright (c) 2025
+ * 
+ */
+
+#ifndef FREERTOS_TASK_H
+#define FREERTOS_TASK_H
 #pragma once
+
 #include "FreeRTOS.h"
 #include "task.h"
 #include "queue.h"
@@ -39,6 +53,8 @@ protected:
 private:
     static void taskEntry(void* pvParams);
 };
+
+#endif // FREERTOS_TASK_H
 
 
 // Integration with EventManager and EventListener

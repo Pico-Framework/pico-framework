@@ -1,4 +1,18 @@
+/**
+ * @file DebugTrace.h
+ * @author Ian Archbell
+ * @brief 
+ * @version 0.1
+ * @date 2025-03-26
+ * 
+ * @copyright Copyright (c) 2025
+ * 
+ */
+
+#ifndef DEBUG_TRACE_H
+#define DEBUG_TRACE_H
 #pragma once
+
 #include <cstdio>
 #include <ctime>
 #include <cstring>
@@ -106,3 +120,5 @@ private:
             va_end(args);                                              \
         }                                                              \
     }
+
+#endif // DEBUG_TRACE_H            

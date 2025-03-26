@@ -1,3 +1,13 @@
+/**
+ * @file HttpRequest.cpp
+ * @author Ian Archbell
+ * @brief 
+ * @version 0.1
+ * @date 2025-03-26
+ * 
+ * @copyright Copyright (c) 2025
+ * 
+ */
 #include "HttpRequest.h"
 #include <sstream>
 #include <algorithm>

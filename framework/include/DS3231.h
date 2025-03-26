@@ -11,6 +11,7 @@
 
 #ifndef DS_3231_H
 #define DS_3231_H
+#pragma once
 
 #include "ds3231/ds3231.h"
 #include "hardware/i2c.h"

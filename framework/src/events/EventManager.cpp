@@ -1,4 +1,13 @@
-// event_manager.cpp
+/**
+ * @file EventManager.cpp
+ * @author Ian Archbell
+ * @brief 
+ * @version 0.1
+ * @date 2025-03-26
+ * 
+ * @copyright Copyright (c) 2025
+ * 
+ */
 #include "EventManager.h"
 #include "FreeRTOSTask.h" // Include your Task class header
 #include "pico/stdlib.h" 

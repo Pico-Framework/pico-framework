@@ -1,6 +1,17 @@
+/**
+ * @file FreeRTOSTask.cpp
+ * @author Ian Archbell
+ * @brief 
+ * @version 0.1
+ * @date 2025-03-26
+ * 
+ * @copyright Copyright (c) 2025
+ * 
+ */
+
 #include "FreeRTOSTask.h"
 
-Task::Task(const char* name, uint16_t stackSize, UBaseType_t priority)
+ Task::Task(const char* name, uint16_t stackSize, UBaseType_t priority)
     : _name(name), _stackSize(stackSize), _priority(priority) {}
 
 Task::~Task() {

@@ -1,5 +1,16 @@
+/**
+ * @file FrameworkApp.h
+ * @author Ian Archbell
+ * @brief 
+ * @version 0.1
+ * @date 2025-03-26
+ * 
+ * @copyright Copyright (c) 2025
+ * 
+ */
 #ifndef FRAMEWORK_APP_H
 #define FRAMEWORK_APP_H
+#pragma once
 
 class FrameworkApp {
 public:
@@ -17,6 +28,11 @@ public:
     // The server will use the router to match requests to the appropriate route handlers.
     // The router is a key component of the server, as it defines how   
     // the server responds to different HTTP methods and paths.
+    // FrameworkApp() {
+    //     initRoutes(); // Initialize routes in the constructor
+    // }
+
+    // Virtual destructor to allow derived classes to clean up resources
     virtual ~FrameworkApp() = default;
     
     // add your routes here

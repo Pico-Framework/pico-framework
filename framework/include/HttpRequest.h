@@ -1,5 +1,18 @@
-#ifndef REQUEST_HPP
-#define REQUEST_HPP
+/**
+ * @file HttpRequest.h
+ * @author Ian Archbell
+ * @brief 
+ * @version 0.1
+ * @date 2025-03-26
+ * 
+ * @copyright Copyright (c) 2025
+ * 
+ */
+
+#ifndef HTTPREQUEST_H
+#define HTTPREQUEST_H
+#pragma once
+
 #include "utility.h"
 #include <string>
 #include <unordered_map>
@@ -112,4 +125,4 @@ private:
 
 };
 
-#endif // REQUEST_HPP
+#endif // HTTPREQUEST_HPP

@@ -1,5 +1,15 @@
-#ifndef RESPONSE_HPP
-#define RESPONSE_HPP
+/**
+ * @file HttpResponse.h
+ * @author Ian Archbell
+ * @brief 
+ * @version 0.1
+ * @date 2025-03-26
+ * 
+ * @copyright Copyright (c) 2025
+ * 
+ */
+#ifndef HTTPRESPONSE_H
+#define HTTPRESPONSE_H
 
 #include <string>
 #include <unordered_map>
@@ -50,4 +60,4 @@ private:
     std::string getStatusMessage(int code);
 };
 
-#endif // RESPONSE_HPP
+#endif // HTTPRESPONSE_HPP

@@ -1,5 +1,15 @@
-#ifndef AUTHENTICATOR_HPP
-#define AUTHENTICATOR_HPP
+/**
+ * @file JwtAuthenticator.h
+ * @author yIan Archbell
+ * @brief 
+ * @version 0.1
+ * @date 2025-03-26
+ * 
+ * @copyright Copyright (c) 2025
+ * 
+ */
+#ifndef JWT_AUTHENTICATOR_H
+#define JWT_AUTHENTICATOR_H
 
 #include <string>
 
@@ -32,4 +42,4 @@ class Authenticator {
         std::string hmacSHA256(const std::string& message) const;
 };
 
-#endif // AUTHENTICATOR_HPP
+#endif // JWT_AUTHENTICATOR_HPP

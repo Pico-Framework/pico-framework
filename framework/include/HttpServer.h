@@ -1,5 +1,17 @@
-#ifndef HTTP_SERVER_HPP
-#define HTTP_SERVER_HPP
+/**
+ * @file HttpServer.h
+ * @author Ian Archbell
+ * @brief 
+ * @version 0.1
+ * @date 2025-03-26
+ * 
+ * @copyright Copyright (c) 2025
+ * 
+ */
+
+#ifndef HTTP_SERVER_H
+#define HTTP_SERVER_H
+#pragma once
 
 #include <string>
 #include "Router.h"
@@ -51,4 +63,4 @@ private:
     static StaticTask_t xTaskBuffer;   
 };
 
-#endif // HTTP_SERVER_HPP
+#endif // HTTP_SERVER_H
