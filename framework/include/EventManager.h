@@ -1,0 +1,49 @@
+#pragma once
+
+#include <vector>
+#include "FreeRTOS.h"
+#include "task.h"
+#include "queue.h"
+
+// Forward declaration of your Task wrapper class
+class Task;
+
+enum class EventType : uint8_t {
+    None = 0,
+    SysStartup,
+    SysError,
+    UserInput,
+    UserCommand,
+    // Extend as needed
+};
+
+struct Event {
+    EventType type;
+    void* data = nullptr;  // Optional payload
+};
+
+class EventManager {
+public:
+    explicit EventManager(size_t queueSize = 10);
+
+    // Subscribe a task to specific events (eventMask is a bitmask of 1 << EventType)
+    void subscribe(uint32_t eventMask, Task* task);
+
+    // Post an event to the queue and notify all relevant subscribers
+    void postEvent(const Event& event);
+
+    // Called by tasks to retrieve the next event (non-blocking if timeout = 0)
+    bool getNextEvent(Event& event, uint32_t timeoutMs = portMAX_DELAY) const;
+
+    // Check if any events are currently pending
+    bool hasPendingEvents() const;
+
+private:
+    struct Subscriber {
+        uint32_t eventMask;
+        Task* task;
+    };
+
+    std::vector<Subscriber> subscribers_;
+    QueueHandle_t eventQueue_;
+};

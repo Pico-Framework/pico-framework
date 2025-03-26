@@ -1,0 +1,38 @@
+# === Build output ===
+build/
+*.elf
+*.bin
+*.uf2
+*.hex
+*.map
+*.dis
+
+# === CMake artifacts ===
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+Makefile
+install_manifest.txt
+
+# === Editor settings ===
+.vscode/
+.idea/
+
+# === macOS system files ===
+.DS_Store
+
+# === Temporary and backup files ===
+*~
+*.swp
+*.tmp
+*.log
+
+# === GCC-generated dependency files ===
+*.d
+
+# === Submodule build folders ===
+**/build/
+**/CMakeFiles/
+**/CMakeCache.txt
+**/cmake_install.cmake
+**/Makefile

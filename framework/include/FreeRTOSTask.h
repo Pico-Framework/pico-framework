@@ -1,0 +1,103 @@
+#pragma once
+#include "FreeRTOS.h"
+#include "task.h"
+#include "queue.h"
+
+class Task {
+
+    public:
+    Task(const char* name, uint16_t stackSize = 1024, UBaseType_t priority = 1);
+    virtual ~Task();
+
+    bool start();
+    void suspend();
+    void resume();
+    TaskHandle_t getHandle() const;
+
+    // For notifications
+    void notify(uint32_t value = 1);
+    void notifyFromISR(uint32_t value = 1, BaseType_t* pxHigherPriorityTaskWoken = nullptr);
+    
+
+protected:
+    virtual void run() = 0; // override in subclass
+
+    uint32_t waitForNotification(TickType_t timeout = portMAX_DELAY);
+
+    // For optional message queue
+    bool createQueue(size_t itemSize, size_t length);
+    bool sendToQueue(const void* item, TickType_t timeout = 0);
+    bool receiveFromQueue(void* item, TickType_t timeout = portMAX_DELAY);
+
+protected:
+    const char* _name;
+    uint16_t _stackSize;
+    UBaseType_t _priority;
+    TaskHandle_t _handle = nullptr;
+    QueueHandle_t _queue = nullptr;
+
+private:
+    static void taskEntry(void* pvParams);
+};
+
+
+// Integration with EventManager and EventListener
+
+// class MyTask : public Task, public EventListener {
+//     public:
+//         MyTask() : Task("MyTask", 1024, 1) {}
+    
+//     protected:
+//         void run() override {
+//             while (true) {
+//                 Event evt = waitForEvent();  // hypothetically wraps queue or notification
+//                 handleEvent(evt);
+//             }
+//         }
+    
+//         void onEvent(const Event& e) override {
+//             sendToQueue(&e, 0);  // Or notify depending on setup
+//         }
+//     };
+    
+
+//#pragma once
+
+// class Event;
+
+// class EventListener {
+// public:
+//     virtual ~EventListener() = default;
+
+//     // Called when an event is dispatched to this listener
+//     virtual void onEvent(const Event& event) = 0;
+// };
+
+
+// #pragma once
+// #include <cstdint>
+
+// class Event {
+// public:
+//     uint32_t type;
+//     void* data;
+
+//     Event(uint32_t type = 0, void* data = nullptr)
+//         : type(type), data(data) {}
+// };
+
+
+// class MyTask : public Task, public EventListener {
+//     public:
+//         MyTask() : Task("MyTask", 1024, 1) {}
+    
+//     protected:
+//         void run() override {
+//             // task main loop
+//         }
+    
+//         void onEvent(const Event& event) override {
+//             // handle event, e.g., push to queue
+//         }
+//     };
+    

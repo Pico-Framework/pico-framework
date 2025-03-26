@@ -1,0 +1,47 @@
+// event_manager.cpp
+#include "EventManager.h"
+#include "FreeRTOSTask.h" // Include your Task class header
+#include "pico/stdlib.h" 
+#include "FreeRTOS.h"
+#include "task.h"
+#include "portmacro.h"
+#include "utility.h" // Include utility functions for is_in_interrupt()
+
+EventManager::EventManager(size_t queueSize) {
+    eventQueue_ = xQueueCreate(queueSize, sizeof(Event));
+}
+
+void EventManager::subscribe(uint32_t eventMask, Task* task) {
+    subscribers_.push_back({ eventMask, task });
+}
+
+void EventManager::postEvent(const Event& event) {
+    BaseType_t xHigherPriTaskWoken = pdFALSE;
+
+    if (is_in_interrupt()) {
+        // ISR context
+        xQueueSendToBackFromISR(eventQueue_, &event, &xHigherPriTaskWoken);
+        for (auto& sub : subscribers_) {
+            if (sub.eventMask & (1u << static_cast<uint8_t>(event.type))) {
+                sub.task->notifyFromISR(1, &xHigherPriTaskWoken);
+            }
+        }
+        portYIELD_FROM_ISR(xHigherPriTaskWoken);
+    } else {
+        // Task context
+        xQueueSendToBack(eventQueue_, &event, 0);
+        for (auto& sub : subscribers_) {
+            if (sub.eventMask & (1u << static_cast<uint8_t>(event.type))) {
+                sub.task->notify();
+            }
+        }
+    }
+}
+
+bool EventManager::getNextEvent(Event& event, uint32_t timeoutMs) const {
+    return xQueueReceive(eventQueue_, &event, pdMS_TO_TICKS(timeoutMs)) == pdTRUE;
+}
+
+bool EventManager::hasPendingEvents() const {
+    return uxQueueMessagesWaiting(eventQueue_) > 0;
+}
