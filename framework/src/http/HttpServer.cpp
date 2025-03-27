@@ -166,7 +166,6 @@ void HttpServer::handleClient(int clientSocket) {
     std::unordered_map<std::string, std::string> headers;
 
     // Receive and process the request, including headers and body
-    TRACE("Router before calling receiveRequest: %p\n", &router);
     if (clientSocket < 0) {
         printf("Invalid client socket detected in handleClient: %d\n", clientSocket);
         return;
@@ -190,17 +189,11 @@ void HttpServer::handleClient(int clientSocket) {
     }
     std::cout << "Request body: " << req.getBody() << std::endl;
 
-    TRACE("Router before calling receiveRequest: %p\n", &router);
-
     printf("\n===== HTTP CLIENT REQUEST =====\n");
     printf("Client request received: %s, path: %s\n", req.getMethod().c_str(), req.getPath().c_str());
     printf("Request body: %s\n", req.getBody().c_str());
 
     // Handle the HTTP request (forwarding to the router)
-    
-    TRACE("Router address in http_server: %p\n", &router);
-
-    printf("Router before handleRequest: %p\n", &router);
 
     bool ok = router.handleRequest(clientSocket, req.getMethod().c_str(), req.getPath().c_str(), req);
     printf("Request handled: %s\n", ok ? "true" : "false");
