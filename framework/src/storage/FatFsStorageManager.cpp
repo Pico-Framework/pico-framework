@@ -154,3 +154,20 @@ size_t FatFsStorageManager::getFileSize(const std::string& path) {
 
     return (size >= 0) ? static_cast<size_t>(size) : 0;
 }
+
+bool FatFsStorageManager::appendToFile(const std::string& path, const uint8_t* data, size_t size) {
+    if (!lock()) return false;
+
+    FF_FILE* file = ff_fopen(path.c_str(), "a");
+    if (!file) {
+        unlock();
+        return false;
+    }
+
+    size_t written = ff_fwrite(data, 1, size, file);
+    ff_fclose(file);
+    unlock();
+
+    return written == size;
+}
+

@@ -17,7 +17,6 @@
 #include <cstring>
 #include <cstdio>
 #include <unordered_map>
-#include "ff_stdio.h"
 #include "lwip/sockets.h"
 #include "utility.h"
 #include "MultipartParser.h"

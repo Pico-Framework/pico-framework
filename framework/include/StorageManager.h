@@ -31,6 +31,8 @@ class StorageManager {
         virtual bool listDirectory(const std::string& path, std::vector<FileInfo>& out) = 0;
 
         virtual size_t getFileSize(const std::string& path) = 0;
+
+        virtual bool appendToFile(const std::string& path, const uint8_t* data, size_t size) = 0;
    
         virtual ~StorageManager() = default;
     };

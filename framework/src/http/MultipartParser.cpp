@@ -15,6 +15,7 @@
 #include <iostream>
 #include <cstring>
 #include <cstdio>
+#include "AppContext.h"
 
 #define BUFFER_SIZE 1460
 
@@ -156,18 +157,29 @@ bool MultipartParser::handleFinalBoundary(std::string& fileData) {
 }
 
 // Save file chunks to SD
+// int MultipartParser::appendFileToSD(const char* filename, const char* data, size_t size) {
+//     printf("Appending data to SD: %s, size: %zu\n", filename, size);
+//     char filepath[128];
+//     snprintf(filepath, sizeof(filepath), "/sd0/%s", filename);
+
+//     FF_FILE* file = ff_fopen(filepath, "a");
+//     if (!file) return -1;
+
+//     size_t written = ff_fwrite(data, 1, size, file);
+//     ff_fclose(file);
+
+//     return (written == size) ? 0 : -1;
+// }
+
 int MultipartParser::appendFileToSD(const char* filename, const char* data, size_t size) {
     printf("Appending data to SD: %s, size: %zu\n", filename, size);
-    char filepath[128];
-    snprintf(filepath, sizeof(filepath), "/sd0/%s", filename);
 
-    FF_FILE* file = ff_fopen(filepath, "a");
-    if (!file) return -1;
+    std::string filepath = std::string("/") + filename;  // No /sd0 — handled in storage
 
-    size_t written = ff_fwrite(data, 1, size, file);
-    ff_fclose(file);
+    auto* storage = AppContext::getFatFsStorage();
+    bool success = storage->appendToFile(filepath, reinterpret_cast<const uint8_t*>(data), size);
 
-    return (written == size) ? 0 : -1;
+    return success ? 0 : -1;
 }
 
 // Sends HTTP response to client
@@ -178,15 +190,9 @@ void MultipartParser::sendHttpResponse(int statusCode, const std::string& messag
     lwip_send(clientSocket, response.c_str(), response.size(), 0);
 }
 
-// Function to check if a file exists
 int MultipartParser::file_exists(const char* filename) {
-    char filepath[128];
-    snprintf(filepath, sizeof(filepath), "/sd0/%s", filename);  // Full path for the file
-    FF_FILE* file = ff_fopen(filepath, "r");  // Try to open in read mode
-    if (file) {
-        ff_fclose(file);  // File exists, close it
-        return 1;  // File exists
-    } else {
-        return 0;  // File does not exist
-    }
+    std::string filepath = std::string("/") + filename;
+
+    auto* storage = AppContext::getFatFsStorage();
+    return storage->exists(filepath) ? 1 : 0;
 }

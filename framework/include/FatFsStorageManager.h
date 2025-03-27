@@ -31,6 +31,8 @@ class FatFsStorageManager : public StorageManager {
 
         size_t getFileSize(const std::string& path);
 
+        bool appendToFile(const std::string& path, const uint8_t* data, size_t size) override;
+
         private:
             bool mounted = false;  // Track if the filesystem is mounted
             std::string mountPoint = "sd0";  // Default mount point for the filesystem

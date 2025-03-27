@@ -54,6 +54,7 @@ target_sources(pico_framework
         src/utility/utility.cpp
         src/port/hw_config.c
         src/storage/FatFsStorageManager.cpp
+        src/storage/JsonService.cpp
 )
 
 
@@ -77,6 +78,7 @@ target_include_directories(pico_framework
     PUBLIC
         ${CMAKE_CURRENT_SOURCE_DIR}/include
         ${CMAKE_CURRENT_SOURCE_DIR}/include/port
+        ${CMAKE_CURRENT_SOURCE_DIR}/lib/json/single_include
         ${FREERTOS_KERNEL_PATH}/include
         ${FREERTOS_KERNEL_PATH}/portable/ThirdParty/GCC/RP2040/include
         ${CMAKE_CURRENT_SOURCE_DIR}/lib/FreeRTOS-FAT-CLI-for-RPi-Pico/src/FreeRTOS+FAT+CLI/include
