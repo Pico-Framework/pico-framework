@@ -37,11 +37,10 @@ add_definitions(-DJWT_SECRET="${JWT_SECRET_VALUE}")
 # Source files (organized by domain)
 target_sources(pico_framework
     PRIVATE
-        #src/main.cpp 
-        #src/system_manager.cpp
-        src/FrameworkManager.cpp
-        src/FrameworkTask.cpp
-        src/FrameworkApp.cpp
+        src/application/FrameworkManager.cpp
+        src/application/FrameworkTask.cpp
+        src/application/FrameworkApp.cpp
+        src/application/AppContext.cpp
         src/http/HttpServer.cpp
         src/http/HttpRequest.cpp
         src/http/HttpResponse.cpp
@@ -54,6 +53,7 @@ target_sources(pico_framework
         src/utility/Logger.cpp
         src/utility/utility.cpp
         src/port/hw_config.c
+        src/storage/FatFsStorageManager.cpp
 )
 
 

@@ -93,6 +93,10 @@ public:
         return path;
     }
 
+    std::string getUrl() const {
+        return url;
+    }
+
     int getContentLength() const {
         std::string content_length_str = getHeader("content-length");
         int contentLength = 0;
@@ -135,6 +139,10 @@ public:
     static bool getMethodAndPath(char* buffer, int clientSocket, char* method, char* path);
     std::unordered_map<std::string, std::string> getFormParams();
     std::unordered_map<std::string, std::string> getQueryParams();
+
+    std::string getQuery() const {
+        return query;
+    }
 
     // multipart handling
     int handle_multipart(int new_sock, Request& req); 

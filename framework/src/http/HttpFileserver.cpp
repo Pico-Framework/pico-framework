@@ -9,23 +9,25 @@
  * 
  */
 #include "HttpFileserver.h"
-#include <ff_utils.h>
-#include <ff_stdio.h>
 #include <string>
 #include <vector>
 #include <cstdio>
 #include <cstring>
 #include <lwip/sockets.h>
 #include "utility.h"
+#include "FatFsStorageManager.h"
+#include "AppContext.h"
+#include "framework_config.h"
 
 #define TRACE_ON
 
 FileHandler::FileHandler() {
-
+   
 }
 
 bool FileHandler::init() {
-    if (mount("sd0")) {
+    FatFsStorageManager* storage = AppContext::getFatFsStorage();
+    if (storage->mount()) {
         TRACE("SD Card mounted successfully\n");
         return true;
     } else {
@@ -34,28 +36,28 @@ bool FileHandler::init() {
     }
 }
 
-void FileHandler::listDirectory(const char *path) {
-    if(!mounted) {
-        init();
-    }
-    printf("Listing directory: %s\n", path);
-    char pcWriteBuffer[128] = {0};
-    FF_FindData_t xFindStruct;
-    memset(&xFindStruct, 0x00, sizeof(FF_FindData_t));
-
-    if (!path) ff_getcwd(pcWriteBuffer, sizeof(pcWriteBuffer));
-    printf("Directory Listing: %s\n", path ? path : pcWriteBuffer);
-
-    int iReturned = ff_findfirst(path ? path : "", &xFindStruct);
-    if (FF_ERR_NONE != iReturned) {
-        printf("ff_findfirst error: %s)\n", iReturned);
+void FileHandler::listDirectory(const char* path) {
+    FatFsStorageManager* storage = AppContext::getFatFsStorage();
+    if (!storage) {
+        printf("No storage manager available\n");
         return;
     }
-    do {
-        const char *pcAttrib = (xFindStruct.ucAttributes & FF_FAT_ATTR_DIR) ? "directory" :
-                                (xFindStruct.ucAttributes & FF_FAT_ATTR_READONLY) ? "read only file" : "writable file";
-        printf("%s\t[%s]\t[size=%lu]\n", xFindStruct.pcFileName, pcAttrib, xFindStruct.ulFileSize);
-    } while (FF_ERR_NONE == ff_findnext(&xFindStruct));
+
+    std::string dir = path ? path : "/";
+    std::vector<FileInfo> files;
+
+    if (!storage->listDirectory(dir, files)) {
+        printf("Failed to list directory: %s\n", dir.c_str());
+        return;
+    }
+
+    printf("Directory Listing: %s\n", dir.c_str());
+    for (const auto& f : files) {
+        const char* attr = f.isDirectory ? "directory" :
+                           f.isReadOnly ? "read-only file" : "writable file";
+
+        printf("%s\t[%s]\t[size=%zu]\n", f.name.c_str(), attr, f.size);
+    }
 }
 
 std::string getMimeType(const std::string& filePath) {
@@ -95,59 +97,91 @@ std::string getMimeType(const std::string& filePath) {
 }
 
 
+// 
+//bool FileHandler::serveFile(Response &res, const char *uri) {
+//     if(!mounted) {
+//         init();
+//     }
+//     char filepath[128];
+//     snprintf(filepath, sizeof(filepath), "/sd0%s", uri);
+//     FF_FILE* file = ff_fopen(filepath, "r");
+//     if (!file) {
+//         printf("File not found: %s\n", filepath);
+//         // Use new approach: 404
+//         res.status(404).send("File Not Found: " + std::string(uri));
+//         return false;
+//     }
+
+//     // figure out file size
+//     ff_fseek(file, 0, SEEK_END);
+//     long file_size = ff_ftell(file);
+//     ff_fseek(file, 0, SEEK_SET);
+
+//     if (file_size < 0) {
+//         ff_fclose(file);
+//         res.status(404).send("Error reading file size for: " + std::string(uri));
+//         return false;
+//     }
+
+//     // Determine the correct Content-Type
+//     std::string mimeType = getMimeType(filepath);
+
+//     printf("Serving file: %s, size: %ld bytes, MIME type: %s\n", filepath, file_size, mimeType.c_str());
+
+//     // 1) start() the response with known size
+//     TRACE("Starting response with size: %ld\n", file_size);
+//     std::string file_path = "/sd0" + std::string(uri);
+//     res.start(200, static_cast<size_t>(file_size), mimeType.c_str());
+
+//     // 2) read in schunks and call writeChunk
+//     char buffer[512];
+//     uint32_t bytes_read;
+//     TRACE("Reading file in chunks...\n");
+//     do {
+//         bytes_read = ff_fread(buffer, 1, sizeof(buffer), file);
+//         if (bytes_read > 0) {
+//             res.writeChunk(buffer, bytes_read);
+//             vTaskDelay(20);  // Small delay to allow tcpip thread to send data
+//         }
+//     } while (bytes_read > 0);
+
+//     ff_fclose(file);
+
+//     // 3) finish() the response (no real effect with content-length, but neat)
+//     res.finish();
+//     TRACE("Called res finish\n");
+
+//     return true;
+// }
+
 bool FileHandler::serveFile(Response &res, const char *uri) {
-    if(!mounted) {
-        init();
-    }
-    char filepath[128];
-    snprintf(filepath, sizeof(filepath), "/sd0%s", uri);
-    FF_FILE* file = ff_fopen(filepath, "r");
-    if (!file) {
-        printf("File not found: %s\n", filepath);
-        // Use new approach: 404
+    std::string path = std::string("/sd0") + uri;
+
+    storageManager = AppContext::getFatFsStorage();
+
+    if (!storageManager->exists(path)) {
+        printf("File not found: %s\n", path.c_str());
         res.status(404).send("File Not Found: " + std::string(uri));
         return false;
     }
 
-    // figure out file size
-    ff_fseek(file, 0, SEEK_END);
-    long file_size = ff_ftell(file);
-    ff_fseek(file, 0, SEEK_SET);
-
-    if (file_size < 0) {
-        ff_fclose(file);
-        res.status(404).send("Error reading file size for: " + std::string(uri));
+    size_t fileSize = storageManager->getFileSize(path);
+    if (fileSize == 0) {
+        res.status(500).send("Error getting file size for: " + std::string(uri));
         return false;
     }
 
-    // Determine the correct Content-Type
-    std::string mimeType = getMimeType(filepath);
+    std::string mimeType = getMimeType(path);
+    printf("Serving file: %s, size: %zu bytes, MIME type: %s\n", path.c_str(), fileSize, mimeType.c_str());
 
-    printf("Serving file: %s, size: %ld bytes, MIME type: %s\n", filepath, file_size, mimeType.c_str());
+    res.start(200, fileSize, mimeType.c_str());
 
-    // 1) start() the response with known size
-    TRACE("Starting response with size: %ld\n", file_size);
-    std::string file_path = "/sd0" + std::string(uri);
-    res.start(200, static_cast<size_t>(file_size), mimeType.c_str());
+    storageManager->streamFile(path, [&](const uint8_t* data, size_t len) {
+        res.writeChunk(reinterpret_cast<const char*>(data), len);
+        vTaskDelay(pdMS_TO_TICKS(STREAM_SEND_DELAY_MS)); // Required: once memory is full, lwip can fail in all sorts of ways, also tcpip thread doesn't get in
+    });
 
-    // 2) read in schunks and call writeChunk
-    char buffer[512];
-    uint32_t bytes_read;
-    TRACE("Reading file in chunks...\n");
-    do {
-        bytes_read = ff_fread(buffer, 1, sizeof(buffer), file);
-        if (bytes_read > 0) {
-            res.writeChunk(buffer, bytes_read);
-            vTaskDelay(20);  // Small delay to allow tcpip thread to send data
-        }
-    } while (bytes_read > 0);
-
-    ff_fclose(file);
-
-    // 3) finish() the response (no real effect with content-length, but neat)
     res.finish();
-    TRACE("Called res finish\n");
-
     return true;
 }
 

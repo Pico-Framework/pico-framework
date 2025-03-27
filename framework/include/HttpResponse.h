@@ -13,6 +13,7 @@
 
 #include <string>
 #include <unordered_map>
+#include <map>
 #include <vector>
 
 class Response {
@@ -90,6 +91,8 @@ public:
     }
 
     void sendUnauthorized();
+
+    std::string renderTemplate(const std::string& tpl, const std::map<std::string, std::string>& context);
 
 private:
     std::string getStatusMessage(int code);

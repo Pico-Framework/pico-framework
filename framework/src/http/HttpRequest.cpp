@@ -106,7 +106,7 @@ bool Request::getMethodAndPath(char* buffer, int clientSocket, char* method, cha
 }
 
 Request Request::receive(int clientSocket) {
-    
+    printf("Receiving request on socket %d\n", clientSocket);
     char buffer[BUFFER_SIZE];  // Declare buffer size
     std::string body = "";  // Initialize empty body
     std::unordered_map<std::string, std::string> headers;  // Initialize empty headers
@@ -122,6 +122,7 @@ Request Request::receive(int clientSocket) {
     }   
 
     // Indentify the raw headers - look for the end of the headers (a double CRLF "\r\n\r\n")
+    printf("Buffer received: %.*s\n", bytesReceived, buffer);
     size_t headerEnd = 0;
     while (headerEnd < bytesReceived) {
         if (buffer[headerEnd] == '\r' && buffer[headerEnd + 1] == '\n' &&
@@ -131,7 +132,7 @@ Request Request::receive(int clientSocket) {
         }
         headerEnd++;
     }
-    printf("HeaderEnd in receive: %zu\n", headerEnd);
+    printf("Raw headers length: %zu\n", headerEnd);
     
     // Create the request which will parse the headers
     Request request(buffer, std::string(method), std::string(path));
@@ -183,7 +184,7 @@ Request Request::receive(int clientSocket) {
         }
         printf("Body: %s\n", body.c_str());
     }
-    printf("Request completed\n");
+    printf("Request object constructed\n");
     return request;  // Return the constructed Request object
 }
 

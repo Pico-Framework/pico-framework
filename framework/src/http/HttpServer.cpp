@@ -168,19 +168,46 @@ void HttpServer::handleClient(int clientSocket) {
         printf("Invalid client socket detected in handleClient: %d\n", clientSocket);
         return;
     }
-
+    printf("Handling client socket: %d\n", clientSocket);
     Request req = Request::receive(clientSocket);
 
+    std::string clientIp = getClientIpFromSocket(clientSocket);
+    req.setClientIp(clientIp);  // Set the client IP in the request object
+
+    std::cout << "Client IP: " << clientIp << std::endl;
     std::cout << "Request received: " << req.getMethod() << " " << req.getPath() << std::endl;
     std::cout << "Request content length: " << req.getContentLength() << std::endl;
     std::cout << "Request content type: " << req.getContentType() << std::endl;
     std::cout << "Request boundary: " << req.getBoundary() << std::endl;
-    std::cout << "Request is multipart: " << req.isMultipart() << std::endl;
+    std::cout << "Request is multipart: " << (req.isMultipart() == 1 ? true : false) << std::endl;
     std::cout << "Request header count: " << req.getHeaders().size() << std::endl;
     std::cout << "Request method: " << req.getMethod() << std::endl;
+    std::cout << "Request method (lowercase): " << toLower(req.getMethod()) << std::endl;
+    std::cout << "Request url: " << req.getUrl() << std::endl;
     std::cout << "Request path: " << req.getPath() << std::endl;
+    std::cout << "Request query: " << req.getQuery() << std::endl;
+    std::cout << "Request query params: " << std::endl;
+    std::unordered_map<std::string, std::string> queryParams = req.getQueryParams();
+    for (const auto& param : queryParams) {
+        std::cout << param.first << ": " << param.second << std::endl;
+    }   
+    std::cout << "Request form params: " << std::endl;
+    std::unordered_map<std::string, std::string> formParams = req.getFormParams();
+    for (const auto& param : formParams) {
+        std::cout << param.first << ": " << param.second << std::endl;
+    }
+    std::cout << "Request cookies: " << std::endl;   
+    std::unordered_map<std::string, std::string> cookies = req.getCookies();
+    for (const auto& cookie : cookies) {
+        std::cout << cookie.first << ": " << cookie.second << std::endl;
+    }
+    std::cout << "Request has body: " << (req.getContentLength() > 0 ? "true" : "false") << std::endl;
     std::cout << "Request headers: " << std::endl;
-    std::cout << "Request start of body index: " << req.getHeaderEnd() << std::endl;
+    if (req.getContentLength() > 0) {
+        std::cout << "Request body length: " << req.getBody().length() << std::endl;
+        std::cout << "Request start of body index: " << req.getHeaderEnd() << std::endl;
+    }
+    
     std::unordered_map<std::string, std::string> headrs = req.getHeaders();
     for (const auto& headr : headrs) {
         std::cout << headr.first << ": " << headr.second << std::endl;

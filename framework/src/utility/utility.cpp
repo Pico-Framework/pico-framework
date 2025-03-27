@@ -20,6 +20,8 @@
 #include "lwip/memp.h"
 #include "lwip/stats.h"
 #include "lwip/pbuf.h"
+#include "lwip/sockets.h"
+#include "lwip/ip_addr.h"
 
 #include <sstream>
 
@@ -242,5 +244,17 @@ std::unordered_map<std::string, std::string> parseUrlEncoded(const std::string& 
         }
     }
     return params;
+}
+
+std::string getClientIpFromSocket(int sock) {
+    sockaddr_in addr;
+    socklen_t len = sizeof(addr);
+
+    if (lwip_getpeername(sock, (sockaddr*)&addr, &len) == 0) {
+        ip_addr_t ip;
+        ip.addr = addr.sin_addr.s_addr;
+        return std::string(ipaddr_ntoa(&ip));  // Make a copy of the static buffer
+    }
+    return "0.0.0.0";  // Fallback if getpeername fails
 }
 

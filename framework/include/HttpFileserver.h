@@ -14,11 +14,10 @@
 
 #include <string>
 #include <vector>
-#include <ff_utils.h>
-#include <ff_stdio.h>
 
 #include "HttpRequest.h"
 #include "HttpResponse.h"
+#include "FatFsStorageManager.h"
 
 class FileHandler {
 public:
@@ -27,6 +26,8 @@ public:
     void listDirectory(const char *path);
     bool serveFile(Response &res, const char* uri);
     bool mounted = false;
+private:
+    FatFsStorageManager* storageManager;    
 
 };
 

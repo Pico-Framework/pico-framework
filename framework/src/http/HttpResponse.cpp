@@ -210,6 +210,18 @@ Response& Response::clearCookie(const std::string& name, const std::string& opti
     return *this;
 }
 
+std::string renderTemplate(const std::string& tpl, const std::map<std::string, std::string>& context) {
+    std::string result = tpl;
+    for (const auto& [key, value] : context) {
+        std::string placeholder = "{{" + key + "}}";
+        size_t pos = 0;
+        while ((pos = result.find(placeholder, pos)) != std::string::npos) {
+            result.replace(pos, placeholder.length(), value);
+            pos += value.length();
+        }
+    }
+    return result;
+}
 
 
 

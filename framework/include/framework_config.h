@@ -1,5 +1,5 @@
 /**
- * @file trace_config.h
+ * @file framework_config.h
  * @author Ian Archbell
  * @brief 
  * @version 0.1
@@ -9,9 +9,13 @@
  * 
  */
 
-#ifndef TRACE_CONFIG_H
-#define TRACE_CONFIG_H 
+#ifndef FRAMEWORK_CONFIG_H
+#define FRAMEWORK_CONFIG_H 
 #pragma once
+
+// === Framework configuration file ===
+// This file contains various configuration settings for the framework.
+#define STREAM_SEND_DELAY_MS 20
 
 // === Per-module enable flags ===
 #define TRACE_NET     1
@@ -23,4 +27,4 @@
 // Options: 0 = INFO, 1 = WARN, 2 = ERROR
 #define TRACE_LEVEL_MIN TRACE_LVL_INFO
 
-#endif // TRACE_CONFIG_H
+#endif // FRAMEWORK_CONFIG_H
