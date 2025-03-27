@@ -13,6 +13,7 @@
 
 #include <string>
 #include <unordered_map>
+#include <vector>
 
 class Response {
     int sock;
@@ -23,10 +24,7 @@ class Response {
     // Member variables for headers and other details
     std::string content_type = "text/html";  // Default content type
     std::string content_length;  // Will be set when we know the content size
-
-    // Additional headers as needed
     
-
 public:
     explicit Response(int sock);
     
@@ -38,7 +36,9 @@ public:
 
     Response& setAuthorization(const std::string &jwtToken);  // New method for JWT authorization   
 
-    
+    Response& setCookie(const std::string& name, const std::string& value, const std::string& options);
+    Response& clearCookie(const std::string& name, const std::string& options);
+   
     // Sends the response with the given body.
     void send(const std::string &body);
 
@@ -54,10 +54,46 @@ public:
 
     void sendHeaders();  // Helper to build & send initial headers once
 
+    Response& redirect(const std::string& url, int statusCode) {
+        status(statusCode);
+        set("Location", url);
+        send("");  // No body
+        return *this;
+    }
+
+    void sendNotFound() {
+        status(404)
+            .set("Content-Type", "application/json")
+            .send("{\"error\": \"Not Found\"}");
+    }
+    
+    void endServerError(const std::string& msg) {
+        status(500)
+            .set("Content-Type", "application/json")
+            .send("{\"error\": \"" + msg + "\"}");
+    }
+
+    bool isHeaderSent() const {
+        return headerSent;
+    }
+    
+    Response& json(const std::string& jsonString) {
+        set("Content-Type", "application/json");
+        send(jsonString);
+        return *this;
+    }
+    
+    Response& text(const std::string& textString) {
+        set("Content-Type", "text/plain");
+        send(textString);
+        return *this;
+    }
+
     void sendUnauthorized();
 
 private:
     std::string getStatusMessage(int code);
+    std::vector<std::string> cookies;
 };
 
 #endif // HTTPRESPONSE_HPP

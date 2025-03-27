@@ -49,6 +49,20 @@ public:
         return headerEnd;
     }
 
+    std::string getHost() const {
+        return getHeader("host");
+    }
+
+    bool isFormUrlEncoded() const {
+        auto it = headers.find("content-type");
+        return it != headers.end() && it->second.find("application/x-www-form-urlencoded") != std::string::npos;
+    }
+
+    bool isJson() const {
+        auto it = headers.find("content-type");
+        return it != headers.end() && it->second.find("application/json") != std::string::npos;
+    }
+
     // Method to get the body of the request
     const std::string& getBbody() const {
         return body;
@@ -106,18 +120,33 @@ public:
         return "";
     }
 
+    void setClientIp(const std::string& ip) {
+        clientIp = ip;
+    }
+    
+    std::string getClientIp() const {
+        return clientIp;
+    }
+    std::unordered_map<std::string, std::string> getCookies() const;
+    std::string getCookie(const std::string& name) const;
+
     static Request receive(int clientSocket);
     static int receiveData(int clientSocket, char* buffer, int size);
     static bool getMethodAndPath(char* buffer, int clientSocket, char* method, char* path);
+    std::unordered_map<std::string, std::string> getFormParams();
+    std::unordered_map<std::string, std::string> getQueryParams();
 
     // multipart handling
     int handle_multipart(int new_sock, Request& req); 
 
 private:
     void parseHeaders(const char* raw);
-    
-    std::string method;
-    std::string path;
+    std::string decodeUrl(const std::string& str);
+    std::string clientIp; // Client IP address for logging or other purposes
+    std::string method; // HTTP method (GET, POST, etc.)
+    std::string url; // Original URL (before parsing)    
+    std::string path; // Parsed path (after removing query string)
+    std::string query; // Query string (if any)
     std::unordered_map<std::string, std::string> headers;
     std::string body;  // Internal storage for the body    
     size_t headerEnd = 0;

@@ -32,7 +32,17 @@
 
 Request::Request(const char* rawHeaders, const std::string& reqMethod, const std::string& reqPath)
     : method(reqMethod), path(reqPath) {
-
+    
+    url = reqPath;  // Store the original URL
+    // Parse the URL to separate path and query string
+    size_t pos = url.find('?');
+    if (pos != std::string::npos) {
+        path = url.substr(0, pos);
+        query = url.substr(pos + 1);
+    } else {
+        path = url;
+        query = "";
+    }
     parseHeaders(rawHeaders);
 }
 
@@ -181,4 +191,82 @@ int Request::handle_multipart(int clientSocket, Request& req) {
     MultipartParser parser(clientSocket, req);
     return parser.handleMultipart() ? 0 : -1;
 }
+
+std::unordered_map<std::string, std::string> Request::getQueryParams() {
+    std::unordered_map<std::string, std::string> params;
+    std::istringstream queryStream(query);
+    std::string keyValue;
+
+    while (std::getline(queryStream, keyValue, '&')) {
+        size_t eqPos = keyValue.find('=');
+        if (eqPos != std::string::npos) {
+            std::string key = decodeUrl(keyValue.substr(0, eqPos));
+            std::string value = decodeUrl(keyValue.substr(eqPos + 1));
+            params[key] = value;
+        }
+    }
+    return params;
+}
+
+std::unordered_map<std::string, std::string> Request::getFormParams() {
+    std::unordered_map<std::string, std::string> params;
+    std::istringstream bodyStream(body);
+    std::string keyValue;
+
+    while (std::getline(bodyStream, keyValue, '&')) {
+        size_t eqPos = keyValue.find('=');
+        if (eqPos != std::string::npos) {
+            std::string key = decodeUrl(keyValue.substr(0, eqPos));
+            std::string value = decodeUrl(keyValue.substr(eqPos + 1));
+            params[key] = value;
+        }
+    }
+    return params;
+}
+
+std::string Request::decodeUrl(const std::string& str) {
+    std::string decoded;
+    char hexBuffer[3] = {0};
+    for (size_t i = 0; i < str.length(); ++i) {
+        if (str[i] == '%' && i + 2 < str.length()) {
+            hexBuffer[0] = str[i + 1];
+            hexBuffer[1] = str[i + 2];
+            decoded += static_cast<char>(std::strtol(hexBuffer, nullptr, 16));
+            i += 2;
+        } else if (str[i] == '+') {
+            decoded += ' ';
+        } else {
+            decoded += str[i];
+        }
+    }
+    return decoded;
+}
+
+std::unordered_map<std::string, std::string> Request::getCookies() const {
+    std::unordered_map<std::string, std::string> cookies;
+    std::string cookieHeader = getHeader("cookie");
+    std::istringstream stream(cookieHeader);
+    std::string pair;
+    while (std::getline(stream, pair, ';')) {
+        size_t eq = pair.find('=');
+        if (eq != std::string::npos) {
+            std::string key = pair.substr(0, eq);
+            std::string value = pair.substr(eq + 1);
+            key.erase(0, key.find_first_not_of(" \t"));
+            value.erase(0, value.find_first_not_of(" \t"));
+            cookies[key] = value;
+        }
+    }
+    return cookies;
+}
+
+std::string Request::getCookie(const std::string& name) const {
+    auto cookies = getCookies();
+    auto it = cookies.find(name);
+    return (it != cookies.end()) ? it->second : "";
+}
+
+
+
+
 

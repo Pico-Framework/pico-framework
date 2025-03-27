@@ -75,6 +75,10 @@ void Response::send(const std::string &body) {
         for (auto &h : headers) {
             resp << h.first << ": " << h.second << "\r\n";
         }
+        for (const auto& cookie : cookies) {
+            resp << "Set-Cookie: " << cookie << "\r\n";
+        }
+
         resp << "\r\n"; // end of headers
 
         std::string header_str = resp.str();
@@ -97,7 +101,9 @@ void Response::sendHeaders() {
         if (!content_length.empty()) {
             resp << "Content-Length: " << content_length << "\r\n";
         }
-
+        for (const auto& cookie : cookies) {
+            resp << "Set-Cookie: " << cookie << "\r\n";
+        }
         // Optionally add any other headers, e.g., Connection, Cache-Control
         resp << "Connection: close\r\n";  // Or 'keep-alive' depending on your use case
 
@@ -125,6 +131,10 @@ void Response::start(int code, size_t contentLength, const std::string &contentT
     for (auto &h : headers) {
         resp << h.first << ": " << h.second << "\r\n";
     }
+    for (const auto& cookie : cookies) {
+        resp << "Set-Cookie: " << cookie << "\r\n";
+    }
+
     resp << "\r\n"; // end of headers
 
     std::string header_str = resp.str();
@@ -174,6 +184,32 @@ void Response::sendUnauthorized() {
          .set("Content-Type", "application/json")
          .send("{\"error\": \"Unauthorized\"}");
 }
+
+// res.setCookie("token", jwt, "HttpOnly; Path=/; Max-Age=3600"); // after login
+// res.clearCookie("token", "Path=/"); // on logout
+// res.setAuthorization(jwt);
+// res.setCookie("token", jwt, "HttpOnly; Secure; SameSite=Strict; Path=/; Max-Age=3600");
+
+Response& Response::setCookie(const std::string& name, const std::string& value, const std::string& options) {
+    std::ostringstream cookie;
+    cookie << name << "=" << value;
+    if (!options.empty()) {
+        cookie << "; " << options;
+    }
+    cookies.push_back(cookie.str());
+    return *this;
+}
+
+Response& Response::clearCookie(const std::string& name, const std::string& options) {
+    std::ostringstream cookie;
+    cookie << name << "=; Max-Age=0";
+    if (!options.empty()) {
+        cookie << "; " << options;
+    }
+    cookies.push_back(cookie.str());
+    return *this;
+}
+
 
 
 
