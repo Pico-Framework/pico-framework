@@ -141,7 +141,6 @@ public:
 
 private:
     void parseHeaders(const char* raw);
-    std::string decodeUrl(const std::string& str);
     std::string clientIp; // Client IP address for logging or other purposes
     std::string method; // HTTP method (GET, POST, etc.)
     std::string url; // Original URL (before parsing)    

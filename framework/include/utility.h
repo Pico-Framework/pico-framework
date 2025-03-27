@@ -15,6 +15,7 @@
 
 #include <string>
 #include <cstring>
+#include <unordered_map>
 
 #define __FILENAME__ (strrchr(__FILE__, '/') ? strrchr(__FILE__, '/') + 1 : __FILE__)
 
@@ -34,5 +35,7 @@ void logSystemStats();
 void printTCPState();
 void printMemsize();
 int is_in_interrupt(void);
+std::string decodeURIComponent(const std::string& encoded);
+std::unordered_map<std::string, std::string> parseUrlEncoded(const std::string& input);
 
 #endif // UTILITY_H

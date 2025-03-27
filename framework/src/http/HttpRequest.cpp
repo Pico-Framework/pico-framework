@@ -192,56 +192,6 @@ int Request::handle_multipart(int clientSocket, Request& req) {
     return parser.handleMultipart() ? 0 : -1;
 }
 
-std::unordered_map<std::string, std::string> Request::getQueryParams() {
-    std::unordered_map<std::string, std::string> params;
-    std::istringstream queryStream(query);
-    std::string keyValue;
-
-    while (std::getline(queryStream, keyValue, '&')) {
-        size_t eqPos = keyValue.find('=');
-        if (eqPos != std::string::npos) {
-            std::string key = decodeUrl(keyValue.substr(0, eqPos));
-            std::string value = decodeUrl(keyValue.substr(eqPos + 1));
-            params[key] = value;
-        }
-    }
-    return params;
-}
-
-std::unordered_map<std::string, std::string> Request::getFormParams() {
-    std::unordered_map<std::string, std::string> params;
-    std::istringstream bodyStream(body);
-    std::string keyValue;
-
-    while (std::getline(bodyStream, keyValue, '&')) {
-        size_t eqPos = keyValue.find('=');
-        if (eqPos != std::string::npos) {
-            std::string key = decodeUrl(keyValue.substr(0, eqPos));
-            std::string value = decodeUrl(keyValue.substr(eqPos + 1));
-            params[key] = value;
-        }
-    }
-    return params;
-}
-
-std::string Request::decodeUrl(const std::string& str) {
-    std::string decoded;
-    char hexBuffer[3] = {0};
-    for (size_t i = 0; i < str.length(); ++i) {
-        if (str[i] == '%' && i + 2 < str.length()) {
-            hexBuffer[0] = str[i + 1];
-            hexBuffer[1] = str[i + 2];
-            decoded += static_cast<char>(std::strtol(hexBuffer, nullptr, 16));
-            i += 2;
-        } else if (str[i] == '+') {
-            decoded += ' ';
-        } else {
-            decoded += str[i];
-        }
-    }
-    return decoded;
-}
-
 std::unordered_map<std::string, std::string> Request::getCookies() const {
     std::unordered_map<std::string, std::string> cookies;
     std::string cookieHeader = getHeader("cookie");
@@ -265,6 +215,15 @@ std::string Request::getCookie(const std::string& name) const {
     auto it = cookies.find(name);
     return (it != cookies.end()) ? it->second : "";
 }
+
+std::unordered_map<std::string, std::string> Request::getQueryParams() {
+    return parseUrlEncoded(query);
+}
+
+std::unordered_map<std::string, std::string> Request::getFormParams() {
+    return parseUrlEncoded(body);
+}
+
 
 
 
