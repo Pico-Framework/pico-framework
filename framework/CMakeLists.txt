@@ -41,6 +41,7 @@ target_sources(pico_framework
         src/application/FrameworkTask.cpp
         src/application/FrameworkApp.cpp
         src/application/AppContext.cpp
+        src/Application/FrameworkController.cpp
         src/http/HttpServer.cpp
         src/http/HttpRequest.cpp
         src/http/HttpResponse.cpp
@@ -55,6 +56,7 @@ target_sources(pico_framework
         src/port/hw_config.c
         src/storage/FatFsStorageManager.cpp
         src/storage/JsonService.cpp
+        src/events/TimerService.cpp
 )
 
 
