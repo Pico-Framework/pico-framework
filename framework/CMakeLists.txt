@@ -42,6 +42,8 @@ target_sources(pico_framework
         src/application/FrameworkApp.cpp
         src/application/AppContext.cpp
         src/Application/FrameworkController.cpp
+        src/Application/FrameworkModel.cpp
+        src/application/FrameworkView.cpp
         src/http/HttpServer.cpp
         src/http/HttpRequest.cpp
         src/http/HttpResponse.cpp

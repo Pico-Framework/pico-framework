@@ -1,4 +1,4 @@
-#include "View.h"
+#include "FrameworkView.h"
 #include <fstream>
 #include <sstream>
 
@@ -9,7 +9,7 @@ static std::string loadFile(const std::string& path) {
     return buffer.str();
 }
 
-std::string View::render(const std::string& templatePath, const std::map<std::string, std::string>& context) {
+std::string FrameworkView::render(const std::string& templatePath, const std::map<std::string, std::string>& context) {
     std::string tpl = loadFile(templatePath);
     for (const auto& [key, value] : context) {
         std::string placeholder = "{{" + key + "}}";
