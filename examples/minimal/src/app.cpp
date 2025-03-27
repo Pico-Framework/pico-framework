@@ -1,5 +1,6 @@
 #include "app.h"
 #include <iostream>
+#include "FrameworkNotification.h"
 
 App::App(int port) : FrameworkApp(port, "AppTask", 2048, 1) {
     std::cout << "App constructed" << std::endl;
@@ -15,7 +16,8 @@ void App::initRoutes() {
 
 void App::run() {
     std::cout << "[App] Waiting for network..." << std::endl;
-    waitForNotification(portMAX_DELAY); // Wait for the network to be ready
+    
+    waitFor(SystemNotification::NetworkReady);
 
     std::cout << "[App] Network ready. Building routing table..." << std::endl;
 

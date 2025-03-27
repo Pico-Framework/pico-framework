@@ -17,6 +17,9 @@
 #include "task.h"
 #include "queue.h"
 
+#include "FrameworkNotification.h"
+
+
 class FrameworkTask {
 
     public:
@@ -27,6 +30,14 @@ class FrameworkTask {
     void suspend();
     void resume();
     TaskHandle_t getHandle() const;
+
+    // Send a notification to this task
+    void notify(SystemNotification type, uint32_t value = 1);
+    void notifyFromISR(SystemNotification type, uint32_t value = 1, BaseType_t* higherPriorityTaskWoken = nullptr);
+
+
+    // Wait for a specific notification type
+    bool waitFor(SystemNotification type, TickType_t timeout = portMAX_DELAY);
 
     // For notifications
     void notify(uint32_t value = 1);

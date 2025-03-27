@@ -3,7 +3,7 @@
 #include "task.h"
 #include "app.h"
 
-App myApp(80);  // Safe again!
+App myApp(80);  
 
 int main() {
     stdio_init_all();

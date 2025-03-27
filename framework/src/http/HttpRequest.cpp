@@ -69,7 +69,6 @@ int Request::receiveData(int clientSocket, char* buffer, int size) {
     size_t bytesReceived = lwip_recv(clientSocket, buffer, size-1, 0);
     if (bytesReceived < 0) {
         printf("Error receiving data from client: %d\n", bytesReceived);
-        lwip_close(clientSocket);  // Close the client socket
         return -1;
     }
 
@@ -78,7 +77,6 @@ int Request::receiveData(int clientSocket, char* buffer, int size) {
 
     if (bytesReceived == 0) {
         printf("Client disconnected.\n");
-        lwip_close(clientSocket);  // Close the client socket
         return -1;
     }
 
@@ -92,7 +90,6 @@ bool Request::getMethodAndPath(char* buffer, int clientSocket, char* method, cha
     // Extract the HTTP method and path
     if (sscanf(buffer, "%s %s", method, path) != 2) {
         printf("Error parsing HTTP request method and path\n");
-        lwip_close(clientSocket);
         return false;
     }
     return true;
@@ -168,7 +165,6 @@ Request Request::receive(int clientSocket) {
 
             if (chunkReceived <= 0) {
                 printf("Error receiving body data, bytes received: %zu\n", chunkReceived);
-                lwip_close(clientSocket);
                 return Request("", "", "");  // Return empty Request on error
             }
 

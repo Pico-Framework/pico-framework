@@ -44,6 +44,41 @@ TaskHandle_t FrameworkTask::getHandle() const {
     return _handle;
 }
 
+void FrameworkTask::notify(SystemNotification type, uint32_t value) {
+    xTaskNotifyIndexed(
+        _handle,
+        static_cast<uint8_t>(type),
+        value,
+        eSetValueWithOverwrite
+    );
+}
+
+// Usage example for notifyFromISR : higherPriorityTaskWoken is set to pdTRUE if a higher priority task was woken by the notification.
+// BaseType_t higherPriorityTaskWoken = pdFALSE;
+// app->notifyFromISR(SystemNotification::NetworkReady, 1, &higherPriorityTaskWoken);
+// portYIELD_FROM_ISR(higherPriorityTaskWoken);
+
+void FrameworkTask::notifyFromISR(SystemNotification type, uint32_t value, BaseType_t* higherPriorityTaskWoken) {
+    xTaskNotifyIndexedFromISR(
+        _handle,
+        static_cast<uint8_t>(type),
+        value,
+        eSetValueWithOverwrite,
+        higherPriorityTaskWoken
+    );
+}
+
+bool FrameworkTask::waitFor(SystemNotification type, TickType_t timeout) {
+    uint32_t value;
+    return xTaskNotifyWaitIndexed(
+        static_cast<uint8_t>(type),
+        0,
+        UINT32_MAX,
+        &value,
+        timeout
+    ) == pdTRUE;
+}
+
 // --- Notifications ---
 void FrameworkTask::notify(uint32_t value) {
     xTaskNotify(_handle, value, eSetValueWithOverwrite);

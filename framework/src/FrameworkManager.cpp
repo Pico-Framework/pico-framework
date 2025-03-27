@@ -45,9 +45,8 @@
      std::cout << "Network up. Notifying app task..." << std::endl;
  
      if (manager->app != nullptr) {
-         manager->app->notify(1);  // Notify app's FrameworkTask
-     }
- 
+        manager->app->notify(SystemNotification::NetworkReady);
+    } 
      vTaskDelete(nullptr);  // Done
  }
  
