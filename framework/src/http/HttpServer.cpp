@@ -40,7 +40,7 @@
 // HttpServer constructor
 HttpServer::HttpServer(int port, Router& router)
     : port(port), router(router) {
-        TRACE("Router in http_server: %p\n", &router);
+
     };
 
 StackType_t HttpServer::xStack[ HTTP_STACK_SIZE ];
@@ -156,8 +156,6 @@ int HttpServer::initServerSocket()
 
 // Handle HTTP request logic (with multipart support for /api/v1/upload)
 void HttpServer::handleClient(int clientSocket) {
-
-    TRACE("Router on handleClient entry: %p\n", (void*)&router);
 
     size_t contentLength = 0;
     char method[16] = {0};

@@ -200,7 +200,6 @@ bool Router::isAuthorizedForRoute(const Route& route, Request& req, Response& re
 bool Router::handleRequest(int client_socket, const char* method, const char* uri, Request& req)
 {    
     printf("Router handling request: %s %s on socket %d\n", method, uri, client_socket);
-    TRACE("Router %p in handleRequest: %s\n", this);
  
     // Build Response object
     Response res(client_socket); 
