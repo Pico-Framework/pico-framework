@@ -44,56 +44,39 @@ TaskHandle_t FrameworkTask::getHandle() const {
     return _handle;
 }
 
-void FrameworkTask::notify(SystemNotification type, uint32_t value) {
-    xTaskNotifyIndexed(
-        _handle,
-        static_cast<uint8_t>(type),
-        value,
-        eSetValueWithOverwrite
-    );
-}
 
 // Usage example for notifyFromISR : higherPriorityTaskWoken is set to pdTRUE if a higher priority task was woken by the notification.
 // BaseType_t higherPriorityTaskWoken = pdFALSE;
 // app->notifyFromISR(SystemNotification::NetworkReady, 1, &higherPriorityTaskWoken);
 // portYIELD_FROM_ISR(higherPriorityTaskWoken);
 
-void FrameworkTask::notifyFromISR(SystemNotification type, uint32_t value, BaseType_t* higherPriorityTaskWoken) {
-    xTaskNotifyIndexedFromISR(
-        _handle,
-        static_cast<uint8_t>(type),
-        value,
-        eSetValueWithOverwrite,
-        higherPriorityTaskWoken
-    );
+#include "FrameworkTask.h"
+
+void FrameworkTask::notify(uint8_t index, uint32_t value) {
+    xTaskNotifyIndexed(_handle, index, value, eSetValueWithOverwrite);
 }
 
-bool FrameworkTask::waitFor(SystemNotification type, TickType_t timeout) {
+void FrameworkTask::notify(FrameworkNotification n, uint32_t value) {
+    notify(static_cast<uint8_t>(n), value);
+}
+
+void FrameworkTask::notifyFromISR(uint8_t index, uint32_t value, BaseType_t* pxHigherPriorityTaskWoken) {
+    xTaskNotifyIndexedFromISR(_handle, index, value, eSetValueWithOverwrite, pxHigherPriorityTaskWoken);
+}
+
+void FrameworkTask::notifyFromISR(FrameworkNotification n, uint32_t value, BaseType_t* pxHigherPriorityTaskWoken) {
+    notifyFromISR(static_cast<uint8_t>(n), value, pxHigherPriorityTaskWoken);
+}
+
+bool FrameworkTask::waitFor(uint8_t index, TickType_t timeout) {
     uint32_t value;
-    return xTaskNotifyWaitIndexed(
-        static_cast<uint8_t>(type),
-        0,
-        UINT32_MAX,
-        &value,
-        timeout
-    ) == pdTRUE;
+    return xTaskNotifyWaitIndexed(index, 0, UINT32_MAX, &value, timeout) == pdTRUE;
 }
 
-// --- Notifications ---
-void FrameworkTask::notify(uint32_t value) {
-    xTaskNotify(_handle, value, eSetValueWithOverwrite);
+bool FrameworkTask::waitFor(FrameworkNotification n, TickType_t timeout) {
+    return waitFor(static_cast<uint8_t>(n), timeout);
 }
 
-// --- Notifications from ISR ---
-void FrameworkTask::notifyFromISR(uint32_t value, BaseType_t* pxHigherPriorityTaskWoken) {
-    xTaskNotifyFromISR(_handle, value, eSetValueWithOverwrite, pxHigherPriorityTaskWoken);
-}
-
-uint32_t FrameworkTask::waitForNotification(TickType_t timeout) {
-    uint32_t value = 0;
-    xTaskNotifyWait(0, 0, &value, timeout);
-    return value;
-}
 
 // --- Queue Support ---
 bool FrameworkTask::createQueue(size_t itemSize, size_t length) {

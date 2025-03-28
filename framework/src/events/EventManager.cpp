@@ -28,24 +28,26 @@ void EventManager::postEvent(const Event& event) {
     BaseType_t xHigherPriTaskWoken = pdFALSE;
 
     if (is_in_interrupt()) {
-        // ISR context
         xQueueSendToBackFromISR(eventQueue_, &event, &xHigherPriTaskWoken);
+
         for (auto& sub : subscribers_) {
             if (sub.eventMask & (1u << static_cast<uint8_t>(event.type))) {
-                sub.task->notifyFromISR(1, &xHigherPriTaskWoken);
+                sub.task->notifyFromISR(static_cast<uint8_t>(event.type), 1, &xHigherPriTaskWoken);
             }
         }
+
         portYIELD_FROM_ISR(xHigherPriTaskWoken);
     } else {
-        // Task context
         xQueueSendToBack(eventQueue_, &event, 0);
+
         for (auto& sub : subscribers_) {
             if (sub.eventMask & (1u << static_cast<uint8_t>(event.type))) {
-                sub.task->notify();
+                sub.task->notify(static_cast<uint8_t>(event.type));
             }
         }
     }
 }
+
 
 bool EventManager::getNextEvent(Event& event, uint32_t timeoutMs) const {
     return xQueueReceive(eventQueue_, &event, pdMS_TO_TICKS(timeoutMs)) == pdTRUE;

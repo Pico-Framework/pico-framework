@@ -17,10 +17,7 @@
 #include "task.h"
 #include "queue.h"
 
-#include "SystemNotification.h"
-#include "UserNotification.h"
-
-
+#include "FrameworkNotification.h"
 class FrameworkTask {
 
     public:
@@ -32,19 +29,17 @@ class FrameworkTask {
     void resume();
     TaskHandle_t getHandle() const;
 
-    // Send a system notification or wait for one
-    void notify(SystemNotification type, uint32_t value = 1);
-    void notifyFromISR(SystemNotification type, uint32_t value = 1, BaseType_t* higherPriorityTaskWoken = nullptr);
-    bool waitFor(SystemNotification type, TickType_t timeout = portMAX_DELAY);
+    // Notify
+    void notify(uint8_t index, uint32_t value = 1);
+    void notify(FrameworkNotification n, uint32_t value = 1);
 
-    // Send a user notification or wait for one
-    void notify(UserNotification type, uint32_t value = 1);
-    void notifyFromISR(UserNotification type, uint32_t value = 1, BaseType_t* higherPriorityTaskWoken = nullptr);
-    bool waitFor(UserNotification type, TickType_t timeout = portMAX_DELAY);
+    // Notify from ISR
+    void notifyFromISR(uint8_t index, uint32_t value = 1, BaseType_t* pxHigherPriorityTaskWoken = nullptr);
+    void notifyFromISR(FrameworkNotification n, uint32_t value = 1, BaseType_t* pxHigherPriorityTaskWoken = nullptr);
 
-    // For basic notifications
-    void notify(uint32_t value = 1);
-    void notifyFromISR(uint32_t value = 1, BaseType_t* pxHigherPriorityTaskWoken = nullptr); 
+    // Wait
+    bool waitFor(uint8_t index, TickType_t timeout = portMAX_DELAY);
+    bool waitFor(FrameworkNotification n, TickType_t timeout = portMAX_DELAY);
 
 protected:
     virtual void run() = 0; // override in subclass
