@@ -17,7 +17,8 @@
 #include "task.h"
 #include "queue.h"
 
-#include "FrameworkNotification.h"
+#include "SystemNotification.h"
+#include "UserNotification.h"
 
 
 class FrameworkTask {
@@ -31,18 +32,19 @@ class FrameworkTask {
     void resume();
     TaskHandle_t getHandle() const;
 
-    // Send a notification to this task
+    // Send a system notification or wait for one
     void notify(SystemNotification type, uint32_t value = 1);
     void notifyFromISR(SystemNotification type, uint32_t value = 1, BaseType_t* higherPriorityTaskWoken = nullptr);
-
-
-    // Wait for a specific notification type
     bool waitFor(SystemNotification type, TickType_t timeout = portMAX_DELAY);
 
-    // For notifications
+    // Send a user notification or wait for one
+    void notify(UserNotification type, uint32_t value = 1);
+    void notifyFromISR(UserNotification type, uint32_t value = 1, BaseType_t* higherPriorityTaskWoken = nullptr);
+    bool waitFor(UserNotification type, TickType_t timeout = portMAX_DELAY);
+
+    // For basic notifications
     void notify(uint32_t value = 1);
-    void notifyFromISR(uint32_t value = 1, BaseType_t* pxHigherPriorityTaskWoken = nullptr);
-    
+    void notifyFromISR(uint32_t value = 1, BaseType_t* pxHigherPriorityTaskWoken = nullptr); 
 
 protected:
     virtual void run() = 0; // override in subclass
