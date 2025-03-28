@@ -15,6 +15,8 @@
 #include <nlohmann/json.hpp>
 #include <chrono>
 
+#include "JwtAuthenticator.h"
+
 using json = nlohmann::json;
 
 #ifndef MBEDTLS_SHA256_DIGEST_LENGTH

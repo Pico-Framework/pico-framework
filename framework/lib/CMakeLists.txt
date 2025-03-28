@@ -26,9 +26,9 @@ set(PORTABLE_PATH ${FAT_CLI_PATH}/src/FreeRTOS+FAT+CLI/portable/RP2040)
 set(SRC_PATH ${FAT_CLI_PATH}/src/FreeRTOS+FAT+CLI/src)
 set(INCLUDE_PATH ${FAT_CLI_PATH}/src/FreeRTOS+FAT+CLI/include)
 
-add_library(freertos_fat_cli)
+add_library(FreeRTOS+FAT+CLI)
 
-target_sources(freertos_fat_cli PRIVATE
+target_sources(FreeRTOS+FAT+CLI PRIVATE
     ${LAB_FAT_PATH}/ff_crc.c
     ${LAB_FAT_PATH}/ff_dir.c
     ${LAB_FAT_PATH}/ff_error.c
@@ -71,7 +71,7 @@ include_directories(
     ${CMAKE_SOURCE_DIR}/framework/include/port
 )  
 
-target_include_directories(freertos_fat_cli PUBLIC
+target_include_directories(FreeRTOS+FAT+CLI PUBLIC
     ${INCLUDE_PATH}
     ${LAB_FAT_PATH}/include
     ${PORTABLE_PATH}
@@ -79,7 +79,7 @@ target_include_directories(freertos_fat_cli PUBLIC
     ${FREERTOS_KERNEL_PATH}/portable/ThirdParty/GCC/RP2040/include
 )
 
-target_link_libraries(freertos_fat_cli PUBLIC
+target_link_libraries(FreeRTOS+FAT+CLI PUBLIC
     cmsis_core
     FreeRTOS-Kernel-Heap4
     hardware_adc

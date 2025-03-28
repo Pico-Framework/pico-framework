@@ -48,6 +48,8 @@ target_sources(pico_framework
         src/http/HttpRequest.cpp
         src/http/HttpResponse.cpp
         src/http/HttpFileserver.cpp
+        src/http/JwtAuthenticator.cpp
+        src/http/Middleware.cpp
         src/http/Router.cpp
         src/http/MultipartParser.cpp
         src/network/Network.cpp 
