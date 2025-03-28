@@ -1,4 +1,7 @@
 #include "FrameworkController.h"
+#include "EventManager.h"
+#include "FrameworkTask.h"
+#include "Event.h"
 
 FrameworkController::FrameworkController(const char* name, uint16_t stackSize, UBaseType_t priority)
     : FrameworkTask(name, stackSize, priority) {}
@@ -15,8 +18,8 @@ void FrameworkController::onStart() {
     // Default no-op
 }
 
-void FrameworkController::onEvent(uint32_t eventMask) {
-    // Default no-op
+void FrameworkController::onEvent(const Event& event) {
+    // Default: do nothing
 }
 
 void FrameworkController::poll() {
@@ -24,9 +27,11 @@ void FrameworkController::poll() {
 }
 
 void FrameworkController::waitAndDispatch(uint32_t timeoutMs) {
-    uint32_t eventMask = waitForNotification(pdMS_TO_TICKS(timeoutMs));
-    if (eventMask != 0) {
-        onEvent(eventMask);
+    Event event;
+    if (EventManager::getInstance().getNextEvent(event, timeoutMs)) {
+        if (event.target == nullptr || event.target == this) {
+            onEvent(event);
+        }
     }
 }
 

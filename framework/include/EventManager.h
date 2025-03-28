@@ -17,6 +17,7 @@
 #include "FreeRTOS.h"
 #include "task.h"
 #include "queue.h"
+#include "Event.h"
 
 // Forward declaration of your Task wrapper class
 class FrameworkTask;
@@ -30,14 +31,15 @@ enum class EventType : uint8_t {
     // Extend as needed
 };
 
-struct Event {
-    EventType type;
-    void* data = nullptr;  // Optional payload
-};
-
 class EventManager {
 public:
-    explicit EventManager(size_t queueSize = 10);
+    // Singleton pattern to ensure only one instance of EventManager
+    static EventManager& getInstance() {
+        static EventManager instance;
+        return instance;
+    }
+
+    explicit EventManager(size_t queueSize = 32);
 
     // Subscribe a task to specific events (eventMask is a bitmask of 1 << EventType)
     void subscribe(uint32_t eventMask, FrameworkTask* task);

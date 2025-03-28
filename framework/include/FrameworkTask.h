@@ -16,6 +16,7 @@
 #include "FreeRTOS.h"
 #include "task.h"
 #include "queue.h"
+#include "Event.h"
 
 #include "FrameworkNotification.h"
 class FrameworkTask {
@@ -23,6 +24,7 @@ class FrameworkTask {
     public:
     FrameworkTask(const char* name, uint16_t stackSize = 1024, UBaseType_t priority = 1);
     virtual ~FrameworkTask();
+    virtual void onEvent(const Event& event) {}
 
     bool start();
     void suspend();
@@ -44,7 +46,7 @@ class FrameworkTask {
 protected:
     virtual void run() = 0; // override in subclass
 
-    uint32_t waitForNotification(TickType_t timeout = portMAX_DELAY);
+    uint32_t waitFor(TickType_t timeout = portMAX_DELAY);
 
     // For optional message queue
     bool createQueue(size_t itemSize, size_t length);

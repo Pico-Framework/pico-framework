@@ -31,7 +31,8 @@ void EventManager::postEvent(const Event& event) {
         xQueueSendToBackFromISR(eventQueue_, &event, &xHigherPriTaskWoken);
 
         for (auto& sub : subscribers_) {
-            if (sub.eventMask & (1u << static_cast<uint8_t>(event.type))) {
+            if ((sub.eventMask & (1u << static_cast<uint8_t>(event.type))) &&
+                (event.target == nullptr || sub.task == event.target)) {
                 sub.task->notifyFromISR(static_cast<uint8_t>(event.type), 1, &xHigherPriTaskWoken);
             }
         }
@@ -41,8 +42,9 @@ void EventManager::postEvent(const Event& event) {
         xQueueSendToBack(eventQueue_, &event, 0);
 
         for (auto& sub : subscribers_) {
-            if (sub.eventMask & (1u << static_cast<uint8_t>(event.type))) {
-                sub.task->notify(static_cast<uint8_t>(event.type));
+            if ((sub.eventMask & (1u << static_cast<uint8_t>(event.type))) &&
+                (event.target == nullptr || sub.task == event.target)) {
+                sub.task->onEvent(event);
             }
         }
     }

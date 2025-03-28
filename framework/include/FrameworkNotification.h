@@ -3,6 +3,7 @@
 
 enum class FrameworkNotification : uint8_t {
     // Reserved for system/framework use
+    None              = 0, 
     NetworkReady      = 1,
     TimeSync          = 2,
     ConfigUpdated     = 3,
@@ -18,3 +19,8 @@ enum class FrameworkNotification : uint8_t {
     ZoneEndTime       = 19,
     ProgramStartTime  = 20,
 };
+
+// Helper for bitmask subscription
+constexpr uint32_t mask(FrameworkNotification n) {
+    return 1u << static_cast<uint8_t>(n);
+}

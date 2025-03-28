@@ -6,6 +6,7 @@
 #include "FreeRTOS.h"
 #include "task.h"
 #include <string>
+#include "Event.h"
 
 class FrameworkController : public FrameworkTask {
 public:
@@ -14,7 +15,7 @@ public:
 
 protected:
     virtual void onStart();                      // Called once at task start
-    virtual void onEvent(uint32_t eventMask);    // Called when notified
+    virtual void onEvent(const Event& event);    // Called when notified
     virtual void poll();                         // Non-blocking periodic work
 
     // Polling helper
