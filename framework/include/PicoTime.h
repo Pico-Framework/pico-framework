@@ -24,9 +24,9 @@ public:
 
     // Time-of-day helpers
     static std::string getNowHhMmSs();
-    static struct tm todayAt(const struct tm& hhmmss);
-    static time_t todayAtTimeT(const struct tm& hhmmss);
-    static std::string todayHhMmSsString(const struct tm& hhmmss);
+    static struct tm todayAt(const struct tm* hhmmss);
+    static time_t todayAtTimeT(const struct tm* hhmmss);
+    static std::string todayHhMmSsString(const struct tm* hhmmss);
 
     // Output
     static void printNow();

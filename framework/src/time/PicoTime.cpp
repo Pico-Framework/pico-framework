@@ -66,12 +66,12 @@ std::string PicoTime::getNowHhMmSs() {
     return std::string(buf);
 }
 
-struct tm PicoTime::todayAt(const struct tm& hhmmss) {
+struct tm PicoTime::todayAt(const struct tm* hhmmss) {
     struct tm now = nowTm();
     struct tm result = {
-        .tm_sec  = hhmmss.tm_sec,
-        .tm_min  = hhmmss.tm_min,
-        .tm_hour = hhmmss.tm_hour,
+        .tm_sec  = hhmmss->tm_sec,
+        .tm_min  = hhmmss->tm_min,
+        .tm_hour = hhmmss->tm_hour,
         .tm_mday = now.tm_mday,
         .tm_mon  = now.tm_mon,
         .tm_year = now.tm_year,
@@ -81,12 +81,12 @@ struct tm PicoTime::todayAt(const struct tm& hhmmss) {
     return result;
 }
 
-time_t PicoTime::todayAtTimeT(const struct tm& hhmmss) {
+time_t PicoTime::todayAtTimeT(const struct tm* hhmmss) {
     struct tm t = todayAt(hhmmss);
     return mktime(&t);
 }
 
-std::string PicoTime::todayHhMmSsString(const struct tm& hhmmss) {
+std::string PicoTime::todayHhMmSsString(const struct tm* hhmmss) {
     struct tm t = todayAt(hhmmss);
     char buf[32];
     strftime(buf, sizeof(buf), "%Y-%m-%d %H:%M:%S", &t);
