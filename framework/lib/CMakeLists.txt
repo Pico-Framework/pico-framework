@@ -1,73 +1,88 @@
-# had to add these here as add subdirectory compains with relatve paths
+cmake_minimum_required(VERSION 3.13)
+project(FreeRTOS_FAT_CLI LANGUAGES C CXX)
+
+# Required: path to FreeRTOS-Kernel
 if(NOT DEFINED FREERTOS_KERNEL_PATH)
-    set(FREERTOS_KERNEL_PATH $ENV{FREERTOS_KERNEL_PATH})
+    message(FATAL_ERROR "[FAT+CLI] FREERTOS_KERNEL_PATH is not defined. Pass it via -DFREERTOS_KERNEL_PATH=<...>")
 endif()
 
-message(STATUS "FREERTOS_KERNEL_PATH BUILDING FreeRTOS+FAT+CLI = ${FREERTOS_KERNEL_PATH}")
+# something like this to clean up later
+#get_filename_component(FRAMEWORK_ROOT ${CMAKE_CURRENT_LIST_DIR} DIRECTORY)
+#set(FAT_CLI_PATH "${FRAMEWORK_ROOT}/lib/FreeRTOS-FAT-CLI-for-RPi-Pico")
 
-add_library(FreeRTOS+FAT+CLI)
+# Optional override: path to FreeRTOS-FAT-CLI-for-RPi-Pico (default assumes standard layout)
+if(NOT DEFINED FAT_CLI_PATH)
+#external projects
+    #set(FAT_CLI_PATH ${CMAKE_SOURCE_DIR}/lib/pico-framework/framework/lib/FreeRTOS-FAT-CLI-for-RPi-Pico)
+    set(FAT_CLI_PATH ${CMAKE_SOURCE_DIR}/framework/lib/FreeRTOS-FAT-CLI-for-RPi-Pico)
+endif()
 
-message("Current source directory: ${CMAKE_CURRENT_SOURCE_DIR}")
-message("Current list directory: ${CMAKE_CURRENT_LIST_DIR}")
-message("Current binary directory: ${CMAKE_CURRENT_BINARY_DIR}")
-message("Top-level source directory: ${CMAKE_SOURCE_DIR}")
-message("Top-level binary directory: ${CMAKE_BINARY_DIR}")
+message(STATUS "[FAT+CLI] FAT_CLI_PATH = ${FAT_CLI_PATH}")
+message(STATUS "[FAT+CLI] FREERTOS_KERNEL_PATH = ${FREERTOS_KERNEL_PATH}")
 
-target_sources(FreeRTOS+FAT+CLI PRIVATE
-        FreeRTOS-FAT-CLI-for-RPi-Pico/src/Lab-Project-FreeRTOS-FAT/ff_crc.c
-        FreeRTOS-FAT-CLI-for-RPi-Pico/src/Lab-Project-FreeRTOS-FAT/ff_dir.c
-        FreeRTOS-FAT-CLI-for-RPi-Pico/src/Lab-Project-FreeRTOS-FAT/ff_error.c
-        FreeRTOS-FAT-CLI-for-RPi-Pico/src/Lab-Project-FreeRTOS-FAT/ff_fat.c
-        FreeRTOS-FAT-CLI-for-RPi-Pico/src/Lab-Project-FreeRTOS-FAT/ff_file.c
-        FreeRTOS-FAT-CLI-for-RPi-Pico/src/Lab-Project-FreeRTOS-FAT/ff_format.c
-        FreeRTOS-FAT-CLI-for-RPi-Pico/src/Lab-Project-FreeRTOS-FAT/ff_ioman.c
-        FreeRTOS-FAT-CLI-for-RPi-Pico/src/Lab-Project-FreeRTOS-FAT/ff_locking.c
-        FreeRTOS-FAT-CLI-for-RPi-Pico/src/Lab-Project-FreeRTOS-FAT/ff_memory.c
-        FreeRTOS-FAT-CLI-for-RPi-Pico/src/Lab-Project-FreeRTOS-FAT/ff_stdio.c
-        FreeRTOS-FAT-CLI-for-RPi-Pico/src/Lab-Project-FreeRTOS-FAT/ff_string.c
-        FreeRTOS-FAT-CLI-for-RPi-Pico/src/Lab-Project-FreeRTOS-FAT/ff_sys.c
-        FreeRTOS-FAT-CLI-for-RPi-Pico/src/Lab-Project-FreeRTOS-FAT/ff_time.c 
-        FreeRTOS-FAT-CLI-for-RPi-Pico/src/FreeRTOS+FAT+CLI/portable/RP2040/dma_interrupts.c
-        FreeRTOS-FAT-CLI-for-RPi-Pico/src/FreeRTOS+FAT+CLI/portable/RP2040/ff_sddisk.c
-        FreeRTOS-FAT-CLI-for-RPi-Pico/src/FreeRTOS+FAT+CLI/portable/RP2040/sd_card.c
-        FreeRTOS-FAT-CLI-for-RPi-Pico/src/FreeRTOS+FAT+CLI/portable/RP2040/SPI/sd_card_spi.c
-        FreeRTOS-FAT-CLI-for-RPi-Pico/src/FreeRTOS+FAT+CLI/portable/RP2040/SPI/sd_spi.c
-        FreeRTOS-FAT-CLI-for-RPi-Pico/src/FreeRTOS+FAT+CLI/portable/RP2040/SPI/my_spi.c
-        FreeRTOS-FAT-CLI-for-RPi-Pico/src/FreeRTOS+FAT+CLI/portable/RP2040/SDIO/sd_card_sdio.c
-        FreeRTOS-FAT-CLI-for-RPi-Pico/src/FreeRTOS+FAT+CLI/portable/RP2040/SDIO/rp2040_sdio.c
-        FreeRTOS-FAT-CLI-for-RPi-Pico/src/FreeRTOS+FAT+CLI/src/crash.c
-        FreeRTOS-FAT-CLI-for-RPi-Pico/src/FreeRTOS+FAT+CLI/src/crc.c
-        FreeRTOS-FAT-CLI-for-RPi-Pico/src/FreeRTOS+FAT+CLI/src/ff_utils.c
-        FreeRTOS-FAT-CLI-for-RPi-Pico/src/FreeRTOS+FAT+CLI/src/file_stream.c
-        FreeRTOS-FAT-CLI-for-RPi-Pico/src/FreeRTOS+FAT+CLI/src/freertos_callbacks.c
-        FreeRTOS-FAT-CLI-for-RPi-Pico/src/FreeRTOS+FAT+CLI/src/FreeRTOS_strerror.c
-        FreeRTOS-FAT-CLI-for-RPi-Pico/src/FreeRTOS+FAT+CLI/src/FreeRTOS_time.c
-        FreeRTOS-FAT-CLI-for-RPi-Pico/src/FreeRTOS+FAT+CLI/src/my_debug.c
-        FreeRTOS-FAT-CLI-for-RPi-Pico/src/FreeRTOS+FAT+CLI/src/sd_timeouts.c
-        FreeRTOS-FAT-CLI-for-RPi-Pico/src/FreeRTOS+FAT+CLI/src/util.c
-)
-target_link_libraries(FreeRTOS+FAT+CLI PRIVATE
-        cmsis_core
-        FreeRTOS-Kernel-Heap4
-        hardware_adc
-        hardware_clocks
-        hardware_dma
-        hardware_pio
-        #hardware_rtc
-        hardware_spi
-        hardware_timer
-        pico_aon_timer
-        pico_multicore
-        pico_stdlib
-        pico_sync
-        
+# Subdirectories
+set(LAB_FAT_PATH ${FAT_CLI_PATH}/src/Lab-Project-FreeRTOS-FAT)
+set(PORTABLE_PATH ${FAT_CLI_PATH}/src/FreeRTOS+FAT+CLI/portable/RP2040)
+set(SRC_PATH ${FAT_CLI_PATH}/src/FreeRTOS+FAT+CLI/src)
+set(INCLUDE_PATH ${FAT_CLI_PATH}/src/FreeRTOS+FAT+CLI/include)
+
+add_library(freertos_fat_cli)
+
+target_sources(freertos_fat_cli PRIVATE
+    ${LAB_FAT_PATH}/ff_crc.c
+    ${LAB_FAT_PATH}/ff_dir.c
+    ${LAB_FAT_PATH}/ff_error.c
+    ${LAB_FAT_PATH}/ff_fat.c
+    ${LAB_FAT_PATH}/ff_file.c
+    ${LAB_FAT_PATH}/ff_format.c
+    ${LAB_FAT_PATH}/ff_ioman.c
+    ${LAB_FAT_PATH}/ff_locking.c
+    ${LAB_FAT_PATH}/ff_memory.c
+    ${LAB_FAT_PATH}/ff_stdio.c
+    ${LAB_FAT_PATH}/ff_string.c
+    ${LAB_FAT_PATH}/ff_sys.c
+    ${LAB_FAT_PATH}/ff_time.c
+
+    ${PORTABLE_PATH}/dma_interrupts.c
+    ${PORTABLE_PATH}/ff_sddisk.c
+    ${PORTABLE_PATH}/sd_card.c
+    ${PORTABLE_PATH}/SPI/sd_card_spi.c
+    ${PORTABLE_PATH}/SPI/sd_spi.c
+    ${PORTABLE_PATH}/SPI/my_spi.c
+    ${PORTABLE_PATH}/SDIO/sd_card_sdio.c
+    ${PORTABLE_PATH}/SDIO/rp2040_sdio.c
+
+    ${SRC_PATH}/crash.c
+    ${SRC_PATH}/crc.c
+    ${SRC_PATH}/ff_utils.c
+    ${SRC_PATH}/file_stream.c
+    ${SRC_PATH}/freertos_callbacks.c
+    ${SRC_PATH}/FreeRTOS_strerror.c
+    ${SRC_PATH}/FreeRTOS_time.c
+    ${SRC_PATH}/my_debug.c
+    ${SRC_PATH}/sd_timeouts.c
+    ${SRC_PATH}/util.c
 )
 
-target_include_directories(FreeRTOS+FAT+CLI PRIVATE    
-    ${CMAKE_SOURCE_DIR}/framework/include/port
+target_include_directories(freertos_fat_cli PUBLIC
+    ${INCLUDE_PATH}
+    ${LAB_FAT_PATH}/include
+    ${PORTABLE_PATH}
     ${FREERTOS_KERNEL_PATH}/include
     ${FREERTOS_KERNEL_PATH}/portable/ThirdParty/GCC/RP2040/include
-    FreeRTOS-FAT-CLI-for-RPi-Pico/src/Lab-Project-FreeRTOS-FAT/include/
-    FreeRTOS-FAT-CLI-for-RPi-Pico/src/FreeRTOS+FAT+CLI/portable/RP2040/
-    FreeRTOS-FAT-CLI-for-RPi-Pico/src/FreeRTOS+FAT+CLI/include 
+)
+
+target_link_libraries(freertos_fat_cli PUBLIC
+    cmsis_core
+    FreeRTOS-Kernel-Heap4
+    hardware_adc
+    hardware_clocks
+    hardware_dma
+    hardware_pio
+    hardware_spi
+    hardware_timer
+    pico_aon_timer
+    pico_multicore
+    pico_stdlib
+    pico_sync
 )
