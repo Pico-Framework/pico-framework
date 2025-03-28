@@ -38,10 +38,9 @@ class FatFsStorageManager : public StorageManager {
             std::string mountPoint = "sd0";  // Default mount point for the filesystem
             bool ensureMounted(){
                 if (!mounted) {
-                    if (mount())  // Mount the filesystem if not already mounted
-                        mounted = true;
+                   mounted = mount();
                 } 
-                return false;  // Return false if mount fails
+                return mounted;  // Return the mount state
             }
 
             bool lock();            

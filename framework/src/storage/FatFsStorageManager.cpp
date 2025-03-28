@@ -115,14 +115,14 @@ bool FatFsStorageManager::remove(const std::string& path) {
 
 bool FatFsStorageManager::rename(const std::string& from, const std::string& to) {
     if (!ensureMounted() || !lock()) return false;
-    bool result = ff_rename(("/sd0" + from).c_str(), ("/sd0" + to).c_str(), false) == 0;
+    bool result = ff_rename((from).c_str(), (to).c_str(), false) == 0;
     unlock();
     return result;
 }
 
 bool FatFsStorageManager::streamFile(const std::string& path, std::function<void(const uint8_t*, size_t)> chunkCallback) {
     if (!ensureMounted() || !lock()) return false;
-    FF_FILE* file = ff_fopen(("/sd0" + path).c_str(), "r");
+    FF_FILE* file = ff_fopen((path).c_str(), "r");
     if (!file) {
         unlock();
         return false;
