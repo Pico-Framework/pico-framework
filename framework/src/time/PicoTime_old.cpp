@@ -6,7 +6,7 @@
 #include "hardware/rtc.h"
 
 
-#include "pico_time.hpp"
+#include "PicoTime.h"
 
 /**
  * @brief Singleton Instance

@@ -59,6 +59,7 @@ target_sources(pico_framework
         src/storage/FatFsStorageManager.cpp
         src/storage/JsonService.cpp
         src/events/TimerService.cpp
+        src/time/PicoTime.cpp
 )
 
 

@@ -1,61 +1,52 @@
-/**
- * @file ds3231.cpp
- * @author Ian Archbell
- * @brief Wrapper class for the ds3231
- * @version 0.1
- * @date 2025-01-17
- * 
- * @copyright Copyright (c) 2025
- * 
- */
-
-#ifndef DS_3231_H
-#define DS_3231_H
 #pragma once
 
-#include "ds3231/ds3231.h"
+#include <stdint.h>
+#include "pico/stdlib.h"
 #include "hardware/i2c.h"
-#include "hardware/gpio.h"
 
-class DS3231{
+class DS3231 {
+public:
+    DS3231(i2c_inst_t* i2c, uint8_t address = 0x68);
 
-    public:
+    bool begin();
+    void setTime(uint8_t hour, uint8_t minute, uint8_t second);
+    void getTime(uint8_t& hour, uint8_t& minute, uint8_t& second);
 
-        DS3231(i2c_inst_t * i2c = i2c1, uint8_t sda_pin = 6, uint8_t scl_pin = 7, uint8_t int_pin = 4, uint8_t dev_addr = DS3231_DEVICE_ADRESS, uint8_t eeprom_addr = AT24C32_EEPROM_ADRESS_0) : 
-            _i2c(i2c),
-            _sda_pin(sda_pin),
-            _scl_pin(scl_pin),
-            _int_pin(int_pin),
-            _dev_addr(dev_addr),
-            _eeprom_addr(eeprom_addr)
-        {
-                /* Initiliaze ds3231 struct. */
-            ds3231_init(&_ds3231, _i2c, _dev_addr, _eeprom_addr);
+    void setDate(uint8_t day, uint8_t month, uint16_t year);
+    void getDate(uint8_t& day, uint8_t& month, uint16_t& year);
 
-        };
+    void setTimestamp(time_t t);
+    time_t getTimestamp();
 
-        bool isEnabled();
+    float getTemperature();
 
-        bool setTime(ds3231_data_t* ds3231_data);
+    // Alarm 1 & 2: normal (date-based)
+    void setAlarm1(uint8_t hour, uint8_t minute, uint8_t second, uint8_t mode);
+    void setAlarm2(uint8_t hour, uint8_t minute, uint8_t mode);
 
-        bool setAlarm1(ds3231_data_t* ds3231_data, uint32_t seconds, enum ALARM_1_MASKS mask, gpio_irq_callback_t ds3231_interrupt_callback);
-        bool setAlarm1(ds3231_alarm_1_t* alarm, enum ALARM_1_MASKS mask, gpio_irq_callback_t ds3231_interrupt_callback);
+    // Alarm 1 & 2: day-of-week-based
+    void setAlarm1DOW(uint8_t hour, uint8_t minute, uint8_t second, uint8_t dow, uint8_t mode);
+    void setAlarm2DOW(uint8_t hour, uint8_t minute, uint8_t dow, uint8_t mode);
 
-        bool getTime(ds3231_data_t* read_data);
+    bool isAlarm1Triggered();
+    bool isAlarm2Triggered();
+    void clearAlarm1();
+    void clearAlarm2();
 
-    private:
+    void enableAlarmInterrupts();
+    void disableAlarmInterrupts();
 
-        bool i2c_init();
-        
-        ds3231_t _ds3231;
-        i2c_inst_t* _i2c;  
-        uint8_t _sda_pin;
-        uint8_t _scl_pin;
-        uint8_t _int_pin;
-        uint8_t _dev_addr;
-        uint8_t _eeprom_addr;
+    bool hasLostPower();
+    void clearPowerLossFlag();
 
+private:
+    i2c_inst_t* i2c_;
+    uint8_t address_;
+
+    uint8_t bcdToDec(uint8_t val);
+    uint8_t decToBcd(uint8_t val);
+    void writeRegister(uint8_t reg, uint8_t value);
+    uint8_t readRegister(uint8_t reg);
+    void readRegisters(uint8_t reg, uint8_t* buf, size_t len);
+    void writeRegisters(uint8_t reg, const uint8_t* buf, size_t len);
 };
-
-
-#endif

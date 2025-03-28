@@ -1,56 +1,36 @@
-/**
- * @file PicoTime.h
- * @author Ian Archbell
- * @brief 
- * @version 0.1
- * @date 2025-03-26
- * 
- * @copyright Copyright (c) 2025
- * 
- */
+#pragma once
 
-#ifndef PICO_TIME_HPP
-#define PICO_TIME_HPP
-
-#include <ctime>
+#include <time.h>
 #include <string>
-#include "pico/util/datetime.h"
-#include "ds3231.h"
+#include "DS3231.h"
+#include "hardware/rtc.h"
 
 class PicoTime {
-    public:
-        static PicoTime& getInstance();
+public:
+    explicit PicoTime(DS3231& rtc);
 
-        void setTimeZone(const std::string& tz);
-        bool setSystemTime(time_t t);
-        bool setSystemTime(ds3231_data_t* dt);
-        
-        time_t getSystemTime();
-        std::string getNowHhMmSs();
+    // Syncing system time and RTC
+    bool setSystemTimeFromRTC();       // DS3231 → AON RTC
+    bool setRTCFromSystemTime();       // AON RTC → DS3231
 
-        static std::string todayHhMmSsString(tm hh_mm_ss);
-        static tm todayHhMmSs(tm* hh_mm_ss);
+    void setSystemTime(time_t t);
+    time_t getSystemTime() const;
 
-        bool setDS3231RTC(ds3231_data_t* ds3231_data);
-        bool setDS3231RTC(time_t t);
+    // Output
+    void printNow();
+    void printTime(time_t t);
+    void print(const struct tm* t);
+    void print(const datetime_t* dt);
 
-        time_t ds3231_data_to_time(const ds3231_data_t* t);
+    // Convenience
+    struct tm nowTm() const;
+    datetime_t nowDatetime();
 
-        ds3231_data_t tm_to_ds3231_data(const tm* t);
-        ds3231_data_t time_t_to_ds3231_data(const time_t* t);
+    std::string getNowHhMmSs() const;
 
-        void printSystemTime();
-        void print(const time_t* t);
-        void print(const tm* t);
-        void print(const ds3231_data_t* t);
+    static std::string todayHhMmSsString(const struct tm& hh_mm_ss);
+    static struct tm todayHhMmSs(const struct tm* hh_mm_ss);
 
-    private:
-        PicoTime() = default;
-        PicoTime(PicoTime&&) = default;  // Enable move constructor
-        PicoTime(const PicoTime&) = delete;
-        PicoTime& operator=(const PicoTime&) = delete;
-
-        static std::string _time_zone;
+private:
+    DS3231& rtc_;
 };
-
-#endif // PICO_TIME_HPP
