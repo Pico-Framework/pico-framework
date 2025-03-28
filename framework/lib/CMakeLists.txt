@@ -64,6 +64,13 @@ target_sources(freertos_fat_cli PRIVATE
     ${SRC_PATH}/util.c
 )
 
+#global include for config files
+
+message("CMAKE_SOURCE_DIR = ${CMAKE_SOURCE_DIR}")
+include_directories(
+    ${CMAKE_SOURCE_DIR}/framework/include/port
+)  
+
 target_include_directories(freertos_fat_cli PUBLIC
     ${INCLUDE_PATH}
     ${LAB_FAT_PATH}/include

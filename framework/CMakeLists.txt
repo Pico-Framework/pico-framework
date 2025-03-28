@@ -76,7 +76,7 @@ target_link_libraries(pico_framework PUBLIC
         pico_lwip_http
         pico_mbedtls
     )    
-    
+
 # Public headers (flat include path for now)
 target_include_directories(pico_framework
     PUBLIC
