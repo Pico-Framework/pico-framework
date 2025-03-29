@@ -35,8 +35,5 @@ void logSystemStats();
 void printTCPState();
 void printMemsize();
 int is_in_interrupt(void);
-std::string decodeURIComponent(const std::string& encoded);
-std::unordered_map<std::string, std::string> parseUrlEncoded(const std::string& input);
-std::string getClientIpFromSocket(int sock);
 
 #endif // UTILITY_H

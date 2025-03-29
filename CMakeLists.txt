@@ -53,3 +53,4 @@ pico_sdk_init()
 
 # Add subdirectories
 add_subdirectory(framework)
+#add_subdirectory(tests)

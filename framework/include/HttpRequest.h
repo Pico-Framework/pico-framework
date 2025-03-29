@@ -18,12 +18,16 @@
 #include <unordered_map>
 #include <iostream>
 
+#include "TcpConnectionSocket.h"
+
 class Router;  // Forward declaration
 
 class Request {
 public:
 
     // Constructor: pass in raw headers (as C-string), HTTP method, and request path.
+    Request(TcpConnectionSocket& conn, const std::string& method, const std::string& url);
+
     Request(const char* rawHeaders, const std::string& reqMethod, const std::string& reqPath); 
 
     std::string getHeader(const std::string &field) const {

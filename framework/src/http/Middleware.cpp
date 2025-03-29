@@ -11,11 +11,12 @@
 
 #include "Middleware.h" 
 #include <iostream>
+#include "HttpResponse.h"
 
 Middleware authMiddleware = [](Request &req, Response &res, const std::vector<std::string> &params) {
     std::string token = req.getHeader("Authorization");
     if (token.empty() || token.find("Bearer ") != 0) {
-        res.status(401).send("{\"error\":\"Unauthorized\"}");
+        res.setStatus(401).send("{\"error\":\"Unauthorized\"}");
         return false;  // 🚨 Block unauthorized requests
     }
 

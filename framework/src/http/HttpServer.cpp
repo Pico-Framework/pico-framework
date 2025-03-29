@@ -23,6 +23,8 @@
 #include "FreeRTOS.h"
 #include "task.h"
 #include "utility.h"
+#include "url_utils.h"
+#include "TcpConnectionSocket.h"
 
 #define __FILENAME__ (strrchr(__FILE__, '/') ? strrchr(__FILE__, '/') + 1 : __FILE__)
 

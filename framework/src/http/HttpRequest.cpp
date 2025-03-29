@@ -20,6 +20,7 @@
 #include "lwip/sockets.h"
 #include "utility.h"
 #include "MultipartParser.h"
+#include "url_utils.h"
 
 #ifdef TRACE_REQUEST
     #define DEBUG_PRINT(...) (std::cout << __VA_ARGS__ << std::endl)
@@ -77,12 +78,12 @@ int Request::receiveData(int clientSocket, char* buffer, int size) {
     
     size_t bytesReceived = lwip_recv(clientSocket, buffer, size-1, 0);
     if (bytesReceived < 0) {
-        printf("Error receiving data from client: %d\n", bytesReceived);
+        printf("Error receiving data from client: %zu\n", bytesReceived);
         return -1;
     }
 
     printf("Received %zu bytes\n", bytesReceived);
-    printf("Buffer: %.*s\n", bytesReceived, buffer);
+    printf("Buffer: %.*s\n", (int)bytesReceived, buffer);
 
     if (bytesReceived == 0) {
         printf("Client disconnected.\n");
@@ -146,7 +147,7 @@ Request Request::receive(int clientSocket) {
 
     // Get the content length from the headers
     int contentLength = request.getContentLength();
-    printf("Content-Length: %zu\n", contentLength);
+    printf("Content-Length: %d\n", contentLength);
 
     // Handle the body only if contentLength is greater than 0
     if (contentLength > 0) {

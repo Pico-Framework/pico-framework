@@ -1,8 +1,18 @@
+/**
+ * @file DS3231.cpp
+ * @author Ian Archbell
+ * @brief 
+ * @version 0.1
+ * @date 2025-03-29
+ * 
+ * @copyright Copyright (c) 2025
+ * 
+ */
+
 #include "DS3231.h"
 #include "hardware/i2c.h"
 #include <time.h>
 #include <string.h>
-
 
 DS3231::DS3231(i2c_inst_t* i2c, uint8_t address) : i2c_(i2c), address_(address) {}
 

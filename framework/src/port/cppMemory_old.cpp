@@ -3,8 +3,6 @@
 #include "FreeRTOS.h"
 #include <stdio.h>
 
-#ifndef UNIT_TEST
-
 void* operator new(size_t size) {
     void* pData = pvPortMalloc(size);
     if (!pData) {
@@ -15,29 +13,17 @@ void* operator new(size_t size) {
     return pData;
 }
 
-void* operator new[](size_t size) {
+void * operator new[]( size_t size ){
     return pvPortMalloc(size);
 }
 
-void operator delete(void* ptr) {
-    if (ptr) {
-        vPortFree(ptr);
+void operator delete(void *ptr) {
+    if (!ptr) {
+        printf("ERROR: Attempted to delete a NULL pointer!\n");
+        return;
     }
+//    printf("Freeing memory at address: %p\n", ptr);
+    vPortFree(ptr);
 }
 
-void operator delete[](void* ptr) {
-    if (ptr) {
-        vPortFree(ptr);
-    }
-}
 
-// ✅ Placement new — required for STL
-void* operator new(size_t, void* ptr) noexcept {
-    return ptr;
-}
-
-void* operator new[](size_t, void* ptr) noexcept {
-    return ptr;
-}
-
-#endif

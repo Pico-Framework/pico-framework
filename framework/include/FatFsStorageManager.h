@@ -29,7 +29,7 @@ class FatFsStorageManager : public StorageManager {
     
         bool listDirectory(const std::string& path, std::vector<FileInfo>& out) override;
 
-        size_t getFileSize(const std::string& path);
+        size_t getFileSize(const std::string& path) override;
 
         bool appendToFile(const std::string& path, const uint8_t* data, size_t size) override;
 

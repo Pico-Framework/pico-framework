@@ -28,9 +28,13 @@ class Response {
     
 public:
     explicit Response(int sock);
+    //explicit Response(TcpConnectionSocket& socket);
     
     // Chainable method to set the HTTP status code.
     Response& status(int code);
+    Response& setStatus(int code); // alias
+
+    Response& setContentType(const std::string &content_type);  // Set the content type for the response
     
     // Chainable method to set a header field.
     Response& set(const std::string &field, const std::string &value);
