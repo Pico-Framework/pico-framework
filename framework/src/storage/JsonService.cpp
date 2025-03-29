@@ -1,31 +1,7 @@
 #include "JsonService.h"
 #include <cstdio>  // for printf
-
-
-// json loaded = {
-//     {"device", {{"enabled", true}}}
-// };
-
-// json defaults = {
-//     {"network", {{"ssid", "wifi"}, {"password", "1234"}}},
-//     {"device", {{"enabled", false}, {"name", "sprinkler"}}}
-// };
-
-// loaded = mergeDefaults(loaded, defaults);
-
-// std::cout << loaded.dump(2) << std::endl;
-
-// {
-//     "device": {
-//       "enabled": true,
-//       "name": "sprinkler"
-//     },
-//     "network": {
-//       "password": "1234",
-//       "ssid": "wifi"
-//     }
-//}
-
+#include <cstdint>
+#include <vector>
 
 nlohmann::json mergeDefaults(const nlohmann::json& target, const nlohmann::json& defaults) {
     nlohmann::json result = target;
@@ -54,43 +30,46 @@ bool JsonService::load(const std::string& path) {
     }
 
     std::string content(buffer.begin(), buffer.end());
-
     nlohmann::json parsed = nlohmann::json::parse(content, nullptr, false);  // No exceptions
+
     if (parsed.is_discarded()) {
         printf("JsonService: Failed to parse JSON from %s\n", path.c_str());
         return false;
     }
 
-    jsonData = parsed;
+    data_ = parsed;
     return true;
 }
 
-bool JsonService::save(const std::string& path) {
-    std::string content = jsonData.dump(4);
-    std::vector<uint8_t> data(content.begin(), content.end());
+bool JsonService::save(const std::string& path) const {
+    if (!storage) return false;
 
-    if (!storage || !storage->writeFile(path, data)) {
-        printf("JsonService: Failed to write %s\n", path.c_str());
-        return false;
-    }
+    std::string content = data_.dump(2);  // Pretty print
+    std::vector<uint8_t> buffer(content.begin(), content.end());
 
-    return true;
+    return storage->writeFile(path, buffer);
 }
 
 nlohmann::json& JsonService::data() {
-    return jsonData;
+    return data_;
 }
 
 const nlohmann::json& JsonService::data() const {
-    return jsonData;
+    return data_;
 }
 
-// auto* storage = AppContext::instance().getStorageManager();
-// JsonService config(storage);
+nlohmann::json& JsonService::root() {
+    return data_;
+}
 
-// if (config.load("/config.json")) {
-//     config.data()["device"]["enabled"] = true;
-//     config.save("/config.json");
-// }
+const nlohmann::json& JsonService::root() const {
+    return data_;
+}
 
+nlohmann::json& JsonService::operator*() {
+    return data_;
+}
 
+const nlohmann::json& JsonService::operator*() const {
+    return data_;
+}
