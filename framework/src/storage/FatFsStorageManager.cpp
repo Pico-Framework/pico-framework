@@ -4,16 +4,17 @@
 #include <FreeRTOS.h>
 #include <semphr.h>
 
+
 FatFsStorageManager::FatFsStorageManager() {
    
 }
 
 bool FatFsStorageManager::lock() {
-    return xSemaphoreTake(mutex, pdMS_TO_TICKS(1000)) == pdTRUE;
+    return true;/*xSemaphoreTake(mutex, pdMS_TO_TICKS(1000)) == pdTRUE*/
 }
 
 void FatFsStorageManager::unlock() {
-    xSemaphoreGive(mutex);
+    /*xSemaphoreGive(mutex)*/;
 }
 
 bool FatFsStorageManager::mount() {
