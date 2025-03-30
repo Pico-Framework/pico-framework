@@ -6,10 +6,6 @@ if(NOT DEFINED FREERTOS_KERNEL_PATH)
     message(FATAL_ERROR "[FAT+CLI] FREERTOS_KERNEL_PATH is not defined. Pass it via -DFREERTOS_KERNEL_PATH=<...>")
 endif()
 
-# something like this to clean up later
-#get_filename_component(FRAMEWORK_ROOT ${CMAKE_CURRENT_LIST_DIR} DIRECTORY)
-#set(FAT_CLI_PATH "${FRAMEWORK_ROOT}/lib/FreeRTOS-FAT-CLI-for-RPi-Pico")
-
 # Optional override: path to FreeRTOS-FAT-CLI-for-RPi-Pico (default assumes standard layout)
 if(NOT DEFINED FAT_CLI_PATH)
 
@@ -25,7 +21,6 @@ Set FAT_CLI_PATH manually or check your submodule path.")
     endif()
 
 endif()
-
 
 message(STATUS "[FAT+CLI] FAT_CLI_PATH = ${FAT_CLI_PATH}")
 message(STATUS "[FAT+CLI] FREERTOS_KERNEL_PATH = ${FREERTOS_KERNEL_PATH}")

@@ -37,7 +37,7 @@ add_definitions(-DJWT_SECRET="${JWT_SECRET_VALUE}")
 # Source files (organized by domain)
 target_sources(pico_framework
     PRIVATE
-        src/application/FrameworkManager.cpp
+        src/application/FrameworkManager.cpp 
         src/application/FrameworkTask.cpp
         src/application/FrameworkApp.cpp
         src/application/AppContext.cpp
@@ -113,7 +113,6 @@ include_directories(
     ${FREERTOS_KERNEL_PATH}/portable/ThirdParty/GCC/RP2040/include
 )
 
-#add_subdirectory(lib/FreeRTOS-FAT-CLI-for-RPi-Pico/src/FreeRTOS+FAT+CLI) doesn't work - can't find the source path for e.g. ../Lab-Project-FreeRTOS-FAT/ff_crc.c
 add_subdirectory(lib)
 
 

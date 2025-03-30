@@ -47,10 +47,12 @@ if (NOT DEFINED PICO_STDIO_USB_CONNECT_WAIT_TIMEOUT_MS)
     set(PICO_STDIO_USB_CONNECT_WAIT_TIMEOUT_MS 3000)
 endif()
 
-# Initialize the SDK
+#quiet down warnings on nlohmann json library
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-psabi")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-psabi")
 
+# Initialize the SDK
 pico_sdk_init()
 
 # Add subdirectories
 add_subdirectory(framework)
-#add_subdirectory(tests)
