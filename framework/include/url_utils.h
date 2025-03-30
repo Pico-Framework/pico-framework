@@ -11,7 +11,7 @@ inline std::string trim(const std::string& s);
 
 // Function to decode URL-encoded strings
 // This function decodes percent-encoded characters (e.g., %20 for space) and replaces '+' with space
-std::string decodeURIComponent(const std::string& str);
+//std::string decodeURIComponent(const std::string& str);
 
 std::string getClientIpFromSocket(int sock);
 

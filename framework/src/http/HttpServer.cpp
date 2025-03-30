@@ -41,6 +41,12 @@
      HttpServer* server;   // Pointer to the HttpServer instance
      int clientSocket;     // The client socket
  };
+
+ // HttpServer constructor
+HttpServer::HttpServer(int port, Router& router)
+: port(port), router(router) {
+
+};
  
  bool HttpServer::start() {
      return xTaskCreateStatic(startServerTask, "HttpServer", HTTP_STACK_SIZE, this, TaskPrio_Mid, xStack, &xTaskBuffer);
