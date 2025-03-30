@@ -23,7 +23,6 @@ class Response {
     bool headerSent = false;  // track if we’ve sent the initial header
 
     // Member variables for headers and other details
-    std::string content_type = "text/html";  // Default content type
     std::string content_length;  // Will be set when we know the content size
     
 public:
@@ -35,6 +34,13 @@ public:
     Response& setStatus(int code); // alias
 
     Response& setContentType(const std::string &content_type);  // Set the content type for the response
+    std::string getContentType() const {
+        auto it = headers.find("Content-Type");
+        if (it != headers.end()) {
+            return it->second;
+        }
+        return "text/html";  // Default content type
+    }   
     
     // Chainable method to set a header field.
     Response& set(const std::string &field, const std::string &value);
@@ -55,7 +61,7 @@ public:
     int getSocket() const;    // to retrieve the raw socket
 
 
-    void setHeader(const std::string& key, const std::string& value);  // Optional helper method to set custom headers
+    Response& setHeader(const std::string& key, const std::string& value);  // Optional helper method to set custom headers
 
     void sendHeaders();  // Helper to build & send initial headers once
 

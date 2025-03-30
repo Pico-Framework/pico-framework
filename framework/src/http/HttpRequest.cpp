@@ -46,13 +46,40 @@ Request::Request(const char* rawHeaders, const std::string& reqMethod, const std
     parseHeaders(rawHeaders);
 }
 
+// void Request::parseHeaders(const char* raw) {
+//     std::istringstream stream(raw);
+//     std::string line;
+
+//     while (std::getline(stream, line)) {
+
+//         // STOP when encountering an empty line (headers-body separator)
+//         if (line == "\r" || line.empty()) {
+//             break;
+//         }
+
+//         auto pos = line.find(":");
+//         if (pos != std::string::npos && pos + 1 < line.size()) {
+//             std::string key = line.substr(0, pos);
+//             std::string value = line.substr(pos + 1);
+
+//             // Remove unexpected characters
+//             key.erase(std::remove(key.begin(), key.end(), '\r'), key.end());
+//             value.erase(std::remove(value.begin(), value.end(), '\r'), value.end());
+//             key.erase(std::remove(key.begin(), key.end(), '"'), key.end());
+//             value.erase(std::remove(value.begin(), value.end(), '"'), value.end());
+//             key = ::toLower(key);
+//             value.erase(0, value.find_first_not_of(" \t"));
+//             headers[key] = value;
+//         }
+//     }
+// }
+
 void Request::parseHeaders(const char* raw) {
     std::istringstream stream(raw);
     std::string line;
 
     while (std::getline(stream, line)) {
-
-        // STOP when encountering an empty line (headers-body separator)
+        // Stop when encountering an empty line (headers-body separator)
         if (line == "\r" || line.empty()) {
             break;
         }
@@ -62,13 +89,21 @@ void Request::parseHeaders(const char* raw) {
             std::string key = line.substr(0, pos);
             std::string value = line.substr(pos + 1);
 
-            // Remove unexpected characters
+            // Remove carriage returns and quotes
             key.erase(std::remove(key.begin(), key.end(), '\r'), key.end());
             value.erase(std::remove(value.begin(), value.end(), '\r'), value.end());
             key.erase(std::remove(key.begin(), key.end(), '"'), key.end());
             value.erase(std::remove(value.begin(), value.end(), '"'), value.end());
             key = ::toLower(key);
-            value.erase(0, value.find_first_not_of(" \t"));
+
+            // Trim both leading and trailing whitespace from value
+            size_t start = value.find_first_not_of(" \t");
+            size_t end = value.find_last_not_of(" \t");
+            if (start != std::string::npos && end != std::string::npos) {
+                value = value.substr(start, end - start + 1);
+            } else {
+                value = "";
+            }
             headers[key] = value;
         }
     }

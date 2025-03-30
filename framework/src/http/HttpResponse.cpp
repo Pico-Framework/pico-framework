@@ -92,30 +92,26 @@ void Response::send(const std::string &body) {
 
 void Response::sendHeaders() {
     if (!headerSent) {
-        // Build the headers based on internal member variables
         std::ostringstream resp;
         resp << "HTTP/1.1 " << status_code << " " << getStatusMessage(status_code) << "\r\n";
-        resp << "Content-Type: " << content_type << "\r\n";
-
-        // Add content length if available
-        if (!content_length.empty()) {
-            resp << "Content-Length: " << content_length << "\r\n";
+        // Output all custom headers:
+        for (auto &h : headers) {
+            resp << h.first << ": " << h.second << "\r\n";
         }
         for (const auto& cookie : cookies) {
             resp << "Set-Cookie: " << cookie << "\r\n";
         }
-        // Optionally add any other headers, e.g., Connection, Cache-Control
-        resp << "Connection: close\r\n";  // Or 'keep-alive' depending on your use case
-
-        resp << "\r\n";  // Blank line to end headers
-
-        // Convert to string and send
+        // Add a Connection header if not already present:
+        if (headers.find("Connection") == headers.end()) {
+            resp << "Connection: close\r\n";
+        }
+        resp << "\r\n";  // End of headers
         std::string header_str = resp.str();
         lwip_send(sock, header_str.c_str(), header_str.size(), 0);
-
         headerSent = true;
     }
 }
+
 
 
 // 1) start(...): Send initial header but no body yet
@@ -163,7 +159,7 @@ void Response::writeChunk(const char* data, size_t length)
     printMemsize();
     #endif
     if (err < 0) {
-        printf("Error sending chunk: %d\n", err);
+        printf("Error sending chunk: %zu\n", err);
         printf("Error: %s\n", strerror(errno));
     }
     else {
@@ -210,7 +206,7 @@ Response& Response::clearCookie(const std::string& name, const std::string& opti
     return *this;
 }
 
-std::string renderTemplate(const std::string& tpl, const std::map<std::string, std::string>& context) {
+std::string Response::renderTemplate(const std::string& tpl, const std::map<std::string, std::string>& context) {
     std::string result = tpl;
     for (const auto& [key, value] : context) {
         std::string placeholder = "{{" + key + "}}";
@@ -222,6 +218,26 @@ std::string renderTemplate(const std::string& tpl, const std::map<std::string, s
     }
     return result;
 }
+
+// In HttpResponse.cpp
+
+// Set the content type and return a reference for chaining.
+Response& Response::setContentType(const std::string &ct) {
+    headers["Content-Type"] = ct;
+    return *this;
+}
+
+// Alias for setting headers (if you want it separate from set())
+Response& Response::setHeader(const std::string &key, const std::string &value) {
+    headers[key] = value;
+    return *this;
+}
+
+// Alias for status (calls the status() method)
+Response& Response::setStatus(int code) {
+    return status(code);
+}
+
 
 
 

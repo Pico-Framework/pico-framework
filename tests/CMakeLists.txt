@@ -33,6 +33,8 @@ add_library(http_core
     ../framework/include/FatFsStorageManager.h
     ../framework/src/http/url_utils.cpp
     ../framework/include/url_utils.h
+    ../framework/src/http/HttpResponse.cpp
+    ../framework/include/HttpResponse.h
     # other files
 )
 
@@ -43,13 +45,25 @@ target_compile_definitions(http_core PRIVATE UNIT_TEST)
 add_executable(HttpRequestTest
     HttpRequest_Test.cpp
     AllTests.cpp
-)
+    )
+
+add_executable(HttpResponseTest    
+    HttpResponse_Test.cpp
+    AllTests.cpp        
+    )
 
 target_compile_definitions(HttpRequestTest PRIVATE UNIT_TEST)
 
+set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,-wrap,lwip_send")
 
 # Link test executable to your code + CppUTest
 target_link_libraries(HttpRequestTest
+    http_core
+    CppUTest
+    CppUTestExt
+)
+
+target_link_libraries(HttpResponseTest
     http_core
     CppUTest
     CppUTestExt

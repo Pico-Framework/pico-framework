@@ -1,0 +1,13 @@
+{
+  "name": "pico-http-tests",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "test": "mocha --timeout 5000"
+  },
+  "devDependencies": {
+    "chai": "^11.0.0",
+    "mocha": "^11.1.0",
+    "supertest": "^6.3.3"
+  }
+}
