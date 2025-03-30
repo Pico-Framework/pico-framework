@@ -52,6 +52,7 @@ target_sources(pico_framework
         src/http/Middleware.cpp
         src/http/Router.cpp
         src/http/MultipartParser.cpp
+        src/http/url_utils.cpp
         src/network/TcpConnectionSocket.cpp
         src/network/Network.cpp 
         src/network/NtpClient.cpp

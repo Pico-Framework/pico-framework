@@ -40,6 +40,9 @@ public:
 
     // Handle incoming client requests
     void handleClient(int clientSocket);
+    void startHandlingClient(int clientSocket);
+    //void handleClient(TcpConnectionSocket clientSocket);
+    //void startHandlingClient(TcpConnectionSocket clientSocket);
 
     int getSocket() const { return sock; }
 
@@ -48,7 +51,7 @@ public:
 
     Router& getRouter() { return router; }
     static void handleClientTask(void *pvParameters);
-    void startHandlingClient(int clientSocket);
+    
     void acceptClientConnections();
 
 

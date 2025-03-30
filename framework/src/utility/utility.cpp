@@ -60,10 +60,10 @@ void printTaskStackSizes() {
 
 void logSystemStats() {
     printf("\n===== SYSTEM STATS =====\n");
-    printf("Free heap size: %d bytes\n", xPortGetFreeHeapSize());
-    printf("Minimum ever free heap: %d bytes\n", xPortGetMinimumEverFreeHeapSize());
+    printf("Free heap size: %zu bytes\n", xPortGetFreeHeapSize());
+    printf("Minimum ever free heap: %zu bytes\n", xPortGetMinimumEverFreeHeapSize());
 
-    printf("Stack watermark: AcceptConnect: %d, HandleClient: %d, tcpip_thread: %d\n",
+    printf("Stack watermark: AcceptConnect: %zu, HandleClient: %zu, tcpip_thread: %zu\n",
         uxTaskGetStackHighWaterMark(NULL),  // Accept thread
         uxTaskGetStackHighWaterMark(NULL),  // HandleClient thread
         uxTaskGetStackHighWaterMark(NULL)); // TCP/IP thread
@@ -117,7 +117,7 @@ void runTimeStats(   ){
 		// Print stats
 		for( x = 0; x < uxArraySize; x++ )
 		{
-			printf("Task: %d \t cPri:%d \t bPri:%d \t hw:%d \t%s\n",
+			printf("Task: %d \t cPri:%d \t bPri:%d \t hw:%zu \t%s\n",
 					pxTaskStatusArray[ x ].xTaskNumber ,
 					pxTaskStatusArray[ x ].uxCurrentPriority ,
 					pxTaskStatusArray[ x ].uxBasePriority ,
@@ -134,7 +134,7 @@ void runTimeStats(   ){
    //Get heap allocation information
    HeapStats_t heapStats;
    vPortGetHeapStats(&heapStats);
-   printf("HEAP avl: %d, blocks %d, alloc: %d, free: %d\n",
+   printf("HEAP avl: %zu, blocks %zu, alloc: %zu, free: %zu\n",
 		   heapStats.xAvailableHeapSpaceInBytes,
 		   heapStats.xNumberOfFreeBlocks,
 		   heapStats.xNumberOfSuccessfulAllocations,

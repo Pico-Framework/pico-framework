@@ -31,6 +31,8 @@ add_library(http_core
     ../framework/include/AppContext.h
     ../framework/src/storage/FatFsStorageManager.cpp
     ../framework/include/FatFsStorageManager.h
+    ../framework/src/http/url_utils.cpp
+    ../framework/include/url_utils.h
     # other files
 )
 

@@ -50,21 +50,21 @@ std::string decodeURIComponent(const std::string& str) {
     return decoded;
 }
 
-std::unordered_map<std::string, std::string> parseUrlEncoded(const std::string& input) {
-    std::unordered_map<std::string, std::string> params;
-    std::istringstream stream(input);
-    std::string keyValue;
+// std::unordered_map<std::string, std::string> parseUrlEncoded(const std::string& input) {
+//     std::unordered_map<std::string, std::string> params;
+//     std::istringstream stream(input);
+//     std::string keyValue;
 
-    while (std::getline(stream, keyValue, '&')) {
-        size_t eqPos = keyValue.find('=');
-        if (eqPos != std::string::npos) {
-            std::string key = decodeURIComponent(keyValue.substr(0, eqPos));
-            std::string value = decodeURIComponent(keyValue.substr(eqPos + 1));
-            params[key] = value;
-        }
-    }
-    return params;
-}
+//     while (std::getline(stream, keyValue, '&')) {
+//         size_t eqPos = keyValue.find('=');
+//         if (eqPos != std::string::npos) {
+//             std::string key = decodeURIComponent(keyValue.substr(0, eqPos));
+//             std::string value = decodeURIComponent(keyValue.substr(eqPos + 1));
+//             params[key] = value;
+//         }
+//     }
+//     return params;
+// }
 
 std::string getClientIpFromSocket(int sock) {
     sockaddr_in addr;
