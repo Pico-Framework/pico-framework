@@ -7,14 +7,8 @@
 #include <algorithm>
 #include <cctype>
 
-inline std::string trim(const std::string& s) {
-    size_t start = s.find_first_not_of(" \t\r\n");
-    size_t end = s.find_last_not_of(" \t\r\n");
-    return (start == std::string::npos) ? "" : s.substr(start, end - start + 1);
-}
-
 // Helper function to decode a URL-encoded string.
-static std::string urlDecode(const std::string &src) {
+std::string urlDecode(const std::string &src) {
     std::string ret;
     for (size_t i = 0; i < src.length(); ++i) {
         if (src[i] == '%') {

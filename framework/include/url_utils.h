@@ -1,29 +1,27 @@
 #pragma once
 
-#include <unordered_map>
 #include <string>
+#include <unordered_map>
 #include <sstream>
 
-std::unordered_map<std::string, std::string> parseQuery(const std::string& query);
-std::unordered_map<std::string, std::string> parseUrlEncoded(const std::string& body);
+// Trim whitespace from the beginning and end of a string.
+inline std::string trim(const std::string& s) {
+    size_t start = s.find_first_not_of(" \t\r\n");
+    size_t end = s.find_last_not_of(" \t\r\n");
+    return (start == std::string::npos) ? "" : s.substr(start, end - start + 1);
+}
 
-inline std::string trim(const std::string& s);
+// Function to decode URL-encoded strings.
+std::string urlDecode(const std::string &src);
 
-// Function to decode URL-encoded strings
-// This function decodes percent-encoded characters (e.g., %20 for space) and replaces '+' with space
-//std::string decodeURIComponent(const std::string& str);
-
-std::string getClientIpFromSocket(int sock);
-
-inline std::string trim(const std::string& s);
-
-// Helper function to decode a URL-encoded string.
-static std::string urlDecode(const std::string &src);
-
+// Parse URL-encoded data into a key-value map.
 std::unordered_map<std::string, std::string> parseUrlEncoded(const std::string &data);
 
+// Alternative parse function if needed.
+std::unordered_map<std::string, std::string> parseQuery(const std::string& query);
 
-
+// Get client IP address from socket.
+std::string getClientIpFromSocket(int sock);
 
 
 

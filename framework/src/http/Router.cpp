@@ -222,7 +222,7 @@ bool Router::handleRequest(int client_socket, const char* method, const char* ur
         if (std::regex_match(uri_str, match, route_regex)) {
             std::vector<std::string> params; // Extract parameters from the match
             for (size_t i = 1; i < match.size(); ++i) {
-                params.push_back(decodeURIComponent(match[i].str())); // decodeURIComponent to handle URL-encoded values
+                params.push_back(urlDecode(match[i].str())); // decodeUrl to handle URL-encoded values
             }
             
             TRACE("Matched route: %s\n", route.path.c_str());
