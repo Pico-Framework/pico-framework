@@ -41,3 +41,8 @@ install_manifest.txt
 tests/node_modules/
 package-lock.json
 yarn.lock
+# === Doxgen generated documentation ===
+framework/docs/html/
+
+# === code counter ===
+.VSCodeCounter/

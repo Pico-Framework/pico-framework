@@ -49,11 +49,14 @@ target_sources(pico_framework
         src/http/HttpResponse.cpp
         src/http/HttpFileserver.cpp
         src/http/JwtAuthenticator.cpp
+        src/http/JsonRequestHelper.cpp # (not mandatory, e.g. auto name = JsonRequestHelper::getString(req, "user.name");)
+        # or if (JSON::hasField(req, "auth.token")) { ... } JSON is a macro for JsonRequestHelper
+        # Only if you want to use JSON request helper methods
         src/http/Middleware.cpp
         src/http/Router.cpp
         src/http/MultipartParser.cpp
         src/http/url_utils.cpp
-        src/network/TcpConnectionSocket.cpp
+        #src/network/TcpConnectionSocket.cpp abstraction coming to use your own layer (e.g. raw ethernet, lwip, etc.)
         src/network/Network.cpp 
         src/network/NtpClient.cpp
         src/events/EventManager.cpp
@@ -95,11 +98,13 @@ target_include_directories(pico_framework
         ${CMAKE_CURRENT_SOURCE_DIR}/lib/FreeRTOS-FAT-CLI-for-RPi-Pico/src/Lab-Project-FreeRTOS-FAT/include
 )
 
+target_compile_options(pico_framework PRIVATE -Wno-psabi)
+
 # Ignore warnings from lwip code
 set_source_files_properties(
         ${PICO_LWIP_PATH}/src/apps/altcp_tls/altcp_tls_mbedtls.c
         PROPERTIES
-        COMPILE_OPTIONS "-Wno-unused-result"
+        COMPILE_OPTIONS "-Wno-unused-result" 
         )
 
 # These are needed to avoid warnings from the FreeRTOS+FAT code

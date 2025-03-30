@@ -1,6 +1,11 @@
 /**
  * @file HttpServer.cpp
+ * @author Ian Archbell
  * @brief HTTP Server implementation with per-client task handling.
+ * @version 0.1
+ * @date 2025-03-26
+ * 
+ * @license MIT License
  * 
  * This version spawns a new FreeRTOS task for each accepted client.
  */
@@ -9,80 +14,101 @@
  #include <lwip/sockets.h>
  #include <lwip/netif.h>
  #include <lwip/ip4_addr.h>
- #include "lwip/stats.h"      // Required for memp_stats
- #include "lwip/memp.h"       // Ensure lwIP memory pools are accessible
+ #include "lwip/stats.h"
+ #include "lwip/memp.h"
  #include "lwip/tcp.h"
  
- #include <cstring>   // memcpy, strcmp, etc.
- #include <cstdio>    // printf
- #include <cstdlib>   // for NULL
+ #include <cstring>
+ #include <cstdio>
+ #include <cstdlib>
  #include "FreeRTOS.h"
  #include "task.h"
  #include "utility.h"
  #include "url_utils.h"
- #include "TcpConnectionSocket.h"
+ //#include "TcpConnectionSocket.h"
  
  #define __FILENAME__ (strrchr(__FILE__, '/') ? strrchr(__FILE__, '/') + 1 : __FILE__)
  
  #ifdef TRACE_ON
      #define TRACE(format, ...) printf(format, ##__VA_ARGS__)
  #else
-     #define TRACE(format, ...) /* do nothing */
+     #define TRACE(format, ...) /* no-op */
  #endif
  
- #define BUFFER_SIZE 1024  // Adjust the buffer size based on expected data
+ #define BUFFER_SIZE 1024
  
- // Static task buffer and stack for the main server task
- StackType_t HttpServer::xStack[ HTTP_STACK_SIZE ];
- StaticTask_t HttpServer::xTaskBuffer; 
+ StackType_t HttpServer::xStack[HTTP_STACK_SIZE];
+ StaticTask_t HttpServer::xTaskBuffer;
  
- // Structure to hold parameters for client tasks
+// ----------------------------------------------------------------------------
+// Task Context Struct
+// ----------------------------------------------------------------------------
+
+/**
+ * @brief Parameters passed to the per-client handler task.
+ */
  struct TaskParams {
-     HttpServer* server;   // Pointer to the HttpServer instance
-     int clientSocket;     // The client socket
- };
-
- // HttpServer constructor
-HttpServer::HttpServer(int port, Router& router)
-: port(port), router(router) {
-
+    HttpServer* server;   // Pointer to the HttpServer instance
+    int clientSocket;     // The client socket
 };
+
+
+ // ----------------------------------------------------------------------------
+ // Constructor and Task Entry
+ // ----------------------------------------------------------------------------
  
- bool HttpServer::start() {
+ /// @copydoc HttpServer::HttpServer
+ HttpServer::HttpServer(int port, Router& router)
+     : port(port), router(router)
+ {
+ }
+ 
+ /// @copydoc HttpServer::start
+ bool HttpServer::start()
+ {
      return xTaskCreateStatic(startServerTask, "HttpServer", HTTP_STACK_SIZE, this, TaskPrio_Mid, xStack, &xTaskBuffer);
  }
  
- void HttpServer::startServerTask(void* pvParameters) {
+ /// @copydoc HttpServer::startServerTask
+ void HttpServer::startServerTask(void* pvParameters)
+ {
      HttpServer* server = static_cast<HttpServer*>(pvParameters);
-     server->run();  // Run the server logic (includes the accept loop)
-     vTaskDelete(NULL); // Delete the task when done
+     server->run();
+     vTaskDelete(NULL);
  }
  
- void HttpServer::run() {
+ // ----------------------------------------------------------------------------
+ // Server Core
+ // ----------------------------------------------------------------------------
+ 
+ /// @copydoc HttpServer::run
+ void HttpServer::run()
+ {
      printf("Starting HTTP Server...\n");
  
      if (!initNetwork()) {
-         return;  // Network initialization failed
+         return;
      }
  
      sock = initServerSocket();
      if (sock < 0) {
-         return;  // Socket initialization failed
+         return;
      }
  
-     // Start accepting client connections asynchronously
      acceptClientConnections();
  }
  
- bool HttpServer::initNetwork() {
+ /// @copydoc HttpServer::initNetwork
+ bool HttpServer::initNetwork()
+ {
      struct netif* netif;
+ 
      TRACE("Waiting for DHCP lease...\n");
  
-     // Wait until a network interface gets an IP address assigned via DHCP
      while (true) {
-         netif = netif_list; // Get the first network interface
+         netif = netif_list;
          if (netif && netif->ip_addr.addr != 0) {
-             break;  // IP address assigned
+             break;
          }
          vTaskDelay(pdMS_TO_TICKS(100));
      }
@@ -91,7 +117,9 @@ HttpServer::HttpServer(int port, Router& router)
      return true;
  }
  
- int HttpServer::initServerSocket() {
+ /// @copydoc HttpServer::initServerSocket
+ int HttpServer::initServerSocket()
+ {
      int s = lwip_socket(AF_INET, SOCK_STREAM, 0);
      if (s < 0) {
          printf("Error creating socket\n");
@@ -119,7 +147,13 @@ HttpServer::HttpServer(int port, Router& router)
      return s;
  }
  
- void HttpServer::acceptClientConnections() {
+ // ----------------------------------------------------------------------------
+ // Connection Handling
+ // ----------------------------------------------------------------------------
+ 
+ /// @copydoc HttpServer::acceptClientConnections
+ void HttpServer::acceptClientConnections()
+ {
      struct sockaddr_in clientAddr;
      socklen_t clientAddrLen = sizeof(clientAddr);
  
@@ -129,7 +163,7 @@ HttpServer::HttpServer(int port, Router& router)
          int clientSocket = lwip_accept(sock, (struct sockaddr*)&clientAddr, &clientAddrLen);
          if (clientSocket < 0) {
              printf("lwip_accept failed, error: %d\n", errno);
-             vTaskDelay(pdMS_TO_TICKS(1000));  // Delay before retrying
+             vTaskDelay(pdMS_TO_TICKS(1000));
              continue;
          }
  
@@ -138,29 +172,30 @@ HttpServer::HttpServer(int port, Router& router)
      }
  }
  
- void HttpServer::startHandlingClient(int clientSocket) {
-     // Allocate a TaskParams structure for the new client task
+ /// @copydoc HttpServer::startHandlingClient
+ void HttpServer::startHandlingClient(int clientSocket)
+ {
      TaskParams* params = new TaskParams{this, clientSocket};
  
-     // Create a new FreeRTOS task to handle the client
      if (xTaskCreate(handleClientTask, "HttpClient", 4096, params, tskIDLE_PRIORITY + 1, NULL) == pdPASS) {
-          printf("Client task created successfully for socket %d\n", clientSocket);
+         printf("Client task created successfully for socket %d\n", clientSocket);
      } else {
-          printf("Failed to create client task for socket %d\n", clientSocket);
-          lwip_close(clientSocket);
-          delete params;
+         printf("Failed to create client task for socket %d\n", clientSocket);
+         lwip_close(clientSocket);
+         delete params;
      }
  }
  
- void HttpServer::handleClient(int clientSocket) {
-     // Process the HTTP request using your existing logic
- 
+ /// @copydoc HttpServer::handleClient
+ void HttpServer::handleClient(int clientSocket)
+ {
      if (clientSocket < 0) {
          printf("Invalid client socket detected in handleClient: %d\n", clientSocket);
          return;
      }
+ 
      printf("Handling client socket: %d\n", clientSocket);
-     
+ 
      Request req = Request::receive(clientSocket);
      std::string clientIp = getClientIpFromSocket(clientSocket);
      req.setClientIp(clientIp);
@@ -179,48 +214,49 @@ HttpServer::HttpServer(int port, Router& router)
  
      for (const auto& param : req.getQueryParams()) {
          std::cout << param.first << ": " << param.second << std::endl;
-     }   
-     
+     }
+ 
      for (const auto& param : req.getFormParams()) {
          std::cout << param.first << ": " << param.second << std::endl;
      }
-     
+ 
      for (const auto& cookie : req.getCookies()) {
          std::cout << cookie.first << ": " << cookie.second << std::endl;
      }
-     
+ 
      if (req.getContentLength() > 0) {
          std::cout << "Request body length: " << req.getBody().length() << std::endl;
          std::cout << "Request start of body index: " << req.getHeaderEnd() << std::endl;
      }
-     
+ 
      for (const auto& headr : req.getHeaders()) {
          std::cout << headr.first << ": " << headr.second << std::endl;
      }
+ 
      std::cout << "Request body: " << req.getBody() << std::endl;
  
      printf("\n===== HTTP CLIENT REQUEST =====\n");
      printf("Client request received: %s, path: %s\n", req.getMethod().c_str(), req.getPath().c_str());
      printf("Request body: %s\n", req.getBody().c_str());
  
-     // Forward the request to the router for handling
      bool ok = router.handleRequest(clientSocket, req.getMethod().c_str(), req.getPath().c_str(), req);
      printf("Request handled: %s\n", ok ? "true" : "false");
  
      if (!ok) {
-         // If the router did not handle the request, send a 404 response
          const char* notFound =
              "HTTP/1.1 404 Not Found\r\n"
              "Content-Type: text/html\r\n\r\n"
              "<h1>404 Not Found</h1>";
          lwip_send(clientSocket, notFound, strlen(notFound), 0);
      }
+ 
      TRACE("Free Heap: %d bytes\n", xPortGetFreeHeapSize());
      TRACE("Min Ever Free Heap: %d bytes\n", xPortGetMinimumEverFreeHeapSize());
  }
  
- // Static task function to handle each client connection in its own task
- void HttpServer::handleClientTask(void* pvParameters) {
+ /// @copydoc HttpServer::handleClientTask
+ void HttpServer::handleClientTask(void* pvParameters)
+ {
      TaskParams* params = static_cast<TaskParams*>(pvParameters);
      HttpServer* server = params->server;
      int clientSocket = params->clientSocket;
@@ -228,11 +264,10 @@ HttpServer::HttpServer(int port, Router& router)
      printf("Handling client in task for socket %d\n", clientSocket);
      server->handleClient(clientSocket);
  
-     // Shutdown and close the client socket after processing
      lwip_shutdown(clientSocket, SHUT_RDWR);
      lwip_close(clientSocket);
  
-     delete params;  // Clean up allocated parameters
+     delete params;
      printf("Client socket %d closed and task deleted\n", clientSocket);
      vTaskDelete(NULL);
  }

@@ -1,112 +1,222 @@
 /**
  * @file HttpResponse.h
  * @author Ian Archbell
- * @brief 
+ * @brief HTTP Response class for managing status, headers, body, and streaming support.
  * @version 0.1
  * @date 2025-03-26
  * 
- * @copyright Copyright (c) 2025
+ * @license MIT License
  * 
+ * This class provides methods for setting HTTP response metadata,
+ * sending body content, streaming chunks, and working with cookies.
+ * Designed for use in embedded HTTP servers.
  */
-#ifndef HTTPRESPONSE_H
-#define HTTPRESPONSE_H
 
-#include <string>
-#include <unordered_map>
-#include <map>
-#include <vector>
-
-class Response {
-    int sock;
-    int status_code = 200;
-    std::unordered_map<std::string, std::string> headers;
-    bool headerSent = false;  // track if we’ve sent the initial header
-
-    // Member variables for headers and other details
-    std::string content_length;  // Will be set when we know the content size
-    
-public:
-    explicit Response(int sock);
-    //explicit Response(TcpConnectionSocket& socket);
-    
-    // Chainable method to set the HTTP status code.
-    Response& status(int code);
-    Response& setStatus(int code); // alias
-
-    Response& setContentType(const std::string &content_type);  // Set the content type for the response
-    std::string getContentType() const {
-        auto it = headers.find("Content-Type");
-        if (it != headers.end()) {
-            return it->second;
-        }
-        return "text/html";  // Default content type
-    }   
-    
-    // Chainable method to set a header field.
-    Response& set(const std::string &field, const std::string &value);
-
-    Response& setAuthorization(const std::string &jwtToken);  // New method for JWT authorization   
-
-    Response& setCookie(const std::string& name, const std::string& value, const std::string& options);
-    Response& clearCookie(const std::string& name, const std::string& options);
-   
-    // Sends the response with the given body.
-    void send(const std::string &body);
-
-    // For streaming in chunks:
-    void start(int code, size_t contentLength, const std::string &contentType = "application/octet-stream");
-    void writeChunk(const char* data, size_t length);
-    void finish();
-
-    int getSocket() const;    // to retrieve the raw socket
-
-
-    Response& setHeader(const std::string& key, const std::string& value);  // Optional helper method to set custom headers
-
-    void sendHeaders();  // Helper to build & send initial headers once
-
-    Response& redirect(const std::string& url, int statusCode) {
-        status(statusCode);
-        set("Location", url);
-        send("");  // No body
-        return *this;
-    }
-
-    void sendNotFound() {
-        status(404)
-            .set("Content-Type", "application/json")
-            .send("{\"error\": \"Not Found\"}");
-    }
-    
-    void endServerError(const std::string& msg) {
-        status(500)
-            .set("Content-Type", "application/json")
-            .send("{\"error\": \"" + msg + "\"}");
-    }
-
-    bool isHeaderSent() const {
-        return headerSent;
-    }
-    
-    Response& json(const std::string& jsonString) {
-        set("Content-Type", "application/json");
-        send(jsonString);
-        return *this;
-    }
-    
-    Response& text(const std::string& textString) {
-        set("Content-Type", "text/plain");
-        send(textString);
-        return *this;
-    }
-
-    void sendUnauthorized();
-
-    std::string renderTemplate(const std::string& tpl, const std::map<std::string, std::string>& context);
-
-private:
-    std::string getStatusMessage(int code);
-    std::vector<std::string> cookies;
-};
-
-#endif // HTTPRESPONSE_HPP
+ #ifndef HTTPRESPONSE_H
+ #define HTTPRESPONSE_H
+ 
+ #include <string>
+ #include <unordered_map>
+ #include <map>
+ #include <vector>
+ 
+ /**
+  * @brief Represents an HTTP response object.
+  * 
+  * Used by the server to construct and send headers, content, and cookies
+  * in response to an incoming HTTP request.
+  */
+ class Response
+ {
+     int sock;
+     int status_code = 200;
+     std::unordered_map<std::string, std::string> headers;
+     bool headerSent = false;
+ 
+     std::string content_length;
+     std::vector<std::string> cookies;
+ 
+ public:
+     /**
+      * @brief Construct a new Response object with a socket.
+      * @param sock The socket file descriptor.
+      */
+     explicit Response(int sock);
+ 
+     // ------------------------------------------------------------------------
+     // Status and Header Management
+     // ------------------------------------------------------------------------
+ 
+     /**
+      * @brief Set the HTTP status code.
+      * @param code Status code (e.g., 200, 404).
+      * @return Reference to this Response object.
+      */
+     Response& status(int code);
+ 
+     /**
+      * @brief Alias for status().
+      */
+     Response& setStatus(int code);
+ 
+     /**
+      * @brief Set the Content-Type header.
+      * @param content_type MIME type string.
+      * @return Reference to this Response object.
+      */
+     Response& setContentType(const std::string &content_type);
+ 
+     /**
+      * @brief Get the current Content-Type header value.
+      * @return MIME type string.
+      */
+     std::string getContentType() const;
+ 
+     /**
+      * @brief Set a generic header field.
+      * @param field Header name.
+      * @param value Header value.
+      * @return Reference to this Response object.
+      */
+     Response& set(const std::string &field, const std::string &value);
+ 
+     /**
+      * @brief Alias for set() for custom headers.
+      */
+     Response& setHeader(const std::string& key, const std::string& value);
+ 
+     /**
+      * @brief Set an Authorization header with a JWT token.
+      * @param jwtToken The JWT string.
+      * @return Reference to this Response object.
+      */
+     Response& setAuthorization(const std::string &jwtToken);
+ 
+     /**
+      * @brief Check if the headers have already been sent.
+      * @return True if headers have been sent, false otherwise.
+      */
+     bool isHeaderSent() const;
+ 
+     // ------------------------------------------------------------------------
+     // Cookie Support
+     // ------------------------------------------------------------------------
+ 
+     /**
+      * @brief Set a cookie to be sent with the response.
+      * @param name Cookie name.
+      * @param value Cookie value.
+      * @param options Additional options (e.g., Path, HttpOnly).
+      * @return Reference to this Response object.
+      */
+     Response& setCookie(const std::string& name, const std::string& value, const std::string& options);
+ 
+     /**
+      * @brief Clear a cookie by setting Max-Age=0.
+      * @param name Cookie name.
+      * @param options Optional options to include in the Set-Cookie header.
+      * @return Reference to this Response object.
+      */
+     Response& clearCookie(const std::string& name, const std::string& options);
+ 
+     // ------------------------------------------------------------------------
+     // Body and Streaming
+     // ------------------------------------------------------------------------
+ 
+     /**
+      * @brief Send a full response including headers and body.
+      * @param body Response body as a string.
+      */
+     void send(const std::string &body);
+ 
+     /**
+      * @brief Send only the headers (for chunked/streaming responses).
+      */
+     void sendHeaders();
+ 
+     /**
+      * @brief Begin a streaming response by sending headers.
+      * @param code HTTP status code.
+      * @param contentLength Total length of body.
+      * @param contentType MIME type.
+      */
+     void start(int code, size_t contentLength, const std::string &contentType = "application/octet-stream");
+ 
+     /**
+      * @brief Send a chunk of the response body.
+      * @param data Pointer to data buffer.
+      * @param length Size of the data.
+      */
+     void writeChunk(const char* data, size_t length);
+ 
+     /**
+      * @brief Finish the response (placeholder for potential finalization).
+      */
+     void finish();
+ 
+     // ------------------------------------------------------------------------
+     // Common Helpers
+     // ------------------------------------------------------------------------
+ 
+     /**
+      * @brief Return the raw socket descriptor.
+      */
+     int getSocket() const;
+ 
+     /**
+      * @brief Send a 401 Unauthorized JSON response.
+      */
+     void sendUnauthorized();
+ 
+     /**
+      * @brief Send a 404 Not Found JSON response.
+      */
+     void sendNotFound();
+ 
+     /**
+      * @brief Send a 500 Internal Server Error response.
+      * @param msg Error message to include.
+      */
+     void endServerError(const std::string& msg);
+ 
+     /**
+      * @brief Send a JSON string with correct content type.
+      * @param jsonString Valid JSON content.
+      * @return Reference to this Response object.
+      */
+     Response& json(const std::string& jsonString);
+ 
+     /**
+      * @brief Send a plain text string with correct content type.
+      * @param textString Text content.
+      * @return Reference to this Response object.
+      */
+     Response& text(const std::string& textString);
+ 
+     /**
+      * @brief Redirect the client to another URL.
+      * @param url Target URL.
+      * @param statusCode HTTP status code (e.g. 302).
+      * @return Reference to this Response object.
+      */
+     Response& redirect(const std::string& url, int statusCode);
+ 
+     /**
+      * @brief Apply basic variable substitution in a template.
+      * @param tpl Input template with {{placeholders}}.
+      * @param context Key-value map for substitution.
+      * @return Final rendered template string.
+      */
+     std::string renderTemplate(const std::string& tpl, const std::map<std::string, std::string>& context);
+ 
+ private:
+     /**
+      * @brief Convert an HTTP status code to its standard message.
+      * @param code HTTP status code.
+      * @return Corresponding message (e.g., "OK").
+      */
+     std::string getStatusMessage(int code);
+ };
+ 
+ #endif // HTTPRESPONSE_H
+ 

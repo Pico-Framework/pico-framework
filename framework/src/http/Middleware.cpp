@@ -17,16 +17,16 @@ Middleware authMiddleware = [](Request &req, Response &res, const std::vector<st
     std::string token = req.getHeader("Authorization");
     if (token.empty() || token.find("Bearer ") != 0) {
         res.setStatus(401).send("{\"error\":\"Unauthorized\"}");
-        return false;  // 🚨 Block unauthorized requests
+        return false;  // Block unauthorized requests
     }
 
     token = token.substr(7);
     if (!Authenticator::getInstance().validateJWT(token)) {
         res.status(401).send("{\"error\":\"Invalid token\"}");
-        return false;  // 🚨 Block invalid tokens
+        return false;  // Block invalid tokens
     }
 
-    return true;  // ✅ Let request proceed if authorized
+    return true;  // Let request proceed if authorized
 };
 
 

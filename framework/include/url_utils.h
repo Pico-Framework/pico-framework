@@ -17,12 +17,8 @@ std::string urlDecode(const std::string &src);
 // Parse URL-encoded data into a key-value map.
 std::unordered_map<std::string, std::string> parseUrlEncoded(const std::string &data);
 
-// Alternative parse function if needed.
-std::unordered_map<std::string, std::string> parseQuery(const std::string& query);
-
 // Get client IP address from socket.
 std::string getClientIpFromSocket(int sock);
 
-
-
-
+std::string getMimeType(const std::string& filePath);
+ 

@@ -2,7 +2,7 @@
 
 #include <time.h>
 #include <string>
-#include "DS3231.h"
+//#include "DS3231.h" support coming soon
 #include "hardware/rtc.h"
 
 #pragma once
