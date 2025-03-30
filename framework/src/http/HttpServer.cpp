@@ -23,6 +23,7 @@
  #include <cstdlib>
  #include "FreeRTOS.h"
  #include "task.h"
+ #include "semphr.h"
  #include "utility.h"
  #include "url_utils.h"
  //#include "TcpConnectionSocket.h"
@@ -36,6 +37,9 @@
  #endif
  
  #define BUFFER_SIZE 1024
+
+static constexpr int MAX_CONCURRENT_CLIENTS = 1;
+SemaphoreHandle_t clientSemaphore;
  
  StackType_t HttpServer::xStack[HTTP_STACK_SIZE];
  StaticTask_t HttpServer::xTaskBuffer;
@@ -66,7 +70,8 @@
  /// @copydoc HttpServer::start
  bool HttpServer::start()
  {
-     return xTaskCreateStatic(startServerTask, "HttpServer", HTTP_STACK_SIZE, this, TaskPrio_Mid, xStack, &xTaskBuffer);
+    clientSemaphore = xSemaphoreCreateCounting(MAX_CONCURRENT_CLIENTS, MAX_CONCURRENT_CLIENTS);    
+    return xTaskCreateStatic(startServerTask, "HttpServer", HTTP_STACK_SIZE, this, TaskPrio_Mid, xStack, &xTaskBuffer);
  }
  
  /// @copydoc HttpServer::startServerTask
@@ -175,15 +180,25 @@
  /// @copydoc HttpServer::startHandlingClient
  void HttpServer::startHandlingClient(int clientSocket)
  {
-     TaskParams* params = new TaskParams{this, clientSocket};
- 
-     if (xTaskCreate(handleClientTask, "HttpClient", 4096, params, tskIDLE_PRIORITY + 1, NULL) == pdPASS) {
-         printf("Client task created successfully for socket %d\n", clientSocket);
-     } else {
-         printf("Failed to create client task for socket %d\n", clientSocket);
-         lwip_close(clientSocket);
-         delete params;
-     }
+    if (xSemaphoreTake(clientSemaphore, pdMS_TO_TICKS(100)) == pdPASS)
+    {
+        TaskParams* params = new TaskParams{this, clientSocket};
+    
+        if (xTaskCreate(handleClientTask, "HttpClient", 4096, params, tskIDLE_PRIORITY + 1, NULL) == pdPASS) {
+            printf("Client task created successfully for socket %d\n", clientSocket);
+        } else {
+            printf("Failed to create client task for socket %d\n", clientSocket);
+            lwip_close(clientSocket);
+            delete params;
+        }
+    }
+    else
+    {
+        printf("Max concurrent clients reached, closing socket %d\n", clientSocket);
+        lwip_close(clientSocket);
+        // Optionally, you could send a response to the client indicating the server is busy.
+        // semaphore will be released in handleClientTask
+    }
  }
  
  /// @copydoc HttpServer::handleClient
@@ -264,11 +279,11 @@
      printf("Handling client in task for socket %d\n", clientSocket);
      server->handleClient(clientSocket);
  
-     lwip_shutdown(clientSocket, SHUT_RDWR);
      lwip_close(clientSocket);
  
      delete params;
      printf("Client socket %d closed and task deleted\n", clientSocket);
+     xSemaphoreGive(clientSemaphore); // Release the semaphore for the next client
      vTaskDelete(NULL);
  }
  
