@@ -18,6 +18,7 @@ enum class FrameworkNotification : uint8_t {
     RunProgram        = 18,
     ZoneEndTime       = 19,
     ProgramStartTime  = 20,
+    TimerTick         = 21,
 };
 
 // Helper for bitmask subscription
