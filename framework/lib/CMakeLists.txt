@@ -12,10 +12,20 @@ endif()
 
 # Optional override: path to FreeRTOS-FAT-CLI-for-RPi-Pico (default assumes standard layout)
 if(NOT DEFINED FAT_CLI_PATH)
-#external projects
-    #set(FAT_CLI_PATH ${CMAKE_SOURCE_DIR}/lib/pico-framework/framework/lib/FreeRTOS-FAT-CLI-for-RPi-Pico)
-    set(FAT_CLI_PATH ${CMAKE_SOURCE_DIR}/framework/lib/FreeRTOS-FAT-CLI-for-RPi-Pico)
+
+    if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/lib/FreeRTOS-FAT-CLI-for-RPi-Pico")
+        set(FAT_CLI_PATH "${CMAKE_CURRENT_SOURCE_DIR}/lib/FreeRTOS-FAT-CLI-for-RPi-Pico")
+
+    elseif(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/../lib/FreeRTOS-FAT-CLI-for-RPi-Pico")
+        set(FAT_CLI_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../lib/FreeRTOS-FAT-CLI-for-RPi-Pico")
+
+    else()
+        message(FATAL_ERROR "Could not locate FreeRTOS-FAT-CLI-for-RPi-Pico.
+Set FAT_CLI_PATH manually or check your submodule path.")
+    endif()
+
 endif()
+
 
 message(STATUS "[FAT+CLI] FAT_CLI_PATH = ${FAT_CLI_PATH}")
 message(STATUS "[FAT+CLI] FREERTOS_KERNEL_PATH = ${FREERTOS_KERNEL_PATH}")
