@@ -93,3 +93,5 @@ target_link_libraries(FreeRTOS+FAT+CLI PUBLIC
     pico_stdlib
     pico_sync
 )
+
+add_compile_options(-Wno-psabi)
