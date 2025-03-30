@@ -15,5 +15,16 @@ inline std::string trim(const std::string& s);
 
 std::string getClientIpFromSocket(int sock);
 
+inline std::string trim(const std::string& s);
+
+// Helper function to decode a URL-encoded string.
+static std::string urlDecode(const std::string &src);
+
+std::unordered_map<std::string, std::string> parseUrlEncoded(const std::string &data);
+
+
+
+
+
 
 
