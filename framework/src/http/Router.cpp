@@ -25,9 +25,8 @@
  * @copyright Copyright (c) 2025, Ian Archbell
  */
 
-#define TRACE_MODULE "ROUTER"
-#define TRACE_ENABLED true
 #include "DebugTrace.h"
+TRACE_INIT(Router)
 
  #include "Router.h"
  #include "HttpRequest.h"

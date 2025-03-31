@@ -13,9 +13,8 @@
  * @copyright Copyright (c) 2025, Ian Archbell
  */
 
- #define TRACE_MODULE "NET"
- #define TRACE_ENABLED false
  #include "DebugTrace.h"
+ TRACE_INIT(NtpClient)
 
  #include "NtpClient.h"
  #include "Network.h"

@@ -18,7 +18,9 @@
  #include "DebugTrace.h"
  #include "FrameworkManager.h"
  #include "FrameworkApp.h"
+ #include "AppContext.h"
  #include <iostream>
+ #include "framework_config.h"
  
  /// @copydoc FrameworkManager::xNetworkTaskBuffer
  StaticTask_t FrameworkManager::xNetworkTaskBuffer;
@@ -76,7 +78,7 @@
 /// @copydoc FrameworkManager::setupTraceFromConfig
  void FrameworkManager::setupTraceFromConfig() {
     #if TRACE_USE_SD
-        setTraceOutputToFile(AppContext::storage(), TRACE_LOG_PATH);
+        setTraceOutputToFile(AppContext::getFatFsStorage(), TRACE_LOG_PATH);
     #else
         setTraceOutputToFile(nullptr, "");
     #endif

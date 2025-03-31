@@ -13,6 +13,9 @@
  * @copyright Copyright (c) 2025, Ian Archbell
  */
 
+ #include "DebugTrace.h"
+ TRACE_INIT(JsonService)
+
  #include "JsonService.h"
  #include <cstdio>
  #include <cstdint>

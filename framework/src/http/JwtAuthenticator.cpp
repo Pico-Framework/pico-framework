@@ -16,9 +16,8 @@
  * @copyright Copyright (c) 2025, Ian Archbell
  */
 
- #define TRACE_MODULE "HTTP"
- #define TRACE_ENABLED false
  #include "DebugTrace.h" 
+ TRACE_INIT(JwtAuthenticator) 
 
  #include "JwtAuthenticator.h"
 

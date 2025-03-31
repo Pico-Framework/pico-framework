@@ -17,9 +17,8 @@
  * 
  */
 
- #define TRACE_MODULE "HTTP"
- #define TRACE_ENABLED false
  #include "DebugTrace.h" 
+ TRACE_INIT(HttpServer) 
 
  #include "HttpServer.h" 
  #include <lwip/sockets.h>

@@ -14,9 +14,8 @@
  * @copyright Copyright (c) 2025, Ian Archbell
  */
 
- #define TRACE_MODULE "NET"
- #define TRACE_ENABLED false
- #include "DebugTrace.h" 
+ #include "DebugTrace.h"
+ TRACE_INIT(Network)
 
 #include "Network.h"
 #include <pico/cyw43_arch.h>

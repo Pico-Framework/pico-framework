@@ -14,6 +14,9 @@
  * @copyright Copyright (c) 2025, Ian Archbell
  */
 
+ #include "DebugTrace.h"
+ TRACE_INIT(FatFsStorageManager)
+
  #include "FatFsStorageManager.h"
  #include <ff_utils.h>
  #include <ff_stdio.h>
