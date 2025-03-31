@@ -17,11 +17,10 @@
 // This file contains various configuration settings for the framework.
 #define STREAM_SEND_DELAY_MS 20
 
-// === Per-module enable flags ===
-#define TRACE_NET     1
-#define TRACE_HTTP    0
-#define TRACE_AUTH    1
-#define TRACE_APP     1
+// === Debug Trace Configuration ===
+
+#define TRACE_ENABLED     1               ///< Set to 0 to disable all tracing
+#define TRACE_USE_SD      1          ///< Set to 1 to use SD card for trace output, 0 for UART
 
 // === Global minimum log level (for all modules) ===
 // Options: 0 = INFO, 1 = WARN, 2 = ERROR
