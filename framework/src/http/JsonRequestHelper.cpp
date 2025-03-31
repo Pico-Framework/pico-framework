@@ -2,11 +2,22 @@
  * @file JsonRequestHelper.cpp
  * @author Ian Archbell
  * @brief Implementation of helper functions to extract fields from JSON request bodies.
+ * 
+ * Part of the PicoFramework HTTP server.
+ * This module provides functions to retrieve various data types (string, int, double, bool)
+ * from JSON request bodies. It also includes methods to check for the presence of fields
+ * and retrieve JSON arrays or objects.
+ * 
  * @version 0.1
  * @date 2025-03-26
  * 
  * @license MIT License
+ * @copyright Copyright (c) 2025, Ian Archbell
  */
+
+ #define TRACE_MODULE "HTTP"
+ #define TRACE_ENABLED false
+ #include "DebugTrace.h" 
 
  #include "JsonRequestHelper.h"
  #include "HttpRequest.h"

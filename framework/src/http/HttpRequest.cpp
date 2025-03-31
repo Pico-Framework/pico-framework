@@ -2,13 +2,22 @@
  * @file HttpRequest.cpp
  * @author Ian Archbell
  * @brief Implementation of the Request class for parsing HTTP requests.
+ * 
+ * Part of the PicoFramework HTTP server.
+ * This module handles parsing the HTTP request line, headers, and body.
+ * It also provides methods to access request parameters, cookies, and multipart data.
+ * It uses the MultipartParser for handling multipart/form-data requests.
+ * 
  * @version 0.1
  * @date 2025-03-26
  * 
  * @license MIT License
- * 
- * @copyright Copyright (c) 2025
+ * @copyright Copyright (c) 2025, Ian Archbell
  */
+
+ #define TRACE_MODULE "HTTP"
+ #define TRACE_ENABLED false
+ #include "DebugTrace.h" 
 
  #include "HttpRequest.h"
  #include <sstream>

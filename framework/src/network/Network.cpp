@@ -1,29 +1,27 @@
 /**
- * @file Network.cpp
+ * @file Network.h
  * @author Ian Archbell
- * @brief 
+ * @brief Manages Wi-Fi initialization, connection status, and power management for Pico W.
+ *
+ * Part of the PicoFramework application framework.
+ * Provides a static interface for connecting to Wi-Fi in station mode using the CYW43 driver.
+ * Uses FreeRTOS for async control and polling during link setup. Integrates with the lwIP network stack.
+ * 
  * @version 0.1
  * @date 2025-03-26
  * 
- * @copyright Copyright (c) 2025
- * 
+ * @license MIT License
+ * @copyright Copyright (c) 2025, Ian Archbell
  */
-#include <pico/cyw43_arch.h>
 
-#include <lwip/ip4_addr.h>
-
-//#include "http_server.hpp"
-#include "lwip/tcpip.h"
-
-
-/**
- * FreeRTOS includes
-*/
-#include <FreeRTOS.h>
-#include <task.h>
-#include <timers.h>
+ #define TRACE_MODULE "NET"
+ #define TRACE_ENABLED false
+ #include "DebugTrace.h" 
 
 #include "Network.h"
+#include <pico/cyw43_arch.h>
+#include <FreeRTOS.h>
+#include <task.h>
 
 /**
  * 
@@ -34,7 +32,15 @@
 
 #include "pico/version.h"
 
+/// @brief  @copydoc Network::wifiConnected
 bool Network::wifiConnected = false;
+
+
+/// @copydoc Network::start_wifi
+//  @note This function will block until the Wi-Fi connection is established.
+//  @note Make sure to include the necessary headers and define WIFI_SSID and WIFI_PASSWORD
+//  in your build environment. For security, it is best defined in your evironment and 
+//  not hardcoded in the source code.
 
 void Network::start_wifi(){
     if (cyw43_arch_init()) {
@@ -66,14 +72,26 @@ void Network::start_wifi(){
     cyw43_wifi_pm(&cyw43_state, pm); // reset power management
 }
 
+/// @copydoc Network::isConnected
+//  @note This function checks the connection status of the Wi-Fi interface.
+//  It returns true if the device is connected to a Wi-Fi network, and false otherwise.
 bool Network::isConnected() {
     return wifiConnected;
 }
 
+/// @copydoc Network::wifi_deinit
 void Network::wifi_deinit(){
     cyw43_arch_deinit();
 }
 
+/// @copydoc Network::getLinkStatus
+//  @note This function retrieves the current link status of the Wi-Fi interface.
+//  It returns an integer representing the link status, which can be one of the following:
+//  - CYW43_LINK_UP: The link is up and connected to a network.
+//  - CYW43_LINK_NOIP: The link is up but no IP address has been acquired.
+//  - CYW43_LINK_JOIN: The device is in the process of joining a network.
+//  - CYW43_LINK_DOWN: The link is down and not connected to any network.
+//  @note The function prints the current link status to the console for debugging purposes.
 int Network::getLinkStatus(){
 
     int status = cyw43_tcpip_link_status( &cyw43_state,  CYW43_ITF_STA);  

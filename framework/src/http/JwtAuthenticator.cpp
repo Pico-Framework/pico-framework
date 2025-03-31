@@ -2,12 +2,23 @@
  * @file JwtAuthenticator.cpp
  * @author Ian Archbell
  * @brief Implementation of Authenticator for JWT creation and validation.
+ * 
+ * Part of the PicoFramework HTTP server.   
+ * This module handles generating JSON Web Tokens (JWT) using HMAC SHA-256
+ * for authentication purposes. It includes methods for encoding and decoding
+ * JWTs, as well as verifying their integrity and authenticity.
+ * It uses the mbedTLS library for cryptographic operations.
+ * 
  * @version 0.1
  * @date 2025-03-26
  * 
  * @license MIT License
- * 
+ * @copyright Copyright (c) 2025, Ian Archbell
  */
+
+ #define TRACE_MODULE "HTTP"
+ #define TRACE_ENABLED false
+ #include "DebugTrace.h" 
 
  #include "JwtAuthenticator.h"
 

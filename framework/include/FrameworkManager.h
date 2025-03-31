@@ -1,47 +1,89 @@
 /**
  * @file FrameworkManager.h
  * @author Ian Archbell
- * @brief 
+ * @brief Orchestrates application startup and network initialization.
+ * 
+ * The FrameworkManager is responsible for starting core tasks like networking,
+ * waiting for connectivity, and notifying the application when it's ready to run.
+ * 
+ * Designed to run early in the system lifecycle, it launches a static FreeRTOS task
+ * for network bring-up and optionally for application initialization.
+ * 
  * @version 0.1
  * @date 2025-03-26
- * 
- * @copyright Copyright (c) 2025
- * 
+ * @license MIT License
+ * @copyright Copyright (c) 2025, Ian Archbell
  */
-#ifndef FRAMEWORK_MANAGER_H
-#define FRAMEWORK_MANAGER_H
-#pragma once
 
-#include "FrameworkApp.h"
-#include "FreeRTOS.h"
-#include "task.h"
-
-#include "Network.h"
-#include "NtpClient.h"
-
-#define NETWORK_STACK_SIZE 1024
-#define APPLICATION_STACK_SIZE 1024
-
-class FrameworkManager {
-public:
-    FrameworkManager(FrameworkApp* app);
-    void start();
-
-private:
-    FrameworkApp* app;
-    TaskHandle_t networkTaskHandle;
-    TaskHandle_t applicationTaskHandle;
-
-    Network network;
-    NTPClient ntpClient;
-
-    static StaticTask_t xApplicationTaskBuffer;   
-    static StaticTask_t xNetworkTaskBuffer;
-    static StackType_t xNetworkStack[NETWORK_STACK_SIZE];
-    static StackType_t xApplicationStack[APPLICATION_STACK_SIZE];
-
-    static void network_task(void* params);
-    static void app_task(void* params);
+ #ifndef FRAMEWORK_MANAGER_H
+ #define FRAMEWORK_MANAGER_H
+ #pragma once
+ 
+ #include "FrameworkApp.h"
+ #include "FreeRTOS.h"
+ #include "task.h"
+ #include "Network.h"
+ #include "NtpClient.h"
+ 
+ #define NETWORK_STACK_SIZE 1024
+ #define APPLICATION_STACK_SIZE 1024
+ 
+ /**
+  * @brief Starts and coordinates core system services like networking and time sync.
+  * 
+  * Responsible for launching the network task, waiting for connection, and notifying
+  * the application via `FrameworkNotification::NetworkReady`.
+  */
+ class FrameworkManager {
+ public:
+     /**
+      * @brief Constructor.
+      * 
+      * @param app Pointer to the application, which will be notified when the network is ready.
+      */
+     FrameworkManager(FrameworkApp* app);
+ 
+     /**
+      * @brief Starts the framework by launching the network task.
+      */
+     void start();
+ 
+ private:
+     FrameworkApp* app;                  ///< Pointer to the application task
+     TaskHandle_t networkTaskHandle;     ///< Handle for the network task
+     TaskHandle_t applicationTaskHandle; ///< (Unused) optional handle for app task
+ 
+     Network network;        ///< Network management
+     NTPClient ntpClient;    ///< NTP time sync client
+ 
+     // Static task allocation buffers
+     static StaticTask_t xApplicationTaskBuffer;
+     static StaticTask_t xNetworkTaskBuffer;
+     static StackType_t xNetworkStack[NETWORK_STACK_SIZE];
+     static StackType_t xApplicationStack[APPLICATION_STACK_SIZE];
+ 
+     /**
+      * @brief Task function for network initialization.
+      * 
+      * Connects to WiFi and notifies the application once ready.
+      */
+     static void network_task(void* params);
+ 
+     /**
+      * @brief Placeholder for an application-level task, if used.
+      */
+     static void app_task(void* params);
+ 
+    /**
+      * @brief Sets up debug tracing from configuration.
+      * 
+      * Uses framework_config to set up tracing options, including file output if enabled.
+      * This function should be called after the framework is initialized and
+      * before any trace calls are made.
+      * 
+      */
+    void setupTraceFromConfig();
 };
-
-#endif
+ 
+ #endif // FRAMEWORK_MANAGER_H
+ 

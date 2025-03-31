@@ -1,219 +1,162 @@
 /**
  * @file utility.cpp
  * @author Ian Archbell
- * @brief 
+ * @brief Implementation of diagnostics and utility functions for memory, stack, and lwIP state.
+ *
+ * Provides runtime tools for embedded system visibility including FreeRTOS and lwIP stats,
+ * memory usage, and debug trace control.
+ *
  * @version 0.1
  * @date 2025-03-26
- * 
- * @copyright Copyright (c) 2025
- * 
+ * @license MIT License
+ * @copyright Copyright (c) 2025, Ian Archbell
  */
 
-#include "utility.h" 
-#include "FreeRTOS.h"
-#include "task.h"
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <string>
-#include <algorithm>
-
-#ifndef UNIT_TEST
-#include "lwip/memp.h"
-#endif
-#include "lwip/stats.h"
-#include "lwip/pbuf.h"
-#include "lwip/sockets.h"
-#include "lwip/ip_addr.h"
-
-#include <sstream>
-
-// Function to print stack sizes of all tasks
-void printTaskStackSizes() {
-    TRACE("Task Stack Sizes:\n");
-
-    // Get the list of all tasks in the system
-    TaskStatus_t *pxTaskStatusArray;
-    UBaseType_t uxTaskCount;
-    uxTaskCount = uxTaskGetNumberOfTasks();
-    
-    // Allocate space to hold task status information
-    pxTaskStatusArray = (TaskStatus_t*)pvPortMalloc(uxTaskCount * sizeof(TaskStatus_t));
-
-    if (pxTaskStatusArray != NULL) {
-        // Get task status information
-        uxTaskGetSystemState(pxTaskStatusArray, uxTaskCount, NULL);
-
-        // Iterate over each task and print stack usage
-        for (UBaseType_t i = 0; i < uxTaskCount; i++) {
-            TRACE("Task %s: Stack high watermark: %u bytes\n",
-                pxTaskStatusArray[i].pcTaskName,
-                pxTaskStatusArray[i].usStackHighWaterMark);
-        }
-
-        // Free the allocated memory
-        vPortFree(pxTaskStatusArray);
-    } else {
-        TRACE("Failed to allocate memory for task status array.\n");
-    }
-}
-
-void logSystemStats() {
-    printf("\n===== SYSTEM STATS =====\n");
-    printf("Free heap size: %zu bytes\n", xPortGetFreeHeapSize());
-    printf("Minimum ever free heap: %zu bytes\n", xPortGetMinimumEverFreeHeapSize());
-
-    printf("Stack watermark: AcceptConnect: %zu, HandleClient: %zu, tcpip_thread: %zu\n",
-        uxTaskGetStackHighWaterMark(NULL),  // Accept thread
-        uxTaskGetStackHighWaterMark(NULL),  // HandleClient thread
-        uxTaskGetStackHighWaterMark(NULL)); // TCP/IP thread
-
-    printf("========================\n");
-}
-
-// Function to print heap information
-void printHeapInfo() {
-    size_t heapSize = xPortGetFreeHeapSize();
-    size_t minHeapSize = xPortGetMinimumEverFreeHeapSize();
-
-    TRACE("Heap Information:\n");
-    TRACE("Free heap size: %u bytes\n", (unsigned int)heapSize);
-    TRACE("Minimum ever free heap size: %u bytes\n", (unsigned int)minHeapSize);
-}
-
-// Function to print stack and heap information
-void printSystemMemoryInfo() {
-    printTaskStackSizes();
-    printHeapInfo();
-}
-
-// Convert string to lowercase for case-insensitive lookup
-std::string toLower(std::string str) {
-    std::transform(str.begin(), str.end(), str.begin(),
-                   [](unsigned char c) { return std::tolower(c); });
-    return str;
-}
-
-void runTimeStats(   ){
-	TaskStatus_t *pxTaskStatusArray;
-	volatile UBaseType_t uxArraySize, x;
-	unsigned long ulTotalRunTime;
-
-
-   // Get number of takss
-   uxArraySize = uxTaskGetNumberOfTasks();
-   TRACE("Number of tasks %d\n", uxArraySize);
-
-   //Allocate a TaskStatus_t structure for each task.
-   pxTaskStatusArray = (TaskStatus_t *)pvPortMalloc( uxArraySize * sizeof( TaskStatus_t ) );
-
-   if( pxTaskStatusArray != NULL ){
-		// Generate raw status information about each task.
-
-		uxArraySize = uxTaskGetSystemState( pxTaskStatusArray,
-									uxArraySize,
-									&ulTotalRunTime );
-
-		// Print stats
-		for( x = 0; x < uxArraySize; x++ )
-		{
-			printf("Task: %d \t cPri:%d \t bPri:%d \t hw:%zu \t%s\n",
-					pxTaskStatusArray[ x ].xTaskNumber ,
-					pxTaskStatusArray[ x ].uxCurrentPriority ,
-					pxTaskStatusArray[ x ].uxBasePriority ,
-					pxTaskStatusArray[ x ].usStackHighWaterMark ,
-					pxTaskStatusArray[ x ].pcTaskName
-					);
-		}
-		// Free array
-		vPortFree( pxTaskStatusArray );
-   } else {
-	   panic("Failed to allocate space for stats\n");
-   }
-
-   //Get heap allocation information
-   HeapStats_t heapStats;
-   vPortGetHeapStats(&heapStats);
-   printf("HEAP avl: %zu, blocks %zu, alloc: %zu, free: %zu\n",
-		   heapStats.xAvailableHeapSpaceInBytes,
-		   heapStats.xNumberOfFreeBlocks,
-		   heapStats.xNumberOfSuccessfulAllocations,
-		   heapStats.xNumberOfSuccessfulFrees
-		   );
-}
-
-void printActivePCBs() {
-#if LWIP_STATS && MEMP_STATS
-    TRACE("Active TCP PCBs: %d\n", lwip_stats.memp[MEMP_TCP_PCB]->used);
-#else
-    TRACE("LWIP stats are not enabled, cannot track active PCBs.\n");
-#endif
-}
-
-#if LWIP_STATS && TRACE_INFO
-    extern void stats_display(void);
-#endif
-
-void printTCPState() {
-    TRACE("\n===== TCP/IP STATE =====\n");
-
-    #if LWIP_STATS && TRACE_INFO
-        stats_display();  // Print all available lwIP stats
-    #else
-        TRACE("lwIP stats unavailable. Ensure LWIP_STATS is enabled in lwipopts.h\n");
-    #endif
-
-    TRACE("========================\n");
-}
-
-void vgetTaskDetails( TaskStatus_t* xTaskDetails )
-{
-    TaskHandle_t xHandle;
-
-    /* Obtain the handle of a task from its name. */
-    xHandle = xTaskGetHandle( "Task_Name" );
-
-    /* Check the handle is not NULL. */
-    configASSERT( xHandle );
-
-    /* Use the handle to obtain further information about the task. */
-    vTaskGetInfo( /* The handle of the task being queried. */
-                  xHandle,
-                  /* The TaskStatus_t structure to complete with information
-                     on xTask. */
-                  xTaskDetails,
-                  /* Include the stack high water mark value in the
-                     TaskStatus_t structure. */
-                  pdTRUE,
-                  /* Include the task state in the TaskStatus_t structure. */
-                  eInvalid );
-}
-
-#include "lwip/pbuf.h"
-#include "lwip/memp.h"
-#include "lwip/tcp.h"
-#include <stdio.h>
-
-// Define the MEM_SIZE calculation
-#define PBUF_POOL_BUFSIZE_CALC (TCP_MSS + 40)
-
-void printMemsize() {
-    printf("MEM SIZE: %d\n", lwip_stats.mem.avail);
-    printf("MEM USED: %d\n", lwip_stats.mem.used); 
-}
-
-// Function to check if in interrupt context
-int is_in_interrupt(void) {
-    uint32_t ipsr_value;
-    // Read the IPSR value using inline assembly
-    #ifndef UNIT_TEST
-        __asm volatile ("MRS %0, ipsr" : "=r" (ipsr_value));
-    #else
-        ipsr_value = 0;  // Stub for test builds
-    #endif
-      
-    // Return 1 if in interrupt, 0 if not
-    return (ipsr_value != 0);
-  }
-
-
+ #define TRACE_MODULE "UTILITY"
+ #define TRACE_ENABLED false
+ #include "DebugTrace.h"
+ 
+ 
+ #include "utility.h" 
+ #include "FreeRTOS.h"
+ #include "task.h"
+ #include <stdio.h>
+ #include <stdlib.h>
+ #include <string.h>
+ #include <string>
+ #include <algorithm>
+ #include <sstream>
+ 
+ #ifndef UNIT_TEST
+ #include "lwip/memp.h"
+ #endif
+ #include "lwip/stats.h"
+ #include "lwip/pbuf.h"
+ #include "lwip/sockets.h"
+ #include "lwip/ip_addr.h"
+ 
+ /// @copydoc printTaskStackSizes
+ void printTaskStackSizes() {
+     TRACE("Task Stack Sizes:\n");
+ 
+     TaskStatus_t *pxTaskStatusArray;
+     UBaseType_t uxTaskCount = uxTaskGetNumberOfTasks();
+     pxTaskStatusArray = (TaskStatus_t*)pvPortMalloc(uxTaskCount * sizeof(TaskStatus_t));
+ 
+     if (pxTaskStatusArray != NULL) {
+         uxTaskGetSystemState(pxTaskStatusArray, uxTaskCount, NULL);
+         for (UBaseType_t i = 0; i < uxTaskCount; i++) {
+             TRACE("Task %s: Stack high watermark: %u bytes\n",
+                   pxTaskStatusArray[i].pcTaskName,
+                   pxTaskStatusArray[i].usStackHighWaterMark);
+         }
+         vPortFree(pxTaskStatusArray);
+     } else {
+         TRACE("Failed to allocate memory for task status array.\n");
+     }
+ }
+ 
+ /// @copydoc logSystemStats
+ void logSystemStats() {
+     printf("\n===== SYSTEM STATS =====\n");
+     printf("Free heap size: %zu bytes\n", xPortGetFreeHeapSize());
+     printf("Minimum ever free heap: %zu bytes\n", xPortGetMinimumEverFreeHeapSize());
+     printf("Stack watermark: AcceptConnect: %zu, HandleClient: %zu, tcpip_thread: %zu\n",
+            uxTaskGetStackHighWaterMark(NULL),
+            uxTaskGetStackHighWaterMark(NULL),
+            uxTaskGetStackHighWaterMark(NULL));
+     printf("========================\n");
+ }
+ 
+ /// @copydoc printHeapInfo
+ void printHeapInfo() {
+     TRACE("Heap Information:\n");
+     TRACE("Free heap size: %u bytes\n", (unsigned int)xPortGetFreeHeapSize());
+     TRACE("Minimum ever free heap size: %u bytes\n", (unsigned int)xPortGetMinimumEverFreeHeapSize());
+ }
+ 
+ /// @copydoc printSystemMemoryInfo
+ void printSystemMemoryInfo() {
+     printTaskStackSizes();
+     printHeapInfo();
+ }
+ 
+ /// @copydoc toLower
+ std::string toLower(std::string str) {
+     std::transform(str.begin(), str.end(), str.begin(),
+                    [](unsigned char c) { return std::tolower(c); });
+     return str;
+ }
+ 
+ /// @copydoc runTimeStats
+ void runTimeStats() {
+     TaskStatus_t* pxTaskStatusArray;
+     UBaseType_t uxArraySize = uxTaskGetNumberOfTasks();
+     unsigned long ulTotalRunTime;
+ 
+     TRACE("Number of tasks %d\n", uxArraySize);
+     pxTaskStatusArray = (TaskStatus_t*)pvPortMalloc(uxArraySize * sizeof(TaskStatus_t));
+ 
+     if (pxTaskStatusArray != NULL) {
+         uxArraySize = uxTaskGetSystemState(pxTaskStatusArray, uxArraySize, &ulTotalRunTime);
+ 
+         for (UBaseType_t x = 0; x < uxArraySize; x++) {
+             printf("Task: %d \t cPri:%d \t bPri:%d \t hw:%zu \t%s\n",
+                    pxTaskStatusArray[x].xTaskNumber,
+                    pxTaskStatusArray[x].uxCurrentPriority,
+                    pxTaskStatusArray[x].uxBasePriority,
+                    pxTaskStatusArray[x].usStackHighWaterMark,
+                    pxTaskStatusArray[x].pcTaskName);
+         }
+         vPortFree(pxTaskStatusArray);
+     } else {
+         panic("Failed to allocate space for stats\n");
+     }
+ 
+     HeapStats_t heapStats;
+     vPortGetHeapStats(&heapStats);
+     printf("HEAP avl: %zu, blocks %zu, alloc: %zu, free: %zu\n",
+            heapStats.xAvailableHeapSpaceInBytes,
+            heapStats.xNumberOfFreeBlocks,
+            heapStats.xNumberOfSuccessfulAllocations,
+            heapStats.xNumberOfSuccessfulFrees);
+ }
+ 
+ /// @copydoc printActivePCBs
+ void printActivePCBs() {
+ #if LWIP_STATS && MEMP_STATS
+     TRACE("Active TCP PCBs: %d\n", lwip_stats.memp[MEMP_TCP_PCB]->used);
+ #else
+     TRACE("LWIP stats are not enabled, cannot track active PCBs.\n");
+ #endif
+ }
+ 
+ /// @copydoc printTCPState
+ void printTCPState() {
+     TRACE("\n===== TCP/IP STATE =====\n");
+ #if LWIP_STATS && TRACE_INFO
+     extern void stats_display(void);
+     stats_display();
+ #else
+     TRACE("lwIP stats unavailable. Ensure LWIP_STATS is enabled in lwipopts.h\n");
+ #endif
+     TRACE("========================\n");
+ }
+ 
+ /// @copydoc printMemsize
+ void printMemsize() {
+     printf("MEM SIZE: %d\n", lwip_stats.mem.avail);
+     printf("MEM USED: %d\n", lwip_stats.mem.used);
+ }
+ 
+ /// @copydoc is_in_interrupt
+ int is_in_interrupt(void) {
+     uint32_t ipsr_value;
+ #ifndef UNIT_TEST
+     __asm volatile ("MRS %0, ipsr" : "=r" (ipsr_value));
+ #else
+     ipsr_value = 0;
+ #endif
+     return (ipsr_value != 0);
+ }
+ 

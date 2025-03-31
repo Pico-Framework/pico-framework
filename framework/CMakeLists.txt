@@ -60,15 +60,14 @@ target_sources(pico_framework
         src/network/Network.cpp 
         src/network/NtpClient.cpp
         src/events/EventManager.cpp
+        src/events/TimerService.cpp
         src/utility/Logger.cpp
         src/utility/utility.cpp
         src/port/hw_config.c
         src/storage/FatFsStorageManager.cpp
         src/storage/JsonService.cpp
-        src/events/TimerService.cpp
         src/time/PicoTime.cpp
 )
-
 
 target_link_libraries(pico_framework PUBLIC
         pico_async_context_freertos

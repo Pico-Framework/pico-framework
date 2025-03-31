@@ -1,65 +1,95 @@
 /**
  * @file Logger.h
  * @author Ian Archbell
- * @brief 
- * @version 0.1
- * @date 2025-03-26
+ * @brief Lightweight structured logging class for embedded applications.
+ *
+ * Part of the PicoFramework application framework.
+ * Logs messages with timestamps and severity levels (INFO, WARN, ERROR).
+ * Optionally supports logging to an SD card via FatFsStorageManager.
  * 
- * @copyright Copyright (c) 2025
- * 
+ * Usage example:
+ * @code
+ * Logger::setMinLogLevel(LOG_INFO);  // Set minimum log level to INFO
+ * Logger::enableFileLogging(AppContext::storage(), "/log/system.log");
+ * Logger::info("System started successfully.");
+ * Logger::warn("Low battery warning.");    
+ * Logger::error("Critical error occurred.");
+ * @endcode
+ *
+ * @version 0.2
+ * @date 2025-03-31
+ * @license MIT License
+ * @copyright Copyright (c) 2025, Ian Archbell
  */
-#ifndef LOGGER_H
-#define LOGGER_H
-#pragma once
 
-#include <cstdio>
-#include <ctime>
-
-enum LogLevel {
-    LOG_INFO,
-    LOG_WARN,
-    LOG_ERROR
-};
-
-class Logger {
-public:
-    static void info(const char* msg)    { log(LOG_INFO, msg); }
-    static void warn(const char* msg)    { log(LOG_WARN, msg); }
-    static void error(const char* msg)   { log(LOG_ERROR, msg); }
-
-    // Optional: change minimum log level (e.g., to suppress info)
-    static void setMinLogLevel(LogLevel level) { minLevel = level; }
-
-private:
-    static LogLevel minLevel;
-
-    static void log(LogLevel level, const char* msg) {
-        if (level < minLevel) return;
-
-        char timeBuf[20];
-        getTimeString(timeBuf, sizeof(timeBuf));
-        const char* levelStr = levelToString(level);
-
-        printf("[%s] [%s] %s\n", timeBuf, levelStr, msg);
-
-        // TODO: forward to SdFatStorageManager when implemented
-        // if (storageReady) SdFatStorageManager::appendLog(...);
-    }
-
-    static void getTimeString(char* buffer, size_t len) {
-        time_t now = time(nullptr);
-        struct tm* t = localtime(&now);
-        strftime(buffer, len, "%Y-%m-%d %H:%M:%S", t);
-    }
-
-    static const char* levelToString(LogLevel level) {
-        switch (level) {
-            case LOG_INFO:  return "INFO";
-            case LOG_WARN:  return "WARN";
-            case LOG_ERROR: return "ERROR";
-            default:        return "???";
-        }
-    }
-};
-
-#endif // LOGGER_H
+ #ifndef LOGGER_H
+ #define LOGGER_H
+ #pragma once
+ 
+ #include <cstdio>
+ #include <ctime>
+ #include <string>
+ #include "FatFsStorageManager.h"
+ 
+ /**
+  * @brief Severity levels for logging.
+  */
+ enum LogLevel {
+     LOG_INFO,   ///< Informational messages
+     LOG_WARN,   ///< Warnings (non-fatal)
+     LOG_ERROR   ///< Errors (potentially requiring user action)
+ };
+ 
+ /**
+  * @class Logger
+  * @brief Basic timestamped logger with optional SD file logging.
+  *
+  * This logger is designed for embedded use, providing filtered logging
+  * based on severity and timestamp, and supporting optional output to SD.
+  */
+ class Logger {
+ public:
+     /**
+      * @brief Log an informational message.
+      * @param msg The message to log.
+      */
+     static void info(const char* msg);
+ 
+     /**
+      * @brief Log a warning message.
+      * @param msg The message to log.
+      */
+     static void warn(const char* msg);
+ 
+     /**
+      * @brief Log an error message.
+      * @param msg The message to log.
+      */
+     static void error(const char* msg);
+ 
+     /**
+      * @brief Set the minimum log level (filters lower levels).
+      * @param level Messages below this level will be suppressed.
+      */
+     static void setMinLogLevel(LogLevel level);
+ 
+     /**
+      * @brief Enable writing logs to SD card via a storage manager.
+      * @param sm Pointer to an initialized FatFsStorageManager.
+      * @param path Path to the log file on SD card (e.g. "/log/system.log").
+      */
+     static void enableFileLogging(FatFsStorageManager* sm, const std::string& path);
+ 
+ private:
+     static LogLevel minLevel;
+     static void log(LogLevel level, const char* msg);
+     static void getTimeString(char* buffer, size_t len);
+     static const char* levelToString(LogLevel level);
+ 
+     static inline FatFsStorageManager* fileLogger = nullptr;
+     static inline std::string logPath = "";
+     static inline bool logToFile = false;
+ };
+ 
+ #endif // LOGGER_H
+ 

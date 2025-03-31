@@ -2,13 +2,22 @@
  * @file HttpResponse.cpp
  * @author Ian Archbell
  * @brief Implementation of the Response class for managing and sending HTTP responses.
+ * 
+ * Part of the PicoFramework HTTP server.
+ * This module handles constructing HTTP responses, setting headers, and sending
+ * the response back to the client. It also supports setting content types,
+ * content lengths, and handling different response statuses.
+ * 
  * @version 0.1
  * @date 2025-03-26
  * 
  * @license MIT License
- * 
- * @copyright Copyright (c) 2025
+ * @copyright Copyright (c) 2025, Ian Archbell
  */
+
+ #define TRACE_MODULE "HTTP"
+ #define TRACE_ENABLED false
+ #include "DebugTrace.h" 
 
  #include "HttpResponse.h"
  #include <sstream>

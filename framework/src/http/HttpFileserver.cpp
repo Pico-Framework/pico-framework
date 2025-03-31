@@ -2,11 +2,21 @@
  * @file HttpFileserver.cpp
  * @author Ian Archbell
  * @brief Implementation of file serving and directory listing over HTTP.
+ * 
+ * Part of the PicoFramework HTTP server.
+ * This module handles serving files from the SD card and listing directory contents.
+ * It uses the FatFsStorageManager to interact with the filesystem.
+ * 
  * @version 0.1
  * @date 2025-03-26
  * 
  * @license MIT License
+ * @copyright Copyright (c) 2025, Ian Archbell
  */
+
+ #define TRACE_MODULE "HTTP"
+ #define TRACE_ENABLED false
+ #include "DebugTrace.h" 
 
  #include "HttpFileserver.h"
  #include <string>

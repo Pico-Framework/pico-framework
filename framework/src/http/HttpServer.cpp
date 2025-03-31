@@ -2,13 +2,24 @@
  * @file HttpServer.cpp
  * @author Ian Archbell
  * @brief HTTP Server implementation with per-client task handling.
+ * 
+ * Part of the PicoFramework HTTP server.
+ * This module handles incoming HTTP requests, spawns a new FreeRTOS task for each
+ * accepted client, and processes the requests using a router.
+ * It uses the lwIP stack for network communication and FreeRTOS for task management.
+ * The server can handle multiple clients concurrently, limited by the MAX_CONCURRENT_CLIENTS.
+ * 
  * @version 0.1
  * @date 2025-03-26
  * 
  * @license MIT License
+ * @copyright Copyright (c) 2025, Ian Archbell
  * 
- * This version spawns a new FreeRTOS task for each accepted client.
  */
+
+ #define TRACE_MODULE "HTTP"
+ #define TRACE_ENABLED false
+ #include "DebugTrace.h" 
 
  #include "HttpServer.h" 
  #include <lwip/sockets.h>
@@ -27,14 +38,6 @@
  #include "utility.h"
  #include "url_utils.h"
  //#include "TcpConnectionSocket.h"
- 
- #define __FILENAME__ (strrchr(__FILE__, '/') ? strrchr(__FILE__, '/') + 1 : __FILE__)
- 
- #ifdef TRACE_ON
-     #define TRACE(format, ...) printf(format, ##__VA_ARGS__)
- #else
-     #define TRACE(format, ...) /* no-op */
- #endif
  
  #define BUFFER_SIZE 1024
 
