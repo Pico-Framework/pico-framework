@@ -200,4 +200,11 @@
  
      return written == size;
  }
+
+ bool FatFsStorageManager::ensureMounted() {
+    if (!mounted) {
+        mounted = mount();
+    }
+    return mounted;
+}
  
