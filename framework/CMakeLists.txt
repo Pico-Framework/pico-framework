@@ -67,6 +67,7 @@ target_sources(pico_framework
         src/storage/FatFsStorageManager.cpp
         src/storage/JsonService.cpp
         src/time/PicoTime.cpp
+        src/utility/syscalls.cpp
 )
 
 target_link_libraries(pico_framework PUBLIC
