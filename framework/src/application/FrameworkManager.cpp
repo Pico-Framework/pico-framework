@@ -15,7 +15,9 @@
  * @copyright Copyright (c) 2025, Ian Archbell
  */
 
- #include "DebugTrace.h"
+ #include "framework_config.h" // Must be included before DebugTrace.h to ensure framework_config.h is processed first
+ #include "DebugTrace.h" // For trace logging
+ TRACE_INIT(FrameworkManager); // Initialize tracing for this module
  #include "FrameworkManager.h"
  #include "FrameworkApp.h"
  #include "AppContext.h"

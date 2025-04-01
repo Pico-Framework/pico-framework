@@ -37,6 +37,7 @@
 #define TRACE_Middileware         1
 #define TRACE_Network             1
 #define TRACE_NtpClient           1
+#define TRACE_utility             1   
 // etc.
 
 // === Global minimum log level (for all modules) ===

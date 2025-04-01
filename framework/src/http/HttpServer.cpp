@@ -17,6 +17,7 @@
  * 
  */
 
+ #include "framework_config.h" // Must be included before DebugTrace.h to ensure framework_config.h is processed first
  #include "DebugTrace.h" 
  TRACE_INIT(HttpServer) 
 

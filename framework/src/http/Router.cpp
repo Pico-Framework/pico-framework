@@ -25,8 +25,9 @@
  * @copyright Copyright (c) 2025, Ian Archbell
  */
 
-#include "DebugTrace.h"
-TRACE_INIT(Router)
+ #include "framework_config.h" // Must be included before DebugTrace.h to ensure framework_config.h is processed first
+ #include "DebugTrace.h"
+ TRACE_INIT(Router)
 
  #include "Router.h"
  #include "HttpRequest.h"
@@ -34,7 +35,6 @@ TRACE_INIT(Router)
  #include "JwtAuthenticator.h"
  #include "Middleware.h"
  #include <regex>
- #include "debugTrace.h"
  #include "utility.h"
  #include "url_utils.h"
  

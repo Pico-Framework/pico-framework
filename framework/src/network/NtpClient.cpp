@@ -13,6 +13,7 @@
  * @copyright Copyright (c) 2025, Ian Archbell
  */
 
+ #include "framework_config.h" // Must be included before DebugTrace.h to ensure framework_config.h is processed first
  #include "DebugTrace.h"
  TRACE_INIT(NtpClient)
 
@@ -21,7 +22,6 @@
  #include "hardware/rtc.h"
  //#include "utility.h"
  #include "lwip/dns.h"
- #include "DebugTrace.h"
  
  #define NTP_MSG_LEN 48
  #define NTP_PORT 123

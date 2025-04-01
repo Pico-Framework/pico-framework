@@ -19,6 +19,10 @@
  * @copyright Copyright (c) 2025, Ian Archbell
  */
 
+ #ifndef FRAMEWORK_CONFIG_H
+ #error "You must include framework_config.h before DebugTrace.h"
+ #endif
+
  #pragma once
 
  #include <cstdio>

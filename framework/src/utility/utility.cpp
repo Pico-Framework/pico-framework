@@ -12,10 +12,9 @@
  * @copyright Copyright (c) 2025, Ian Archbell
  */
 
- #define TRACE_MODULE "UTILITY"
- #define TRACE_ENABLED false
+ #include "framework_config.h" // Must be included before DebugTrace.h to ensure framework_config.h is processed first
  #include "DebugTrace.h"
- 
+ TRACE_INIT(utility) // Initialize tracing for this module
  
  #include "utility.h" 
  #include "FreeRTOS.h"
