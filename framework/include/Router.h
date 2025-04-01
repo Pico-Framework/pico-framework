@@ -158,6 +158,12 @@
       * @return A reference to the internal HttpFileServer
       */
      HttpFileServer& getFileHandler() { return fileServer; }
+
+     /**
+      * @brief Serve static files from the internal HttpFileServer.
+      */
+     void serveStatic(Request &req, Response &res, const std::vector<std::string> &params);
+   
  
  private:
      HttpFileServer fileServer; ///< Internal file server instance

@@ -234,4 +234,9 @@
          }
      }
  }
+
+ // Inside Router.cpp
+ void Router::serveStatic(Request &req, Response &res, const std::vector<std::string> &params) {
+    fileServer.handle_static_request(req, res, params);
+}
  
