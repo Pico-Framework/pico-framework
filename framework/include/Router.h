@@ -163,7 +163,12 @@
       * @brief Serve static files from the internal HttpFileServer.
       */
      void serveStatic(Request &req, Response &res, const std::vector<std::string> &params);
-   
+
+    /**
+      * @brief Convenience method to list directory from the internal HttpFileServer.
+      */
+     void listDirectory(Request &req, Response &res, const std::vector<std::string> &params);
+
  
  private:
      HttpFileServer fileServer; ///< Internal file server instance
