@@ -43,26 +43,26 @@
  JsonService::JsonService(StorageManager* storage)
      : storage(storage) {}
  
- /// @copydoc JsonService::load
- bool JsonService::load(const std::string& path) {
-     std::vector<uint8_t> buffer;
-     if (!storage || !storage->readFile(path, buffer)) {
-         printf("JsonService: Failed to read %s\n", path.c_str());
-         return false;
-     }
- 
-     std::string content(buffer.begin(), buffer.end());
-     nlohmann::json parsed = nlohmann::json::parse(content, nullptr, false);  // No exceptions
- 
-     if (parsed.is_discarded()) {
-         printf("JsonService: Failed to parse JSON from %s\n", path.c_str());
-         return false;
-     }
- 
-     data_ = parsed;
-     return true;
- }
- 
+/// @copydoc JsonService::load
+bool JsonService::load(const std::string& path)
+{
+    std::vector<uint8_t> buffer;
+    if (!storage->readFile(path, buffer)) {
+        return false;
+    }
+
+    std::string str(buffer.begin(), buffer.end());
+
+    // Treat empty file as valid empty object
+    if (str.empty()) {
+        data_ = nlohmann::json::object();
+        return true;
+    }
+
+    data_ = nlohmann::json::parse(str, nullptr, false);  // No exceptions
+    return !data_.is_discarded();
+}
+    
  /// @copydoc JsonService::save
  bool JsonService::save(const std::string& path) const {
      if (!storage) return false;

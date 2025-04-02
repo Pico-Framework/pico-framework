@@ -58,22 +58,7 @@
  
      SemaphoreHandle_t mutex;           ///< Optional lock for thread safety
  
-     /**
-      * @brief Ensure the filesystem is mounted.
-      * @return true if mounted successfully or already mounted.
-      */
-     bool ensureMounted();
- 
-     /**
-      * @brief Lock the storage manager for exclusive access.
-      * @return true if lock was acquired.
-      */
-     bool lock();
- 
-     /**
-      * @brief Unlock the storage manager.
-      */
-     void unlock();
+     std::string resolvePath(const std::string& path) const;
 
      
   
