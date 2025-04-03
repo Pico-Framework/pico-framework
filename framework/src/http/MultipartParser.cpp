@@ -99,9 +99,7 @@ State MultipartParser::currentState = SEARCHING_FOR_BOUNDARY; // Initialize stat
  /// @copydoc MultipartParser::handleChunk
  bool MultipartParser::handleChunk(std::string& chunkData)
  {
-     printf("Current state on handling chunk: %d\n", currentState);
-     printf("Handling chunk data, size: %zu bytes\n", chunkData.size());
- 
+     TRACE("Handling chunk, size: %zu bytes\n", chunkData.size());
      const std::string boundaryPrefix = "--" + boundary;
      const std::string finalBoundary = boundaryPrefix + "--";
  
@@ -119,7 +117,7 @@ State MultipartParser::currentState = SEARCHING_FOR_BOUNDARY; // Initialize stat
                          skip += 2;
                      chunkData = chunkData.substr(skip);
                      currentState = FOUND_BOUNDARY;
-                     printf("Found initial boundary, buffer size now: %zu bytes\n", chunkData.size());
+                     TRACE("Found initial boundary, buffer size now: %zu bytes\n", chunkData.size());
                      continue;
                  }
                  return true; // Wait for more data
@@ -250,7 +248,7 @@ State MultipartParser::currentState = SEARCHING_FOR_BOUNDARY; // Initialize stat
  /// @copydoc MultipartParser::processFileData
  bool MultipartParser::processFileData(const std::string& fileData)
  {
-    printf("Processing file data, size: %zu bytes\n", fileData.size()); 
+   TRACE("Processing file data, size: %zu bytes\n", fileData.size()); 
     if(!appendFileToSD(filename.c_str(), fileData.c_str(), fileData.size())){ 
         sendHttpResponse(500, "Failed to write file data");
         return false;
@@ -261,7 +259,7 @@ State MultipartParser::currentState = SEARCHING_FOR_BOUNDARY; // Initialize stat
  /// @copydoc MultipartParser::appendFileToSD
  int MultipartParser::appendFileToSD(const char* filename, const char* data, size_t size)
  {
-    printf("Appending %zu bytes to file: %s\n", size, filename);
+    TRACE("Appending %zu bytes to file: %s\n", size, filename);
  
      // Append data to the file using FatFsStorageManager
     FatFsStorageManager* storage = AppContext::getFatFsStorage();
