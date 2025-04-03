@@ -230,6 +230,10 @@ bool MultipartParser::handleChunk(std::string &chunkData)
             }
 
             TRACE("Final boundary reached — exiting multipart parser\n");
+            currentState = COMPLETE; // ✅ <== this was missing
+            break;
+
+            TRACE("Final boundary reached — exiting multipart parser\n");
             break;
         }
 
