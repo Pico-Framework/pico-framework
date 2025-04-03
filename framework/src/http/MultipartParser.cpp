@@ -37,7 +37,10 @@
  #include <algorithm>
  #include <cctype>
  #include <filesystem>
+ #include "AppContext.h" 
  
+State MultipartParser::currentState = SEARCHING_FOR_BOUNDARY; // Initialize state
+
  /// @copydoc MultipartParser::MultipartParser
  MultipartParser::MultipartParser(int clientSocket, const Request& request)
      : clientSocket(clientSocket), request(request)
@@ -46,109 +49,182 @@
      std::size_t pos = contentType.find("boundary=");
      if (pos != std::string::npos)
      {
-         boundary = "--" + contentType.substr(pos + 9);
+         boundary = contentType.substr(pos + 9);
      }
  }
  
  /// @copydoc MultipartParser::handleMultipart
  bool MultipartParser::handleMultipart()
- {
-     char buf[1024];
-     int len;
- 
-     while ((len = lwip_recv(clientSocket, buf, sizeof(buf) - 1, 0)) > 0)
-     {
-         buf[len] = '\0';
-         std::string chunk(buf, len);
- 
-         if (!leftoverData.empty())
-         {
-             chunk = leftoverData + chunk;
-             leftoverData.clear();
-         }
- 
-         if (!handleChunk(chunk))
-         {
-             return false;
-         }
-     }
- 
-     return true;
- }
+{
+    char buf[1460];
+    int len;
+
+    currentState = SEARCHING_FOR_BOUNDARY;
+
+    // Handle any body data included with the initial request
+    const std::string& initialBody = request.getBody();
+    if (!initialBody.empty())
+    {
+        std::string chunk = initialBody;
+        if (!handleChunk(chunk))
+            return false;
+    }
+
+    // Stream remaining data from socket
+    while ((len = lwip_recv(clientSocket, buf, sizeof(buf) - 1, 0)) > 0)
+    {
+        buf[len] = '\0';
+        std::string chunk(buf, len);
+
+        if (!handleChunk(chunk))
+            return false;
+
+        if (currentState == COMPLETE)
+            break;
+
+        vTaskDelay(pdMS_TO_TICKS(10)); // yield to allow other tasks to run
+    }
+
+    if (currentState != COMPLETE)
+    {
+        sendHttpResponse(400, "Upload incomplete or failed");
+        return false;
+    }
+
+    // Only send 200 when we're truly done
+    sendHttpResponse(200, "File uploaded successfully");
+    return true;
+}
  
  /// @copydoc MultipartParser::handleChunk
  bool MultipartParser::handleChunk(std::string& chunkData)
  {
-     buffer += chunkData;
+     printf("Current state on handling chunk: %d\n", currentState);
+     printf("Handling chunk data, size: %zu bytes\n", chunkData.size());
  
-     if (currentState == SEARCHING_FOR_BOUNDARY)
+     const std::string boundaryPrefix = "--" + boundary;
+     const std::string finalBoundary = boundaryPrefix + "--";
+ 
+     while (!chunkData.empty() && currentState != COMPLETE)
      {
-         size_t boundaryPos = buffer.find(boundary);
-         if (boundaryPos != std::string::npos)
+         switch (currentState)
          {
-             buffer = buffer.substr(boundaryPos + boundary.length() + 2); // skip CRLF
-             currentState = FOUND_BOUNDARY;
-         }
-         else
-         {
-             return true;
-         }
-     }
- 
-     if (currentState == FOUND_BOUNDARY)
-     {
-         std::istringstream stream(buffer);
-         std::string line;
-         bool headersComplete = false;
- 
-         while (std::getline(stream, line))
-         {
-             line.erase(std::remove(line.begin(), line.end(), '\r'), line.end());
-             if (line.empty())
+             case SEARCHING_FOR_BOUNDARY:
              {
-                 headersComplete = true;
-                 break;
-             }
-             if (line.find("Content-Disposition:") != std::string::npos)
-             {
-                 if (!extractFilename(line))
+                 size_t boundaryPos = chunkData.find(boundaryPrefix);
+                 if (boundaryPos != std::string::npos)
                  {
-                     sendHttpResponse(400, "Invalid file upload: missing filename");
-                     return false;
+                     size_t skip = boundaryPos + boundaryPrefix.length();
+                     if (chunkData.substr(skip, 2) == "\r\n")
+                         skip += 2;
+                     chunkData = chunkData.substr(skip);
+                     currentState = FOUND_BOUNDARY;
+                     printf("Found initial boundary, buffer size now: %zu bytes\n", chunkData.size());
+                     continue;
                  }
+                 return true; // Wait for more data
              }
-         }
  
-         if (!headersComplete)
-         {
-             return true; // Wait for more data
-         }
+             case FOUND_BOUNDARY:
+            {
+                size_t headersEnd = chunkData.find("\r\n\r\n");
+                if (headersEnd == std::string::npos)
+                    return true; // wait for more data
+
+                std::string headers = chunkData.substr(0, headersEnd);
+                std::istringstream stream(headers);
+                std::string line;
+                bool gotFilename = false;
+
+                while (std::getline(stream, line))
+                {
+                    line.erase(std::remove(line.begin(), line.end(), '\r'), line.end());
+                    if (line.find("Content-Disposition:") != std::string::npos)
+                    {
+                        gotFilename = extractFilename(line);
+                    }
+                }
+
+                if (!gotFilename)
+                {
+                    sendHttpResponse(400, "Invalid upload: no filename");
+                    currentState = COMPLETE;
+                    return false;
+                }
+
+                // If file exists already, send error
+                 
+                if (file_exists(filename.c_str()))
+                {
+                    sendHttpResponse(409, "File already exists");
+                    currentState = COMPLETE;
+                    return false;
+                }
+
+                chunkData = chunkData.substr(headersEnd + 4); // skip headers
+                currentState = FOUND_DATA_START;
+                continue;
+            }
+
  
-         std::string remaining((std::istreambuf_iterator<char>(stream)), std::istreambuf_iterator<char>());
-         buffer = remaining;
-         currentState = FOUND_DATA_START;
-     }
+             case FOUND_DATA_START:
+             {
+                 size_t finalPos = chunkData.find(finalBoundary);
+                 size_t nextBoundaryPos = chunkData.find(boundaryPrefix);
  
-     if (currentState == FOUND_DATA_START)
-     {
-         size_t boundaryPos = buffer.find(boundary);
-         if (boundaryPos != std::string::npos)
-         {
-             std::string fileData = buffer.substr(0, boundaryPos - 2); // -2 to remove CRLF
-             processFileData(fileData);
-             buffer = buffer.substr(boundaryPos + boundary.length() + 2);
-             currentState = FOUND_BOUNDARY;
-         }
-         else
-         {
-             leftoverData = buffer;
-             processFileData(buffer);
-             buffer.clear();
+                 size_t boundaryPos = std::string::npos;
+                 bool isFinal = false;
+ 
+                 if (finalPos != std::string::npos &&
+                     (nextBoundaryPos == std::string::npos || finalPos < nextBoundaryPos))
+                 {
+                     boundaryPos = finalPos;
+                     isFinal = true;
+                 }
+                 else if (nextBoundaryPos != std::string::npos)
+                 {
+                     boundaryPos = nextBoundaryPos;
+                 }
+ 
+                 if (boundaryPos == std::string::npos)
+                 {
+                     // No boundary, stream all data
+                     if (processFileData(chunkData))
+                     {
+                         chunkData.clear();
+                         return true;
+                     }
+                     return false; // Error processing data;
+                 }
+ 
+                 // Process data up to boundary
+                 size_t dataEnd = boundaryPos;
+                 if (dataEnd >= 2 && chunkData.substr(dataEnd - 2, 2) == "\r\n")
+                     dataEnd -= 2;
+ 
+                 std::string fileData = chunkData.substr(0, dataEnd);
+                 processFileData(fileData);
+ 
+                 // Advance past boundary
+                 size_t skip = boundaryPos + boundaryPrefix.length();
+                 if (isFinal)
+                     skip += 2; // "--"
+                 if (chunkData.substr(skip, 2) == "\r\n")
+                     skip += 2;
+ 
+                 chunkData = chunkData.substr(skip);
+                 currentState = isFinal ? COMPLETE : FOUND_BOUNDARY;
+                 continue;
+             }
+ 
+             default:
+                 return false;
          }
      }
  
      return true;
  }
+ 
  
  /// @copydoc MultipartParser::extractFilename
  bool MultipartParser::extractFilename(const std::string& contentDisposition)
@@ -174,22 +250,29 @@
  /// @copydoc MultipartParser::processFileData
  bool MultipartParser::processFileData(const std::string& fileData)
  {
-     return appendFileToSD(filename.c_str(), fileData.c_str(), fileData.size()) == 0;
+    printf("Processing file data, size: %zu bytes\n", fileData.size()); 
+    if(!appendFileToSD(filename.c_str(), fileData.c_str(), fileData.size())){ 
+        sendHttpResponse(500, "Failed to write file data");
+        return false;
+    }
+    return true;
  }
  
  /// @copydoc MultipartParser::appendFileToSD
  int MultipartParser::appendFileToSD(const char* filename, const char* data, size_t size)
  {
-     std::ofstream file(filename, std::ios::binary | std::ios::app);
-     if (!file) return 1;
-     file.write(data, size);
-     return 0;
+    printf("Appending %zu bytes to file: %s\n", size, filename);
+ 
+     // Append data to the file using FatFsStorageManager
+    FatFsStorageManager* storage = AppContext::getFatFsStorage();
+    return storage->appendToFile(filename, (uint8_t*)data, size); // Use the FatFsStorageManager to handle file appending
  }
  
  /// @copydoc MultipartParser::file_exists
  int MultipartParser::file_exists(const char* filename)
  {
-     return std::filesystem::exists(filename) ? 1 : 0;
+    FatFsStorageManager* storage = AppContext::getFatFsStorage(); 
+    return storage->exists(filename);
  }
  
  /// @copydoc MultipartParser::findDataStart

@@ -22,6 +22,14 @@
  #include <unordered_map>
  #include "HttpRequest.h"
  
+ enum State {
+    SEARCHING_FOR_BOUNDARY,
+    FOUND_BOUNDARY,
+    FOUND_DATA_START,
+    COMPLETE
+};
+
+
  /**
   * @brief Parses and processes multipart/form-data uploads over HTTP.
   * 
@@ -60,12 +68,7 @@
      std::string buffer;
      Request request;
  
-     enum State {
-         SEARCHING_FOR_BOUNDARY,
-         FOUND_BOUNDARY,
-         FOUND_DATA_START
-     };
-     State currentState = SEARCHING_FOR_BOUNDARY;
+     static State currentState;
  
      /**
       * @brief Extract the filename from a Content-Disposition header.
