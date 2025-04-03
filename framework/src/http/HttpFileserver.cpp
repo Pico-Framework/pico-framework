@@ -97,9 +97,16 @@
  
      if (!storageManager->exists(path))
      {
-         printf("File not found: %s\n", path.c_str());
-         res.status(404).send("File Not Found: " + std::string(uri));
-         return false;
+        if (!storageManager->isMounted()) {
+            TRACE("SD card is not mounted — static file access failed\n");
+            res.status(500).send("SD card not mounted");
+            return false;
+        }
+        else{
+            printf("File not found: %s\n", path.c_str());
+            res.status(404).send("File Not Found: " + std::string(uri));
+            return false;
+        }
      }
  
      size_t fileSize = storageManager->getFileSize(path);

@@ -27,17 +27,30 @@
  
  /// @copydoc FatFsStorageManager::mount()
  bool FatFsStorageManager::mount() {
-     bool result = false;
-     if (mounted) {
-         printf("Already mounted\n");
-         result = true;
-     } else {
-         printf("Mounting %s\n", mountPoint.c_str());
-         result = ::mount(mountPoint.c_str());
-         printf("Mount result: %s\n", result ? "true" : "false");
-     }
-     return result;
- }
+    if (mounted) return true;
+
+    TRACE("Mounting SD card at: %s\n", mountPoint.c_str());
+    mounted = ::mount(mountPoint.c_str());
+
+    if (mounted) {
+        // Attempt to open root directory to validate
+        FF_FindData_t testFind = {};
+        std::string root = "/" + mountPoint;
+        int result = ff_findfirst(root.c_str(), &testFind);
+        if (result != FF_ERR_NONE) {
+            TRACE("SD mount appears successful, but directory listing failed — treating as mount failure\n");
+            mounted = false;
+        }
+    }
+
+    if (!mounted) {
+        TRACE("ERROR: SD mount FAILED for %s\n", mountPoint.c_str());
+    } else {
+        TRACE("SD card mounted successfully\n");
+    }
+    return mounted;
+}
+
  
  /// @copydoc FatFsStorageManager::unmount()
  bool FatFsStorageManager::unmount() {
