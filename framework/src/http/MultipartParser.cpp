@@ -97,6 +97,7 @@ State MultipartParser::currentState = SEARCHING_FOR_BOUNDARY; // Initialize stat
     }
 
     // Only send 200 when we're truly done
+    TRACE("Multipart: Successfully received file '%s'\n", filename.c_str());
     sendHttpResponse(200, "File uploaded successfully");
     return true;
 }
