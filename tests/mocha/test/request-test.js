@@ -13,7 +13,7 @@ describe('Pico HTTP Server End-to-End Tests', function() {
       .expect(200)
       .end(function(err, res) {
         if (err) return done(err);
-        expect(res.text).to.include('Welcome');
+        expect(res.text).to.include('Welcome from Ian Archbell');
         done();
       });
   });
