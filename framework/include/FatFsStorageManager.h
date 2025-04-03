@@ -52,7 +52,7 @@
  
      bool appendToFile(const std::string& path, const uint8_t* data, size_t size) override;
      
-     bool isMounted() const;
+     bool isMounted();
  
  private:
      bool mounted = false;               ///< Indicates if the filesystem is currently mounted
@@ -62,7 +62,9 @@
  
      std::string resolvePath(const std::string& path) const;
 
-     bool ensureMounted();    
+     bool ensureMounted();  
+     
+     bool probeMountPoint(); // Check if the mount point is valid
   
  };
  

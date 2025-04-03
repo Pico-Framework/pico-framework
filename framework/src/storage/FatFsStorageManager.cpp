@@ -32,15 +32,9 @@
     TRACE("Mounting SD card at: %s\n", mountPoint.c_str());
     mounted = ::mount(mountPoint.c_str());
 
-    if (mounted) {
-        // Attempt to open root directory to validate
-        FF_FindData_t testFind = {};
-        std::string root = "/" + mountPoint;
-        int result = ff_findfirst(root.c_str(), &testFind);
-        if (result != FF_ERR_NONE) {
-            TRACE("SD mount appears successful, but directory listing failed — treating as mount failure\n");
-            mounted = false;
-        }
+    if (mounted && !probeMountPoint()) {
+        TRACE("SD mount appears successful, but directory listing failed — treating as mount failure\n");
+        mounted = false;
     }
 
     if (!mounted) {
@@ -48,10 +42,10 @@
     } else {
         TRACE("SD card mounted successfully\n");
     }
+
     return mounted;
 }
 
- 
  /// @copydoc FatFsStorageManager::unmount()
  bool FatFsStorageManager::unmount() {
      ::unmount(mountPoint.c_str());
@@ -242,7 +236,21 @@
     return true;
 }
 
-bool FatFsStorageManager::isMounted() const {
-    return mounted;
+bool FatFsStorageManager::isMounted() {
+    if (!mounted) return false;
+
+    if (!probeMountPoint()) {
+        TRACE("SD no longer accessible — marking as unmounted\n");
+        mounted = false;
+        return false;
+    }
+    return true;
+}
+
+bool FatFsStorageManager::probeMountPoint() {
+    FF_FindData_t xFindStruct = {};
+    std::string root = "/" + mountPoint;
+    int result = ff_findfirst(root.c_str(), &xFindStruct);
+    return result == FF_ERR_NONE;
 }
  
