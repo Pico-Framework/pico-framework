@@ -66,8 +66,10 @@ State MultipartParser::currentState = SEARCHING_FOR_BOUNDARY; // Initialize stat
     if (!initialBody.empty())
     {
         std::string chunk = initialBody;
-        if (!handleChunk(chunk))
+        if (!handleChunk(chunk)){
+        TRACE("Error handling chunk\n");
             return false;
+        }
     }
 
     // Stream remaining data from socket
@@ -76,8 +78,11 @@ State MultipartParser::currentState = SEARCHING_FOR_BOUNDARY; // Initialize stat
         buf[len] = '\0';
         std::string chunk(buf, len);
 
-        if (!handleChunk(chunk))
+        if (!handleChunk(chunk)){
+            sendHttpResponse(400, "Upload incomplete or failed");
+            TRACE("Error handling chunk\n");
             return false;
+        }
 
         if (currentState == COMPLETE)
             break;
