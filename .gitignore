@@ -38,7 +38,7 @@ install_manifest.txt
 **/Makefile
 
 # === Node.js artifacts ===
-tests/node_modules/
+node_modules/
 package-lock.json
 yarn.lock
 # === Doxgen generated documentation ===
