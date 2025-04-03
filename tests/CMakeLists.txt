@@ -19,7 +19,6 @@ include_directories(
     ./mocks
     )
 
-
 # Your main code
 add_library(http_core
     ../framework/src/http/HttpRequest.cpp

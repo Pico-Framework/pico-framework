@@ -71,10 +71,16 @@ target_sources(FreeRTOS+FAT+CLI PRIVATE
 
 #global include for config files
 
-message("CMAKE_SOURCE_DIR = ${CMAKE_SOURCE_DIR}")
-include_directories(
-    ${CMAKE_SOURCE_DIR}/framework/include/port
-)  
+# Global config include: FreeRTOSConfig.h
+if (NOT DEFINED FREERTOS_CONFIG_FILE_DIRECTORY)
+    message(FATAL_ERROR "[FAT+CLI] FREERTOS_CONFIG_FILE_DIRECTORY is not defined. Pass -DFREERTOS_CONFIG_FILE_DIRECTORY=...")
+endif()
+
+message(STATUS "[FAT+CLI] Using FreeRTOSConfig from: ${FREERTOS_CONFIG_FILE_DIRECTORY}")
+
+target_include_directories(FreeRTOS+FAT+CLI PUBLIC
+    ${FREERTOS_CONFIG_FILE_DIRECTORY}
+)
 
 target_include_directories(FreeRTOS+FAT+CLI PUBLIC
     ${INCLUDE_PATH}

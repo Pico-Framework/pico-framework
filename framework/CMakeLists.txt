@@ -112,6 +112,11 @@ include_directories(
     ${FREERTOS_KERNEL_PATH}/portable/ThirdParty/GCC/RP2040/include
 )
 
+# Set the FreeRTOS config file directory
+if (NOT DEFINED FREERTOS_CONFIG_FILE_DIRECTORY)
+    set(FREERTOS_CONFIG_FILE_DIRECTORY ${CMAKE_CURRENT_LIST_DIR})
+endif()
+
 add_subdirectory(lib)
 
 
