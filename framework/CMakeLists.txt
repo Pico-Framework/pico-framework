@@ -113,8 +113,15 @@ include_directories(
 )
 
 # Set the FreeRTOS config file directory
+# Set default FreeRTOS config path if user hasn't provided one
 if (NOT DEFINED FREERTOS_CONFIG_FILE_DIRECTORY)
-    set(FREERTOS_CONFIG_FILE_DIRECTORY ${CMAKE_CURRENT_LIST_DIR})
+    set(FREERTOS_CONFIG_FILE_DIRECTORY
+        ${CMAKE_CURRENT_SOURCE_DIR}/include/port
+        CACHE PATH "Path to FreeRTOSConfig.h used by framework"
+    )
+    message(STATUS "[framework] Defaulting FREERTOS_CONFIG_FILE_DIRECTORY to: ${FREERTOS_CONFIG_FILE_DIRECTORY}")
+else()
+    message(STATUS "[framework] Using user-provided FREERTOS_CONFIG_FILE_DIRECTORY: ${FREERTOS_CONFIG_FILE_DIRECTORY}")
 endif()
 
 add_subdirectory(lib)
