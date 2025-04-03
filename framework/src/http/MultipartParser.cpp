@@ -249,22 +249,19 @@ State MultipartParser::currentState = SEARCHING_FOR_BOUNDARY; // Initialize stat
  bool MultipartParser::processFileData(const std::string& fileData)
  {
    TRACE("Processing file data, size: %zu bytes\n", fileData.size()); 
-    if(!appendFileToSD(filename.c_str(), fileData.c_str(), fileData.size())){ 
-        sendHttpResponse(500, "Failed to write file data");
-        return false;
-    }
-    return true;
- }
- 
- /// @copydoc MultipartParser::appendFileToSD
- int MultipartParser::appendFileToSD(const char* filename, const char* data, size_t size)
- {
-    TRACE("Appending %zu bytes to file: %s\n", size, filename);
- 
-     // Append data to the file using FatFsStorageManager
-    FatFsStorageManager* storage = AppContext::getFatFsStorage();
-    return storage->appendToFile(filename, (uint8_t*)data, size); // Use the FatFsStorageManager to handle file appending
- }
+   auto* storage = AppContext::getFatFsStorage();
+   if (!storage->appendToFile(filename, (uint8_t*)fileData.c_str(), fileData.size())) {
+       if (!storage->isMounted()) {
+           TRACE("SD card not mounted — cannot handle multipart upload\n");
+           sendHttpResponse(500, "SD card not mounted");
+       } else {
+           TRACE("Failed to append file during multipart upload\n");
+           sendHttpResponse(500, "Failed to write file data");
+       }
+       return false;
+   }
+   return true;
+}
  
  /// @copydoc MultipartParser::file_exists
  int MultipartParser::file_exists(const char* filename)

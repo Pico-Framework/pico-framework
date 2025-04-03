@@ -51,6 +51,8 @@
      size_t getFileSize(const std::string& path) override;
  
      bool appendToFile(const std::string& path, const uint8_t* data, size_t size) override;
+     
+     bool isMounted() const;
  
  private:
      bool mounted = false;               ///< Indicates if the filesystem is currently mounted
@@ -60,7 +62,7 @@
  
      std::string resolvePath(const std::string& path) const;
 
-     
+     bool ensureMounted();    
   
  };
  
