@@ -235,13 +235,13 @@
      }
  }
 
-// Serve static files using the HttpFileServer instance.
+// Serve static files using the HttpFileserver instance.
 /// @copydoc Router::serveStatic
  void Router::serveStatic(Request &req, Response &res, const std::vector<std::string> &params) {
     fileServer.handle_static_request(req, res, params);
 }
 
-// Convenience method to list directory contents using the HttpFileServer instance.
+// Convenience method to list directory contents using the HttpFileserver instance.
  /// @copydoc Router::listDirectory
 void Router::listDirectory(Request &req, Response &res, const std::vector<std::string> &params) {
     fileServer.handle_list_directory(req, res, params);

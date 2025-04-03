@@ -132,17 +132,17 @@
  }
  
  // ----------------------------------------------------------------------------
- // HttpFileServer Implementation
+ // HttpFileserver Implementation
  // ----------------------------------------------------------------------------
  
- /// @copydoc HttpFileServer::HttpFileServer
- HttpFileServer::HttpFileServer()
+ /// @copydoc HttpFileserver::HttpFileserver
+ HttpFileserver::HttpFileserver()
  {
      // fileHandler.init();  // switched to lazy init to avoid startup issues
  }
  
- /// @copydoc HttpFileServer::handle_list_directory
- void HttpFileServer::handle_list_directory(Request& req, Response& res, const std::vector<std::string>& params)
+ /// @copydoc HttpFileserver::handle_list_directory
+ void HttpFileserver::handle_list_directory(Request& req, Response& res, const std::vector<std::string>& params)
  {
      std::string directory_path = req.getPath();
      printf("Handling list directory request for URI: %s\n", directory_path.c_str());
@@ -167,8 +167,8 @@
      return std::equal(suffix.rbegin(), suffix.rend(), str.rbegin());
  }
  
- /// @copydoc HttpFileServer::handle_static_request
- void HttpFileServer::handle_static_request(Request& req, Response& res, const std::vector<std::string>& params)
+ /// @copydoc HttpFileserver::handle_static_request
+ void HttpFileserver::handle_static_request(Request& req, Response& res, const std::vector<std::string>& params)
  {
      const std::string& uri = req.getPath();
      printf("Serving static request for URI: %s\n", uri.c_str());
@@ -187,8 +187,8 @@
      fileHandler.serveFile(res, filePath.c_str());
  }
  
- /// @copydoc HttpFileServer::getMimeType
- std::string HttpFileServer::getMimeType(const std::string& filePath)
+ /// @copydoc HttpFileserver::getMimeType
+ std::string HttpFileserver::getMimeType(const std::string& filePath)
  {
      TRACE("Getting MIME type for file: %s\n", filePath.c_str());
  

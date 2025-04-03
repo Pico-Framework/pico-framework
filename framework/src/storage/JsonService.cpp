@@ -13,93 +13,114 @@
  * @copyright Copyright (c) 2025, Ian Archbell
  */
 
- #include "framework_config.h" // Must be included before DebugTrace.h to ensure framework_config.h is processed first
- #include "DebugTrace.h"
- TRACE_INIT(JsonService)
+#include "framework_config.h" // Must be included before DebugTrace.h to ensure framework_config.h is processed first
+#include "DebugTrace.h"
+TRACE_INIT(JsonService)
 
- #include "JsonService.h"
- #include <cstdio>
- #include <cstdint>
- #include <vector>
- 
- /// @copydoc mergeDefaults
- nlohmann::json mergeDefaults(const nlohmann::json& target, const nlohmann::json& defaults) {
-     nlohmann::json result = target;
- 
-     for (auto it = defaults.begin(); it != defaults.end(); ++it) {
-         const std::string& key = it.key();
- 
-         if (!result.contains(key)) {
-             result[key] = it.value();
-         } else if (result[key].is_object() && it.value().is_object()) {
-             result[key] = mergeDefaults(result[key], it.value());
-         }
-     }
- 
-     return result;
- }
- 
- /// @copydoc JsonService::JsonService
- JsonService::JsonService(StorageManager* storage)
-     : storage(storage) {}
- 
+#include "JsonService.h"
+#include <cstdio>
+#include <cstdint>
+#include <vector>
+
+/// @copydoc mergeDefaults
+nlohmann::json mergeDefaults(const nlohmann::json &target, const nlohmann::json &defaults)
+{
+    nlohmann::json result = target;
+
+    for (auto it = defaults.begin(); it != defaults.end(); ++it)
+    {
+        const std::string &key = it.key();
+
+        if (!result.contains(key))
+        {
+            result[key] = it.value();
+        }
+        else if (result[key].is_object() && it.value().is_object())
+        {
+            result[key] = mergeDefaults(result[key], it.value());
+        }
+    }
+
+    return result;
+}
+
+/// @copydoc JsonService::JsonService
+JsonService::JsonService(StorageManager *storage)
+    : storage(storage) {}
+
 /// @copydoc JsonService::load
-bool JsonService::load(const std::string& path)
+bool JsonService::load(const std::string &path)
 {
     std::vector<uint8_t> buffer;
-    if (!storage->readFile(path, buffer)) {
+    if (!storage->readFile(path, buffer))
+    {
+        TRACE("Failed to read JSON file: %s\n", path.c_str());
         return false;
     }
 
     std::string str(buffer.begin(), buffer.end());
 
     // Treat empty file as valid empty object
-    if (str.empty()) {
+    if (str.empty())
+    {
         data_ = nlohmann::json::object();
         return true;
     }
 
-    data_ = nlohmann::json::parse(str, nullptr, false);  // No exceptions
+    data_ = nlohmann::json::parse(str, nullptr, false); // No exceptions
     return !data_.is_discarded();
 }
-    
- /// @copydoc JsonService::save
- bool JsonService::save(const std::string& path) const {
-     if (!storage) return false;
- 
-     std::string content = data_.dump(2);  // Pretty print
-     std::vector<uint8_t> buffer(content.begin(), content.end());
- 
-     return storage->writeFile(path, buffer);
- }
- 
- /// @copydoc JsonService::data
- nlohmann::json& JsonService::data() {
-     return data_;
- }
- 
- /// @copydoc JsonService::data const
- const nlohmann::json& JsonService::data() const {
-     return data_;
- }
- 
- /// @copydoc JsonService::root
- nlohmann::json& JsonService::root() {
-     return data_;
- }
- 
- /// @copydoc JsonService::root const
- const nlohmann::json& JsonService::root() const {
-     return data_;
- }
- 
- /// @copydoc JsonService::operator*
- nlohmann::json& JsonService::operator*() {
-     return data_;
- }
- 
- /// @copydoc JsonService::operator* const
- const nlohmann::json& JsonService::operator*() const {
-     return data_;
- }
- 
+
+/// @copydoc JsonService::save
+bool JsonService::save(const std::string &path) const
+{
+    if (!storage)
+        return false;
+
+    std::string content = data_.dump(2); // Pretty print
+    std::vector<uint8_t> buffer(content.begin(), content.end());
+
+    bool ok = storage->writeFile(path, buffer);
+    TRACE("Saving JSON file to %s: %s\n", path.c_str(), ok ? "ok" : "failed");
+    return ok;
+}
+
+/// @copydoc JsonService::data
+nlohmann::json &JsonService::data()
+{
+    return data_;
+}
+
+/// @copydoc JsonService::data const
+const nlohmann::json &JsonService::data() const
+{
+    return data_;
+}
+
+/// @copydoc JsonService::root
+nlohmann::json &JsonService::root()
+{
+    return data_;
+}
+
+/// @copydoc JsonService::root const
+const nlohmann::json &JsonService::root() const
+{
+    return data_;
+}
+
+/// @copydoc JsonService::operator*
+nlohmann::json &JsonService::operator*()
+{
+    return data_;
+}
+
+/// @copydoc JsonService::operator* const
+const nlohmann::json &JsonService::operator*() const
+{
+    return data_;
+}
+
+bool JsonService::hasValidData() const {
+    return !data_.is_discarded();
+}

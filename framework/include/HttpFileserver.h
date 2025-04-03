@@ -63,13 +63,13 @@
  /**
   * @brief HTTP-level controller for serving static files and directory listings.
   */
- class HttpFileServer
+ class HttpFileserver
  {
  public:
      /**
-      * @brief Construct a new HttpFileServer object.
+      * @brief Construct a new HttpFileserver object.
       */
-     HttpFileServer();
+     HttpFileserver();
  
      /**
       * @brief Handle requests for static file content.

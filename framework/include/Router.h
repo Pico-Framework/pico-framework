@@ -26,7 +26,7 @@
  
  #include "HttpRequest.h"
  #include "HttpResponse.h"
- #include "HttpFileserver.h"   // for HttpFileServer
+ #include "HttpFileserver.h"   // for HttpFileserver
  
  /**
   * @brief Function signature for HTTP route handlers.
@@ -155,23 +155,23 @@
  
      /**
       * @brief Get the file server instance.
-      * @return A reference to the internal HttpFileServer
+      * @return A reference to the internal HttpFileserver
       */
-     HttpFileServer& getFileHandler() { return fileServer; }
+     HttpFileserver& getFileHandler() { return fileServer; }
 
      /**
-      * @brief Serve static files from the internal HttpFileServer.
+      * @brief Serve static files from the internal HttpFileserver.
       */
      void serveStatic(Request &req, Response &res, const std::vector<std::string> &params);
 
     /**
-      * @brief Convenience method to list directory from the internal HttpFileServer.
+      * @brief Convenience method to list directory from the internal HttpFileserver.
       */
      void listDirectory(Request &req, Response &res, const std::vector<std::string> &params);
 
  
  private:
-     HttpFileServer fileServer; ///< Internal file server instance
+     HttpFileserver fileServer; ///< Internal file server instance
      std::unordered_map<std::string, std::vector<Route>> routes;
      std::string cached_token; ///< Cached Bearer token
      std::vector<Middleware> globalMiddleware;

@@ -32,7 +32,7 @@
 ## File Uploads & Static File Serving
 - [x] `MultipartParser` for `multipart/form-data` upload
 - [x] Overwrite protection on file uploads
-- [x] `HttpFileServer` for serving static files
+- [x] `HttpFileserver` for serving static files
 - [x] SD card writing via `FatFsStorageManager`
 
 ## Utilities & Helpers

@@ -315,6 +315,51 @@
          .set("Content-Type", "application/json")
          .send("{\"error\": \"Unauthorized\"}");
  }
+
+ /**
+ * @copydoc Response::sendNotFound()
+ */
+void Response::sendNotFound() {
+    return status(404)
+        .setContentType("application/json")
+        .send(R"({"error": "Not Found"})");
+}
+
+/**
+ * @copydoc Response::endServerError()
+ */
+void Response::endServerError(const std::string& message) {
+    return status(500)
+        .setContentType("application/json")
+        .send("{\"error\": \"" + message + "\"}");
+}
+
+/**
+ * @copydoc Response::json()
+ */
+Response& Response::json(const std::string& body) {
+    this->set("Content-Type", "application/json")
+        .send(body);
+        return *this;
+}
+
+/**
+ * @copydoc Response::text()
+ */
+Response& Response::text(const std::string& body) {
+    this->set("Content-Type", "text/plain")
+        .send(body);
+        return *this;
+}
+
+Response& Response::redirect(const std::string& url, int code) {
+    this->status(code)
+        .set("Location", url)
+        .send("");
+    return *this;
+}
+
+
  
  /**
   * @copydoc Response::renderTemplate()
