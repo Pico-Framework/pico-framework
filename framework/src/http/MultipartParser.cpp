@@ -294,12 +294,17 @@ State MultipartParser::currentState = SEARCHING_FOR_BOUNDARY; // Initialize stat
  {
      std::ostringstream oss;
      oss << "HTTP/1.1 " << statusCode << " OK\r\n"
-         << "Content-Type: text/plain\r\n\r\n"
+         << "Content-Type: text/plain\r\n"
          << "Content-Length: " << message.length() << "\r\n"
          << "Connection: close\r\n"
          << "\r\n"
          << message;
  
-     lwip_send(clientSocket, oss.str().c_str(), oss.str().length(), 0);
+     std::string response = oss.str();
+     lwip_send(clientSocket, response.c_str(), response.length(), 0);
+ 
+     // Properly close the connection
+     vTaskDelay(pdMS_TO_TICKS(50));                   // Optional flush delay
+     lwip_close(clientSocket);                        // Fully close socket
  }
  
