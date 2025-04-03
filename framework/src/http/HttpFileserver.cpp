@@ -91,7 +91,7 @@
  /// @copydoc FileHandler::serveFile
  bool FileHandler::serveFile(Response& res, const char* uri)
  {
-     std::string path = std::string("/sd0") + uri;
+     std::string path = uri;
  
      storageManager = AppContext::getFatFsStorage();
  
