@@ -13,13 +13,18 @@
  * @copyright Copyright (c) 2025, Ian Archbell
  */
 
- #include "AppContext.h"
+#include "framework_config.h"
+#include "DebugTrace.h"
+TRACE_INIT(AppContext);
+
+#include "AppContext.h"
 #include "FatFsStorageManager.h"
 
 FatFsStorageManager* AppContext::getFatFsStorage() {
     if (!fatFs) {
         static FatFsStorageManager instance;
         fatFs = &instance;
+        TRACE("FatFsStorageManager initialized");
         fatFs->mount();  // Optional: auto-mount here
     }
     return fatFs;

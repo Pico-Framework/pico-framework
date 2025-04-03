@@ -56,7 +56,7 @@
       * and writes file contents to storage.
       * 
       * @return true if upload succeeds.
-      * @return false on failure (malformed request, existing file, or write error).
+      * @return false on failure (mazlformed request, existing file, or write error).
       */
      bool handleMultipart();
  
