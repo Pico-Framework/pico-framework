@@ -214,6 +214,7 @@
          if (request.isMultipart()) {
              TRACE("Multipart request detected\n");
              request.handle_multipart(clientSocket, request);
+             TRACE("Multipart request handled\n");
              return request;
          }
          printf("Non-multipart request detected\n");
