@@ -183,9 +183,10 @@ void HttpServer::acceptClientConnections()
             vTaskDelay(pdMS_TO_TICKS(1000));
             continue;
         }
-
+        // Could add switch in here to switch between main server task and a task per client
         printf("Client connected on socket %d, spawning task...\n", clientSocket);
         handleClient(clientSocket); // Handle the client in same task as we can only handle two max and saves stack size
+        lwip_close(clientSocket);       // Ensure cleanup after handling
         //startHandlingClient(clientSocket);
     }
 }
