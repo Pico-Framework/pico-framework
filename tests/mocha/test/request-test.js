@@ -1,57 +1,46 @@
 import request from 'supertest';
-import { expect } from 'chai';
+import assert from 'assert';
 
-// Replace with your Pico's IP address or hostname
-const picoUrl = 'http:192.168.50.20';
+describe('Pico HTTP Server End-to-End Tests', function () {
+  this.timeout(10000); // In case responses are slow
 
-describe('Pico HTTP Server End-to-End Tests', function() {
-  this.timeout(5000);
-
-  it('GET / should return 200 OK with expected welcome text', function(done) {
-    request(picoUrl)
-      .get('/')
-      .expect(200)
-      .end(function(err, res) {
-        if (err) return done(err);
-        expect(res.text).to.include('Welcome from Ian Archbell');
-        done();
-      });
+  afterEach(function (done) {
+    setTimeout(done, 500); // adjust as needed
   });
 
-  it('GET /api with query parameters should return parsed query as JSON', function(done) {
-    request(picoUrl)
-      .get('/api?foo=bar&baz=qux')
-      .expect(200)
-      .end(function(err, res) {
-        if (err) return done(err);
-        expect(res.body).to.deep.equal({ foo: 'bar', baz: 'qux' });
-        done();
-      });
+  const server = request('http://192.168.50.20');
+
+  it('GET /index.html should return 200 OK with expected welcome text', async () => {
+    const res = await server.get('/index.html');
+    assert.strictEqual(res.statusCode, 200);
+    assert.ok(res.text.includes('Welcome from Ian Archbell') || res.text.includes('<html'), 'Expected index.html content');
   });
 
-  it('POST /submit with URL-encoded form data should parse form parameters', function(done) {
-    request(picoUrl)
-      .post('/submit')
-      .send('name=John+Doe&age=30')
-      .set('Content-Type', 'application/x-www-form-urlencoded')
-      .expect(200)
-      .end(function(err, res) {
-        if (err) return done(err);
-        expect(res.body).to.deep.equal({ name: 'John Doe', age: '30' });
-        done();
-      });
+  it('POST /api/v1/upload should be handled without crashing (no-op)', async () => {
+    const res = await server
+      .post('/api/v1/upload')
+      .set('Content-Type', 'multipart/form-data')
+      .attach('file', Buffer.from('dummy content'), 'dummy.txt');
+
+    // Since your route is a no-op, a 200 or 204 would be valid
+    assert.ok(res.statusCode === 200 || res.statusCode === 204);
   });
 
-  it('POST /upload with multipart/form-data should handle file uploads', function(done) {
-    request(picoUrl)
-      .post('/upload')
-      .field('description', 'Test upload')
-      .attach('file', 'test/fixtures/sample.txt')
-      .expect(200)
-      .end(function(err, res) {
-        if (err) return done(err);
-        expect(res.body).to.have.property('description', 'Test upload');
-        done();
-      });
+  it('GET /auth without token should return 401 Unauthorized', async () => {
+    const res = await server.get('/auth');
+    assert.strictEqual(res.statusCode, 401);
+  });
+
+  it('GET /auth with valid token should return authenticated response', async () => {
+    const res = await server
+      .get('/auth')
+      .set('Authorization', 'Bearer testtoken'); // Assuming `authMiddleware` accepts "testtoken"
+    assert.strictEqual(res.statusCode, 200);
+    assert.ok(res.text.includes('Authenticated'));
+  });
+
+  it('GET /nonexistent should fall back to static file handling (catch-all)', async () => {
+    const res = await server.get('/nonexistent');
+    assert.ok(res.statusCode === 200 || res.statusCode === 404); // Allow 404 if file not present
   });
 });

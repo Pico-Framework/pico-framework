@@ -27,10 +27,10 @@
  #define MEMP_MEM_MALLOC                 0   // Use static memory pools rather than malloc for internal allocations
  #define MEM_ALIGNMENT                   4   // Align memory to 4-byte boundaries
  #define MEM_SIZE                        (16 * 1024)  // Total heap size available to lwIP (16 KB); prevents silent issues at lower sizes [may be able to lower]
- #define MEMP_NUM_NETCONN                8   // Maximum number of simultaneously active netconns (was 32)
- #define MEMP_NUM_TCP_PCB                8   // Maximum number of concurrently active TCP protocol control blocks (was 32)
- #define MEMP_NUM_TCP_PCB_LISTEN         8   // Maximum number of listening TCP PCBs [shouldn't need 32]
- #define MEMP_NUM_TCP_SEG                32  // Maximum number of simultaneously queued TCP segments [shouldn't need 32]
+ #define MEMP_NUM_NETCONN                64  // Maximum number of simultaneously active netconns (was 32)
+ #define MEMP_NUM_TCP_PCB                16   // Maximum number of concurrently active TCP protocol control blocks 
+ #define MEMP_NUM_TCP_PCB_LISTEN         8   // Maximum number of listening TCP PCBs 
+ #define MEMP_NUM_TCP_SEG                64  // Maximum number of simultaneously queued TCP segments 
  #define MEMP_NUM_ARP_QUEUE              10  // Maximum number of ARP request queue entries
  #define MEMP_NUM_NETBUF                 16  // Maximum number of network buffers
  #define MEMP_NUM_SYS_TIMEOUT            16  // Maximum number of active timeouts (old value; increased from 10)
@@ -55,10 +55,11 @@
  #define TCP_MSS                         1460 // Maximum segment size (bytes)
  #define TCP_SND_BUF                     (8 * TCP_MSS) // Size of TCP sender buffer (bytes)
  #define TCP_WND                         (8 * TCP_MSS) // TCP receive window size (bytes)
- #define TCP_SND_QUEUELEN                ((4 * (TCP_SND_BUF) + (TCP_MSS - 1)) / TCP_MSS) // Calculate send queue length
- #define TCP_LISTEN_BACKLOG              1   // Enable support for backlog on TCP listen
+ //#define TCP_SND_QUEUELEN                ((4 * (TCP_SND_BUF) + (TCP_MSS - 1)) / TCP_MSS) // Calculate send queue length
+ #define TCP_SND_QUEUELEN                32   // Calculate send queue length
+ #define TCP_LISTEN_BACKLOG              1    // Enable support for backlog on TCP listen
  #define TCP_MSL                         1000 // Maximum Segment Lifetime (ms) [reduces TIME_WAIT duration]
- #define TCP_SYNMAXRTX                   3   // Maximum retransmissions for SYN segments
+ #define TCP_SYNMAXRTX                   3    // Maximum retransmissions for SYN segments
  
  // TCP Keepalive settings:
  #define LWIP_TCP_KEEPALIVE              1   // Enable TCP keepalive functionality
