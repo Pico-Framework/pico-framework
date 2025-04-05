@@ -3,11 +3,13 @@
 #include <string>
 #include <unordered_map>
 
-struct HttpResponse {
-    int statusCode = 0;
-    std::string body;
-    std::unordered_map<std::string, std::string> headers;
-};
+namespace {
+    struct HttpResponse {
+        int statusCode = 0;
+        std::string body;
+        std::unordered_map<std::string, std::string> headers;
+    };
+}
 
 class HttpClient {
 public:
