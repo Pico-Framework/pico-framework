@@ -71,6 +71,7 @@ target_sources(pico_framework
         src/http/HttpRequest.cpp
         src/http/HttpResponse.cpp
         src/http/HttpFileserver.cpp
+        src/http/HttpParser.cpp
         #src/http/JwtAuthenticator.cpp #moved to conditional above
         src/http/JsonRequestHelper.cpp # (not mandatory, e.g. auto name = JsonRequestHelper::getString(req, "user.name");)
         # or if (JSON::hasField(req, "auth.token")) { ... } JSON is a macro for JsonRequestHelper
@@ -93,7 +94,6 @@ target_sources(pico_framework
         src/http/JsonResponse.cpp
 )
 
-
 target_link_libraries(pico_framework PUBLIC
         pico_async_context_freertos         # needed for async context used in freeertos port
         FreeRTOS-Kernel-Heap4               # needed for FreeRTOS kernel, we use heap 4 for now
@@ -110,7 +110,7 @@ if (PICO_HTTP_ENABLE_JWT)
 endif()
 
 if(PICO_HTTP_CLIENT_ENABLE_TLS)
-    target_link_libraries(pico_framework PRIVATE mbedtls mbedx509 mbedcrypto)
+    target_link_libraries(pico_framework PRIVATE pico_mbedtls)
 endif()
 
 # Public headers (flat include path for now)
@@ -154,6 +154,5 @@ else()
 endif()
 
 add_subdirectory(lib)
-
 
 

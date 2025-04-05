@@ -62,4 +62,29 @@ option(PICO_HTTP_TLS_VERIFY "Enable certificate verification for TLS connections
 # Add subdirectories
 add_subdirectory(framework)
 
+# Dummy executable to measure memory usage of the framework
+add_executable(framework_test framework/src/main.cpp)
+target_link_libraries(framework_test pico_framework)
 
+# Ensure CMAKE_SIZE and CMAKE_OBJDUMP are set
+find_program(CMAKE_SIZE arm-none-eabi-size)
+find_program(CMAKE_OBJDUMP arm-none-eabi-objdump)
+
+if (NOT CMAKE_SIZE)
+    message(FATAL_ERROR "CMAKE_SIZE (arm-none-eabi-size) not found")
+endif()
+if (NOT CMAKE_OBJDUMP)
+    message(FATAL_ERROR "CMAKE_OBJDUMP (arm-none-eabi-objdump) not found")
+endif()
+
+# Create post-build diagnostics as a separate target
+add_custom_target(report_memory ALL
+    DEPENDS framework_test
+    COMMAND ${CMAKE_SIZE} $<TARGET_FILE:framework_test>
+    COMMAND ${CMAKE_OBJDUMP} -h $<TARGET_FILE:framework_test>
+    COMMAND ${CMAKE_COMMAND}
+        -DPATH_TO_ELF=$<TARGET_FILE:framework_test>
+        -DCMAKE_OBJDUMP=${CMAKE_OBJDUMP}
+        -P ${CMAKE_CURRENT_SOURCE_DIR}/tools/report_memory.cmake
+    COMMENT "📊 Running Framework RAM usage analysis..."
+)
