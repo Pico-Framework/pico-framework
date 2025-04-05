@@ -20,7 +20,7 @@ This document provides an overview of implemented features, utilities, and syste
 - [x] Lightweight embedded HTTP server
 - [x] Routing system with method/path matching
 - [x] Middleware support (per-route, chainable)
-- [x] Request & Response abstractions
+- [x] HttpRequest & HttpResponse abstractions
 - [x] Static file serving (SD/FatFs)
 - [x] Multipart form parsing
 - [x] MIME type detection
@@ -112,7 +112,7 @@ This document provides an overview of implemented features, utilities, and syste
 ## ✅ Testing (Planned)
 
 - [ ] CppUTest integration
-- [ ] Unit tests for Router, Controller, Request, etc.
+- [ ] Unit tests for Router, Controller, HttpRequest, etc.
 - [ ] End-to-end route + HTTP tests
 
 ---

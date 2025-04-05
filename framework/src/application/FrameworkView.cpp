@@ -15,7 +15,7 @@
  * Example usage:
  * 
  * @code  
- * void handleHome(Request& req, Response& res) {
+ * void handleHome(HttpRequest& req, HttpResponse& res) {
  *    std::map<std::string, std::string> context = {
  *           {"name", "Alice"},
  *           {"time", getCurrentTimeString()}

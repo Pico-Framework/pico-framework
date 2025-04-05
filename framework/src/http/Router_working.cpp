@@ -50,7 +50,7 @@ bool Router::extractAuthorizationToken(const std::string &auth_header) {
     return false;  // Invalid Authorization header format
 }
 
-std::string Router::getAuthorizationToken(const Request &req) {
+std::string Router::getAuthorizationToken(const HttpRequest &req) {
     // If cached_token is empty, extract it from the header
     if (cached_token.empty()) {
         std::string auth_header = req.getHeader("Authorization");
@@ -63,26 +63,21 @@ std::string Router::getAuthorizationToken(const Request &req) {
     return cached_token;  // Return the cached token (could be empty if not set)
 }
 
-bool Router::handle_auth_req(Request &req, Response &res, const std::vector<std::string> &params)
+bool Router::handle_auth_req(HttpRequest &req, HttpResponse &res, const std::vector<std::string> &params)
 {   
     TRACE("Handling /auth\n");
     // Check for the Authorization header
     std::string auth_header = req.getHeader("Authorization");
     if (auth_header.empty()) {
         printf("Missing Authorization header\n");
-        res.status(401)
-           .set("Content-Type", "application/json")
-           .send("{\"error\":\"Missing Authorization header\"}");
+        JsonResponse::sendError(res, 401, "UNAUTHORIZED", "Missing Authorization header");
         return false;
     }
     else{
         std ::string token = getAuthorizationToken(req);
-        TRACE("Token: %s\n", token.c_str());
-        res.status(200)
-           .set("Content-Type", "application/json")
-           .send("{\"token\":\"" +  token + "\"}"); 
-            TRACE("Authorization header: %s\n", auth_header.c_str());
-           return true;
+        TRACE("Token: %s\n", token.c_str());    
+        JsonResponse::sendSuccess(res, {{"token", token}}, "Authorization successful");
+        return true;
     }
 }
 
@@ -116,7 +111,7 @@ void Router::addRoute(const std::string& method,
 
     regex_pattern += "$";  // Anchor regex
 
-    RouteHandler finalHandler = [handler, this, middleware](Request &req, Response &res, const std::vector<std::string> &params) {
+    RouteHandler finalHandler = [handler, this, middleware](HttpRequest &req, HttpResponse &res, const std::vector<std::string> &params) {
         // Run global middleware first
         for (const auto& mw : this->globalMiddleware) {  // Use `this->` to access class members
             if (!mw(req, res, params)) return;  // 🚨 Stop if middleware fails
@@ -146,7 +141,7 @@ bool authenticateUser(const std::string& userId, const std::string& password) {
         std::string userName = "John Doe";  // Example user name
  
         // Generate the token
-        std::string jwtToken = Authenticator::getInstance().generateJWT(userId, userName);
+        std::string jwtToken = JwtAuthenticator::getInstance().generateJWT(userId, userName);
 
         // Now you can send this token to the client (e.g., via HTTP response body or as a cookie)
         //std::cout << "Generated JWT: " << jwtToken << std::endl;
@@ -157,7 +152,7 @@ bool authenticateUser(const std::string& userId, const std::string& password) {
 
 // Function to extract the JWT token from the Authorization header
 
-std::string getAuthorizationToken(const Request& req) {
+std::string getAuthorizationToken(const HttpRequest& req) {
     // Look for the Authorization header in the request
 
     auto it = req.getHeaders().find("authorization");
@@ -176,17 +171,17 @@ std::string getAuthorizationToken(const Request& req) {
 }
 
 // Function to check if the route is authorized
-bool Router::isAuthorizedForRoute(const Route& route, Request& req, Response& res) {
+bool Router::isAuthorizedForRoute(const Route& route, HttpRequest& req, HttpResponse& res) {
     // Check if the route requires authorization
     if (route.requires_auth) {
         printf("Authorization required for route: %s\n", route.path.c_str());
         // Extract token from Authorization header
         std::string token = getAuthorizationToken(req);  // You would have a function like this to get the token
         TRACE("Token: %s\n", token.c_str());
-        bool validated = Authenticator::getInstance().validateJWT(token);
+        bool validated = JwtAuthenticator::getInstance().validateJWT(token);
         TRACE("Token validated: %s\n", validated ? "true" : "false");
-        if (token.empty() || !Authenticator::getInstance().validateJWT(token), true) {  // Token is missing or invalid
-            res.status(401).send("Unauthorized");  // Send a 401 Unauthorized response
+        if (token.empty() || !JwtAuthenticator::getInstance().validateJWT(token), true) {  // Token is missing or invalid
+            JsonResponse::sendError(res, 401, "UNAUTHORIZED", "Invalid or missing token");
             printf("Authorization failed - route handled\n");
             return false;  // Authorization failed
         }
@@ -198,12 +193,12 @@ bool Router::isAuthorizedForRoute(const Route& route, Request& req, Response& re
 }
 
 //----- handleRequest
-bool Router::handleRequest(int client_socket, const char* method, const char* uri, Request& req)
+bool Router::handleRequest(int client_socket, const char* method, const char* uri, HttpRequest& req)
 {    
     printf("Router handling request: %s %s on socket %d\n", method, uri, client_socket);
  
-    // Build Response object
-    Response res(client_socket); 
+    // Build HttpResponse object
+    HttpResponse res(client_socket); 
 
     // Find routes for the method
     auto it = routes.find(method);

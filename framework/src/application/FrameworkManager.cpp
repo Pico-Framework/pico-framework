@@ -23,6 +23,7 @@
  #include "AppContext.h"
  #include <iostream>
  #include "framework_config.h"
+ #include "JwtAuthenticator.h"
  
  /// @copydoc FrameworkManager::xNetworkTaskBuffer
  StaticTask_t FrameworkManager::xNetworkTaskBuffer;
@@ -36,9 +37,9 @@
  
  /// @copydoc FrameworkManager::start
  void FrameworkManager::start() {
+    
      setupTraceFromConfig();
      std::cout << "Initializing framework..." << std::endl;
-
  
      // Launch only the network task
      networkTaskHandle = xTaskCreateStatic(

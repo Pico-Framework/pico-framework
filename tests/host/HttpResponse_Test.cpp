@@ -24,7 +24,7 @@ TEST_GROUP(HttpResponse)
 
 TEST(HttpResponse, SendMethodSendsHeadersAndBody)
 {
-    Response resp(1);
+    HttpResponse resp(1);
     std::string body = "Hello World";
     // Calling send() should send headers (if not already sent) and then the body.
     resp.send(body);
@@ -47,7 +47,7 @@ TEST(HttpResponse, SendMethodSendsHeadersAndBody)
 
 TEST(HttpResponse, SetAndGetAuthorizationHeader)
 {
-    Response resp(1);
+    HttpResponse resp(1);
     resp.setAuthorization("mytoken");
     resp.send("Test");
     
@@ -57,7 +57,7 @@ TEST(HttpResponse, SetAndGetAuthorizationHeader)
 
 TEST(HttpResponse, SetCookieAndClearCookie)
 {
-    Response resp(1);
+    HttpResponse resp(1);
     resp.setCookie("token", "abc123", "HttpOnly; Path=/");
     resp.clearCookie("token", "Path=/");
     resp.send("Cookie Test");
@@ -69,7 +69,7 @@ TEST(HttpResponse, SetCookieAndClearCookie)
 
 TEST(HttpResponse, SendHeadersOnlySendsOnce)
 {
-    Response resp(1);
+    HttpResponse resp(1);
     resp.set("X-Test", "value");
     resp.sendHeaders();
     
@@ -83,7 +83,7 @@ TEST(HttpResponse, SendHeadersOnlySendsOnce)
 
 TEST(HttpResponse, StartMethodSendsInitialHeaders)
 {
-    Response resp(1);
+    HttpResponse resp(1);
     resp.start(404, 10, "application/json");
     
     STRCMP_CONTAINS("HTTP/1.1 404 Not Found", g_lwip_sent_buffer.c_str());
@@ -93,7 +93,7 @@ TEST(HttpResponse, StartMethodSendsInitialHeaders)
 
 TEST(HttpResponse, WriteChunkSendsData)
 {
-    Response resp(1);
+    HttpResponse resp(1);
     // First, send headers.
     resp.start(200, 20, "text/plain");
     // Clear buffer so we capture only the chunk.
@@ -107,7 +107,7 @@ TEST(HttpResponse, WriteChunkSendsData)
 
 TEST(HttpResponse, SendUnauthorizedSendsProperResponse)
 {
-    Response resp(1);
+    HttpResponse resp(1);
     resp.sendUnauthorized();
     
     // Verify that status is set to 401 and correct headers/body are sent.
@@ -118,7 +118,7 @@ TEST(HttpResponse, SendUnauthorizedSendsProperResponse)
 
 TEST(HttpResponse, RenderTemplateReplacesPlaceholders)
 {
-    Response resp(1);
+    HttpResponse resp(1);
     std::map<std::string, std::string> context;
     context["name"] = "John";
     context["age"] = "30";
@@ -129,11 +129,11 @@ TEST(HttpResponse, RenderTemplateReplacesPlaceholders)
     STRCMP_EQUAL("Hello, John. You are 30 years old.", rendered.c_str());
 }
 
-// Additional tests for the remaining Response functions
+// Additional tests for the remaining HttpResponse functions
 
 TEST(HttpResponse, FinishDoesNotSendAdditionalData)
 {
-    Response resp(1);
+    HttpResponse resp(1);
     // First, send something so headers and body are written.
     resp.send("Body");
     size_t initialSize = g_lwip_sent_buffer.size();
@@ -144,13 +144,13 @@ TEST(HttpResponse, FinishDoesNotSendAdditionalData)
 
 TEST(HttpResponse, GetSocketReturnsConstructorValue)
 {
-    Response resp(42);
+    HttpResponse resp(42);
     LONGS_EQUAL(42, resp.getSocket());
 }
 
 TEST(HttpResponse, SetContentTypeSetsCustomContentType)
 {
-    Response resp(1);
+    HttpResponse resp(1);
     // Set a custom content type.
     resp.setContentType("application/json");
     resp.send("Test");
@@ -159,7 +159,7 @@ TEST(HttpResponse, SetContentTypeSetsCustomContentType)
 
 TEST(HttpResponse, SetHeaderAddsCustomHeader)
 {
-    Response resp(1);
+    HttpResponse resp(1);
     // setHeader should add a header to the internal headers map.
     resp.setHeader("X-Custom", "foo");
     resp.send("Test");
@@ -168,7 +168,7 @@ TEST(HttpResponse, SetHeaderAddsCustomHeader)
 
 TEST(HttpResponse, RedirectSendsProperRedirectResponse)
 {
-    Response resp(1);
+    HttpResponse resp(1);
     // The redirect() helper should set the proper status and Location header.
     resp.redirect("http://example.com", 302);
     STRCMP_CONTAINS("HTTP/1.1 302", g_lwip_sent_buffer.c_str());
@@ -179,7 +179,7 @@ TEST(HttpResponse, RedirectSendsProperRedirectResponse)
 
 TEST(HttpResponse, SendNotFoundSends404Response)
 {
-    Response resp(1);
+    HttpResponse resp(1);
     resp.sendNotFound();
     STRCMP_CONTAINS("HTTP/1.1 404 Not Found", g_lwip_sent_buffer.c_str());
     STRCMP_CONTAINS("Content-Type: application/json", g_lwip_sent_buffer.c_str());
@@ -188,7 +188,7 @@ TEST(HttpResponse, SendNotFoundSends404Response)
 
 TEST(HttpResponse, EndServerErrorSends500Response)
 {
-    Response resp(1);
+    HttpResponse resp(1);
     resp.endServerError("Oops");
     STRCMP_CONTAINS("HTTP/1.1 500 Internal Server Error", g_lwip_sent_buffer.c_str());
     STRCMP_CONTAINS("Content-Type: application/json", g_lwip_sent_buffer.c_str());
@@ -197,16 +197,16 @@ TEST(HttpResponse, EndServerErrorSends500Response)
 
 TEST(HttpResponse, JsonSendsJsonResponse)
 {
-    Response resp(1);
+    HttpResponse resp(1);
     // The json() helper sets Content-Type and sends the JSON string.
-    resp.json("{\"ok\":true}");
+    resp.json(std::string("{\"ok\":true}"));
     STRCMP_CONTAINS("Content-Type: application/json", g_lwip_sent_buffer.c_str());
     STRCMP_CONTAINS("{\"ok\":true}", g_lwip_sent_buffer.c_str());
 }
 
 TEST(HttpResponse, TextSendsPlainTextResponse)
 {
-    Response resp(1);
+    HttpResponse resp(1);
     // The text() helper should set Content-Type to text/plain and send the text.
     resp.text("Hello");
     STRCMP_CONTAINS("Content-Type: text/plain", g_lwip_sent_buffer.c_str());
@@ -215,7 +215,7 @@ TEST(HttpResponse, TextSendsPlainTextResponse)
 
 TEST(HttpResponse, SetStatusAliasWorks)
 {
-    Response resp(1);
+    HttpResponse resp(1);
     // Using setStatus (alias for status) should update the status code.
     resp.setStatus(404);
     resp.send("Test");

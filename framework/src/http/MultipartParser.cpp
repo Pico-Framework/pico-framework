@@ -42,7 +42,7 @@ TRACE_INIT(MultipartParser)
 State MultipartParser::currentState = SEARCHING_FOR_BOUNDARY; // Initialize state
 
 /// @copydoc MultipartParser::MultipartParser
-MultipartParser::MultipartParser(int clientSocket, const Request &request)
+MultipartParser::MultipartParser(int clientSocket, const HttpRequest &request)
     : clientSocket(clientSocket), request(request)
 {
     std::string contentType = request.getHeader("Content-Type");
@@ -319,18 +319,22 @@ bool MultipartParser::handleFinalBoundary(std::string &fileData)
 /// @copydoc MultipartParser::sendHttpResponse
 void MultipartParser::sendHttpResponse(int statusCode, const std::string &message)
 {
+    std::string code = std::to_string(statusCode);
+    std::string body = R"({"success":false,"error":{"code":")" + code +
+                       R"(","message":")" + message + R"("}})";
+
     std::ostringstream oss;
-    oss << "HTTP/1.1 " << statusCode << " OK\r\n"
-        << "Content-Type: text/plain\r\n"
-        << "Content-Length: " << message.length() << "\r\n"
+    oss << "HTTP/1.1 " << statusCode << " Bad Request\r\n"
+        << "Content-Type: application/json\r\n"
+        << "Content-Length: " << body.length() << "\r\n"
         << "Connection: close\r\n"
         << "\r\n"
-        << message;
+        << body;
 
     std::string response = oss.str();
     lwip_send(clientSocket, response.c_str(), response.length(), 0);
 
-    // Properly close the connection
-    vTaskDelay(pdMS_TO_TICKS(50)); // Optional flush delay
-    lwip_close(clientSocket);      // Fully close socket
+    // Graceful close
+    vTaskDelay(pdMS_TO_TICKS(50));
+    lwip_close(clientSocket);
 }

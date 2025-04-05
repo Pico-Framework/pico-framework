@@ -117,6 +117,16 @@
  // -----------------------------------------------------------------------------
  // ALTCP / Secure Sockets / TLS Support
  // -----------------------------------------------------------------------------
+ #ifdef PICO_HTTP_CLIENT_ENABLE_TLS
+ #define LWIP_ALTCP                  1
+ #define LWIP_ALTCP_TLS              1
+ #define LWIP_ALTCP_TLS_MBEDTLS      1
+#else
+ #define LWIP_ALTCP                  0
+ #define LWIP_ALTCP_TLS              0
+ #define LWIP_ALTCP_TLS_MBEDTLS      0
+#endif
+ 
  #define LWIP_ALTCP                      1   // Enable the ALTCP abstraction layer
  #define LWIP_ALTCP_TLS                  1   // Enable TLS support for ALTCP
  #define LWIP_ALTCP_TLS_MBEDTLS          1   // Use mbedTLS for ALTCP TLS support

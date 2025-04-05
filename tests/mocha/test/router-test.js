@@ -6,7 +6,7 @@ describe('Pico Routing Table End-to-End Tests', function () {
   this.timeout(10000);
 
   afterEach(function (done) {
-    setTimeout(done, 1000); // adjust as needed
+    setTimeout(done, 100); // adjust as needed
   });
 
   const server = request('http://192.168.50.20');
@@ -37,8 +37,21 @@ describe('Pico Routing Table End-to-End Tests', function () {
 
   it('POST /api/v1/programs should add a program', async () => {
     const res = await server
-      .post('/api/v1/programs')
-      .send({ name: 'testProgram', duration: 5 })
+      .post('/api/v1/programs/2')
+      .sendJson({
+    "name": "Program 2",
+    "start_time_z": "T21:02:00.0Z",
+    "zone_run_times": [
+        {
+            "zone_name": "Raspberries",
+            "runtime": 5
+        },
+        {
+            "zone_name": "Strawberries",
+            "runtime": 3
+        }
+    ]
+  })  
       .set('Content-Type', 'application/json');
     assert.strictEqual(res.statusCode, 200);
   });

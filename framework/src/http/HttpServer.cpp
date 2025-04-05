@@ -229,21 +229,21 @@ void HttpServer::handleClient(int clientSocket)
 
     printf("Handling client socket: %d\n", clientSocket);
 
-    Request req = Request::receive(clientSocket);
+    HttpRequest req = HttpRequest::receive(clientSocket);
     std::string clientIp = getClientIpFromSocket(clientSocket);
     req.setClientIp(clientIp);
 
     std::cout << "Client IP: " << clientIp << std::endl;
-    std::cout << "Request received: " << req.getMethod() << " " << req.getPath() << std::endl;
-    std::cout << "Request content length: " << req.getContentLength() << std::endl;
-    std::cout << "Request content type: " << req.getContentType() << std::endl;
-    std::cout << "Request boundary: " << req.getBoundary() << std::endl;
-    std::cout << "Request is multipart: " << (req.isMultipart() ? "true" : "false") << std::endl;
-    std::cout << "Request header count: " << req.getHeaders().size() << std::endl;
-    std::cout << "Request method (lowercase): " << toLower(req.getMethod()) << std::endl;
-    std::cout << "Request url: " << req.getUrl() << std::endl;
-    std::cout << "Request path: " << req.getPath() << std::endl;
-    std::cout << "Request query: " << req.getQuery() << std::endl;
+    std::cout << "HttpRequest received: " << req.getMethod() << " " << req.getPath() << std::endl;
+    std::cout << "HttpRequest content length: " << req.getContentLength() << std::endl;
+    std::cout << "HttpRequest content type: " << req.getContentType() << std::endl;
+    std::cout << "HttpRequest boundary: " << req.getBoundary() << std::endl;
+    std::cout << "HttpRequest is multipart: " << (req.isMultipart() ? "true" : "false") << std::endl;
+    std::cout << "HttpRequest header count: " << req.getHeaders().size() << std::endl;
+    std::cout << "HttpRequest method (lowercase): " << toLower(req.getMethod()) << std::endl;
+    std::cout << "HttpRequest url: " << req.getUrl() << std::endl;
+    std::cout << "HttpRequest path: " << req.getPath() << std::endl;
+    std::cout << "HttpRequest query: " << req.getQuery() << std::endl;
 
     for (const auto &param : req.getQueryParams())
     {
@@ -262,8 +262,8 @@ void HttpServer::handleClient(int clientSocket)
 
     if (req.getContentLength() > 0)
     {
-        std::cout << "Request body length: " << req.getBody().length() << std::endl;
-        std::cout << "Request start of body index: " << req.getHeaderEnd() << std::endl;
+        std::cout << "HttpRequest body length: " << req.getBody().length() << std::endl;
+        std::cout << "HttpRequest start of body index: " << req.getHeaderEnd() << std::endl;
     }
 
     for (const auto &headr : req.getHeaders())
@@ -271,14 +271,14 @@ void HttpServer::handleClient(int clientSocket)
         std::cout << headr.first << ": " << headr.second << std::endl;
     }
 
-    std::cout << "Request body: " << req.getBody() << std::endl;
+    std::cout << "HttpRequest body: " << req.getBody() << std::endl;
 
     printf("\n===== HTTP CLIENT REQUEST =====\n");
     printf("Client request received: %s, path: %s\n", req.getMethod().c_str(), req.getPath().c_str());
-    printf("Request body: %s\n", req.getBody().c_str());
+    printf("HttpRequest body: %s\n", req.getBody().c_str());
 
     bool ok = router.handleRequest(clientSocket, req.getMethod().c_str(), req.getPath().c_str(), req);
-    printf("Request handled: %s\n", ok ? "true" : "false");
+    printf("HttpRequest handled: %s\n", ok ? "true" : "false");
 
     if (!ok)
     {

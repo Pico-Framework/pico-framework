@@ -14,7 +14,7 @@
  * 
  * To create your own middleware:
  * @code
- * Middleware myMiddleware = [](Request& req, Response& res, const auto& params) {
+ * Middleware myMiddleware = [](HttpRequest& req, HttpResponse& res, const auto& params) {
  *     Check something
  *     return true;
  * };
@@ -46,7 +46,7 @@
   * @param params Path parameters captured by the router.
   * @return true to continue to the next middleware or handler; false to halt processing.
   */
- using Middleware = std::function<bool(Request&, Response&, const std::vector<std::string>&)>;
+ using Middleware = std::function<bool(HttpRequest&, HttpResponse&, const std::vector<std::string>&)>;
  
  /**
   * @brief Authentication middleware that checks for a valid JWT in the Authorization header.
@@ -57,7 +57,7 @@
   * Example: Register route with per-route middleware
   * 
   * router.addRoute("GET", "/secure/data", { authMiddleware, loggingMiddleware },
-  *     [](Request& req, Response& res, const std::vector<std::string>& params)
+  *     [](HttpRequest& req, HttpResponse& res, const std::vector<std::string>& params)
   *     {
   *         res.json({{"message", "You are authenticated!"}});
   *     }

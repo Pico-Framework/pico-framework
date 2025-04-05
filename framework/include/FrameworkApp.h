@@ -87,7 +87,7 @@
       * 
       * Example:
       * @code
-      * router.addRoute("GET", "/", [](Request& req, Response& res, const std::vector<std::string>&) {
+      * router.addRoute("GET", "/", [](HttpRequest& req, HttpResponse& res, const std::vector<std::string>&) {
       *     res.send("Hello from root!");
       * });
       * @endcode

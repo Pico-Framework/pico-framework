@@ -1,7 +1,7 @@
 /**
  * @file HttpResponse.cpp
  * @author Ian Archbell
- * @brief Implementation of the Response class for managing and sending HTTP responses.
+ * @brief Implementation of the HttpResponse class for managing and sending HTTP responses.
  * 
  * Part of the PicoFramework HTTP server.
  * This module handles constructing HTTP responses, setting headers, and sending
@@ -35,10 +35,10 @@
  // ------------------------------------------------------------------------
  
  /**
-  * @brief Construct a new Response object.
+  * @brief Construct a new HttpResponse object.
   * @param sock Socket descriptor for the client connection.
   */
- Response::Response(int sock)
+ HttpResponse::HttpResponse(int sock)
      : sock(sock), status_code(200), headerSent(false)
  {
  }
@@ -48,53 +48,53 @@
  // ------------------------------------------------------------------------
  
  /**
-  * @copydoc Response::status()
+  * @copydoc HttpResponse::status()
   */
- Response& Response::status(int code)
+ HttpResponse& HttpResponse::status(int code)
  {
      status_code = code;
      return *this;
  }
  
  /**
-  * @copydoc Response::setStatus()
+  * @copydoc HttpResponse::setStatus()
   */
- Response& Response::setStatus(int code)
+ HttpResponse& HttpResponse::setStatus(int code)
  {
      return status(code);
  }
  
  /**
-  * @copydoc Response::set()
+  * @copydoc HttpResponse::set()
   */
- Response& Response::set(const std::string &field, const std::string &value)
+ HttpResponse& HttpResponse::set(const std::string &field, const std::string &value)
  {
      headers[field] = value;
      return *this;
  }
  
  /**
-  * @copydoc Response::setHeader()
+  * @copydoc HttpResponse::setHeader()
   */
- Response& Response::setHeader(const std::string &key, const std::string &value)
+ HttpResponse& HttpResponse::setHeader(const std::string &key, const std::string &value)
  {
      headers[key] = value;
      return *this;
  }
  
  /**
-  * @copydoc Response::setContentType()
+  * @copydoc HttpResponse::setContentType()
   */
- Response& Response::setContentType(const std::string &ct)
+ HttpResponse& HttpResponse::setContentType(const std::string &ct)
  {
      headers["Content-Type"] = ct;
      return *this;
  }
  
  /**
-  * @copydoc Response::setAuthorization()
+  * @copydoc HttpResponse::setAuthorization()
   */
- Response& Response::setAuthorization(const std::string &jwtToken)
+ HttpResponse& HttpResponse::setAuthorization(const std::string &jwtToken)
  {
      if (!jwtToken.empty())
      {
@@ -104,26 +104,26 @@
  }
  
  /**
-  * @copydoc Response::getContentType()
+  * @copydoc HttpResponse::getContentType()
   */
- std::string Response::getContentType() const
+ std::string HttpResponse::getContentType() const
  {
      auto it = headers.find("Content-Type");
      return (it != headers.end()) ? it->second : "text/html";
  }
  
  /**
-  * @copydoc Response::isHeaderSent()
+  * @copydoc HttpResponse::isHeaderSent()
   */
- bool Response::isHeaderSent() const
+ bool HttpResponse::isHeaderSent() const
  {
      return headerSent;
  }
  
  /**
-  * @copydoc Response::getSocket()
+  * @copydoc HttpResponse::getSocket()
   */
- int Response::getSocket() const
+ int HttpResponse::getSocket() const
  {
      return sock;
  }
@@ -133,7 +133,7 @@
   * @param code HTTP status code.
   * @return Corresponding status message.
   */
- std::string Response::getStatusMessage(int code)
+ std::string HttpResponse::getStatusMessage(int code)
  {
      switch (code)
      {
@@ -150,9 +150,9 @@
  // ------------------------------------------------------------------------
  
  /**
-  * @copydoc Response::setCookie()
+  * @copydoc HttpResponse::setCookie()
   */
- Response& Response::setCookie(const std::string& name, const std::string& value, const std::string& options)
+ HttpResponse& HttpResponse::setCookie(const std::string& name, const std::string& value, const std::string& options)
  {
      std::ostringstream cookie;
      cookie << name << "=" << value;
@@ -165,9 +165,9 @@
  }
  
  /**
-  * @copydoc Response::clearCookie()
+  * @copydoc HttpResponse::clearCookie()
   */
- Response& Response::clearCookie(const std::string& name, const std::string& options)
+ HttpResponse& HttpResponse::clearCookie(const std::string& name, const std::string& options)
  {
      std::ostringstream cookie;
      cookie << name << "=; Max-Age=0";
@@ -184,9 +184,9 @@
  // ------------------------------------------------------------------------
  
  /**
-  * @copydoc Response::send()
+  * @copydoc HttpResponse::send()
   */
- void Response::send(const std::string &body)
+ void HttpResponse::send(const std::string &body)
  {
      if (!headerSent)
      {
@@ -220,9 +220,9 @@
  }
  
  /**
-  * @copydoc Response::sendHeaders()
+  * @copydoc HttpResponse::sendHeaders()
   */
- void Response::sendHeaders()
+ void HttpResponse::sendHeaders()
  {
      if (!headerSent)
      {
@@ -250,9 +250,9 @@
  }
  
  /**
-  * @copydoc Response::start()
+  * @copydoc HttpResponse::start()
   */
- void Response::start(int code, size_t contentLength, const std::string &contentType)
+ void HttpResponse::start(int code, size_t contentLength, const std::string &contentType)
  {
      status_code = code;
      headers["Content-Length"] = std::to_string(contentLength);
@@ -276,9 +276,9 @@
  }
  
  /**
-  * @copydoc Response::writeChunk()
+  * @copydoc HttpResponse::writeChunk()
   */
- void Response::writeChunk(const char* data, size_t length)
+ void HttpResponse::writeChunk(const char* data, size_t length)
  {
      if (!headerSent)
      {
@@ -295,9 +295,9 @@
  }
  
  /**
-  * @copydoc Response::finish()
+  * @copydoc HttpResponse::finish()
   */
- void Response::finish()
+ void HttpResponse::finish()
  {
      // Placeholder for future expansion (e.g., chunked transfer end).
  }
@@ -307,9 +307,9 @@
  // ------------------------------------------------------------------------
  
  /**
-  * @copydoc Response::sendUnauthorized()
+  * @copydoc HttpResponse::sendUnauthorized()
   */
- void Response::sendUnauthorized()
+ void HttpResponse::sendUnauthorized()
  {
      this->status(401)
          .set("Content-Type", "application/json")
@@ -317,42 +317,50 @@
  }
 
  /**
- * @copydoc Response::sendNotFound()
+ * @copydoc HttpResponse::sendNotFound()
  */
-void Response::sendNotFound() {
+void HttpResponse::sendNotFound() {
     return status(404)
         .setContentType("application/json")
         .send(R"({"error": "Not Found"})");
 }
 
 /**
- * @copydoc Response::endServerError()
+ * @copydoc HttpResponse::endServerError()
  */
-void Response::endServerError(const std::string& message) {
+void HttpResponse::endServerError(const std::string& message) {
     return status(500)
         .setContentType("application/json")
         .send("{\"error\": \"" + message + "\"}");
 }
 
 /**
- * @copydoc Response::json()
+ * @copydoc HttpResponse::json()
  */
-Response& Response::json(const std::string& body) {
+HttpResponse& HttpResponse::json(const std::string& body) {
     this->set("Content-Type", "application/json")
         .send(body);
         return *this;
 }
+// send a json object
+HttpResponse& HttpResponse::json(const nlohmann::json& jsonObj) {
+    return json(jsonObj.dump());  // dump() creates a compact string
+}
+
+HttpResponse& HttpResponse::jsonFormatted(const nlohmann::json& jsonObj) {
+    return json(jsonObj.dump(2));  // dump() creates a compact string
+}
 
 /**
- * @copydoc Response::text()
+ * @copydoc HttpResponse::text()
  */
-Response& Response::text(const std::string& body) {
+HttpResponse& HttpResponse::text(const std::string& body) {
     this->set("Content-Type", "text/plain")
         .send(body);
         return *this;
 }
 
-Response& Response::redirect(const std::string& url, int code) {
+HttpResponse& HttpResponse::redirect(const std::string& url, int code) {
     this->status(code)
         .set("Location", url)
         .send("");
@@ -362,9 +370,9 @@ Response& Response::redirect(const std::string& url, int code) {
 
  
  /**
-  * @copydoc Response::renderTemplate()
+  * @copydoc HttpResponse::renderTemplate()
   */
- std::string Response::renderTemplate(const std::string& tpl, const std::map<std::string, std::string>& context)
+ std::string HttpResponse::renderTemplate(const std::string& tpl, const std::map<std::string, std::string>& context)
  {
      std::string result = tpl;
      for (const auto& [key, value] : context)

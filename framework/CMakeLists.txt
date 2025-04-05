@@ -7,6 +7,9 @@ if (DEFINED ENV{WIFI_PASSWORD} AND (NOT WIFI_PASSWORD))
     message("Using WIFI_PASSWORD from environment")
 endif()
 
+#get the memory usage
+set(PICO_PRINT_MEM_USAGE ON)
+
 # Framework library
 add_library(pico_framework)
 
@@ -17,9 +20,29 @@ target_compile_definitions(pico_framework PUBLIC
         WIFI_SSID=\"${WIFI_SSID}\"
         WIFI_PASSWORD=\"${WIFI_PASSWORD}\"
         CYW43_HOST_NAME="Pico-Framework"
-        ALTCP_MBEDTLS_AUTHMODE=MBEDTLS_SSL_VERIFY_REQUIRED
+        #ALTCP_MBEDTLS_AUTHMODE=MBEDTLS_SSL_VERIFY_REQUIRED #this does not trigger the mbedtls library to be linked
         NO_SYS=0
     ) 
+
+if(PICO_HTTP_TLS_VERIFY)
+    add_compile_definitions(ALTCP_MBEDTLS_AUTHMODE=MBEDTLS_SSL_VERIFY_REQUIRED)
+    target_sources(pico_framework PRIVATE
+        src/application/PasswordHasher.cpp
+    )
+else()
+    add_compile_definitions(ALTCP_MBEDTLS_AUTHMODE=MBEDTLS_SSL_VERIFY_NONE)
+endif()
+
+if(PICO_HTTP_CLIENT_ENABLE_TLS)
+    add_compile_definitions(PICO_HTTP_CLIENT_ENABLE_TLS=1)
+endif() 
+
+if(PICO_HTTP_ENABLE_JWT)
+    target_sources(pico_framework PRIVATE
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/http/JwtAuthenticator.cpp
+    )
+    add_compile_definitions(PICO_HTTP_ENABLE_JWT=1)
+endif()
 
 # Read the environment variable at configure time
 if(DEFINED ENV{JWT_SECRET})
@@ -48,7 +71,7 @@ target_sources(pico_framework
         src/http/HttpRequest.cpp
         src/http/HttpResponse.cpp
         src/http/HttpFileserver.cpp
-        src/http/JwtAuthenticator.cpp
+        #src/http/JwtAuthenticator.cpp #moved to conditional above
         src/http/JsonRequestHelper.cpp # (not mandatory, e.g. auto name = JsonRequestHelper::getString(req, "user.name");)
         # or if (JSON::hasField(req, "auth.token")) { ... } JSON is a macro for JsonRequestHelper
         # Only if you want to use JSON request helper methods
@@ -67,22 +90,28 @@ target_sources(pico_framework
         src/storage/FatFsStorageManager.cpp
         src/storage/JsonService.cpp
         src/time/PicoTime.cpp
+        src/http/JsonResponse.cpp
 )
 
+
 target_link_libraries(pico_framework PUBLIC
-        pico_async_context_freertos
-        FreeRTOS-Kernel-Heap4
-        pico_stdlib
-        hardware_i2c
-        hardware_pwm
-        hardware_spi
-        pico_cyw43_arch_lwip_sys_freertos
-        hardware_rtc
-        FreeRTOS+FAT+CLI
-        pico_lwip_mbedtls
-        pico_lwip_http
-        pico_mbedtls
-    )    
+        pico_async_context_freertos         # needed for async context used in freeertos port
+        FreeRTOS-Kernel-Heap4               # needed for FreeRTOS kernel, we use heap 4 for now
+        pico_stdlib                         # needed for standard functions including printf
+        pico_cyw43_arch_lwip_sys_freertos   # needed for lwip and WiFi
+        hardware_rtc                        # needed for RTC - system date time functions require it
+        FreeRTOS+FAT+CLI                    # needed for FatFsStorageManager - SDIO support - installed as submodule
+        
+        #hardware_i2c                       # needed for I2C - future external RTC
+        )    
+
+if (PICO_HTTP_ENABLE_JWT)
+    target_link_libraries(pico_framework PUBLIC pico_mbedtls )
+endif()
+
+if(PICO_HTTP_CLIENT_ENABLE_TLS)
+    target_link_libraries(pico_framework PRIVATE mbedtls mbedx509 mbedcrypto)
+endif()
 
 # Public headers (flat include path for now)
 target_include_directories(pico_framework

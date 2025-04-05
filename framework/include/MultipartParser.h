@@ -47,7 +47,7 @@
       * @param clientSocket The socket for the HTTP client connection.
       * @param request The full HTTP request object.
       */
-     MultipartParser(int clientSocket, const Request& request);
+     MultipartParser(int clientSocket, const HttpRequest& request);
  
      /**
       * @brief Begin processing the multipart upload from the socket.
@@ -66,7 +66,7 @@
      std::string filename;
      std::string leftoverData;
      std::string buffer;
-     Request request;
+     HttpRequest request;
  
      static State currentState;
  

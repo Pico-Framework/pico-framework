@@ -1,7 +1,7 @@
 /**
  * @file HttpRequest.cpp
  * @author Ian Archbell
- * @brief Implementation of the Request class for parsing HTTP requests.
+ * @brief Implementation of the HttpRequest class for parsing HTTP requests.
  * 
  * Part of the PicoFramework HTTP server.
  * This module handles parsing the HTTP request line, headers, and body.
@@ -41,13 +41,13 @@
  #define BUFFER_SIZE 1460  // this is the standard MTU size
  
  /**
-  * @brief Construct a Request object and parse the URL and headers.
+  * @brief Construct a HttpRequest object and parse the URL and headers.
   * 
   * @param rawHeaders Raw header string.
   * @param reqMethod HTTP method (GET, POST, etc.).
-  * @param reqPath Request URL path.
+  * @param reqPath HttpRequest URL path.
   */
- Request::Request(const char* rawHeaders, const std::string& reqMethod, const std::string& reqPath)
+ HttpRequest::HttpRequest(const char* rawHeaders, const std::string& reqMethod, const std::string& reqPath)
      : method(reqMethod), path(reqPath) {
      
      url = reqPath;  // Store the original URL
@@ -68,7 +68,7 @@
   * 
   * @param raw The raw HTTP header data.
   */
- void Request::parseHeaders(const char* raw) {
+ void HttpRequest::parseHeaders(const char* raw) {
      std::istringstream stream(raw);
      std::string line;
  
@@ -111,7 +111,7 @@
   * @param size Maximum size of the buffer.
   * @return int Number of bytes received, or -1 on error.
   */
- int Request::receiveData(int clientSocket, char* buffer, int size) {
+ int HttpRequest::receiveData(int clientSocket, char* buffer, int size) {
      
      size_t bytesReceived = lwip_recv(clientSocket, buffer, size-1, 0);
      if (bytesReceived < 0) {
@@ -142,7 +142,7 @@
   * @param path Output buffer for path.
   * @return true on success, false on failure.
   */
- bool Request::getMethodAndPath(char* buffer, int clientSocket, char* method, char* path) {
+ bool HttpRequest::getMethodAndPath(char* buffer, int clientSocket, char* method, char* path) {
      // Extract the HTTP method and path
      if (sscanf(buffer, "%s %s", method, path) != 2) {
          printf("Error parsing HTTP request method and path\n");
@@ -155,9 +155,9 @@
   * @brief Receive and parse a full HTTP request from a socket.
   * 
   * @param clientSocket The client socket.
-  * @return Request The fully parsed request object.
+  * @return HttpRequest The fully parsed request object.
   */
- Request Request::receive(int clientSocket) {
+ HttpRequest HttpRequest::receive(int clientSocket) {
      printf("Receiving request on socket %d\n", clientSocket);
      char buffer[BUFFER_SIZE];  // Declare buffer size
      std::string body = "";  // Initialize empty body
@@ -167,10 +167,10 @@
  
      int bytesReceived = receiveData(clientSocket, (char*) &buffer, sizeof(buffer));
      if (bytesReceived == -1) {
-         return Request("", "", "");  // Return empty Request on error
+         return HttpRequest("", "", "");  // Return empty HttpRequest on error
      }       
      if (!getMethodAndPath((char*)&buffer, clientSocket, (char*)&method, (char*)&path)){
-         return Request("", "", "");  // Return empty Request on error
+         return HttpRequest("", "", "");  // Return empty HttpRequest on error
      }   
  
      // Identify the raw headers - look for the end of the headers (a double CRLF "\r\n\r\n")
@@ -187,10 +187,10 @@
      printf("Raw headers length: %zu\n", headerEnd);
      
      // Create the request which will parse the headers
-     Request request(buffer, std::string(method), std::string(path));
+     HttpRequest request(buffer, std::string(method), std::string(path));
   
-     // Get headers from the Request object
-     headers = request.getHeaders();  // Retrieve headers from the Request object
+     // Get headers from the HttpRequest object
+     headers = request.getHeaders();  // Retrieve headers from the HttpRequest object
  
      TRACE("Parsed headers:\n");
      for (const auto& header : headers) {
@@ -208,7 +208,7 @@
          if (bodyReceived > 0) {
              body.append(buffer + headerEnd, bodyReceived);
          }
-         request.setBody(body);  // Set the body in the Request object
+         request.setBody(body);  // Set the body in the HttpRequest object
  
          // Check for multipart data and delegate to handler if necessary
          if (request.isMultipart()) {
@@ -228,7 +228,7 @@
  
              if (chunkReceived <= 0) {
                  printf("Error receiving body data, bytes received: %zu\n", chunkReceived);
-                 return Request("", "", "");  // Return empty Request on error
+                 return HttpRequest("", "", "");  // Return empty HttpRequest on error
              }
  
              body.append(buffer, chunkReceived);  // Append received data to body
@@ -236,8 +236,8 @@
          }
          printf("Body: %s\n", body.c_str());
      }
-     printf("Request object constructed\n");
-     return request;  // Return the constructed Request object
+     printf("HttpRequest object constructed\n");
+     return request;  // Return the constructed HttpRequest object
  }
  
  /**
@@ -247,7 +247,7 @@
   * @param req Reference to this request.
   * @return int 0 on success, -1 on failure.
   */
- int Request::handle_multipart(int clientSocket, Request& req) {
+ int HttpRequest::handle_multipart(int clientSocket, HttpRequest& req) {
      MultipartParser parser(clientSocket, req);
      return parser.handleMultipart() ? 0 : -1;
  }
@@ -257,7 +257,7 @@
   * 
   * @return std::unordered_map<std::string, std::string> Map of cookie name-value pairs.
   */
- std::unordered_map<std::string, std::string> Request::getCookies() const {
+ std::unordered_map<std::string, std::string> HttpRequest::getCookies() const {
      std::unordered_map<std::string, std::string> cookies;
      std::string cookieHeader = getHeader("cookie");
      std::istringstream stream(cookieHeader);
@@ -281,7 +281,7 @@
   * @param name Cookie name.
   * @return std::string Value of the cookie or empty string.
   */
- std::string Request::getCookie(const std::string& name) const {
+ std::string HttpRequest::getCookie(const std::string& name) const {
      auto cookies = getCookies();
      auto it = cookies.find(name);
      return (it != cookies.end()) ? it->second : "";
@@ -292,7 +292,7 @@
   * 
   * @return Map of query parameters.
   */
- std::unordered_map<std::string, std::string> Request::getQueryParams() {
+ std::unordered_map<std::string, std::string> HttpRequest::getQueryParams() {
      return parseUrlEncoded(query);
  }
  
@@ -301,7 +301,7 @@
   * 
   * @return Map of form parameters.
   */
- std::unordered_map<std::string, std::string> Request::getFormParams() {
+ std::unordered_map<std::string, std::string> HttpRequest::getFormParams() {
      return parseUrlEncoded(body);
  }
  

@@ -4,18 +4,22 @@ import { expect } from 'chai';
 // Change this to the correct IP/hostname and port where your test firmware is running.
 const picoUrl = 'http://192.168.50.20';
 
-describe('HTTP Server Routing Tests', function() {
+describe('HTTP Server End-to-End Tests', function() {
   // Increase timeout if your device is slow to respond.
   this.timeout(5000);
 
+  afterEach(function (done) {
+    setTimeout(done, 100); // adjust as needed
+  });
+
   // --- Static Route Test ---
-  it('GET / should return "Hello from Ian Archbell!"', function(done) {
+  it('GET / should return "<!DOCTYPE html><html><body><h1>Welcome from Ian Archbell</h1></body></html>"', function(done) {
     request(picoUrl)
       .get('/')
       .expect(200)
       .end(function(err, res) {
         if (err) return done(err);
-        expect(res.text).to.contain('Hello from Ian Archbell!');
+        expect(res.text).to.contain('Hello from Ian Archbell');
         done();
       });
   });
@@ -27,12 +31,12 @@ describe('HTTP Server Routing Tests', function() {
   // });
   it('GET /user/:id should extract dynamic parameter', function(done) {
     request(picoUrl)
-      .get('/user/12345')
+      .get('/programs/1')
       .expect(200)
       .end(function(err, res) {
         if (err) return done(err);
         // Expect the route handler to return a JSON object with the id extracted from the URL.
-        expect(res.body).to.have.property('id', '12345');
+        expect(res.body).to.have.property('program', 'Program data for 1');
         done();
       });
   });
@@ -56,12 +60,12 @@ describe('HTTP Server Routing Tests', function() {
   it('GET /auth with valid auth header should return token', function(done) {
     request(picoUrl)
       .get('/auth')
-      .set('Authorization', 'Bearer validToken123')
+      .set('Authorization', 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjM2MDAsImlhdCI6MCwibmFtZSI6IkpvaG4gRG9lIiwic3ViIjoiYWRtaW4ifQ.rrJCcGVKN8qckNWNVC2FECqTEECwByEny7F-3mdD88k')
       .expect(200)
       .end(function(err, res) {
         if (err) return done(err);
         // Expect the response to include a token field (or similar indication of successful auth).
-        expect(res.body).to.have.property('token');
+        expect(res.text).to.contain('{"message":"Authenticated request"}');
         done();
       });
   });
@@ -72,11 +76,11 @@ describe('HTTP Server Routing Tests', function() {
   it('GET /nonexistent should return static content from catch-all route', function(done) {
     request(picoUrl)
       .get('/nonexistent')
-      .expect(200)
+      .expect(404)
       .end(function(err, res) {
         if (err) return done(err);
         // You might expect a 404 page or some default static page content.
-        expect(res.text).to.not.be.empty;
+        expect(res.text).to.contain('File Not Found: /nonexistent');
         done();
       });
   });

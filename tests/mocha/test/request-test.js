@@ -1,11 +1,11 @@
 import request from 'supertest';
 import assert from 'assert';
 
-describe('Pico HTTP Server End-to-End Tests', function () {
+describe('Pico HTTP HttpRequest End-to-End Tests', function () {
   this.timeout(10000); // In case responses are slow
 
   afterEach(function (done) {
-    setTimeout(done, 500); // adjust as needed
+    setTimeout(done, 100); // adjust as needed
   });
 
   const server = request('http://192.168.50.20');
@@ -34,7 +34,7 @@ describe('Pico HTTP Server End-to-End Tests', function () {
   it('GET /auth with valid token should return authenticated response', async () => {
     const res = await server
       .get('/auth')
-      .set('Authorization', 'Bearer testtoken'); // Assuming `authMiddleware` accepts "testtoken"
+      .set('Authorization', 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjM2MDAsImlhdCI6MCwibmFtZSI6IkpvaG4gRG9lIiwic3ViIjoiYWRtaW4ifQ.rrJCcGVKN8qckNWNVC2FECqTEECwByEny7F-3mdD88k'); // Assuming `authMiddleware` accepts "testtoken"
     assert.strictEqual(res.statusCode, 200);
     assert.ok(res.text.includes('Authenticated'));
   });

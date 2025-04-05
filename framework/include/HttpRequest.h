@@ -1,7 +1,7 @@
 /**
  * @file HttpRequest.h
  * @author Ian Archbell
- * @brief Defines the Request class for handling HTTP requests: headers, method, path,
+ * @brief Defines the HttpRequest class for handling HTTP requests: headers, method, path,
  *        query string, cookies, and body (including multipart forms).
  * @version 0.1
  * @date 2025-03-26
@@ -24,30 +24,30 @@
  class Router;  ///< Forward declaration for potential routing needs
  
  /**
-  * @class Request
+  * @class HttpRequest
   * @brief Represents a parsed HTTP request, providing access to headers, method, path, body, etc.
   */
- class Request {
+ class HttpRequest {
  public:
      // ─────────────────────────────────────────────────────────────────────────────
      // Constructors
      // ─────────────────────────────────────────────────────────────────────────────
  
      /**
-      * @brief Construct a Request from a TcpConnectionSocket and details.
+      * @brief Construct a HttpRequest from a TcpConnectionSocket and details.
       * @param conn TCP socket abstraction.
       * @param method HTTP method (GET, POST, etc.).
       * @param url The full requested URL.
       */
-     //Request(TcpConnectionSocket& conn, const std::string& method, const std::string& url);
+     //HttpRequest(TcpConnectionSocket& conn, const std::string& method, const std::string& url);
  
      /**
-      * @brief Construct a Request from raw headers, method, and path.
+      * @brief Construct a HttpRequest from raw headers, method, and path.
       * @param rawHeaders Raw HTTP headers as a C-string.
       * @param reqMethod HTTP method.
-      * @param reqPath Request path.
+      * @param reqPath HttpRequest path.
       */
-     Request(const char* rawHeaders, const std::string& reqMethod, const std::string& reqPath); 
+     HttpRequest(const char* rawHeaders, const std::string& reqMethod, const std::string& reqPath); 
  
      // ─────────────────────────────────────────────────────────────────────────────
      // Header Accessors
@@ -282,9 +282,9 @@
      /**
       * @brief Receive and parse an HTTP request from a socket.
       * @param clientSocket The socket file descriptor.
-      * @return A fully populated Request object.
+      * @return A fully populated HttpRequest object.
       */
-     static Request receive(int clientSocket);
+     static HttpRequest receive(int clientSocket);
  
      /**
       * @brief Receive raw data from socket into buffer.
@@ -315,7 +315,7 @@
       * @param req Reference to this request.
       * @return 0 on success, -1 on failure.
       */
-     int handle_multipart(int new_sock, Request& req); 
+     int handle_multipart(int new_sock, HttpRequest& req); 
  
  private:
      void parseHeaders(const char* raw);

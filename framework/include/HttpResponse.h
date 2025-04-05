@@ -1,7 +1,7 @@
 /**
  * @file HttpResponse.h
  * @author Ian Archbell
- * @brief HTTP Response class for managing status, headers, body, and streaming support.
+ * @brief HTTP HttpResponse class for managing status, headers, body, and streaming support.
  * @version 0.1
  * @date 2025-03-26
  * 
@@ -19,6 +19,10 @@
  #include <unordered_map>
  #include <map>
  #include <vector>
+ #include "nlohmann/json.hpp"
+ 
+  // Forward declaration of HttpRequest class
+ class HttpRequest;
  
  /**
   * @brief Represents an HTTP response object.
@@ -26,7 +30,7 @@
   * Used by the server to construct and send headers, content, and cookies
   * in response to an incoming HTTP request.
   */
- class Response
+ class HttpResponse
  {
      int sock;
      int status_code = 200;
@@ -38,10 +42,10 @@
  
  public:
      /**
-      * @brief Construct a new Response object with a socket.
+      * @brief Construct a new HttpResponse object with a socket.
       * @param sock The socket file descriptor.
       */
-     explicit Response(int sock);
+     explicit HttpResponse(int sock);
  
      // ------------------------------------------------------------------------
      // Status and Header Management
@@ -50,21 +54,21 @@
      /**
       * @brief Set the HTTP status code.
       * @param code Status code (e.g., 200, 404).
-      * @return Reference to this Response object.
+      * @return Reference to this HttpResponse object.
       */
-     Response& status(int code);
+     HttpResponse& status(int code);
  
      /**
       * @brief Alias for status().
       */
-     Response& setStatus(int code);
+     HttpResponse& setStatus(int code);
  
      /**
       * @brief Set the Content-Type header.
       * @param content_type MIME type string.
-      * @return Reference to this Response object.
+      * @return Reference to this HttpResponse object.
       */
-     Response& setContentType(const std::string &content_type);
+     HttpResponse& setContentType(const std::string &content_type);
  
      /**
       * @brief Get the current Content-Type header value.
@@ -76,21 +80,21 @@
       * @brief Set a generic header field.
       * @param field Header name.
       * @param value Header value.
-      * @return Reference to this Response object.
+      * @return Reference to this HttpResponse object.
       */
-     Response& set(const std::string &field, const std::string &value);
+     HttpResponse& set(const std::string &field, const std::string &value);
  
      /**
       * @brief Alias for set() for custom headers.
       */
-     Response& setHeader(const std::string& key, const std::string& value);
+     HttpResponse& setHeader(const std::string& key, const std::string& value);
  
      /**
       * @brief Set an Authorization header with a JWT token.
       * @param jwtToken The JWT string.
-      * @return Reference to this Response object.
+      * @return Reference to this HttpResponse object.
       */
-     Response& setAuthorization(const std::string &jwtToken);
+     HttpResponse& setAuthorization(const std::string &jwtToken);
  
      /**
       * @brief Check if the headers have already been sent.
@@ -107,17 +111,17 @@
       * @param name Cookie name.
       * @param value Cookie value.
       * @param options Additional options (e.g., Path, HttpOnly).
-      * @return Reference to this Response object.
+      * @return Reference to this HttpResponse object.
       */
-     Response& setCookie(const std::string& name, const std::string& value, const std::string& options);
+     HttpResponse& setCookie(const std::string& name, const std::string& value, const std::string& options);
  
      /**
       * @brief Clear a cookie by setting Max-Age=0.
       * @param name Cookie name.
       * @param options Optional options to include in the Set-Cookie header.
-      * @return Reference to this Response object.
+      * @return Reference to this HttpResponse object.
       */
-     Response& clearCookie(const std::string& name, const std::string& options);
+     HttpResponse& clearCookie(const std::string& name, const std::string& options);
  
      // ------------------------------------------------------------------------
      // Body and Streaming
@@ -125,7 +129,7 @@
  
      /**
       * @brief Send a full response including headers and body.
-      * @param body Response body as a string.
+      * @param body HttpResponse body as a string.
       */
      void send(const std::string &body);
  
@@ -180,26 +184,28 @@
      void endServerError(const std::string& msg);
  
      /**
-      * @brief Send a JSON string with correct content type.
+      * @brief Send a JSON string/object with correct content type.
       * @param jsonString Valid JSON content.
-      * @return Reference to this Response object.
+      * @return Reference to this HttpResponse object.
       */
-     Response& json(const std::string& jsonString);
+     HttpResponse& json(const std::string& jsonString);
+     HttpResponse& json(const nlohmann::json& jsonObj);
+     HttpResponse& jsonFormatted(const nlohmann::json& jsonObj);
  
      /**
       * @brief Send a plain text string with correct content type.
       * @param textString Text content.
-      * @return Reference to this Response object.
+      * @return Reference to this HttpResponse object.
       */
-     Response& text(const std::string& textString);
+     HttpResponse& text(const std::string& textString);
  
      /**
       * @brief Redirect the client to another URL.
       * @param url Target URL.
       * @param statusCode HTTP status code (e.g. 302).
-      * @return Reference to this Response object.
+      * @return Reference to this HttpResponse object.
       */
-     Response& redirect(const std::string& url, int statusCode);
+     HttpResponse& redirect(const std::string& url, int statusCode);
  
      /**
       * @brief Apply basic variable substitution in a template.

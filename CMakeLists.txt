@@ -51,5 +51,15 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-psabi")
 # Initialize the SDK
 pico_sdk_init()
 
+# global include because pico sdk has includes that will fail if not included
+# we do not link it in unless option is set beow
+include_directories(${PICO_SDK_PATH}/lib/mbedtls/include)
+
+option(PICO_HTTP_CLIENT_ENABLE_TLS "Enable TLS support in HttpClient" ON)
+option(PICO_HTTP_ENABLE_JWT "Enable JWT authentication support" ON)
+option(PICO_HTTP_TLS_VERIFY "Enable certificate verification for TLS connections" ON)
+
 # Add subdirectories
 add_subdirectory(framework)
+
+

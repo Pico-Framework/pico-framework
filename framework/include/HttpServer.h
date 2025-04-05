@@ -88,9 +88,9 @@
       * @param body Output body content.
       * @param contentLength Output content length.
       * @param headers Output map of parsed headers.
-      * @return Parsed Request object.
+      * @return Parsed HttpRequest object.
       */
-     Request receiveRequest(int clientSocket, char* method, char* path, std::string& body,
+     HttpRequest receiveRequest(int clientSocket, char* method, char* path, std::string& body,
                             size_t& contentLength, std::unordered_map<std::string, std::string>& headers);
  
      /**

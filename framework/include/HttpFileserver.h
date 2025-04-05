@@ -44,12 +44,12 @@
      void listDirectory(const char* path);
  
      /**
-      * @brief Serve a file to the client via the Response object.
+      * @brief Serve a file to the client via the HttpResponse object.
       * @param res HTTP response object.
       * @param uri URI or path to the file.
       * @return true if file was served successfully.
       */
-     bool serveFile(Response& res, const char* uri);
+     bool serveFile(HttpResponse& res, const char* uri);
  
      /**
       * @brief Flag indicating whether storage is mounted.
@@ -77,7 +77,7 @@
       * @param res The HTTP response object.
       * @param params Route parameters (unused).
       */
-     void handle_static_request(Request& req, Response& res, const std::vector<std::string>& params);
+     void handle_static_request(HttpRequest& req, HttpResponse& res, const std::vector<std::string>& params);
  
      /**
       * @brief Handle requests to list directory contents.
@@ -85,7 +85,7 @@
       * @param res The HTTP response object.
       * @param params Route parameters (unused).
       */
-     void handle_list_directory(Request& req, Response& res, const std::vector<std::string>& params);
+     void handle_list_directory(HttpRequest& req, HttpResponse& res, const std::vector<std::string>& params);
  
      /**
       * @brief Get the MIME type based on the file extension.

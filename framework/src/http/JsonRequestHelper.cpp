@@ -25,14 +25,14 @@
  using json = nlohmann::json;
  
  /// @copydoc JsonRequestHelper::getFullJson
- json JsonRequestHelper::getFullJson(const Request& req)
+ json JsonRequestHelper::getFullJson(const HttpRequest& req)
  {
      if (!req.isJson()) return json::object();
      return json::parse(req.getBody(), nullptr, false);
  }
  
  /// @copydoc JsonRequestHelper::getJsonValue
- json JsonRequestHelper::getJsonValue(const Request& req, const std::string& path)
+ json JsonRequestHelper::getJsonValue(const HttpRequest& req, const std::string& path)
  {
      json current = getFullJson(req);
      if (!current.is_object()) return nullptr;
@@ -51,13 +51,13 @@
  }
  
  /// @copydoc JsonRequestHelper::hasField
- bool JsonRequestHelper::hasField(const Request& req, const std::string& key)
+ bool JsonRequestHelper::hasField(const HttpRequest& req, const std::string& key)
  {
      return !getJsonValue(req, key).is_null();
  }
  
  /// @copydoc JsonRequestHelper::getString
- std::string JsonRequestHelper::getString(const Request& req, const std::string& key)
+ std::string JsonRequestHelper::getString(const HttpRequest& req, const std::string& key)
  {
      auto val = getJsonValue(req, key);
      if (val.is_string()) return val.get<std::string>();
@@ -66,35 +66,35 @@
  }
  
  /// @copydoc JsonRequestHelper::getInt
- int JsonRequestHelper::getInt(const Request& req, const std::string& key, int def)
+ int JsonRequestHelper::getInt(const HttpRequest& req, const std::string& key, int def)
  {
      auto val = getJsonValue(req, key);
      return val.is_number_integer() ? val.get<int>() : def;
  }
  
  /// @copydoc JsonRequestHelper::getDouble
- double JsonRequestHelper::getDouble(const Request& req, const std::string& key, double def)
+ double JsonRequestHelper::getDouble(const HttpRequest& req, const std::string& key, double def)
  {
      auto val = getJsonValue(req, key);
      return val.is_number() ? val.get<double>() : def;
  }
  
  /// @copydoc JsonRequestHelper::getBool
- bool JsonRequestHelper::getBool(const Request& req, const std::string& key, bool def)
+ bool JsonRequestHelper::getBool(const HttpRequest& req, const std::string& key, bool def)
  {
      auto val = getJsonValue(req, key);
      return val.is_boolean() ? val.get<bool>() : def;
  }
  
  /// @copydoc JsonRequestHelper::getArray
- json JsonRequestHelper::getArray(const Request& req, const std::string& key)
+ json JsonRequestHelper::getArray(const HttpRequest& req, const std::string& key)
  {
      auto val = getJsonValue(req, key);
      return val.is_array() ? val : json::array();
  }
  
  /// @copydoc JsonRequestHelper::getObject
- json JsonRequestHelper::getObject(const Request& req, const std::string& key)
+ json JsonRequestHelper::getObject(const HttpRequest& req, const std::string& key)
  {
      auto val = getJsonValue(req, key);
      return val.is_object() ? val : json::object();

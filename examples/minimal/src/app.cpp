@@ -7,7 +7,7 @@ App::App(int port) : FrameworkApp(port, "AppTask", 2048, 1) {
 }
 
 void App::initRoutes() {
-    router.addRoute("GET", "/", [this](Request& req, Response& res, const std::vector<std::string>&) {
+    router.addRoute("GET", "/", [this](HttpRequest& req, HttpResponse& res, const std::vector<std::string>&) {
         req.printHeaders();
         res.send("Hello from Ian Archbell!");
     });

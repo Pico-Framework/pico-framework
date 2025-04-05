@@ -42,6 +42,7 @@ message("FRAMEWRORK_DIR: ${FRAMEWORK_DIR}")
 # Include the framework headers
 include_directories(
     ${FRAMEWORK_DIR}/include
+    ${FRAMEWORK_DIR}/lib/json/single_include
     ./mocks
     ./mocks/lwip
     )
@@ -79,7 +80,7 @@ add_executable(HttpRequestTest
 add_executable(HttpResponseTest    
     HttpResponse_Test.cpp
     AllTests.cpp        
-    )
+    ) 
 
 target_compile_definitions(HttpRequestTest PRIVATE UNIT_TEST)
 

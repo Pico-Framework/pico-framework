@@ -19,6 +19,12 @@ TRACE_INIT(AppContext);
 
 #include "AppContext.h"
 #include "FatFsStorageManager.h"
+#include "JwtAuthenticator.h"
+
+AppContext& AppContext::getInstance() {
+    static AppContext instance;
+    return instance;
+}
 
 FatFsStorageManager* AppContext::getFatFsStorage() {
     if (!fatFs) {
@@ -29,5 +35,20 @@ FatFsStorageManager* AppContext::getFatFsStorage() {
     }
     return fatFs;
 }
+
+#ifdef PICO_HTTP_ENABLE_JWT
+JwtAuthenticator* AppContext::jwtAuth = nullptr;
+
+JwtAuthenticator* AppContext::getJwtAuthenticator() {
+    if (!jwtAuth) {
+        jwtAuth = &JwtAuthenticator::getInstance(); 
+        jwtAuth->init(JWT_SECRET, 3600);            
+        TRACE("JwtAuthenticator initialized");
+    }
+    return jwtAuth;
+}
+#endif
+
+
 
     
