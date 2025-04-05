@@ -1,3 +1,7 @@
+#include "framework_config.h"
+#include "DebugTrace.h"
+TRACE_INIT(HttpClient);
+
 #include "HttpClient.h"
 #include "HttpParser.h"
 #include "ChunkedDecoder.h"
@@ -14,6 +18,7 @@
 #endif
 
 bool HttpClient::get(const std::string& url, HttpResponse& response) {
+    TRACE("HttpClient", "Making request to %s", url.c_str());
     // Very minimal URL parsing (http/https, host, path)
     std::string protocol, host, path;
     size_t proto_pos = url.find("://");
@@ -44,16 +49,24 @@ bool HttpClient::get(const std::string& url, HttpResponse& response) {
 bool HttpClient::getPlain(const std::string& host, const std::string& path, HttpResponse& response) {
     TcpConnectionSocket socket;
     if (!socket.connect(host.c_str(), 80)) {
+        TRACE("HttpClient", "Connection failed");
         return false;
     }
 
+    TRACE("HttpClient", "Socket connected");
     std::ostringstream req;
     req << "GET " << path << " HTTP/1.1\r\n"
         << "Host: " << host << "\r\n"
         << "Connection: close\r\n\r\n";
 
-    socket.send(req.str().c_str(), req.str().size());
-
+    if (socket.send(req.str().c_str(), req.str().size()))
+    {
+        TRACE("HttpClient", "Request sent");
+    } else {
+        TRACE("HttpClient", "Request failed");
+        return false;
+    }
+    TRACE("HttpClient", "Request sent");
     std::string raw;
     char buffer[1024];
     int len = 0;
@@ -63,11 +76,12 @@ bool HttpClient::getPlain(const std::string& host, const std::string& path, Http
     }
 
     socket.close();
-
+    TRACE("HttpClient", "Parsing response...");
     std::string headerText;
     std::string body = extractHeadersAndBody(raw, headerText);
     response.headers = HttpParser::parseHeaders(headerText);
     response.statusCode = HttpParser::parseStatusCode(headerText);
+    TRACE("HttpClient", "Got status code %d", response.statusCode);
 
     auto it = response.headers.find("transfer-encoding");
     if (it != response.headers.end() && it->second == "chunked") {

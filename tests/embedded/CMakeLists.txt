@@ -23,6 +23,10 @@ endif()
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-psabi")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-psabi")
 
+set(PICO_NO_MBEDTLS TRUE)
+
+set(PICO_HTTP_ENABLE_HTTP_CLIENT ON CACHE BOOL "" FORCE)
+
 pico_sdk_init()
 
 set(FREERTOS_KERNEL_PATH $ENV{FREERTOS_KERNEL_PATH} CACHE PATH "Path to FreeRTOS kernel")
@@ -41,18 +45,26 @@ FetchContent_Declare(
   CppUTest
   GIT_REPOSITORY https://github.com/cpputest/cpputest.git
   GIT_TAG        v4.0
+  OVERRIDE_FIND_PACKAGE
+  SOURCE_SUBDIR .
 )
+
+# Set options **before** making available
+set(TESTS OFF CACHE BOOL "Disable CppUTest tests" FORCE)
+set(EXAMPLES OFF CACHE BOOL "Disable CppUTest examples" FORCE)
+set(CPPUTEST_USE_MEM_LEAK_DETECTION 0 CACHE BOOL "" FORCE)
+set(CPPUTEST_USE_NEW_MACROS 0 CACHE BOOL "" FORCE)
+set(CPPUTEST_USE_STD_CPP_LIB 0 CACHE BOOL "" FORCE)
+set(CPPUTEST_USE_LONG_LONG 1 CACHE BOOL "" FORCE)
 
 FetchContent_MakeAvailable(CppUTest)
 
 # Configure the actual targets
 target_compile_definitions(CppUTest PUBLIC
-    CPPUTEST_USE_LONG_LONG=1
     CPPUTEST_USE_MEM_LEAK_DETECTION=0
     CPPUTEST_USE_STD_CPP_LIB=0
 )
 target_compile_definitions(CppUTestExt PUBLIC
-    CPPUTEST_USE_LONG_LONG=1
     CPPUTEST_USE_MEM_LEAK_DETECTION=0
     CPPUTEST_USE_STD_CPP_LIB=0
 )

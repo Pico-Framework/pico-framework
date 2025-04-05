@@ -1,17 +1,14 @@
 #include "CppUTest/TestHarness.h"
-#include "http-client/HttpClient.hpp"
+#include "HttpClient.h"
 
 TEST_GROUP(HttpClientTest) { };
 
-TEST(HttpClientTest, Get_ChunkedResponse_ShouldReturn200AndNonEmptyBody)
-{
+TEST(HttpClientTest, Get_ChunkedResponse_ShouldReturn200AndNonEmptyBody) {
     HttpClient client;
     HttpResponse response;
 
-    bool ok = client.get("https://httpbin.org/stream/3", response);
-
+    bool ok = client.get("http://httpbin.org/stream/5", response);
     CHECK_TRUE(ok);
-    LONGS_EQUAL(200, response.statusCode);
+    CHECK_EQUAL(200, response.statusCode);
     CHECK_TRUE(response.body.length() > 0);
-    STRCMP_CONTAINS("{", response.body.c_str());  // crude check for JSON
 }

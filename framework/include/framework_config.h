@@ -39,6 +39,11 @@
 #define TRACE_NtpClient           1
 #define TRACE_utility             1  
 #define TRACE_AppContext          1 
+#define TRACE_TcpConnectionSocket 1
+#define TRACE_ChunkedDecoder      1
+#define TRACE_JsonParser          1
+#define TRACE_HttpClient          1
+#define TRACE_LwipDnsResolver     1
 // etc.
 
 // === Global minimum log level (for all modules) ===

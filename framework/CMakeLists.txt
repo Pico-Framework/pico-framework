@@ -7,8 +7,8 @@ if (DEFINED ENV{WIFI_PASSWORD} AND (NOT WIFI_PASSWORD))
     message("Using WIFI_PASSWORD from environment")
 endif()
 
-#get the memory usage
-set(PICO_PRINT_MEM_USAGE ON)
+# Always start with TLS off to avoid leaks from upstream
+set(PICO_USE_MBEDTLS OFF CACHE BOOL "" FORCE)
 
 # Framework library
 add_library(pico_framework)
@@ -92,9 +92,11 @@ target_sources(pico_framework
         src/storage/JsonService.cpp
         src/time/PicoTime.cpp
         src/http/JsonResponse.cpp
+        src/network/TcpConnectionSocket.cpp
+        src/network/lwip_dns_resolver.cpp
 )
 
-if(PICO_HTTP_CLIENT_ENABLE_TLS)
+if(PICO_HTTP_ENABLE_HTTP_CLIENT)
     target_sources(pico_framework PRIVATE
         src/http-client/HttpClient.cpp
         src/http-client/ChunkedDecoder.cpp

@@ -16,7 +16,6 @@ public:
     TcpConnectionSocket(TcpConnectionSocket&& other) noexcept;
     TcpConnectionSocket& operator=(TcpConnectionSocket&& other) noexcept;
 
-    bool isValid() const;
     int getSocketFd() const;
 
     int recv(char* buffer, size_t size);
@@ -28,6 +27,14 @@ public:
     TcpConnectionSocket accept();
     bool connect(const char* host, int port);
 
+    bool isValid() const {
+        return sockfd >= 0;
+    }    
+    bool isConnected() const {
+        return connected;
+    }
+
 private:
     int sockfd;
+    bool connected = false;;
 };
