@@ -18,7 +18,7 @@
  #include <unordered_map>
  #include "Router.h"
  
- #define HTTP_STACK_SIZE 8*1024
+ #define HTTP_STACK_SIZE 8*1024 / sizeof(StackType_t) // Stack size for FreeRTOS task
  
  /**
   * @brief HTTP Server that listens for incoming connections and dispatches requests.

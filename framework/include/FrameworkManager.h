@@ -25,8 +25,8 @@
  #include "Network.h"
  #include "NtpClient.h"
  
- #define NETWORK_STACK_SIZE 1024
- #define APPLICATION_STACK_SIZE 1024
+ #define NETWORK_STACK_SIZE 1024 / sizeof(StackType_t)
+ #define APPLICATION_STACK_SIZE 1024 / sizeof(StackType_t)
  
  /**
   * @brief Starts and coordinates core system services like networking and time sync.
