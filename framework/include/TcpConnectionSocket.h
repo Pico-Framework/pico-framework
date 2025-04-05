@@ -26,7 +26,7 @@ public:
     TcpConnectionSocket(); // Default constructor for listener
     bool bindAndListen(int port);
     TcpConnectionSocket accept();
-
+    bool connect(const char* host, int port);
 
 private:
     int sockfd;

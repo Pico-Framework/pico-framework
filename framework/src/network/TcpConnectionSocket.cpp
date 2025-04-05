@@ -75,3 +75,25 @@ int TcpConnectionSocket::close() {
     }
     return result;
 }
+
+#include "TcpConnectionSocket.h"
+#include "lwip/sockets.h"
+#include "lwip/netdb.h"
+#include <cstring>
+
+bool TcpConnectionSocket::connect(const char* host, int port) {
+    struct sockaddr_in addr {};
+    struct hostent* server = gethostbyname(host);
+    if (!server) return false;
+
+    sockfd = lwip_socket(AF_INET, SOCK_STREAM, 0);
+    if (sockfd < 0) return false;
+
+    std::memset(&addr, 0, sizeof(addr));
+    addr.sin_family = AF_INET;
+    addr.sin_port = htons(port);
+    std::memcpy(&addr.sin_addr, server->h_addr, server->h_length);
+
+    return lwip_connect(sockfd, (struct sockaddr*)&addr, sizeof(addr)) >= 0;
+}
+

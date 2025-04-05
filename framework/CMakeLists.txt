@@ -92,6 +92,8 @@ target_sources(pico_framework
         src/storage/JsonService.cpp
         src/time/PicoTime.cpp
         src/http/JsonResponse.cpp
+        src/http-client/HttpClient.cpp
+        src/http-client/ChunkedDecoder.cpp
 )
 
 target_link_libraries(pico_framework PUBLIC
@@ -129,11 +131,13 @@ target_include_directories(pico_framework
 target_compile_options(pico_framework PRIVATE -Wno-psabi)
 
 # Ignore warnings from lwip code
+if(PICO_HTTP_CLIENT_ENABLE_TLS)
 set_source_files_properties(
         ${PICO_LWIP_PATH}/src/apps/altcp_tls/altcp_tls_mbedtls.c
         PROPERTIES
         COMPILE_OPTIONS "-Wno-unused-result" 
         )
+endif()
 
 # These are needed to avoid warnings from the FreeRTOS+FAT code
 include_directories(

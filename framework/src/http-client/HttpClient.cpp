@@ -1,64 +1,94 @@
-#include "HttpClient.hpp"
+#include "HttpClient.h"
+#include "HttpParser.h"
+#include "ChunkedDecoder.h"
 #include "TcpConnectionSocket.h"
+#include <sstream>
 #include <cstring>
 
-#ifdef PICO_HTTP_CLIENT_ENABLE_TLS
+#if PICO_HTTP_CLIENT_ENABLE_TLS
+#include "mbedtls/platform.h"
 #include "mbedtls/net_sockets.h"
 #include "mbedtls/ssl.h"
-#include "mbedtls/ctr_drbg.h"
 #include "mbedtls/entropy.h"
+#include "mbedtls/ctr_drbg.h"
 #endif
 
-static std::string extractBody(const std::string& response) {
-    size_t pos = response.find("\r\n\r\n");
-    return (pos != std::string::npos) ? response.substr(pos + 4) : "";
-}
+bool HttpClient::get(const std::string& url, HttpResponse& response) {
+    // Very minimal URL parsing (http/https, host, path)
+    std::string protocol, host, path;
+    size_t proto_pos = url.find("://");
+    if (proto_pos == std::string::npos) return false;
 
-bool HttpClient::get(const std::string& url, std::string& outBody) {
-    UrlComponents parts;
-    if (!UrlUtils::parse(url, parts)) return false;
+    protocol = url.substr(0, proto_pos);
+    size_t host_start = proto_pos + 3;
+    size_t path_start = url.find('/', host_start);
+    if (path_start == std::string::npos) {
+        host = url.substr(host_start);
+        path = "/";
+    } else {
+        host = url.substr(host_start, path_start - host_start);
+        path = url.substr(path_start);
+    }
 
-#ifdef PICO_HTTP_CLIENT_ENABLE_TLS
-    if (parts.protocol == "https") {
-        return getTls(parts.host, parts.port, parts.path, outBody);
+    if (protocol == "http") {
+        return getPlain(host, path, response);
+    }
+#if PICO_HTTP_CLIENT_ENABLE_TLS
+    else if (protocol == "https") {
+        return getTls(host, path, response);
     }
 #endif
-    return getPlain(parts.host, parts.port, parts.path, outBody);
+    return false;
 }
 
-bool HttpClient::getPlain(const std::string& host, uint16_t port, const std::string& path, std::string& outBody) {
+bool HttpClient::getPlain(const std::string& host, const std::string& path, HttpResponse& response) {
     TcpConnectionSocket socket;
-    if (!socket.connect(host.c_str(), port)) return false;
+    if (!socket.connect(host.c_str(), 80)) {
+        return false;
+    }
 
-    std::string request =
-        "GET " + path + " HTTP/1.1\r\n"
-        "Host: " + host + "\r\n"
-        "Connection: close\r\n\r\n";
+    std::ostringstream req;
+    req << "GET " << path << " HTTP/1.1\r\n"
+        << "Host: " << host << "\r\n"
+        << "Connection: close\r\n\r\n";
 
-    if (!socket.send(request)) return false;
+    socket.send(req.str().c_str(), req.str().size());
 
-    std::string response;
+    std::string raw;
     char buffer[1024];
-    int received;
+    int len = 0;
 
-    while ((received = socket.receive(buffer, sizeof(buffer))) > 0) {
-        response.append(buffer, received);
+    while ((len = socket.recv(buffer, sizeof(buffer))) > 0) {
+        raw.append(buffer, len);
     }
 
     socket.close();
-    outBody = extractBody(response);
+
+    std::string headerText;
+    std::string body = extractHeadersAndBody(raw, headerText);
+    response.headers = HttpParser::parseHeaders(headerText);
+    response.statusCode = HttpParser::parseStatusCode(headerText);
+
+    auto it = response.headers.find("transfer-encoding");
+    if (it != response.headers.end() && it->second == "chunked") {
+        ChunkedDecoder decoder;
+        decoder.feed(body);
+        response.body = decoder.getDecoded();
+    } else {
+        response.body = body;
+    }
+
     return true;
 }
 
-#ifdef PICO_HTTP_CLIENT_ENABLE_TLS
-bool HttpClient::getTls(const std::string& host, uint16_t port, const std::string& path, std::string& outBody) {
-    mbedtls_entropy_context entropy;
-    mbedtls_ctr_drbg_context ctr_drbg;
+#if PICO_HTTP_CLIENT_ENABLE_TLS
+bool HttpClient::getTls(const std::string& host, const std::string& path, HttpResponse& response) {
+    mbedtls_net_context net;
     mbedtls_ssl_context ssl;
     mbedtls_ssl_config conf;
-    mbedtls_net_context net;
-
-    const char* pers = "http_client_tls";
+    mbedtls_entropy_context entropy;
+    mbedtls_ctr_drbg_context ctr_drbg;
+    const char* pers = "http_client";
 
     mbedtls_net_init(&net);
     mbedtls_ssl_init(&ssl);
@@ -67,49 +97,47 @@ bool HttpClient::getTls(const std::string& host, uint16_t port, const std::strin
     mbedtls_entropy_init(&entropy);
 
     if (mbedtls_ctr_drbg_seed(&ctr_drbg, mbedtls_entropy_func, &entropy,
-                               reinterpret_cast<const unsigned char*>(pers), strlen(pers)) != 0)
+                               (const unsigned char*)pers, strlen(pers)) != 0) {
         return false;
-
-    if (mbedtls_net_connect(&net, host.c_str(), std::to_string(port).c_str(), MBEDTLS_NET_PROTO_TCP) != 0)
-        return false;
-
-    if (mbedtls_ssl_config_defaults(&conf,
-                                    MBEDTLS_SSL_IS_CLIENT,
-                                    MBEDTLS_SSL_TRANSPORT_STREAM,
-                                    MBEDTLS_SSL_PRESET_DEFAULT) != 0)
-        return false;
-
-    mbedtls_ssl_conf_authmode(&conf, MBEDTLS_SSL_VERIFY_NONE); // optional: change for cert verification
-    mbedtls_ssl_conf_rng(&conf, mbedtls_ctr_drbg_random, &ctr_drbg);
-
-    if (mbedtls_ssl_setup(&ssl, &conf) != 0) return false;
-
-    mbedtls_ssl_set_hostname(&ssl, host.c_str());
-    mbedtls_ssl_set_bio(&ssl, &net, mbedtls_net_send, mbedtls_net_recv, nullptr);
-
-    int ret;
-    while ((ret = mbedtls_ssl_handshake(&ssl)) != 0) {
-        if (ret != MBEDTLS_ERR_SSL_WANT_READ && ret != MBEDTLS_ERR_SSL_WANT_WRITE)
-            return false;
     }
 
-    std::string request =
-        "GET " + path + " HTTP/1.1\r\n"
-        "Host: " + host + "\r\n"
-        "Connection: close\r\n\r\n";
+    if (mbedtls_net_connect(&net, host.c_str(), "443", MBEDTLS_NET_PROTO_TCP) != 0) {
+        return false;
+    }
 
-    ret = mbedtls_ssl_write(&ssl, reinterpret_cast<const unsigned char*>(request.c_str()), request.length());
-    if (ret < 0) return false;
+    if (mbedtls_ssl_config_defaults(&conf,
+        MBEDTLS_SSL_IS_CLIENT,
+        MBEDTLS_SSL_TRANSPORT_STREAM,
+        MBEDTLS_SSL_PRESET_DEFAULT) != 0) {
+        return false;
+    }
 
-    std::string response;
+    mbedtls_ssl_conf_authmode(&conf, MBEDTLS_SSL_VERIFY_NONE);
+    mbedtls_ssl_conf_rng(&conf, mbedtls_ctr_drbg_random, &ctr_drbg);
+
+    if (mbedtls_ssl_setup(&ssl, &conf) != 0) {
+        return false;
+    }
+
+    mbedtls_ssl_set_bio(&ssl, &net, mbedtls_net_send, mbedtls_net_recv, nullptr);
+
+    if (mbedtls_ssl_handshake(&ssl) != 0) {
+        return false;
+    }
+
+    std::ostringstream req;
+    req << "GET " << path << " HTTP/1.1\r\n"
+        << "Host: " << host << "\r\n"
+        << "Connection: close\r\n\r\n";
+
+    mbedtls_ssl_write(&ssl, (const unsigned char*)req.str().c_str(), req.str().size());
+
+    std::string raw;
     char buffer[1024];
-
-    do {
-        ret = mbedtls_ssl_read(&ssl, reinterpret_cast<unsigned char*>(buffer), sizeof(buffer) - 1);
-        if (ret > 0) response.append(buffer, ret);
-    } while (ret > 0);
-
-    outBody = extractBody(response);
+    int len = 0;
+    while ((len = mbedtls_ssl_read(&ssl, (unsigned char*)buffer, sizeof(buffer))) > 0) {
+        raw.append(buffer, len);
+    }
 
     mbedtls_ssl_close_notify(&ssl);
     mbedtls_net_free(&net);
@@ -118,6 +146,30 @@ bool HttpClient::getTls(const std::string& host, uint16_t port, const std::strin
     mbedtls_ctr_drbg_free(&ctr_drbg);
     mbedtls_entropy_free(&entropy);
 
+    std::string headerText;
+    std::string body = extractHeadersAndBody(raw, headerText);
+    response.headers = HttpParser::parseHeaders(headerText);
+    response.statusCode = HttpParser::parseStatusCode(headerText);
+
+    auto it = response.headers.find("transfer-encoding");
+    if (it != response.headers.end() && it->second == "chunked") {
+        ChunkedDecoder decoder;
+        decoder.feed(body);
+        response.body = decoder.getDecoded();
+    } else {
+        response.body = body;
+    }
+
     return true;
 }
 #endif
+
+std::string HttpClient::extractHeadersAndBody(const std::string& raw, std::string& headerOut) {
+    size_t pos = raw.find("\r\n\r\n");
+    if (pos == std::string::npos) {
+        headerOut.clear();
+        return raw;
+    }
+    headerOut = raw.substr(0, pos);
+    return raw.substr(pos + 4);
+}

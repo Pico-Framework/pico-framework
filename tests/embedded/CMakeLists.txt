@@ -12,7 +12,7 @@ if (NOT FREERTOS_KERNEL_PATH AND NOT DEFINED ENV{FREERTOS_KERNEL_PATH})
     return()
 endif()
 
-project(FatFsStorageManager_Test C CXX ASM)
+project(Embedded_Tests C CXX ASM)
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_CXX_STANDARD 17)
 
@@ -87,7 +87,8 @@ add_executable(EmbeddedTest
     TestRunner.cpp
     #FatFsStorageManager_Test.cpp
     #JsonService_Test.cpp
-    PasswordHash_test.cpp
+    #PasswordHash_test.cpp
+    HttpClient_Test.cpp
     ${TESTS_DIR}/host/mocks/test_stub_waitpid.c
     ${FRAMEWORK_DIR}/src/port/hw_config.c
 )
