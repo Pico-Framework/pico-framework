@@ -21,6 +21,8 @@ TRACE_INIT(AppContext);
 #include "FatFsStorageManager.h"
 #include "JwtAuthenticator.h"
 
+FatFsStorageManager AppContext::fatFs;
+
 AppContext& AppContext::getInstance() {
     static AppContext instance;
     return instance;
