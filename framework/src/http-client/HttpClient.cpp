@@ -17,7 +17,7 @@ TRACE_INIT(HttpClient);
 #include "mbedtls/ctr_drbg.h"
 #endif
 
-bool HttpClient::get(const std::string& url, HttpResponse& response) {
+bool HttpClient::get(const std::string& url, HttpClientResponse& response) {
     TRACE("HttpClient", "Making request to %s", url.c_str());
     // Very minimal URL parsing (http/https, host, path)
     std::string protocol, host, path;
@@ -46,7 +46,7 @@ bool HttpClient::get(const std::string& url, HttpResponse& response) {
     return false;
 }
 
-bool HttpClient::getPlain(const std::string& host, const std::string& path, HttpResponse& response) {
+bool HttpClient::getPlain(const std::string& host, const std::string& path, HttpClientResponse& response) {
     TcpConnectionSocket socket;
     if (!socket.connect(host.c_str(), 80)) {
         TRACE("HttpClient", "Connection failed");
@@ -96,7 +96,7 @@ bool HttpClient::getPlain(const std::string& host, const std::string& path, Http
 }
 
 #if PICO_HTTP_CLIENT_ENABLE_TLS
-bool HttpClient::getTls(const std::string& host, const std::string& path, HttpResponse& response) {
+bool HttpClient::getTls(const std::string& host, const std::string& path, HttpClientResponse& response) {
     mbedtls_net_context net;
     mbedtls_ssl_context ssl;
     mbedtls_ssl_config conf;
