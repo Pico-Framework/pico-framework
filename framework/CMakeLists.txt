@@ -92,9 +92,14 @@ target_sources(pico_framework
         src/storage/JsonService.cpp
         src/time/PicoTime.cpp
         src/http/JsonResponse.cpp
+)
+
+if(PICO_HTTP_CLIENT_ENABLE_TLS)
+    target_sources(pico_framework PRIVATE
         src/http-client/HttpClient.cpp
         src/http-client/ChunkedDecoder.cpp
-)
+    )
+endif()
 
 target_link_libraries(pico_framework PUBLIC
         pico_async_context_freertos         # needed for async context used in freeertos port
