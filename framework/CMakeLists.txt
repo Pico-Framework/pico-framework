@@ -121,6 +121,7 @@ endif()
 if(PICO_HTTP_CLIENT_ENABLE_TLS)
     target_sources(pico_framework PRIVATE
         ${PICO_LWIP_PATH}/src/apps/altcp_tls/altcp_tls_mbedtls.c
+        ${PICO_LWIP_PATH}/src/apps/altcp_tls/altcp_tls_mbedtls_mem.c
     )
     target_link_libraries(pico_framework PUBLIC pico_mbedtls)
 endif()
