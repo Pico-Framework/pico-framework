@@ -1,8 +1,11 @@
+// #include "framework_config.h"
+// #include "DebugTrace.h"
+// TRACE_INIT(HttpClient);
+
 #include "HttpClient.h"
 #include "HttpParser.h"
 #include "ChunkedDecoder.h"
 #include "TcpConnectionSocket.h"
-
 #include <sstream>
 #include <cstring>
 
@@ -25,8 +28,8 @@ static int mbedtls_recv_callback(void* ctx, unsigned char* buf, size_t len) {
 }
 
 bool HttpClient::get(const std::string& url, HttpClientResponse& response) {
-    printf("HttpClient: Making request to %s\n", url.c_str());
-
+   printf("HttpClient: Making request to %s\n", url.c_str());
+    // Very minimal URL parsing (http/https, host, path)
     std::string protocol, host, path;
     size_t proto_pos = url.find("://");
     if (proto_pos == std::string::npos) return false;
@@ -61,32 +64,34 @@ bool HttpClient::getPlain(const std::string& host, const std::string& path, Http
     }
 
     printf("HttpClient: Socket connected\n");
-
     std::ostringstream req;
     req << "GET " << path << " HTTP/1.1\r\n"
         << "Host: " << host << "\r\n"
         << "Connection: close\r\n\r\n";
 
-    if (!socket.send(req.str().c_str(), req.str().size())) {
+    if (socket.send(req.str().c_str(), req.str().size()))
+    {
+        printf("HttpClient Request sent\n");
+    } else {
         printf("HttpClient: Request failed\n");
         return false;
     }
-
-    char buffer[1024];
+    printf("HttpClient Request sent\n");
     std::string raw;
-    int len;
+    char buffer[1024];
+    int len = 0;
 
     while ((len = socket.recv(buffer, sizeof(buffer))) > 0) {
         raw.append(buffer, len);
     }
 
     socket.close();
-
+    printf("HttpClient: Parsing response...");
     std::string headerText;
     std::string body = extractHeadersAndBody(raw, headerText);
     response.headers = HttpParser::parseHeaders(headerText);
     response.statusCode = HttpParser::parseStatusCode(headerText);
-    printf("HttpClient: Got status code %d\n", response.statusCode);
+    printf("HttpClient: Got status code %d", response.statusCode);
 
     auto it = response.headers.find("transfer-encoding");
     if (it != response.headers.end() && it->second == "chunked") {
@@ -134,7 +139,7 @@ bool HttpClient::getTls(const std::string& host, const std::string& path, HttpCl
         return false;
     }
 
-    mbedtls_ssl_conf_authmode(&conf, ALTCP_MBEDTLS_AUTHMODE);
+    mbedtls_ssl_conf_authmode(&conf, ALTCP_MBEDTLS_AUTHMODE); // Controlled via build config
     mbedtls_ssl_conf_rng(&conf, mbedtls_ctr_drbg_random, &ctr_drbg);
 
     if (mbedtls_ssl_setup(&ssl, &conf) != 0) {
@@ -160,33 +165,21 @@ bool HttpClient::getTls(const std::string& host, const std::string& path, HttpCl
         return false;
     }
 
-    std::string raw;
     char buf[1024];
     int len;
+    response.body.clear();
 
-    while ((len = mbedtls_ssl_read(&ssl, reinterpret_cast<unsigned char*>(buf), sizeof(buf))) > 0) {
-        raw.append(buf, len);
+    while ((len = mbedtls_ssl_read(&ssl, reinterpret_cast<unsigned char*>(buf), sizeof(buf) - 1)) > 0) {
+        buf[len] = '\0';
+        response.body.append(buf);
     }
+
+    // TODO: Parse status code and headers from response.body if needed
 
     mbedtls_ssl_free(&ssl);
     mbedtls_ssl_config_free(&conf);
     mbedtls_ctr_drbg_free(&ctr_drbg);
     mbedtls_entropy_free(&entropy);
-
-    std::string headerText;
-    std::string body = extractHeadersAndBody(raw, headerText);
-    response.headers = HttpParser::parseHeaders(headerText);
-    response.statusCode = HttpParser::parseStatusCode(headerText);
-    printf("HttpClient: Got status code %d\n", response.statusCode);
-
-    auto it = response.headers.find("transfer-encoding");
-    if (it != response.headers.end() && it->second == "chunked") {
-        ChunkedDecoder decoder;
-        decoder.feed(body);
-        response.body = decoder.getDecoded();
-    } else {
-        response.body = body;
-    }
 
     return true;
 }
