@@ -10,6 +10,7 @@
 #include <FreeRTOS.h>
 #include <task.h>
 #include <queue.h>
+#include "lwip_dns_resolver.h"
 
 TcpConnectionSocket::TcpConnectionSocket()
     : sockfd(-1), connected(false), use_tls(false),
@@ -68,13 +69,12 @@ void TcpConnectionSocket::setServerTlsConfig(const std::string& cert, const std:
 
 bool TcpConnectionSocket::connect(const char* host, int port) {
     ip_addr_t ip;
-    err_t err = dns_gethostbyname(host, &ip, nullptr, nullptr);
-    if (err != ERR_OK) {
+    if (!resolveHostnameBlocking(host, &ip)) {
         printf("[TcpConnectionSocket] DNS resolution failed for %s\n", host);
         return false;
     }
 
-    return !root_ca_cert.empty() ? connectTls(ip, port) : connectPlain(ip, port);
+    return use_tls ? connectTls(ip, port) : connectPlain(ip, port);
 }
 
 bool TcpConnectionSocket::connectPlain(const ip_addr_t& ip, int port) {
