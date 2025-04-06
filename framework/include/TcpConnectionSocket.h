@@ -64,6 +64,7 @@ public:
      * @return true on success, false on failure.
      */
     bool connect(const char* host, int port);
+    bool connectTls(const char* host, int port);
 
     /**
      * @brief Send data over the connection.

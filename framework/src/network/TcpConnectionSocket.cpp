@@ -9,7 +9,6 @@
 #include <cstdio>
 #include <FreeRTOS.h>
 #include <task.h>
-#include <queue.h>
 #include "lwip_dns_resolver.h"
 
 TcpConnectionSocket::TcpConnectionSocket()
@@ -99,6 +98,15 @@ bool TcpConnectionSocket::connectPlain(const ip_addr_t& ip, int port) {
     connected = true;
     use_tls = false;
     return true;
+}
+
+bool TcpConnectionSocket::connectTls(const char* host, int port) {
+    ip_addr_t ip;
+    if (!resolveHostnameBlocking(host, &ip)) {
+        printf("[TcpConnectionSocket] DNS resolution failed for %s\n", host);
+        return false;
+    }
+    return connectTls(ip, port);
 }
 
 bool TcpConnectionSocket::connectTls(const ip_addr_t& ip, int port) {
