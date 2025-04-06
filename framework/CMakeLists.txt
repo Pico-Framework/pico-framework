@@ -119,6 +119,9 @@ if (PICO_HTTP_ENABLE_JWT)
 endif()
 
 if(PICO_HTTP_CLIENT_ENABLE_TLS)
+    target_sources(pico_framework PRIVATE
+        ${PICO_LWIP_PATH}/src/apps/altcp_tls/altcp_tls_mbedtls.c
+    )
     target_link_libraries(pico_framework PUBLIC pico_mbedtls)
 endif()
 
