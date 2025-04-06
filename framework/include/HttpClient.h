@@ -7,6 +7,12 @@ struct HttpClientResponse {
     int statusCode = 0;
     std::string body;
     std::unordered_map<std::string, std::string> headers;
+
+    void clear() {
+        statusCode = 0;
+        body.clear();
+        headers.clear();
+    }
 };
 
 
