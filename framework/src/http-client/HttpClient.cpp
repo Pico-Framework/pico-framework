@@ -14,6 +14,12 @@
 #include "mbedtls/ctr_drbg.h"
 #endif
 
+#if PICO_HTTP_CLIENT_ENABLE_TLS
+void HttpClient::setRootCACertificate(const std::string& cert) {
+    rootCACert = cert;
+}
+#endif
+
 static int mbedtls_send_callback(void* ctx, const unsigned char* buf, size_t len) {
     TcpConnectionSocket* socket = static_cast<TcpConnectionSocket*>(ctx);
     return socket->send(reinterpret_cast<const char*>(buf), len);

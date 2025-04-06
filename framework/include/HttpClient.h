@@ -37,6 +37,12 @@ private:
     bool getPlain(const std::string& host, const std::string& path, HttpClientResponse& response);
 #if PICO_HTTP_CLIENT_ENABLE_TLS
     bool getTls(const std::string& host, const std::string& path, HttpClientResponse& response);
+    **
+     * @brief Set the Root CA Certificate used for TLS validation.
+     * 
+     * @param cert PEM-encoded root CA certificate.
+     */
+    void setRootCACertificate(const std::string& cert) {
 #endif
 
     std::string extractHeadersAndBody(const std::string& raw, std::string& headerOut);
