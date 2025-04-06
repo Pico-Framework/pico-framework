@@ -8,9 +8,9 @@
 #include <lwip/sockets.h>
 #include <lwip/netdb.h>
 
-#include "framework_config.h"
-#include "DebugTrace.h"
-TRACE_INIT(TcpConnectionSocket)
+//#include "framework_config.h"
+//#include "Debugprintf.h"
+//printf_INIT(TcpConnectionSocket)
 
 TcpConnectionSocket::TcpConnectionSocket(int sockfd)
     : sockfd(sockfd) {}
@@ -96,37 +96,37 @@ int TcpConnectionSocket::close()
 }
 
 bool TcpConnectionSocket::connect(const char* host, int port) {
-    TRACE("TcpConnectionSocket", "Starting connect to %s:%d", host, port);
+    printf("TcpConnectionSocket: Starting connect to %s:%d\n", host, port);
 
     ip_addr_t ip;
-    TRACE("TcpConnectionSocket", "Resolving hostname: %s", host);
+    printf("TcpConnectionSocket: Resolving hostname: %s\n", host);
     if (!resolveHostnameBlocking(host, &ip)) {
-        TRACE("TcpConnectionSocket", "DNS lookup failed for: %s", host);
+        printf("TcpConnectionSocket", "DNS lookup failed for: %s\n", host);
         return false;
     }
 
-    TRACE("TcpConnectionSocket", "DNS resolved to: %s", ipaddr_ntoa(&ip));
+    printf("TcpConnectionSocket: DNS resolved to: %s\n", ipaddr_ntoa(&ip));
 
     struct sockaddr_in addr = {};
     addr.sin_family = AF_INET;
     addr.sin_port = lwip_htons(port);
     addr.sin_addr.s_addr = ip.addr;
 
-    TRACE("TcpConnectionSocket", "Creating socket...");
+    printf("TcpConnectionSocket: Creating socket...\n");
     sockfd = lwip_socket(AF_INET, SOCK_STREAM, 0);
     if (sockfd < 0) {
-        TRACE("TcpConnectionSocket", "Socket creation failed");
+        printf("TcpConnectionSocket: Socket creation failed\n");
         return false;
     }
 
-    TRACE("TcpConnectionSocket", "Connecting to %s:%d...", host, port);
+    printf("TcpConnectionSocket: Connecting to %s:%d...\n", host, port);
     if (lwip_connect(sockfd, reinterpret_cast<struct sockaddr*>(&addr), sizeof(addr)) < 0) {
-        TRACE("TcpConnectionSocket", "Connection to %s:%d failed", host, port);
+        printf("TcpConnectionSocket: Connection to %s:%d failed\n", host, port);
         lwip_close(sockfd);
         sockfd = -1;
         return false;
     }
 
-    TRACE("TcpConnectionSocket", "Connection successful to %s:%d", host, port);
+    printf("TcpConnectionSocket: Connection successful to %s:%d\n", host, port);
     return true;
 }

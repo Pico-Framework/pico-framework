@@ -5,7 +5,7 @@ TEST_GROUP(HttpClientTest) { };
 
 TEST(HttpClientTest, Get_ChunkedResponse_ShouldReturn200AndNonEmptyBody) {
     HttpClient client;
-    HttpResponse response;
+    HttpClientResponse response;
 
     bool ok = client.get("http://httpbin.org/stream/5", response);
     CHECK_TRUE(ok);

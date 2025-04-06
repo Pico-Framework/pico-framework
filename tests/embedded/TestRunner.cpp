@@ -18,7 +18,6 @@ void testTask(void*) {
         vTaskDelay(pdMS_TO_TICKS(100)); // Wait for Wi-Fi connection
     }
     printf("Wi-Fi connected. Running tests...\n");
-    tcpip_init(nullptr, nullptr); // 🧠 Must be here
 
     bool result = CommandLineTestRunner::RunAllTests(0, (char**)nullptr);
     printf("Test task completed with result %d\n", result);

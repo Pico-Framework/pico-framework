@@ -1,6 +1,6 @@
-#include "framework_config.h"
-#include "DebugTrace.h"
-TRACE_INIT(HttpClient);
+// #include "framework_config.h"
+// #include "DebugTrace.h"
+// TRACE_INIT(HttpClient);
 
 #include "HttpClient.h"
 #include "HttpParser.h"
@@ -28,7 +28,7 @@ static int mbedtls_recv_callback(void* ctx, unsigned char* buf, size_t len) {
 }
 
 bool HttpClient::get(const std::string& url, HttpClientResponse& response) {
-    TRACE("HttpClient", "Making request to %s", url.c_str());
+   printf("HttpClient: Making request to %s\n", url.c_str());
     // Very minimal URL parsing (http/https, host, path)
     std::string protocol, host, path;
     size_t proto_pos = url.find("://");
@@ -59,11 +59,11 @@ bool HttpClient::get(const std::string& url, HttpClientResponse& response) {
 bool HttpClient::getPlain(const std::string& host, const std::string& path, HttpClientResponse& response) {
     TcpConnectionSocket socket;
     if (!socket.connect(host.c_str(), 80)) {
-        TRACE("HttpClient", "Connection failed");
+        printf("HttpClient: Connection failed\n");
         return false;
     }
 
-    TRACE("HttpClient", "Socket connected");
+    printf("HttpClient: Socket connected\n");
     std::ostringstream req;
     req << "GET " << path << " HTTP/1.1\r\n"
         << "Host: " << host << "\r\n"
@@ -71,12 +71,12 @@ bool HttpClient::getPlain(const std::string& host, const std::string& path, Http
 
     if (socket.send(req.str().c_str(), req.str().size()))
     {
-        TRACE("HttpClient", "Request sent");
+        printf("HttpClient Request sent\n");
     } else {
-        TRACE("HttpClient", "Request failed");
+        printf("HttpClient: Request failed\n");
         return false;
     }
-    TRACE("HttpClient", "Request sent");
+    printf("HttpClient Request sent\n");
     std::string raw;
     char buffer[1024];
     int len = 0;
@@ -86,12 +86,12 @@ bool HttpClient::getPlain(const std::string& host, const std::string& path, Http
     }
 
     socket.close();
-    TRACE("HttpClient", "Parsing response...");
+    printf("HttpClient: Parsing response...");
     std::string headerText;
     std::string body = extractHeadersAndBody(raw, headerText);
     response.headers = HttpParser::parseHeaders(headerText);
     response.statusCode = HttpParser::parseStatusCode(headerText);
-    TRACE("HttpClient", "Got status code %d", response.statusCode);
+    printf("HttpClient: Got status code %d", response.statusCode);
 
     auto it = response.headers.find("transfer-encoding");
     if (it != response.headers.end() && it->second == "chunked") {

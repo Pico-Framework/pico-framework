@@ -5,8 +5,6 @@
  * This configuration is tuned for use with FreeRTOS and Raspberry Pi Pico W (RP2040),
  * incorporating custom memory, TCP, debugging, and threading settings.
  *
- * This file uses your old values (from lwipopts.old) and retains the grouped layout
- * and improved savannah debug bug fix from your lwipopts.h.
  */
 
 #ifndef LWIPOPTS_H
@@ -27,21 +25,21 @@
 #define MEMP_MEM_MALLOC 0         // Use static memory pools rather than malloc for internal allocations
 #define MEM_ALIGNMENT 4           // Align memory to 4-byte boundaries
 #define MEM_SIZE (10 * 1024)      // Total heap size available to lwIP (16 KB); prevents silent issues at lower sizes [may be able to lower]
-#define MEMP_NUM_NETCONN 64       // Maximum number of simultaneously active netconns (was 32)
+#define MEMP_NUM_NETCONN 32       // Maximum number of simultaneously active netconns (was 32)
 #define MEMP_NUM_TCP_PCB 16       // Maximum number of concurrently active TCP protocol control blocks
 #define MEMP_NUM_TCP_PCB_LISTEN 8 // Maximum number of listening TCP PCBs
-#define MEMP_NUM_TCP_SEG 64       // Maximum number of simultaneously queued TCP segments
+#define MEMP_NUM_TCP_SEG 32       // Maximum number of simultaneously queued TCP segments
 #define MEMP_NUM_ARP_QUEUE 10     // Maximum number of ARP request queue entries
 #define MEMP_NUM_NETBUF 16        // Maximum number of network buffers
 #define MEMP_NUM_SYS_TIMEOUT 16   // Maximum number of active timeouts (old value; increased from 10)
 #define NUM_MEMP_PBUF 16          // Number of pbuf structures in the pool
 
-#define LWIP_ALLOW_MEM_FREE_FROM_OTHER_CONTEXT 1 // Allow freeing memory allocated in different contexts
+//#define LWIP_ALLOW_MEM_FREE_FROM_OTHER_CONTEXT 1 // Allow freeing memory allocated in different contexts
 
 // -----------------------------------------------------------------------------
 // PBUF Buffer Settings
 // -----------------------------------------------------------------------------
-#define PBUF_POOL_SIZE 8       // Total number of pbufs in the pool
+#define PBUF_POOL_SIZE 24       // Total number of pbufs in the pool
 #define PBUF_POOL_BUFSIZE 1460 // Size (in bytes) of each pbuf in the pool - sane as TCP_MSS
 
 #define ETH_PAD_SIZE 0 // Extra padding added to ethernet frames (0 means no extra pad)
@@ -50,12 +48,14 @@
 // TCP Configuration
 // -----------------------------------------------------------------------------
 #define LWIP_TCP 1                // Enable TCP support
-#define TCP_TTL 5                 // Set default Time-To-Live for TCP packets
+#define LWIP_IPV4 1               // Enable IPv4 support
+#define TCP_TTL 255               // Set default Time-To-Live for TCP packets (max hops)
 #define TCP_QUEUE_OOSEQ 0         // Disable queuing of out-of-order TCP segments
 #define TCP_MSS 1460              // Maximum segment size (bytes)
 #define TCP_SND_BUF (8 * TCP_MSS) // Size of TCP sender buffer (bytes) - may be able to lower
-#define TCP_WND (PBUF_POOL_SIZE * (PBUF_POOL_BUFSIZE - 60))
-// #define TCP_SND_QUEUELEN                ((4 * (TCP_SND_BUF) + (TCP_MSS - 1)) / TCP_MSS) // Calculate send queue length
+//#define TCP_WND (PBUF_POOL_SIZE * (PBUF_POOL_BUFSIZE - 60))
+#define TCP_WND (8 * TCP_MSS) // Size of TCP receive window (bytes) - may be able to lower
+#define TCP_SND_QUEUELEN                ((4 * (TCP_SND_BUF) + (TCP_MSS - 1)) / TCP_MSS) // Calculate send queue length
 #define TCP_SND_QUEUELEN 32  // Calculate send queue length
 #define TCP_LISTEN_BACKLOG 1 // Enable support for backlog on TCP listen
 #define TCP_MSL 1000         // Maximum Segment Lifetime (ms) [reduces TIME_WAIT duration]
@@ -92,7 +92,7 @@
 // -----------------------------------------------------------------------------
 // Protocols and Raw API
 // -----------------------------------------------------------------------------
-#define LWIP_RAW 0            // Disable the raw API (not used)
+#define LWIP_RAW 1            // Disable the raw API (not used)
 #define LWIP_NETCONN 0        // Not used
 #define LWIP_SOCKET 1         // Enable socket API support
 #define LWIP_COMPAT_SOCKETS 0 // Use POSIX-like sockets instead of native lwIP sockets
@@ -100,18 +100,18 @@
 // -----------------------------------------------------------------------------
 // Threading / OS Integration
 // -----------------------------------------------------------------------------
-#define LWIP_NETCONN_SEM_PER_THREAD 1    // Each thread gets its own netconn semaphore
+#define LWIP_NETCONN_SEM_PER_THREAD 0    // Each thread gets its own netconn semaphore - only if using a single socket from multiple threads
 #define LWIP_SO_RCVTIMEO 1               // Enable support for socket receive timeouts
 #define LWIP_TCPIP_CORE_LOCKING 1        // Disable core locking (not needed with FreeRTOS)
-#define LWIP_TCPIP_CORE_LOCKING_INPUT 0  // Disable core locking input (not needed with FreeRTOS)
+#define LWIP_TCPIP_CORE_LOCKING_INPUT 1  // Disable core locking input (not needed with FreeRTOS)
 #define TCPIP_THREAD_NAME "tcpip_thread" // Name assigned to the TCP/IP thread
 #define TCPIP_THREAD_STACKSIZE 2048      // Stack size (in bytes) for the TCP/IP thread
 #define TCPIP_THREAD_PRIO 3              // Priority for the TCP/IP thread
-#define TCPIP_MBOX_SIZE 127              // Mailbox size for the TCP/IP thread message queue
+#define TCPIP_MBOX_SIZE 8                // Mailbox size for the TCP/IP thread message queue
 #define DEFAULT_THREAD_STACKSIZE 2048    // Default stack size for lwIP-related threads
 #define DEFAULT_UDP_RECVMBOX_SIZE 8      // Default mailbox size for UDP receive (old value)
-#define DEFAULT_TCP_RECVMBOX_SIZE 127    // Default mailbox size for TCP receive
-#define DEFAULT_ACCEPTMBOX_SIZE 127      // Default mailbox size for accepted connections
+#define DEFAULT_TCP_RECVMBOX_SIZE 8      // Default mailbox size for TCP receive
+#define DEFAULT_ACCEPTMBOX_SIZE 8        // Default mailbox size for accepted connections
 #define DEFAULT_RAW_RECVMBOX_SIZE 8      // Default mailbox size for raw receive (from old settings)
 #define LWIP_TIMEVAL_PRIVATE 0           // Use the standard system timeval structure
 
@@ -138,6 +138,7 @@
 #define LWIP_NETIF_LINK_CALLBACK 1       // Enable callbacks on network link state changes
 #define LWIP_NETIF_EXT_STATUS_CALLBACK 1 // Enable extended status callbacks for network interfaces
 #define DHCP_DOES_ARP_CHECK 0            // Disable ARP check for DHCP responses
+#define LWIP_DHCP_DOES_ACD_CHECK    0    // Disable Address Conflict Detection (ACD) for DHCP
 #define LWIP_NETIF_TX_SINGLE_PBUF 1      // Transmit a single pbuf per packet (improves performance)
 #define ETHARP_TABLE_SIZE 127            // Set the size of the ARP table
 
