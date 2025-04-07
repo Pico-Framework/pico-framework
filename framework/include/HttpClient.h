@@ -33,7 +33,9 @@ public:
      * 
      * @param cert PEM-encoded root CA certificate.
      */
-    void setRootCACertificate(const std::string& cert);
+    void setRootCACertificate(const std::string& cert){
+        rootCACert = cert;
+    }
 #endif
 
 private:
