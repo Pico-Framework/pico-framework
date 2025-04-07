@@ -77,3 +77,14 @@ bool HttpClient::get(const std::string& url, HttpClientResponse& response) {
 
     return true;
 }
+
+std::string HttpClient::extractHeadersAndBody(const std::string& raw, std::string& headerOut) {
+    size_t pos = raw.find("\r\n\r\n");
+    if (pos == std::string::npos) {
+        headerOut.clear();
+        return raw;
+    }
+    headerOut = raw.substr(0, pos);
+    return raw.substr(pos + 4);
+}
+
