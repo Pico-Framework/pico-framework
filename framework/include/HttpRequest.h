@@ -16,6 +16,7 @@
 #pragma once
 
 #include "utility.h"
+#include "HttpResponse.h"
 #include <string>
 #include <map>
 #include <iostream>
@@ -41,7 +42,10 @@ public:
      * @param url The full requested URL.
      */
     HttpRequest() = default; // Default constructor
-    // HttpRequest(TcpConnectionSocket& conn, const std::string& method, const std::string& url);
+    HttpRequest& get(HttpResponse& response); // for chaining response
+    HttpRequest& post(HttpResponse& response); // for chaining response
+    HttpRequest& put(HttpResponse& response); // for chaining response
+    HttpRequest& delete_(HttpResponse& response); // for chaining response
 
     /**
      * @brief Construct a HttpRequest from raw headers, method, and path.

@@ -6,12 +6,17 @@
 class HttpClient {
 public:
     /**
-     * @brief Perform a GET request using a pre-built HttpRequest.
+     * @brief Perform a GET/POST/PUT/DELETE request using a pre-built HttpRequest.
      * @param request A fully constructed HttpRequest (with method, host, uri, etc.)
      * @param response An HttpResponse that will be populated
      * @return true if the request succeeded and response was parsed
      */
     bool get(const HttpRequest& request, HttpResponse& response);
+    bool post(const HttpRequest& request, HttpResponse& response);
+    bool put(const HttpRequest& request, HttpResponse& response);
+    bool delete_(const HttpRequest& request, HttpResponse& response);
+
+    bool sendRequest(const HttpRequest& request, HttpResponse& response); // common helper
 
     /**
      * @brief Perform a simple GET request by URL (for convenience).
@@ -31,13 +36,6 @@ public:
     }
 
 private:
-    bool request(const std::string& method,
-                 const std::string& url,
-                 const std::map<std::string, std::string>& headers,
-                 const std::string& body,
-                 HttpResponse& response);
-
-    bool getPlain(const std::string& host, const std::string& path, HttpResponse& response);
 
     std::string rootCACert;
 

@@ -8,36 +8,44 @@
 #include <sstream>
 #include <cstring>
 
-bool HttpClient::gets(const std::string& uri, HttpResponse& response) {
-    HttpRequest request;
-
-    const std::string::size_type proto_end = uri.find("://");
-    if (proto_end == std::string::npos) return false;
-
-    std::string protocol = uri.substr(0, proto_end);
-    std::string rest = uri.substr(proto_end + 3); // Skip "://"
-
-    std::string::size_type path_start = rest.find('/');
-    std::string host, path;
-
-    if (path_start != std::string::npos) {
-        host = rest.substr(0, path_start);
-        path = rest.substr(path_start);
-    } else {
-        host = rest;
-        path = "/";
-    }
-
-    request.setProtocol(protocol)
-           .setHost(host)
-           .setUri(path)
-           .setMethod("GET")
-           .setUserAgent("PicoFramework/1.0");
-
-    return get(request, response);
+bool HttpClient::get(const HttpRequest& request, HttpResponse& response) {
+    return sendRequest(request, response);
 }
 
-bool HttpClient::get(const HttpRequest& request, HttpResponse& response) {
+bool HttpClient::post(const HttpRequest& request, HttpResponse& response) {
+    return sendRequest(request, response);
+}
+
+bool HttpClient::put(const HttpRequest& request, HttpResponse& response) {
+    return sendRequest(request, response);
+}
+
+bool HttpClient::delete_(const HttpRequest& request, HttpResponse& response) {
+    return sendRequest(request, response);
+}
+
+bool HttpClient::gets(const std::string& uri, HttpResponse& response) {
+    const auto proto_end = uri.find("://");
+    if (proto_end == std::string::npos) return false;
+
+    const std::string protocol = uri.substr(0, proto_end);
+    const std::string rest = uri.substr(proto_end + 3);
+
+    const auto path_start = rest.find('/');
+    const std::string host = (path_start != std::string::npos) ? rest.substr(0, path_start) : rest;
+    const std::string path = (path_start != std::string::npos) ? rest.substr(path_start) : "/";
+
+    HttpRequest::create()
+        .setProtocol(protocol)
+        .setHost(host)
+        .setUri(path)
+        .setUserAgent("PicoFramework/1.0")
+        .get(response);  
+
+    return response.ok();  
+}
+
+bool HttpClient::sendRequest(const HttpRequest& request, HttpResponse& response) {
     const std::string& protocol = request.getProtocol();
     const std::string& host     = request.getHost();
     const std::string& path     = request.getUri();
@@ -47,12 +55,6 @@ bool HttpClient::get(const HttpRequest& request, HttpResponse& response) {
 
     const bool useTls = (protocol == "https");
     const uint16_t port = useTls ? 443 : 80;
-
-    printf("HttpClient: Making request to %s\n", host.c_str());
-    printf("HttpClient: Protocol: %s, Port: %d, Host: %s, Path: %s\n", protocol.c_str(), port, host.c_str(), path.c_str());
-    printf("HttpClient: Method: %s\n", method.c_str());
-    printf("HttpClient: Body: %s\n", body.c_str());
-    printf("HttpClient: User Headers:\n");
 
     TcpConnectionSocket socket;
     if (useTls){
@@ -91,7 +93,6 @@ bool HttpClient::get(const HttpRequest& request, HttpResponse& response) {
     }
 
     response.setStatus(HttpParser::parseStatusCode(rawHeader));
-
     auto parsedHeaders = HttpParser::parseHeaders(rawHeader);
     for (const auto& [key, value] : parsedHeaders) {
         response.setHeader(key, value);
@@ -102,8 +103,8 @@ bool HttpClient::get(const HttpRequest& request, HttpResponse& response) {
         return false;
     }
 
-    auto transferEncoding = response.getHeader("Transfer-Encoding");
-    if (transferEncoding == "chunked") {
+    const std::string transferEncoding = response.getHeader("transfer-encoding");
+    if (toLower(transferEncoding) == "chunked") {
         ChunkedDecoder decoder;
         decoder.feed(bodyData);
         response.setBody(decoder.getDecoded());
@@ -113,6 +114,7 @@ bool HttpClient::get(const HttpRequest& request, HttpResponse& response) {
 
     return true;
 }
+
 
 std::string HttpClient::extractHeadersAndBody(const std::string& raw, std::string& headerOut) {
     size_t pos = raw.find("\r\n\r\n");

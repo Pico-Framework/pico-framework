@@ -163,6 +163,13 @@ public:
     // ------------------------------------------------------------------------
     // Common Helpers
     // ------------------------------------------------------------------------
+    /**
+     * @brief Check if the response status code indicates success.
+     * @return True if status code is 2xx, false otherwise.
+     */
+    bool ok() const {
+        return status_code >= 200 && status_code < 300;
+    }
 
     /**
      * @brief Return the raw socket descriptor.

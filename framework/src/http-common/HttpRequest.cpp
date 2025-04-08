@@ -32,17 +32,50 @@ TRACE_INIT(HttpRequest)
 #include "MultipartParser.h"
 #include "url_utils.h"
 #include "HttpParser.h"
-
-#ifdef TRACE_REQUEST
-#define DEBUG_PRINT(...) (std::cout << __VA_ARGS__ << std::endl)
-#else
-#define DEBUG_PRINT(...) \
-    do                   \
-    {                    \
-    } while (0)
-#endif
+#include "HttpClient.h"
 
 #define BUFFER_SIZE 1460 // this is the standard MTU size
+
+/**
+ * Support chaining of HttpClient::get() to HttpRequest.
+ */
+HttpRequest& HttpRequest::get(HttpResponse& response) {
+    HttpClient client;
+    this->setMethod("GET");
+    client.get(*this, response);
+    return *this;
+}
+
+/**
+ * Support chaining of HttpClient::post() to HttpRequest.
+ */
+HttpRequest& HttpRequest::post(HttpResponse& response) {
+    HttpClient client;
+    this->setMethod("POST");
+    client.post(*this, response);
+    return *this;
+}
+
+/**
+ * Support chaining of HttpClient::put() to HttpRequest.
+ */
+HttpRequest& HttpRequest::put(HttpResponse& response) {
+    HttpClient client;
+    this->setMethod("PUT");
+    client.put(*this, response);
+    return *this;
+}
+
+/**
+ * Support chaining of HttpClient::delete() to HttpRequest.
+ */
+HttpRequest& HttpRequest::delete_(HttpResponse& response) {
+    HttpClient client;
+    this->setMethod("DELETE");
+    client.delete_(*this, response);
+    return *this;
+}
+
 
 /**
  * @brief Construct a HttpRequest object and parse the URL and headers.
