@@ -55,8 +55,10 @@ bool HttpClient::get(const HttpRequest& request, HttpResponse& response) {
     printf("HttpClient: User Headers:\n");
 
     TcpConnectionSocket socket;
-    if (useTls)
+    if (useTls){
         socket.setRootCACertificate(rootCACert);
+        socket.setHostname(host.c_str()); // required for SNI
+    }
     if (!socket.connect(host.c_str(), port, useTls)) {
         return false;
     }
