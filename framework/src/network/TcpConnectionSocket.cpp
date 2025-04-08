@@ -80,6 +80,7 @@ void TcpConnectionSocket::setServerTlsConfig(const std::string &cert, const std:
 
 bool TcpConnectionSocket::connect(const char *host, int port, bool use_tls)
 {
+    strncpy(hostname, host, sizeof(hostname) - 1);
     this->use_tls = use_tls;
     ip_addr_t ip;
     if (!resolveHostnameBlocking(host, &ip))
