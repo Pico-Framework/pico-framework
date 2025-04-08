@@ -39,7 +39,7 @@ endif()
 
 if(PICO_HTTP_ENABLE_JWT)
     target_sources(pico_framework PRIVATE
-        ${CMAKE_CURRENT_SOURCE_DIR}/src/http/JwtAuthenticator.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/http-server/JwtAuthenticator.cpp
     )
     add_compile_definitions(PICO_HTTP_ENABLE_JWT=1)
 endif()
@@ -67,19 +67,19 @@ target_sources(pico_framework
         src/Application/FrameworkController.cpp
         src/Application/FrameworkModel.cpp
         src/application/FrameworkView.cpp
-        src/http/HttpServer.cpp
-        src/http/HttpRequest.cpp
-        src/http/HttpResponse.cpp
-        src/http/HttpFileserver.cpp
-        src/http/HttpParser.cpp
-        #src/http/JwtAuthenticator.cpp #moved to conditional above
-        src/http/JsonRequestHelper.cpp # (not mandatory, e.g. auto name = JsonRequestHelper::getString(req, "user.name");)
+        src/http-server/HttpServer.cpp
+        src/http-common/HttpRequest.cpp
+        src/http-common/HttpResponse.cpp
+        src/http-server/HttpFileserver.cpp
+        src/http-common/HttpParser.cpp
+        #src/http-server/JwtAuthenticator.cpp #moved to conditional above
+        src/http-common/JsonRequestHelper.cpp # (not mandatory, e.g. auto name = JsonRequestHelper::getString(req, "user.name");)
         # or if (JSON::hasField(req, "auth.token")) { ... } JSON is a macro for JsonRequestHelper
         # Only if you want to use JSON request helper methods
-        src/http/Middleware.cpp
-        src/http/Router.cpp
-        src/http/MultipartParser.cpp
-        src/http/url_utils.cpp
+        src/http-server/Middleware.cpp
+        src/http-server/Router.cpp
+        src/http-server/MultipartParser.cpp
+        src/http-common/url_utils.cpp
         #src/network/TcpConnectionSocket.cpp abstraction coming to use your own layer (e.g. raw ethernet, lwip, etc.)
         src/network/Network.cpp 
         src/network/NtpClient.cpp
@@ -91,7 +91,7 @@ target_sources(pico_framework
         src/storage/FatFsStorageManager.cpp
         src/storage/JsonService.cpp
         src/time/PicoTime.cpp
-        src/http/JsonResponse.cpp
+        src/http-common/JsonResponse.cpp
         src/network/TcpConnectionSocket.cpp
         src/network/lwip_dns_resolver.cpp
 )

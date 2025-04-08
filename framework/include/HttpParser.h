@@ -1,9 +1,9 @@
 #pragma once
 #include <string>
-#include <unordered_map>
+#include <map>
 
 class HttpParser {
 public:
     static int parseStatusCode(const std::string& statusLine);
-    static std::unordered_map<std::string, std::string> parseHeaders(const std::string& rawHeaders);
+    static std::map<std::string, std::string> parseHeaders(const std::string& rawHeaders);
 };

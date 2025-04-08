@@ -1,7 +1,3 @@
-#define LWIP_ALTCP 1
-#define LWIP_ALTCP_TLS 1
-#define LWIP_ALTCP_TLS_MBEDTLS 1
-
 #include "TcpConnectionSocket.h"
 
 #include <lwip/dns.h>
@@ -15,15 +11,10 @@
 #include <FreeRTOS.h>
 #include <task.h>
 #include "lwip_dns_resolver.h"
-#include "mbedtls/debug.h"
 
-
-static void my_mbedtls_debug(void *ctx, int level,
-                             const char *file, int line,
-                             const char *str)
-{
-    printf("mbedTLS [%d] %s:%04d: %s", level, file, line, str);
-}
+#include "framework_config.h"
+#include "DebugTrace.h"
+TRACE_INIT(TcpConnectionSocket);
 
 TcpConnectionSocket::TcpConnectionSocket()
     : sockfd(-1), connected(false), use_tls(false),
@@ -139,7 +130,7 @@ bool TcpConnectionSocket::connectTls(const char *host, int port)
 
 err_t TcpConnectionSocket::onConnected(void *arg, struct altcp_pcb *conn, err_t err)
 {
-    printf("[TcpConnectionSocket] onConnected callback\n");
+    TRACE("[TcpConnectionSocket] onConnected callback\n");
     if (err != ERR_OK)
     {
         printf("[TcpConnectionSocket] Connection failed: %d\n", err);
@@ -178,7 +169,7 @@ bool TcpConnectionSocket::connectTls(const ip_addr_t &ip, int port)
 {
     if (!tls_config)
     {
-        printf("[TcpConnectionSocket] RootCA Certificate is: %s\n", root_ca_cert.c_str());
+        TRACE("[TcpConnectionSocket] RootCA Certificate is: %s\n", root_ca_cert.c_str());
         tls_config = altcp_tls_create_config_client(
             reinterpret_cast<const uint8_t *>(root_ca_cert.c_str()),
             root_ca_cert.size() + 1); // +1 for null terminator
@@ -188,7 +179,7 @@ bool TcpConnectionSocket::connectTls(const ip_addr_t &ip, int port)
             printf("[TcpConnectionSocket] TLS config creation failed %d\n", tls_config);
             return false;
         }
-        printf("[TcpConnectionSocket] TLS config created\n");
+        TRACE("[TcpConnectionSocket] TLS config created\n");
     }
     tls_pcb = altcp_tls_new(tls_config, IPADDR_TYPE_ANY);
     //tls_pcb = altcp_tls_new(tls_config, IP_GET_TYPE(&ip));
@@ -197,7 +188,7 @@ bool TcpConnectionSocket::connectTls(const ip_addr_t &ip, int port)
         printf("[TcpConnectionSocket] Failed to create TLS connection\n");
         return false;
     }
-    printf("Setting tls hostname: %s\n", hostname);
+    TRACE("Setting tls hostname: %s\n", hostname);
 
     // Because altcp_tls_context() returns void*, we must cast to correct type in C++
     auto* ssl_ctx = static_cast<mbedtls_ssl_context*>(altcp_tls_context(tls_pcb));
@@ -205,13 +196,13 @@ bool TcpConnectionSocket::connectTls(const ip_addr_t &ip, int port)
 
     // Register recv callback *before* connect
     altcp_arg(tls_pcb, this); // Set the context for the callbacks
-    printf("[TcpConnectionSocket] Registering TLS recv callback\n");
+    TRACE("[TcpConnectionSocket] Registering TLS recv callback\n");
     altcp_recv(tls_pcb, tlsRecvCallback); // Register callback
 
     this->connectResult = ERR_OK;
     this->connectingTask = xTaskGetCurrentTaskHandle();
     altcp_err(tls_pcb, &TcpConnectionSocket::onError);
-    printf("[TcpConnectionSocket] TLS Connecting to %s:%d\n", ipaddr_ntoa(&ip), port);
+    TRACE("[TcpConnectionSocket] TLS Connecting to %s:%d\n", ipaddr_ntoa(&ip), port);
     err_t err = altcp_connect(tls_pcb, &ip, port, &TcpConnectionSocket::onConnected);
     if (err != ERR_OK)
     {
@@ -224,7 +215,7 @@ bool TcpConnectionSocket::connectTls(const ip_addr_t &ip, int port)
     // Wait briefly for the handshake — altcp doesn't expose state.
     // Wait for notification that TLS handshake completed
     ulTaskNotifyTakeIndexed(NotifyConnect, pdTRUE, pdMS_TO_TICKS(portMAX_DELAY));
-    printf("[TcpConnectionSocket] TLS handshake completed\n");
+    TRACE("[TcpConnectionSocket] TLS handshake completed\n");
     if (connectResult == ERR_OK){
         printf("[TcpConnectionSocket] TLS connection established\n");
         connected = true;
@@ -243,16 +234,15 @@ int TcpConnectionSocket::send(const char *buffer, size_t size)
 {
     if (use_tls && tls_pcb)
     {
-        printf("[TcpConnectionSocket] Sending %zu bytes over TLS\n", size);
-        printf("Buffer: %s\n", buffer);
+        TRACE("[TcpConnectionSocket] Sending %zu bytes over TLS\n", size);
+        TRACE("Buffer: %s\n", buffer);
            if(tls_pcb->state == nullptr) {
                 printf("[TcpConnectionSocket] TLS connection is not established\n");
                 return -1;
             }
             else{
-                printf("[TcpConnectionSocket] TLS connection is established\n");
+                TRACE("[TcpConnectionSocket] TLS connection is established\n");
             }
-        printf("[TLS] Connection TLS state = %d\n", tls_pcb->state);
         err_t err = altcp_write(tls_pcb, buffer, size, TCP_WRITE_FLAG_COPY);
 
         if (err == ERR_OK)
@@ -268,7 +258,7 @@ int TcpConnectionSocket::send(const char *buffer, size_t size)
     }
     else if (sockfd >= 0)
     {
-        printf("[TcpConnectionSocket] Sending %zu bytes over plain TCP\n", size);
+        TRACE("[TcpConnectionSocket] Sending %zu bytes over plain TCP\n", size);
         return lwip_send(sockfd, buffer, size, 0);
     }
     return -1;

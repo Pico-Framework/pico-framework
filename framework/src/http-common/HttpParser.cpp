@@ -1,7 +1,7 @@
 #include "HttpParser.h"
 #include <sstream>
 #include <algorithm>
-#include <unordered_map>
+#include <map>
 
 int HttpParser::parseStatusCode(const std::string& statusLine) {
     std::istringstream stream(statusLine);
@@ -11,8 +11,8 @@ int HttpParser::parseStatusCode(const std::string& statusLine) {
     return code;
 }
 
-std::unordered_map<std::string, std::string> HttpParser::parseHeaders(const std::string& rawHeaders) {
-    std::unordered_map<std::string, std::string> headers;
+std::map<std::string, std::string> HttpParser::parseHeaders(const std::string& rawHeaders) {
+    std::map<std::string, std::string> headers;
     std::istringstream stream(rawHeaders);
     std::string line;
 

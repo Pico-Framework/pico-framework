@@ -26,30 +26,42 @@ bool HttpClient::get(const std::string& url, HttpClientResponse& response) {
     printf("HttpClient: Protocol: %s, Host: %s, Path: %s\n", protocol.c_str(), host.c_str(), path.c_str());
 
     TcpConnectionSocket socket;
+    bool connected = false;
+
     if (protocol == "https") {
         socket.setRootCACertificate(rootCACert);
-        //socket.setUseTls(true);  // You could set a flag if this was supported
-    }
-
-    int port = (protocol == "https") ? 443 : 80;
-    if (!socket.connect(host.c_str(), port)) {
-        printf("HttpClient: Socket connection failed\n");
+        socket.setHostname(host.c_str());
+        connected = socket.connectTls(host.c_str(), 443);
+    } else if (protocol == "http") {
+        connected = socket.connect(host.c_str(), 80);
+    } else {
+        printf("HttpClient: Unsupported protocol %s\n", protocol.c_str());
         return false;
     }
 
+    if (!connected) {
+        printf("HttpClient: Connection failed\n");
+        return false;
+    }
+
+    printf("HttpClient: Connected to %s over %s\n", host.c_str(), protocol.c_str());
+
     std::ostringstream req;
     req << "GET " << path << " HTTP/1.1\r\n"
-        << "Host: " << host << "\r\n"
+        << "Host: " << host << "\r\n\r\n"
         << "User-Agent: PicoHttpClient/1.0\r\n"
         << "Connection: close\r\n\r\n";
 
     std::string request = req.str();
     printf("[HttpClient] Request:\n%s\n", request.c_str());
 
-    if (!socket.send(request.c_str(), request.size())) {
-        printf("HttpClient: Send failed\n");
+    int sent = socket.send(request.c_str(), request.size() + 1);
+    if (sent < 0) {
+        printf("HttpClient: Send failed %d\n", sent);
         return false;
     }
+
+    printf("HttpClient: Request sent\n");
 
     char buf[1024];
     std::string raw;
@@ -77,6 +89,7 @@ bool HttpClient::get(const std::string& url, HttpClientResponse& response) {
 
     return true;
 }
+
 
 std::string HttpClient::extractHeadersAndBody(const std::string& raw, std::string& headerOut) {
     size_t pos = raw.find("\r\n\r\n");

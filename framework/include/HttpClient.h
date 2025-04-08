@@ -1,12 +1,12 @@
 #pragma once
 
 #include <string>
-#include <unordered_map>
+#include <map>
 
 struct HttpClientResponse {
     int statusCode = 0;
     std::string body;
-    std::unordered_map<std::string, std::string> headers;
+    std::map<std::string, std::string> headers;
 
     void clear() {
         statusCode = 0;
@@ -41,7 +41,7 @@ public:
 private:
     bool request(const std::string& method,
                  const std::string& url,
-                 const std::unordered_map<std::string, std::string>& headers,
+                 const std::map<std::string, std::string>& headers,
                  const std::string& body,
                  HttpClientResponse& response);
 
