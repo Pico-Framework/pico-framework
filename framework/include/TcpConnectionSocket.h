@@ -27,7 +27,8 @@ enum class SocketEvent : uint8_t {
 
 enum NotifyIndex {
     NotifyRecv = 0,
-    NotifyAccept = 1
+    NotifyAccept = 1,
+    NotifyConnect = 2,
 };
 
 /**
@@ -65,6 +66,8 @@ public:
      */
     bool connect(const char* host, int port);
     bool connectTls(const char* host, int port);
+    static err_t onConnected(void* arg, struct altcp_pcb* conn, err_t err);
+    static void onError(void* arg, err_t err);
 
     /**
      * @brief Send data over the connection.
@@ -109,6 +112,14 @@ public:
      */
     int getSocketFd() const;
 
+    void setHostname(const char* name) {
+        if (name) {
+            strncpy(hostname, name, sizeof(hostname) - 1);
+            hostname[sizeof(hostname) - 1] = '\0';
+        }
+    }
+    const char* getHostname() const { return hostname; }
+
 private:
     // Internal helpers
     bool connectPlain(const ip_addr_t& ip, int port);
@@ -121,6 +132,7 @@ private:
     bool connected = false;
     bool use_tls = false;
     bool is_server_socket = false;
+    int connectResult = ERR_OK;
 
     std::string root_ca_cert;
 
@@ -138,7 +150,10 @@ private:
     // buffering receive pbufs using callabck and queue
     static constexpr size_t MAX_TLS_SEGMENT_SIZE = 1460; // Typical MSS size
 
+    TaskHandle_t connectingTask = nullptr; ///< Task handle for async operations
     TaskHandle_t waiting_task = nullptr; ///< Task handle for async operations
     altcp_pcb* pending_client = nullptr; ///< For TLS: set by acceptCallback
+
+    char hostname[64] = {0}; ///< Hostname for TLS connections
 
 };
