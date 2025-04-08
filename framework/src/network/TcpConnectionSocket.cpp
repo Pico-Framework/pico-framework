@@ -111,7 +111,7 @@ bool TcpConnectionSocket::connectPlain(const ip_addr_t &ip, int port)
         sockfd = -1;
         return false;
     }
-
+    printf("[TcpConnectionSocket] Connected to server (plain)\n");
     connected = true;
     use_tls = false;
     return true;

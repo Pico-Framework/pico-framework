@@ -55,17 +55,17 @@ HttpRequest::HttpRequest(const char *rawHeaders, const std::string &reqMethod, c
     : method(reqMethod), path(reqPath)
 {
 
-    url = reqPath; // Store the original URL
+    uri = reqPath; // Store the original URL
     // Parse the URL to separate path and query string
-    size_t pos = url.find('?');
+    size_t pos = uri.find('?');
     if (pos != std::string::npos)
     {
-        path = url.substr(0, pos);
-        query = url.substr(pos + 1);
+        path = uri.substr(0, pos);
+        query = uri.substr(pos + 1);
     }
     else
     {
-        path = url;
+        path = uri;
         query = "";
     }
     parseHeaders(rawHeaders);
@@ -314,7 +314,7 @@ HttpRequest HttpRequest::create() {
 }
 
 HttpRequest& HttpRequest::setUri(const std::string& uri) {
-    url = uri;
+    this->uri = uri;
     return *this;
 }
 

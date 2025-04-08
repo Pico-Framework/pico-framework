@@ -53,7 +53,7 @@ public:
 
     // used by fluent builder - client side
     HttpRequest(const std::string& raw, const std::string& method, const std::string& path)
-    : method(method), path(path), url(path) {}
+    : method(method), path(path), uri(path) {}
 
     // ─────────────────────────────────────────────────────────────────────────────
     // Header Accessors
@@ -249,9 +249,9 @@ public:
     /**
      * @brief Get the original URL from the request line.
      */
-    std::string getUrl() const
+    std::string getUri() const
     {
-        return url;
+        return uri;
     }
 
     /**
@@ -374,7 +374,7 @@ private:
 
     std::string clientIp;
     std::string method;
-    std::string url;
+    std::string uri;
     std::string path;
     std::string query;
     std::string host;

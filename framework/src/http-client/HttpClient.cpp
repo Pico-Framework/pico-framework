@@ -10,7 +10,7 @@
 bool HttpClient::get(const HttpRequest& request, HttpResponse& response) {
     const std::string& protocol = request.getProtocol();
     const std::string& host     = request.getHost();
-    const std::string& path     = request.getUrl();
+    const std::string& path     = request.getUri();
     const std::string& method   = request.getMethod();
     const std::string& body     = request.getBody();
     const auto& headers         = request.getHeaders();

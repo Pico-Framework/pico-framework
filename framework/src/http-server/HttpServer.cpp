@@ -241,7 +241,7 @@ void HttpServer::handleClient(int clientSocket)
     std::cout << "HttpRequest is multipart: " << (req.isMultipart() ? "true" : "false") << std::endl;
     std::cout << "HttpRequest header count: " << req.getHeaders().size() << std::endl;
     std::cout << "HttpRequest method (lowercase): " << toLower(req.getMethod()) << std::endl;
-    std::cout << "HttpRequest url: " << req.getUrl() << std::endl;
+    std::cout << "HttpRequest url: " << req.getUri() << std::endl;
     std::cout << "HttpRequest path: " << req.getPath() << std::endl;
     std::cout << "HttpRequest query: " << req.getQuery() << std::endl;
 
