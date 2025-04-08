@@ -1,95 +1,78 @@
 #include "HttpClient.h"
+#include "HttpRequest.h"
+#include "HttpResponse.h"
 #include "HttpParser.h"
 #include "ChunkedDecoder.h"
 #include "TcpConnectionSocket.h"
 
 #include <sstream>
 #include <cstring>
-bool HttpClient::get(const std::string& url, HttpClientResponse& response) {
-    printf("HttpClient: Making request to %s\n", url.c_str());
+bool HttpClient::get(const HttpRequest& request, HttpResponse& response) {
+    const std::string& protocol = request.getProtocol();
+    const std::string& host     = request.getHost();
+    const std::string& path     = request.getUrl();
+    const std::string& method   = request.getMethod();
+    const std::string& body     = request.getBody();
+    const auto& headers         = request.getHeaders();
 
-    std::string protocol, host, path;
-    size_t proto_pos = url.find("://");
-    if (proto_pos == std::string::npos) return false;
-
-    protocol = url.substr(0, proto_pos);
-    size_t host_start = proto_pos + 3;
-    size_t path_start = url.find('/', host_start);
-    if (path_start == std::string::npos) {
-        host = url.substr(host_start);
-        path = "/";
-    } else {
-        host = url.substr(host_start, path_start - host_start);
-        path = url.substr(path_start);
-    }
-
-    printf("HttpClient: Protocol: %s, Host: %s, Path: %s\n", protocol.c_str(), host.c_str(), path.c_str());
+    const bool useTls = (protocol == "https");
+    const uint16_t port = useTls ? 443 : 80;
 
     TcpConnectionSocket socket;
-    bool connected = false;
-
-    if (protocol == "https") {
-        socket.setRootCACertificate(rootCACert);
-        socket.setHostname(host.c_str());
-        connected = socket.connectTls(host.c_str(), 443);
-    } else if (protocol == "http") {
-        connected = socket.connect(host.c_str(), 80);
-    } else {
-        printf("HttpClient: Unsupported protocol %s\n", protocol.c_str());
+    if (!socket.connect(host.c_str(), port, useTls)) {
         return false;
     }
-
-    if (!connected) {
-        printf("HttpClient: Connection failed\n");
-        return false;
-    }
-
-    printf("HttpClient: Connected to %s over %s\n", host.c_str(), protocol.c_str());
 
     std::ostringstream req;
-    req << "GET " << path << " HTTP/1.1\r\n"
-        << "Host: " << host << "\r\n\r\n"
-        << "User-Agent: PicoHttpClient/1.0\r\n"
-        << "Connection: close\r\n\r\n";
+    req << method << " " << path << " HTTP/1.1\r\n";
+    req << "Host: " << host << "\r\n";
 
-    std::string request = req.str();
-    printf("[HttpClient] Request:\n%s\n", request.c_str());
+    for (const auto& [key, value] : headers) {
+        req << key << ": " << value << "\r\n";
+    }
 
-    int sent = socket.send(request.c_str(), request.size() + 1);
-    if (sent < 0) {
-        printf("HttpClient: Send failed %d\n", sent);
+    if (!body.empty()) {
+        req << "Content-Length: " << body.length() << "\r\n";
+    }
+
+    req << "\r\n";
+    if (!body.empty()) {
+        req << body;
+    }
+
+    std::string requestStr = req.str();
+    if (!socket.send(requestStr.c_str(), requestStr.length())) {
         return false;
     }
 
-    printf("HttpClient: Request sent\n");
-
-    char buf[1024];
-    std::string raw;
-    int len;
-    while ((len = socket.recv(buf, sizeof(buf))) > 0) {
-        raw.append(buf, len);
+    std::string rawHeader;
+    if (!HttpParser::receiveHeaders(socket, rawHeader)) {
+        return false;
     }
 
-    socket.close();
+    response.setStatus(HttpParser::parseStatusCode(rawHeader));
 
-    std::string headerText;
-    std::string body = extractHeadersAndBody(raw, headerText);
-    response.headers = HttpParser::parseHeaders(headerText);
-    response.statusCode = HttpParser::parseStatusCode(headerText);
-    printf("HttpClient: Got status code %d\n", response.statusCode);
+    auto parsedHeaders = HttpParser::parseHeaders(rawHeader);
+    for (const auto& [key, value] : parsedHeaders) {
+        response.setHeader(key, value);
+    }
 
-    auto it = response.headers.find("transfer-encoding");
-    if (it != response.headers.end() && it->second == "chunked") {
+    std::string bodyData;
+    if (!HttpParser::receiveBody(socket, parsedHeaders, bodyData)) {
+        return false;
+    }
+
+    auto transferEncoding = response.getHeader("Transfer-Encoding");
+    if (transferEncoding == "chunked") {
         ChunkedDecoder decoder;
-        decoder.feed(body);
-        response.body = decoder.getDecoded();
+        decoder.feed(bodyData);
+        response.setBody(decoder.getDecoded());
     } else {
-        response.body = body;
+        response.setBody(bodyData);
     }
 
     return true;
 }
-
 
 std::string HttpClient::extractHeadersAndBody(const std::string& raw, std::string& headerOut) {
     size_t pos = raw.find("\r\n\r\n");

@@ -1,33 +1,26 @@
 #pragma once
-
+#include "HttpRequest.h"
+#include "HttpResponse.h"
 #include <string>
 #include <map>
-
-struct HttpClientResponse {
-    int statusCode = 0;
-    std::string body;
-    std::map<std::string, std::string> headers;
-
-    void clear() {
-        statusCode = 0;
-        body.clear();
-        headers.clear();
-    }
-};
-
-
 class HttpClient {
 public:
     /**
-     * @brief Perform a GET request to the given URL.
-     * 
-     * @param url The full URL (http:// or https://).
-     * @param response Output parameter to hold status, headers, and body.
-     * @return true on success, false on failure.
+     * @brief Perform a GET request using a pre-built HttpRequest.
+     * @param request A fully constructed HttpRequest (with method, host, uri, etc.)
+     * @param response An HttpResponse that will be populated
+     * @return true if the request succeeded and response was parsed
      */
-    bool get(const std::string& url, HttpClientResponse& response);
-    #if PICO_HTTP_CLIENT_ENABLE_TLS
-    bool getTls(const std::string& host, const std::string& path, HttpClientResponse& response);
+    bool get(const HttpRequest& request, HttpResponse& response);
+
+    /**
+     * @brief Perform a simple GET request by URL (for convenience).
+     * @param url Full URL (e.g., "http://example.com/path")
+     * @param response HttpResponse object to populate
+     * @return true on success
+     */
+    bool gets(const std::string& url, HttpResponse& response);
+
     /**
      * @brief Set the Root CA Certificate used for TLS validation.
      * 
@@ -36,16 +29,15 @@ public:
     void setRootCACertificate(const std::string& cert){
         rootCACert = cert;
     }
-#endif
 
 private:
     bool request(const std::string& method,
                  const std::string& url,
                  const std::map<std::string, std::string>& headers,
                  const std::string& body,
-                 HttpClientResponse& response);
+                 HttpResponse& response);
 
-    bool getPlain(const std::string& host, const std::string& path, HttpClientResponse& response);
+    bool getPlain(const std::string& host, const std::string& path, HttpResponse& response);
 
     std::string rootCACert;
 

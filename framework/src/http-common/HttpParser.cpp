@@ -53,3 +53,46 @@ std::map<std::string, std::string> HttpParser::parseHeaders(const std::string& r
 
     return headers;
 }
+
+bool HttpParser::receiveHeaders(TcpConnectionSocket& socket, std::string& outHeaders) {
+    char buffer[1024];
+    std::string data;
+    while (true) {
+        int n = socket.recv(buffer, sizeof(buffer));
+        if (n <= 0) return false;
+        data.append(buffer, n);
+        auto end = data.find("\r\n\r\n");
+        if (end != std::string::npos) {
+            outHeaders = data.substr(0, end + 4);
+            return true;
+        }
+    }
+}
+
+bool HttpParser::receiveBody(TcpConnectionSocket& socket,
+                             const std::map<std::string, std::string>& headers,
+                             std::string& outBody) {
+    auto it = headers.find("Content-Length");
+    if (it != headers.end()) {
+        int contentLength = std::stoi(it->second);
+        outBody.clear();
+        while ((int)outBody.size() < contentLength) {
+            char buffer[1024];
+            int n = socket.recv(buffer, std::min<int>((int)sizeof(buffer), contentLength - (int)outBody.size()));
+
+            if (n <= 0) return false;
+            outBody.append(buffer, n);
+        }
+        return true;
+    }
+
+    // Fallback: read until socket closes (not ideal, but valid for no content-length)
+    char buffer[1024];
+    while (true) {
+        int n = socket.recv(buffer, sizeof(buffer));
+        if (n <= 0) break;
+        outBody.append(buffer, n);
+    }
+    return !outBody.empty();
+}
+

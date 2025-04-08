@@ -64,7 +64,7 @@ public:
      * @param port Port number.
      * @return true on success, false on failure.
      */
-    bool connect(const char* host, int port);
+    bool connect(const char* host, int port, bool useTls = false);
     bool connectTls(const char* host, int port);
     static err_t onConnected(void* arg, struct altcp_pcb* conn, err_t err);
     static void onError(void* arg, err_t err);

@@ -115,6 +115,11 @@ public:
         return getHeader("host");
     }
 
+    std::string getProtocol() const
+    {
+        return protocol;
+    }
+
     // ─────────────────────────────────────────────────────────────────────────────
     // Content Type / Body Type Checkers
     // ─────────────────────────────────────────────────────────────────────────────

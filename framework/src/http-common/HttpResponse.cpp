@@ -54,15 +54,16 @@ HttpResponse &HttpResponse::status(int code)
 /**
  * @copydoc HttpResponse::setStatus()
  */
-HttpResponse &HttpResponse::setStatus(int code)
+HttpResponse& HttpResponse::setStatus(int code)
 {
-    return status(code);
+    status_code = code;
+    return *this;
 }
 
 /**
  * @copydoc HttpResponse::set()
  */
-HttpResponse &HttpResponse::set(const std::string &field, const std::string &value)
+HttpResponse& HttpResponse::set(const std::string &field, const std::string &value)
 {
     headers[field] = value;
     return *this;
@@ -71,7 +72,7 @@ HttpResponse &HttpResponse::set(const std::string &field, const std::string &val
 /**
  * @copydoc HttpResponse::setHeader()
  */
-HttpResponse &HttpResponse::setHeader(const std::string &key, const std::string &value)
+HttpResponse& HttpResponse::setHeader(const std::string &key, const std::string &value)
 {
     headers[key] = value;
     return *this;
@@ -80,7 +81,7 @@ HttpResponse &HttpResponse::setHeader(const std::string &key, const std::string 
 /**
  * @copydoc HttpResponse::setContentType()
  */
-HttpResponse &HttpResponse::setContentType(const std::string &ct)
+HttpResponse& HttpResponse::setContentType(const std::string &ct)
 {
     headers["Content-Type"] = ct;
     return *this;
@@ -89,7 +90,7 @@ HttpResponse &HttpResponse::setContentType(const std::string &ct)
 /**
  * @copydoc HttpResponse::setAuthorization()
  */
-HttpResponse &HttpResponse::setAuthorization(const std::string &jwtToken)
+HttpResponse& HttpResponse::setAuthorization(const std::string &jwtToken)
 {
     if (!jwtToken.empty())
     {
@@ -391,4 +392,10 @@ std::string HttpResponse::renderTemplate(const std::string &tpl, const std::map<
         }
     }
     return result;
+}
+
+
+HttpResponse& HttpResponse::setBody(const std::string& body) {
+    this->body = body;
+    return *this;
 }

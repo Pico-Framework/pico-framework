@@ -78,7 +78,7 @@ void TcpConnectionSocket::setServerTlsConfig(const std::string &cert, const std:
     }
 }
 
-bool TcpConnectionSocket::connect(const char *host, int port)
+bool TcpConnectionSocket::connect(const char *host, int port, bool useTls)
 {
     ip_addr_t ip;
     if (!resolveHostnameBlocking(host, &ip))
