@@ -2,6 +2,7 @@
 #include <sstream>
 #include <algorithm>
 #include <map>
+ #include "utility.h"
 
 int HttpParser::parseStatusCode(const std::string& statusLine) {
     std::istringstream stream(statusLine);
@@ -77,14 +78,41 @@ std::pair<std::string, std::string> HttpParser::receiveHeaderAndLeftover(TcpConn
     }
 }
 
+#include "ChunkedDecoder.h"
+
 bool HttpParser::receiveBody(TcpConnectionSocket& socket,
                              const std::map<std::string, std::string>& headers,
                              const std::string& leftoverBody,
                              std::string& outBody) {
-    auto it = headers.find("Content-Length");
+    auto transferEncodingIt = headers.find("transfer-encoding");
+    if (transferEncodingIt != headers.end() &&
+        toLower(transferEncodingIt->second) == "chunked") {
+        ChunkedDecoder decoder;
+        std::string buffer = leftoverBody;
+        char temp[1460];
+
+        decoder.feed(buffer);
+
+        while (!decoder.isComplete()) {
+            int n = socket.recv(temp, sizeof(temp));
+            if (n <= 0) return false;
+
+            decoder.feed(std::string(temp, n));
+        }
+
+        outBody = decoder.getDecoded();
+        return true;
+    }
+
+    auto it = headers.find("content-length");
     if (it != headers.end()) {
         int contentLength = std::stoi(it->second);
         outBody = leftoverBody;
+
+        if ((int)outBody.size() >= contentLength) {
+            outBody = outBody.substr(0, contentLength);
+            return true;
+        }
 
         int attempts = 0;
         int idleCycles = 0;
@@ -97,9 +125,7 @@ bool HttpParser::receiveBody(TcpConnectionSocket& socket,
             if (n <= 0) {
                 idleCycles++;
                 vTaskDelay(pdMS_TO_TICKS(10));
-                if (idleCycles > 20) {
-                    return false; // too many idle cycles
-                }
+                if (idleCycles > 20) return false;
                 continue;
             }
 
@@ -110,7 +136,7 @@ bool HttpParser::receiveBody(TcpConnectionSocket& socket,
         return ((int)outBody.size() == contentLength);
     }
 
-    // No Content-Length: fallback to reading until socket closes
+    // No Content-Length or chunked — read until socket closes
     outBody = leftoverBody;
     char buffer[1460];
     while (true) {
@@ -121,4 +147,3 @@ bool HttpParser::receiveBody(TcpConnectionSocket& socket,
 
     return !outBody.empty();
 }
-
