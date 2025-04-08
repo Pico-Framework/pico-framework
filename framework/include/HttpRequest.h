@@ -113,7 +113,7 @@ public:
      */
     std::string getHost() const
     {
-        return getHeader("host");
+        return host;
     }
 
     std::string getProtocol() const

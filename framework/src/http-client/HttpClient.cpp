@@ -7,6 +7,36 @@
 
 #include <sstream>
 #include <cstring>
+
+bool HttpClient::gets(const std::string& uri, HttpResponse& response) {
+    HttpRequest request;
+
+    const std::string::size_type proto_end = uri.find("://");
+    if (proto_end == std::string::npos) return false;
+
+    std::string protocol = uri.substr(0, proto_end);
+    std::string rest = uri.substr(proto_end + 3); // Skip "://"
+
+    std::string::size_type path_start = rest.find('/');
+    std::string host, path;
+
+    if (path_start != std::string::npos) {
+        host = rest.substr(0, path_start);
+        path = rest.substr(path_start);
+    } else {
+        host = rest;
+        path = "/";
+    }
+
+    request.setProtocol(protocol)
+           .setHost(host)
+           .setUri(path)
+           .setMethod("GET")
+           .setUserAgent("PicoFramework/1.0");
+
+    return get(request, response);
+}
+
 bool HttpClient::get(const HttpRequest& request, HttpResponse& response) {
     const std::string& protocol = request.getProtocol();
     const std::string& host     = request.getHost();
@@ -18,7 +48,15 @@ bool HttpClient::get(const HttpRequest& request, HttpResponse& response) {
     const bool useTls = (protocol == "https");
     const uint16_t port = useTls ? 443 : 80;
 
+    printf("HttpClient: Making request to %s\n", host.c_str());
+    printf("HttpClient: Protocol: %s, Port: %d, Host: %s, Path: %s\n", protocol.c_str(), port, host.c_str(), path.c_str());
+    printf("HttpClient: Method: %s\n", method.c_str());
+    printf("HttpClient: Body: %s\n", body.c_str());
+    printf("HttpClient: User Headers:\n");
+
     TcpConnectionSocket socket;
+    if (useTls)
+        socket.setRootCACertificate(rootCACert);
     if (!socket.connect(host.c_str(), port, useTls)) {
         return false;
     }
@@ -45,8 +83,8 @@ bool HttpClient::get(const HttpRequest& request, HttpResponse& response) {
         return false;
     }
 
-    std::string rawHeader;
-    if (!HttpParser::receiveHeaders(socket, rawHeader)) {
+    auto [rawHeader, leftover] = HttpParser::receiveHeaderAndLeftover(socket);
+    if (rawHeader.empty()) {
         return false;
     }
 
@@ -58,7 +96,7 @@ bool HttpClient::get(const HttpRequest& request, HttpResponse& response) {
     }
 
     std::string bodyData;
-    if (!HttpParser::receiveBody(socket, parsedHeaders, bodyData)) {
+    if (!HttpParser::receiveBody(socket, parsedHeaders, leftover, bodyData)) {
         return false;
     }
 

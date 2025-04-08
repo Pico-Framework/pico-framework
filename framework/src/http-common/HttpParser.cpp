@@ -54,45 +54,71 @@ std::map<std::string, std::string> HttpParser::parseHeaders(const std::string& r
     return headers;
 }
 
-bool HttpParser::receiveHeaders(TcpConnectionSocket& socket, std::string& outHeaders) {
-    char buffer[1024];
-    std::string data;
+std::pair<std::string, std::string> HttpParser::receiveHeaderAndLeftover(TcpConnectionSocket& socket) {
+    std::string buffer;
+    char temp[1460];
+
     while (true) {
-        int n = socket.recv(buffer, sizeof(buffer));
-        if (n <= 0) return false;
-        data.append(buffer, n);
-        auto end = data.find("\r\n\r\n");
-        if (end != std::string::npos) {
-            outHeaders = data.substr(0, end + 4);
-            return true;
+        int n = socket.recv(temp, sizeof(temp));
+        if (n <= 0) {
+            return {"", ""}; // signal error (empty header)
         }
+
+        buffer.append(temp, n);
+        std::size_t headerEnd = buffer.find("\r\n\r\n");
+
+        if (headerEnd != std::string::npos) {
+            std::string headerText = buffer.substr(0, headerEnd + 4);
+            std::string leftover = buffer.substr(headerEnd + 4);
+            return {headerText, leftover};
+        }
+
+        vTaskDelay(pdMS_TO_TICKS(1));
     }
 }
 
 bool HttpParser::receiveBody(TcpConnectionSocket& socket,
                              const std::map<std::string, std::string>& headers,
+                             const std::string& leftoverBody,
                              std::string& outBody) {
     auto it = headers.find("Content-Length");
     if (it != headers.end()) {
         int contentLength = std::stoi(it->second);
-        outBody.clear();
-        while ((int)outBody.size() < contentLength) {
-            char buffer[1024];
-            int n = socket.recv(buffer, std::min<int>((int)sizeof(buffer), contentLength - (int)outBody.size()));
+        outBody = leftoverBody;
 
-            if (n <= 0) return false;
+        int attempts = 0;
+        int idleCycles = 0;
+
+        while ((int)outBody.size() < contentLength && attempts++ < 2000) {
+            char buffer[1460];
+            int toRead = std::min<int>(sizeof(buffer), contentLength - (int)outBody.size());
+            int n = socket.recv(buffer, toRead);
+
+            if (n <= 0) {
+                idleCycles++;
+                vTaskDelay(pdMS_TO_TICKS(10));
+                if (idleCycles > 20) {
+                    return false; // too many idle cycles
+                }
+                continue;
+            }
+
+            idleCycles = 0;
             outBody.append(buffer, n);
         }
-        return true;
+
+        return ((int)outBody.size() == contentLength);
     }
 
-    // Fallback: read until socket closes (not ideal, but valid for no content-length)
-    char buffer[1024];
+    // No Content-Length: fallback to reading until socket closes
+    outBody = leftoverBody;
+    char buffer[1460];
     while (true) {
         int n = socket.recv(buffer, sizeof(buffer));
         if (n <= 0) break;
         outBody.append(buffer, n);
     }
+
     return !outBody.empty();
 }
 
