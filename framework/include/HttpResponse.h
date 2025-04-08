@@ -224,26 +224,35 @@ public:
      * @brief Get the response status code.
      * @return Status code (e.g., 200)
      */
-    int getStatusCode() const;
+    int getStatusCode() const{
+        return status_code;
+    }
 
     /**
      * @brief Get the value of a specific response header.
      * @param key Header name
      * @return Header value (empty string if not found)
      */
-    const std::string &getHeader(const std::string &key) const;
+    std::string getHeader(const std::string& key) const {
+        auto it = headers.find(key);
+        return (it != headers.end()) ? it->second : "";
+    }
 
     /**
      * @brief Get all response headers.
      * @return Map of header key/value pairs
      */
-    const std::map<std::string, std::string> &getHeaders() const;
+    const std::map<std::string, std::string> &getHeaders() const{
+        return headers;
+    }
 
     /**
      * @brief Get the response body.
      * @return Response body string
      */
-    const std::string &getBody() const;
+    const std::string &getBody() const{
+        return body;
+    }
 
 private:
     /**

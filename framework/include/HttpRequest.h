@@ -40,6 +40,7 @@ public:
      * @param method HTTP method (GET, POST, etc.).
      * @param url The full requested URL.
      */
+    HttpRequest() = default; // Default constructor
     // HttpRequest(TcpConnectionSocket& conn, const std::string& method, const std::string& url);
 
     /**
