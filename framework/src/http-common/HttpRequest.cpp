@@ -36,33 +36,38 @@ TRACE_INIT(HttpRequest)
 
 #define BUFFER_SIZE 1460 // this is the standard MTU size
 
-HttpResponse HttpRequest::get(const std::string& url) {
+HttpResponse HttpRequest::get(const std::string &url)
+{
     setMethod("GET");
     setUri(url);
     return send();
 }
 
-HttpResponse HttpRequest::post(const std::string& url, const std::string& body) {
+HttpResponse HttpRequest::post(const std::string &url, const std::string &body)
+{
     setMethod("POST");
     setUri(url);
     setBody(body);
     return send();
 }
 
-HttpResponse HttpRequest::put(const std::string& url, const std::string& body) {
+HttpResponse HttpRequest::put(const std::string &url, const std::string &body)
+{
     setMethod("PUT");
     setUri(url);
     setBody(body);
     return send();
 }
 
-HttpResponse HttpRequest::del(const std::string& url) {
+HttpResponse HttpRequest::del(const std::string &url)
+{
     setMethod("DELETE");
     setUri(url);
     return send();
 }
 
-HttpResponse HttpRequest::send() {
+HttpResponse HttpRequest::send()
+{
     HttpResponse response;
     HttpClient client;
     client.sendRequest(*this, response);
@@ -96,12 +101,14 @@ HttpRequest::HttpRequest(const char *rawHeaders, const std::string &reqMethod, c
     parseHeaders(rawHeaders);
 }
 
-HttpRequest& HttpRequest::setBody(const std::string& b) {
+HttpRequest &HttpRequest::setBody(const std::string &b)
+{
     body = b;
     return *this;
 }
 
-void HttpRequest::parseHeaders(const char* raw) {
+void HttpRequest::parseHeaders(const char *raw)
+{
     headers = HttpParser::parseHeaders(raw);
 }
 
@@ -167,11 +174,11 @@ bool HttpRequest::getMethodAndPath(char *buffer, int clientSocket, char *method,
 HttpRequest HttpRequest::receive(int clientSocket)
 {
     printf("Receiving request on socket %d\n", clientSocket);
-    char buffer[BUFFER_SIZE];                             // Declare buffer size
-    std::string body = "";                                // Initialize empty body
+    char buffer[BUFFER_SIZE];                   // Declare buffer size
+    std::string body = "";                      // Initialize empty body
     std::map<std::string, std::string> headers; // Initialize empty headers
-    char method[16] = {0};                                // Initialize method buffer
-    char path[BUFFER_SIZE] = {0};                         // Initialize path buffer
+    char method[16] = {0};                      // Initialize method buffer
+    char path[BUFFER_SIZE] = {0};               // Initialize path buffer
 
     int bytesReceived = receiveData(clientSocket, (char *)&buffer, sizeof(buffer));
     if (bytesReceived == -1)
@@ -334,64 +341,103 @@ std::unordered_map<std::string, std::string> HttpRequest::getFormParams()
 // Fluent Builder Methods - some shared server-side
 // ─────────────────────────────────────────────────────────────────────────────
 
-HttpRequest HttpRequest::create() {
+HttpRequest HttpRequest::create()
+{
     return HttpRequest("", "", "");
 }
 
-HttpRequest& HttpRequest::setUri(const std::string& uri) {
+HttpRequest &HttpRequest::setUri(const std::string &uri)
+{
+
+    const auto proto_end = uri.find("://");
+    if (proto_end == std::string::npos)
+    {
+        protocol = "http";
+        host = "";
+        this->uri = "/";
+        return *this;
+    }
+
+    protocol = uri.substr(0, proto_end);
+    std::string rest = uri.substr(proto_end + 3); // skip "://"
+
+    const auto path_start = rest.find('/');
+    if (path_start == std::string::npos)
+    {
+        host = rest;
+        this->uri = "/";
+    }
+    else
+    {
+        host = rest.substr(0, path_start);
+        this->uri = rest.substr(path_start);
+    }
+
     this->uri = uri;
     return *this;
 }
 
-HttpRequest& HttpRequest::setHost(const std::string& h) {
+HttpRequest &HttpRequest::setHost(const std::string &h)
+{
     host = h;
     return *this;
 }
 
-HttpRequest& HttpRequest::setProtocol(const std::string& p) {
+HttpRequest &HttpRequest::setProtocol(const std::string &p)
+{
     protocol = p;
     return *this;
 }
 
-HttpRequest& HttpRequest::setHeaders(const std::map<std::string, std::string>& headers) {
-    for (const auto& [k, v] : headers) {
+HttpRequest &HttpRequest::setHeaders(const std::map<std::string, std::string> &headers)
+{
+    for (const auto &[k, v] : headers)
+    {
         this->headers[k] = v;
     }
     return *this;
 }
 
-HttpRequest& HttpRequest::setHeader(const std::string& key, const std::string& value) {
+HttpRequest &HttpRequest::setHeader(const std::string &key, const std::string &value)
+{
     headers[key] = value;
     return *this;
 }
 
-HttpRequest& HttpRequest::setUserAgent(const std::string& userAgent) {
+HttpRequest &HttpRequest::setUserAgent(const std::string &userAgent)
+{
     headers["User-Agent"] = userAgent;
     return *this;
 }
 
-HttpRequest& HttpRequest::setAcceptEncoding(const std::string& encoding) {
+HttpRequest &HttpRequest::setAcceptEncoding(const std::string &encoding)
+{
     headers["Accept-Encoding"] = encoding;
     return *this;
 }
-HttpRequest& HttpRequest::setRootCACertificate(const std::string& certData) {
+HttpRequest &HttpRequest::setRootCACertificate(const std::string &certData)
+{
     rootCACertificate = certData;
     return *this;
 }
 
 #if defined(PICO_HTTP_ENABLE_STORAGE)
 #include <fstream>
-HttpRequest& HttpRequest::setBodyFromFile(const std::string& path) {
+HttpRequest &HttpRequest::setBodyFromFile(const std::string &path)
+{
     std::ifstream file(path, std::ios::in | std::ios::binary);
-    if (file) {
+    if (file)
+    {
         body.assign((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
     }
     return *this;
 }
 
-bool HttpRequest::setRootCACertificateFromFile(const char* path) {
+bool HttpRequest::setRootCACertificateFromFile(const char *path)
+{
     std::string contents;
-    if (!StorageManager::instance().readFileToString(path, contents)) {
+    if (!StorageManager::instance().readFileToString(path, contents))
+    {
         return false;
     }
     setRootCACertificate(contents);
