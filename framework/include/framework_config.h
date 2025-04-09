@@ -42,7 +42,7 @@
 #define TRACE_TcpConnectionSocket 0
 #define TRACE_ChunkedDecoder      0
 #define TRACE_JsonParser          1
-#define TRACE_HttpClient          1
+#define TRACE_HttpClient          0
 #define TRACE_LwipDnsResolver     1
 #define TRACE_HttpParser          0
 // etc.

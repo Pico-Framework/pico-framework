@@ -48,20 +48,6 @@
  class FrameworkTask;
  
  /**
-  * @brief Enumerates supported event types.
-  * 
-  * Extend this enum as needed for your application domain.
-  */
- enum class EventType : uint8_t {
-     None = 0,
-     SysStartup,
-     SysError,
-     UserInput,
-     UserCommand,
-     // Extend as needed
- };
- 
- /**
   * @brief Manages the system-wide event queue and subscriptions.
   * 
   * Allows tasks to:
@@ -80,7 +66,7 @@
          static EventManager instance;
          return instance;
      }
- 
+
      /**
       * @brief Constructor with optional queue size override.
       * 

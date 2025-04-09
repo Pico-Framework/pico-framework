@@ -94,6 +94,7 @@ target_sources(pico_framework
         src/http-common/JsonResponse.cpp
         src/network/TcpConnectionSocket.cpp
         src/network/lwip_dns_resolver.cpp
+        src/events/GpioEventManager.cpp
 )
 
 if(PICO_HTTP_ENABLE_HTTP_CLIENT)
