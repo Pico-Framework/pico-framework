@@ -374,8 +374,10 @@ HttpRequest &HttpRequest::setUri(const std::string &uri) {
     }
     printf("[HttpRequest::setUri] protocol=%s host=%s uri=%s\n",
         protocol.c_str(), host.c_str(), this->uri.c_str());
+
     return *this;
 }
+
 
 HttpRequest &HttpRequest::setHost(const std::string &h)
 {
