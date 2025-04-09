@@ -25,8 +25,8 @@
 // === Module-specific trace enables ===
 #define TRACE_FrameworkManager    1
 #define TRACE_HttpServer          1
-#define TRACE_HttpRequest         1
-#define TRACE_HttpResponse        1
+#define TRACE_HttpRequest         0
+#define TRACE_HttpResponse        0
 #define TRACE_HttpFileserver      1
 #define TRACE_MultipartParser     0
 #define TRACE_JsonRequestHelper   1
@@ -39,11 +39,12 @@
 #define TRACE_NtpClient           1
 #define TRACE_utility             1  
 #define TRACE_AppContext          1 
-#define TRACE_TcpConnectionSocket 1
-#define TRACE_ChunkedDecoder      1
+#define TRACE_TcpConnectionSocket 0
+#define TRACE_ChunkedDecoder      0
 #define TRACE_JsonParser          1
 #define TRACE_HttpClient          1
 #define TRACE_LwipDnsResolver     1
+#define TRACE_HttpParser          0
 // etc.
 
 // === Global minimum log level (for all modules) ===

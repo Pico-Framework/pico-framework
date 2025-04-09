@@ -130,8 +130,8 @@ int HttpRequest::receiveData(int clientSocket, char *buffer, int size)
         return -1;
     }
 
-    printf("Received %zu bytes\n", bytesReceived);
-    printf("Buffer: %.*s\n", (int)bytesReceived, buffer);
+    TRACE("Received %zu bytes\n", bytesReceived);
+    TRACE("Buffer: %.*s\n", (int)bytesReceived, buffer);
 
     if (bytesReceived == 0)
     {
@@ -173,7 +173,7 @@ bool HttpRequest::getMethodAndPath(char *buffer, int clientSocket, char *method,
  */
 HttpRequest HttpRequest::receive(int clientSocket)
 {
-    printf("Receiving request on socket %d\n", clientSocket);
+    TRACE("Receiving request on socket %d\n", clientSocket);
     char buffer[BUFFER_SIZE];                   // Declare buffer size
     std::string body = "";                      // Initialize empty body
     std::map<std::string, std::string> headers; // Initialize empty headers
@@ -191,7 +191,7 @@ HttpRequest HttpRequest::receive(int clientSocket)
     }
 
     // Identify the raw headers - look for the end of the headers (a double CRLF "\r\n\r\n")
-    printf("Buffer received: %.*s\n", bytesReceived, buffer);
+    TRACE("Buffer received: %.*s\n", bytesReceived, buffer);
     size_t headerEnd = 0;
     while (headerEnd < bytesReceived)
     {
@@ -203,7 +203,7 @@ HttpRequest HttpRequest::receive(int clientSocket)
         }
         headerEnd++;
     }
-    printf("Raw headers length: %zu\n", headerEnd);
+    TRACE("Raw headers length: %zu\n", headerEnd);
 
     // Create the request which will parse the headers
     HttpRequest request(buffer, std::string(method), std::string(path));
@@ -219,7 +219,7 @@ HttpRequest HttpRequest::receive(int clientSocket)
 
     // Get the content length from the headers
     int contentLength = request.getContentLength();
-    printf("Content-Length: %d\n", contentLength);
+    TRACE("Content-Length: %d\n", contentLength);
 
     // Handle the body only if contentLength is greater than 0
     if (contentLength > 0)
@@ -240,11 +240,11 @@ HttpRequest HttpRequest::receive(int clientSocket)
             TRACE("Multipart request handled\n");
             return request;
         }
-        printf("Non-multipart request detected\n");
+        TRACE("Non-multipart request detected\n");
 
         // For non-multipart data, continue receiving the body data in chunks
         size_t bodyRemaining = contentLength - body.length();
-        printf("Body remaining: %zu\n", bodyRemaining);
+        TRACE("Body remaining: %zu\n", bodyRemaining);
         while (bodyRemaining > 0)
         {
             size_t bytesToReceive = std::min(bodyRemaining, sizeof(buffer) - 1); // Limit to buffer size
@@ -261,7 +261,7 @@ HttpRequest HttpRequest::receive(int clientSocket)
         }
         printf("Body: %s\n", body.c_str());
     }
-    printf("HttpRequest object constructed\n");
+    TRACE("HttpRequest object constructed\n");
     return request; // Return the constructed HttpRequest object
 }
 

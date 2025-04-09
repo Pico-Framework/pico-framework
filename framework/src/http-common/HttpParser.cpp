@@ -3,6 +3,9 @@
 #include <algorithm>
 #include <map>
  #include "utility.h"
+ #include "framework_config.h"
+ #include "DebugTrace.h"
+TRACE_INIT(HttpParser)
 
 int HttpParser::parseStatusCode(const std::string& statusLine) {
     std::istringstream stream(statusLine);
@@ -102,8 +105,8 @@ bool HttpParser::receiveBody(TcpConnectionSocket& socket,
         }
 
         outBody = decoder.getDecoded();
-        printf("Chunked: decoded size = d", outBody.size());
-        printf("Chunked: decoded body = %s", outBody.c_str());
+        TRACE("Chunked: decoded size = d", outBody.size());
+        TRACE("Chunked: decoded body = %s", outBody.c_str());
         return true;
     }
 

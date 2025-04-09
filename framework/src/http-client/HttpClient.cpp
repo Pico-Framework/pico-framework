@@ -8,6 +8,10 @@
 #include <sstream>
 #include <cstring>
 
+#include "framework_config.h"
+#include "DebugTrace.h"
+TRACE_INIT(HttpClient)
+
 bool HttpClient::sendRequest(const HttpRequest& request, HttpResponse& response) {
 
     response.reset();  // Clear any prior response data
@@ -24,6 +28,19 @@ bool HttpClient::sendRequest(const HttpRequest& request, HttpResponse& response)
     const uint16_t port = useTls ? 443 : 80;
 
     TcpConnectionSocket socket;
+
+
+    TRACE("Connecting to %s:%d\n", host.c_str(), port);
+    TRACE("Using TLS: %s\n", useTls ? "true" : "false");
+    TRACE("Root CA: %s\n", cert.empty() ? "none" : "set");
+    TRACE("Method: %s\n", method.c_str());
+    TRACE("Path: %s\n", path.c_str());
+    TRACE("Body: %s\n", body.c_str());
+    TRACE("Headers:\n");
+    for (const auto& [key, value] : headers) {
+        TRACE("  %s: %s\n", key.c_str(), value.c_str());
+    }
+
 
     if (useTls) {
         if (!cert.empty()) {
@@ -63,8 +80,8 @@ bool HttpClient::sendRequest(const HttpRequest& request, HttpResponse& response)
         return false;
     }
 
-    printf("Raw header: %s\n", rawHeader.c_str());
-    printf("Leftover: %s\n", leftover.c_str());
+    TRACE("Raw header: %s\n", rawHeader.c_str());
+    TRACE("Leftover: %s\n", leftover.c_str());
 
     response.setStatus(HttpParser::parseStatusCode(rawHeader));
     const auto parsedHeaders = HttpParser::parseHeaders(rawHeader);
