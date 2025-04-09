@@ -47,6 +47,9 @@ public:
     HttpRequest(const std::string& raw, const std::string& method, const std::string& path)
     : method(method), path(path), uri(path) {}
 
+    HttpRequest() = default;
+    HttpRequest(const HttpRequest&) = default;
+
     // ─────────────────────────────────────────────────────────────────────────────
     // Store a CA Root Certificate
     // ─────────────────────────────────────────────────────────────────────────────
