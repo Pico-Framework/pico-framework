@@ -352,32 +352,29 @@ HttpRequest HttpRequest::create()
  * @param uri The URI to set.
  * @return Reference to this request.
  */
-HttpRequest &HttpRequest::setUri(const std::string &uri) {
+HttpRequest& HttpRequest::setUri(const std::string& uri) {
     const auto proto_end = uri.find("://");
     if (proto_end == std::string::npos) {
-        protocol = "http";
-        host = "";
-        this->uri = uri; // treat it as-is, relative URI like "/api"
+        // Relative URI — just set it, do not overwrite protocol or host
+        this->uri = uri;
         return *this;
     }
 
+    // Full URL — parse into protocol, host, and path
     protocol = uri.substr(0, proto_end);
     std::string rest = uri.substr(proto_end + 3); // skip "://"
 
     const auto path_start = rest.find('/');
     if (path_start == std::string::npos) {
         host = rest;
-        this->uri = "/"; // no path found
+        this->uri = "/";
     } else {
         host = rest.substr(0, path_start);
-        this->uri = rest.substr(path_start); // path and query
+        this->uri = rest.substr(path_start);
     }
-    printf("[HttpRequest::setUri] protocol=%s host=%s uri=%s\n",
-        protocol.c_str(), host.c_str(), this->uri.c_str());
 
     return *this;
 }
-
 
 HttpRequest &HttpRequest::setHost(const std::string &h)
 {
