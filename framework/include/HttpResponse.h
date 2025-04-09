@@ -216,6 +216,16 @@ public:
      */
     HttpResponse &redirect(const std::string &url, int statusCode);
 
+#if defined(PICO_HTTP_ENABLE_STORAGE)
+    /**
+     * @brief Save the response body to a file using StorageManager.
+     * 
+     * @param path The destination file path.
+     * @return true on success, false on failure.
+     */
+    bool saveFile(const char* path) const;
+#endif
+
     /**
      * @brief Apply basic variable substitution in a template.
      * @param tpl Input template with {{placeholders}}.

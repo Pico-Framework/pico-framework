@@ -36,18 +36,6 @@ public:
     // ─────────────────────────────────────────────────────────────────────────────
 
     /**
-     * @brief Construct a HttpRequest from a TcpConnectionSocket and details.
-     * @param conn TCP socket abstraction.
-     * @param method HTTP method (GET, POST, etc.).
-     * @param url The full requested URL.
-     */
-    HttpRequest() = default; // Default constructor
-    HttpRequest& get(HttpResponse& response); // for chaining response
-    HttpRequest& post(HttpResponse& response); // for chaining response
-    HttpRequest& put(HttpResponse& response); // for chaining response
-    HttpRequest& delete_(HttpResponse& response); // for chaining response
-
-    /**
      * @brief Construct a HttpRequest from raw headers, method, and path.
      * @param rawHeaders Raw HTTP headers as a C-string.
      * @param reqMethod HTTP method.
@@ -58,6 +46,49 @@ public:
     // used by fluent builder - client side
     HttpRequest(const std::string& raw, const std::string& method, const std::string& path)
     : method(method), path(path), uri(path) {}
+
+    // ─────────────────────────────────────────────────────────────────────────────
+    // Store a CA Root Certificate
+    // ─────────────────────────────────────────────────────────────────────────────
+
+    /**
+     * @brief Set the root CA certificate to use for TLS.
+     * 
+     * @param certData PEM-encoded certificate.
+     */
+    void setRootCACertificate(const std::string& certData);
+
+#if defined(PICO_HTTP_ENABLE_STORAGE)
+    /**
+     * @brief Load and set the root CA certificate from a file using StorageManager.
+     * 
+     * @param path Path to the certificate file.
+     * @return true if loaded successfully, false otherwise.
+     */
+    bool setRootCACertificateFromFile(const char* path);
+#endif
+
+
+    // ─────────────────────────────────────────────────────────────────────────────
+    // Easy access methods for sending requests
+    // ─────────────────────────────────────────────────────────────────────────────
+    
+    /**
+     * @brief Send the request and return the response.
+     * @return HttpResponse object containing the response.
+     */
+    HttpResponse send();
+
+    /**
+     * @brief Send a GETPOST/PUT/DEL request.
+     * @param url The URL to send the request to.
+     * @return HttpResponse object containing the response.
+     */
+    HttpResponse get(const std::string& url);
+    HttpResponse post(const std::string& url, const std::string& body);
+    HttpResponse put(const std::string& url, const std::string& body);
+    HttpResponse del(const std::string& url);
+
 
     // ─────────────────────────────────────────────────────────────────────────────
     // Header Accessors
@@ -369,7 +400,16 @@ public:
     HttpRequest &setUserAgent(const std::string &userAgent);
     HttpRequest &setAcceptEncoding(const std::string &encoding);
 
-    #ifdef PICO_HTTP_ENABLE_FILE_IO
+    /**
+     * @brief Get the root CA certificate string, if set.
+     * 
+     * @return const std::string& PEM-encoded root certificate.
+     */
+    const std::string& getRootCACertificate() const{
+        return rootCACertificate;
+    }
+
+    #if defined(PICO_HTTP_ENABLE_STORAGE)
     HttpRequest& setBodyFromFile(const std::string& path);
     #endif
 
@@ -385,6 +425,7 @@ private:
     std::string protocol;
     std::map<std::string, std::string> headers;  // optional
     std::string body;
+    std::string rootCACertificate;
     size_t headerEnd = 0;
 };
 

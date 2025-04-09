@@ -36,46 +36,38 @@ TRACE_INIT(HttpRequest)
 
 #define BUFFER_SIZE 1460 // this is the standard MTU size
 
-/**
- * Support chaining of HttpClient::get() to HttpRequest.
- */
-HttpRequest& HttpRequest::get(HttpResponse& response) {
-    HttpClient client;
-    this->setMethod("GET");
-    client.get(*this, response);
-    return *this;
+HttpResponse HttpRequest::get(const std::string& url) {
+    setMethod("GET");
+    setUri(url);
+    return send();
 }
 
-/**
- * Support chaining of HttpClient::post() to HttpRequest.
- */
-HttpRequest& HttpRequest::post(HttpResponse& response) {
-    HttpClient client;
-    this->setMethod("POST");
-    client.post(*this, response);
-    return *this;
+HttpResponse HttpRequest::post(const std::string& url, const std::string& body) {
+    setMethod("POST");
+    setUri(url);
+    setBody(body);
+    return send();
 }
 
-/**
- * Support chaining of HttpClient::put() to HttpRequest.
- */
-HttpRequest& HttpRequest::put(HttpResponse& response) {
-    HttpClient client;
-    this->setMethod("PUT");
-    client.put(*this, response);
-    return *this;
+HttpResponse HttpRequest::put(const std::string& url, const std::string& body) {
+    setMethod("PUT");
+    setUri(url);
+    setBody(body);
+    return send();
 }
 
-/**
- * Support chaining of HttpClient::delete() to HttpRequest.
- */
-HttpRequest& HttpRequest::delete_(HttpResponse& response) {
-    HttpClient client;
-    this->setMethod("DELETE");
-    client.delete_(*this, response);
-    return *this;
+HttpResponse HttpRequest::del(const std::string& url) {
+    setMethod("DELETE");
+    setUri(url);
+    return send();
 }
 
+HttpResponse HttpRequest::send() {
+    HttpResponse response;
+    HttpClient client;
+    client.sendRequest(*this, response);
+    return response;
+}
 
 /**
  * @brief Construct a HttpRequest object and parse the URL and headers.
@@ -383,7 +375,7 @@ HttpRequest& HttpRequest::setAcceptEncoding(const std::string& encoding) {
     return *this;
 }
 
-#ifdef PICO_HTTP_ENABLE_FILE_IO
+#if defined(PICO_HTTP_ENABLE_STORAGE)
 #include <fstream>
 HttpRequest& HttpRequest::setBodyFromFile(const std::string& path) {
     std::ifstream file(path, std::ios::in | std::ios::binary);
@@ -391,5 +383,14 @@ HttpRequest& HttpRequest::setBodyFromFile(const std::string& path) {
         body.assign((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
     }
     return *this;
+}
+
+bool HttpRequest::setRootCACertificateFromFile(const char* path) {
+    std::string contents;
+    if (!StorageManager::instance().readFileToString(path, contents)) {
+        return false;
+    }
+    setRootCACertificate(contents);
+    return true;
 }
 #endif

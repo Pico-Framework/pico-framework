@@ -394,8 +394,14 @@ std::string HttpResponse::renderTemplate(const std::string &tpl, const std::map<
     return result;
 }
 
-
 HttpResponse& HttpResponse::setBody(const std::string& body) {
     this->body = body;
     return *this;
 }
+
+#if defined(PICO_HTTP_ENABLE_STORAGE)
+bool HttpResponse::saveFile(const char* path) const {
+    return StorageManager::instance().writeFile(path, body_);
+}
+#endif
+
