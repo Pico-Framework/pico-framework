@@ -95,14 +95,15 @@ bool HttpParser::receiveBody(TcpConnectionSocket& socket,
         while (!decoder.isComplete()) {
             int n = socket.recv(temp, sizeof(temp));
             if (n <= 0) {
-                std::cout << "Chunked: recv() failed or EOF" << std::endl;
+                printf("Chunked: recv() failed or EOF");
                 return false;
             }
             decoder.feed(std::string(temp, n));
         }
 
         outBody = decoder.getDecoded();
-        std::cout << "Chunked: decoded size = " << outBody.size() << std::endl;
+        printf("Chunked: decoded size = d", outBody.size());
+        printf("Chunked: decoded body = %s", outBody.c_str());
         return true;
     }
 
