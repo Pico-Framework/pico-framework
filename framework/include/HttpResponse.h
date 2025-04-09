@@ -271,6 +271,12 @@ public:
         return body;
     }
 
+    /**
+     * @brief Clear the response status, headers, and body.
+     */
+    void reset();
+
+
 private:
     /**
      * @brief Convert an HTTP status code to its standard message.

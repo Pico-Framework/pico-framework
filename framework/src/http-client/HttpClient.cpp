@@ -9,6 +9,9 @@
 #include <cstring>
 
 bool HttpClient::sendRequest(const HttpRequest& request, HttpResponse& response) {
+
+    response.reset();  // Clear any prior response data
+
     const std::string& protocol = request.getProtocol();
     const std::string& host     = request.getHost();
     const std::string& path     = request.getUri();

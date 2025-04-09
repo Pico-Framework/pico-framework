@@ -399,6 +399,12 @@ HttpResponse& HttpResponse::setBody(const std::string& body) {
     return *this;
 }
 
+void HttpResponse::reset() {
+    status_code = 0;
+    headers.clear();
+    body.clear();
+}
+
 #if defined(PICO_HTTP_ENABLE_STORAGE)
 bool HttpResponse::saveFile(const char* path) const {
     return StorageManager::instance().writeFile(path, body_);
