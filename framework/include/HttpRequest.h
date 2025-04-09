@@ -59,7 +59,7 @@ public:
      * 
      * @param certData PEM-encoded certificate.
      */
-    void setRootCACertificate(const std::string& certData);
+    HttpRequest& setRootCACertificate(const std::string& certData);
 
 #if defined(PICO_HTTP_ENABLE_STORAGE)
     /**

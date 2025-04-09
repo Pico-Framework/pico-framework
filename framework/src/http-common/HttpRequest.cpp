@@ -374,6 +374,10 @@ HttpRequest& HttpRequest::setAcceptEncoding(const std::string& encoding) {
     headers["Accept-Encoding"] = encoding;
     return *this;
 }
+HttpRequest& HttpRequest::setRootCACertificate(const std::string& certData) {
+    rootCACertificate = certData;
+    return *this;
+}
 
 #if defined(PICO_HTTP_ENABLE_STORAGE)
 #include <fstream>
