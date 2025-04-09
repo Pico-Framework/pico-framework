@@ -36,10 +36,34 @@ TRACE_INIT(HttpRequest)
 
 #define BUFFER_SIZE 1460 // this is the standard MTU size
 
+HttpResponse HttpRequest::get()
+{
+    setMethod("GET");
+    return send();
+}
+
 HttpResponse HttpRequest::get(const std::string &url)
 {
     setMethod("GET");
     setUri(url);
+    return send();
+}
+
+HttpResponse HttpRequest::post()
+{
+    setMethod("POST");
+    return send();
+}
+
+HttpResponse HttpRequest::put()
+{
+    setMethod("PUT");
+    return send();
+}
+
+HttpResponse HttpRequest::del()
+{
+    setMethod("DELETE");
     return send();
 }
 

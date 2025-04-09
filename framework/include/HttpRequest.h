@@ -87,9 +87,13 @@ public:
      * @param url The URL to send the request to.
      * @return HttpResponse object containing the response.
      */
+    HttpResponse get();
     HttpResponse get(const std::string& url);
+    HttpResponse post();
     HttpResponse post(const std::string& url, const std::string& body);
+    HttpResponse put();
     HttpResponse put(const std::string& url, const std::string& body);
+    HttpResponse del();
     HttpResponse del(const std::string& url);
 
 
