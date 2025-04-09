@@ -87,20 +87,22 @@ bool HttpParser::receiveBody(TcpConnectionSocket& socket,
     auto transferEncodingIt = headers.find("transfer-encoding");
     if (transferEncodingIt != headers.end() &&
         toLower(transferEncodingIt->second) == "chunked") {
+
         ChunkedDecoder decoder;
-        std::string buffer = leftoverBody;
+        decoder.feed(leftoverBody);
+
         char temp[1460];
-
-        decoder.feed(buffer);
-
         while (!decoder.isComplete()) {
             int n = socket.recv(temp, sizeof(temp));
-            if (n <= 0) return false;
-
+            if (n <= 0) {
+                std::cout << "Chunked: recv() failed or EOF" << std::endl;
+                return false;
+            }
             decoder.feed(std::string(temp, n));
         }
 
         outBody = decoder.getDecoded();
+        std::cout << "Chunked: decoded size = " << outBody.size() << std::endl;
         return true;
     }
 
@@ -136,7 +138,7 @@ bool HttpParser::receiveBody(TcpConnectionSocket& socket,
         return ((int)outBody.size() == contentLength);
     }
 
-    // No Content-Length or chunked — read until socket closes
+    // No known content length or transfer encoding — fallback
     outBody = leftoverBody;
     char buffer[1460];
     while (true) {
