@@ -35,6 +35,10 @@ bool HttpClient::gets(const std::string& uri, HttpResponse& response) {
     const std::string host = (path_start != std::string::npos) ? rest.substr(0, path_start) : rest;
     const std::string path = (path_start != std::string::npos) ? rest.substr(path_start) : "/";
 
+    printf("GET %s %s\n", host.c_str(), path.c_str());
+    printf("Protocol: %s\n", protocol.c_str());
+    printf("URI: %s\n", uri.c_str());
+
     HttpRequest::create()
         .setProtocol(protocol)
         .setHost(host)
@@ -91,7 +95,8 @@ bool HttpClient::sendRequest(const HttpRequest& request, HttpResponse& response)
     if (rawHeader.empty()) {
         return false;
     }
-
+    printf("Raw header: %s\n", rawHeader.c_str());
+    printf("Leftover: %s\n", leftover.c_str());
     response.setStatus(HttpParser::parseStatusCode(rawHeader));
     auto parsedHeaders = HttpParser::parseHeaders(rawHeader);
     for (const auto& [key, value] : parsedHeaders) {
@@ -102,19 +107,10 @@ bool HttpClient::sendRequest(const HttpRequest& request, HttpResponse& response)
     if (!HttpParser::receiveBody(socket, parsedHeaders, leftover, bodyData)) {
         return false;
     }
-
-    const std::string transferEncoding = response.getHeader("transfer-encoding");
-    if (toLower(transferEncoding) == "chunked") {
-        ChunkedDecoder decoder;
-        decoder.feed(bodyData);
-        response.setBody(decoder.getDecoded());
-    } else {
-        response.setBody(bodyData);
-    }
-
+    
+    response.setBody(bodyData);
     return true;
 }
-
 
 std::string HttpClient::extractHeadersAndBody(const std::string& raw, std::string& headerOut) {
     size_t pos = raw.find("\r\n\r\n");
