@@ -36,6 +36,6 @@ void GpioEventManager::gpio_event_handler(uint gpio, uint32_t events) {
     }
 
     // Also send an Event to EventManager if anyone wants to subscribe
-    Event evt(EventType::GpioChange, &data, sizeof(data));
+    Event evt(EventType::GpioChange, &data, sizeof(data)); // broadcast event to anyone subscribed as target isn't specified
     EventManager::getInstance().postEvent(evt); // EventManager knows whther it's an ISR or not
 }

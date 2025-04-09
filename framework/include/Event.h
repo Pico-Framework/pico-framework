@@ -1,67 +1,67 @@
 /**
  * @file Event.h
- * @author Ian Archbell
- * @brief Event struct used in the framework event system.
- *
- * Part of the PicoFramework application framework.
- * Represents a typed event optionally targeted at a specific task,
- * and optionally carrying a payload. Used by EventManager and the
- * framework's pub/sub notification system.
- *
- * @version 0.1
- * @date 2025-03-31
- * @license MIT License
+ * @brief Defines the Event structure and related utilities for event messaging.
+ * @version 1.0
+ * @date 2025-04-09
  * @copyright Copyright (c) 2025, Ian Archbell
+ * @license MIT
  */
 
 #pragma once
-
-#include "FrameworkNotification.h"
-
-
-// Forward declaration to avoid circular include
+#include <cstdint>
+#include "FrameworkNotification.h" // Must be included before alias
 class FrameworkTask;
-
 /**
-  * @brief Enumerates supported event types.
-  * 
-  * Extend this enum as needed for your application domain.
-  */
- enum class EventType : uint8_t {
-    None = 0,
-    SysStartup,
-    SysError,
-    UserInput,
-    UserCommand,
-    GpioChange,
-    // Extend as needed
-};
-
-/**
- * @brief Represents a framework event used for task messaging.
- *
- * Each event contains:
- * - A `FrameworkNotification` type (e.g., NetworkReady, Shutdown)
- * - An optional target task (nullptr = broadcast to all)
- * - An optional payload pointer for custom event data
+ * @brief Alias for the type used to identify events.
  */
+using EventType = FrameworkNotification;
 
+/**
+ * @brief Represents a framework event, optionally carrying payload data.
+ */
+struct Event
+{
+    EventType type = EventType::None; ///< Event type identifier
+    const void *data = nullptr;       ///< Pointer to event payload data
+    size_t size = 0;                  ///< Size of payload data
+    void *source = nullptr;           ///< Optional source (e.g. task)
+    FrameworkTask *target = nullptr;  ///< Optional specific target (for directed delivery)
 
- struct Event {
-    EventType type{};                   ///< For user-defined events
-    FrameworkTask* target = nullptr;   ///< Receiver
-    void* source = nullptr;            ///< Sender
-    const void* data = nullptr;        ///< Payload
-    size_t dataSize = 0;               ///< Payload size
+    enum class FrameworkNotification : uint8_t
+    {
+        // Reserved for system/framework use
+        None = 0,
+        NetworkReady = 1,
+        TimeSync = 2,
+        ConfigUpdated = 3,
+        OTAAvailable = 4,
+        GpioChange = 5,
 
+        // Users are free to add their own from here
+        UserBase = 16,
+
+        // Example user-defined notifications
+        ControllerReady = UserBase,
+        ProgramEnd = 17,
+        RunProgram = 18,
+        ZoneEndTime = 19,
+        ProgramStartTime = 20,
+        TimerTick = 21,
+    };
+
+    /**
+     * @brief Default constructor (creates a None event).
+     */
     Event() = default;
 
-    // System/framework event (legacy support)
-    Event(FrameworkNotification frameworkType, FrameworkTask* target = nullptr, void* data = nullptr)
-        : type(static_cast<EventType>(frameworkType)), target(target), data(data) {}
-
-    // App/user event
-    Event(EventType type, const void* data = nullptr, size_t size = 0, void* source = nullptr)
-        : type(type), data(data), dataSize(size), source(source) {}
+    /**
+     * @brief Construct a new Event with optional payload.
+     *
+     * @param type   Event type (e.g. EventType::RunProgram)
+     * @param data   Pointer to optional payload
+     * @param size   Size of payload
+     * @param source Optional source (e.g. task pointer)
+     */
+    Event(EventType type, const void* data = nullptr, size_t size = 0, void* source = nullptr, FrameworkTask* target = nullptr)
+    : type(type), data(data), size(size), source(source), target(target) {}
 };
-

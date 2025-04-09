@@ -8,6 +8,7 @@ enum class FrameworkNotification : uint8_t {
     TimeSync          = 2,
     ConfigUpdated     = 3,
     OTAAvailable      = 4,
+    GpioChange        = 5,
 
     // Users are free to add their own from here
     UserBase          = 16,
