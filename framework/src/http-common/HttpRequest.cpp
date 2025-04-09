@@ -346,15 +346,18 @@ HttpRequest HttpRequest::create()
     return HttpRequest("", "", "");
 }
 
-HttpRequest &HttpRequest::setUri(const std::string &uri)
-{
-
+/**
+ * @brief Set the URI for the request.
+ * Parses the uri into protocol, host, and path. But not if it is just a /path
+ * @param uri The URI to set.
+ * @return Reference to this request.
+ */
+HttpRequest &HttpRequest::setUri(const std::string &uri) {
     const auto proto_end = uri.find("://");
-    if (proto_end == std::string::npos)
-    {
+    if (proto_end == std::string::npos) {
         protocol = "http";
         host = "";
-        this->uri = "/";
+        this->uri = uri; // treat it as-is, relative URI like "/api"
         return *this;
     }
 
@@ -362,18 +365,15 @@ HttpRequest &HttpRequest::setUri(const std::string &uri)
     std::string rest = uri.substr(proto_end + 3); // skip "://"
 
     const auto path_start = rest.find('/');
-    if (path_start == std::string::npos)
-    {
+    if (path_start == std::string::npos) {
         host = rest;
-        this->uri = "/";
-    }
-    else
-    {
+        this->uri = "/"; // no path found
+    } else {
         host = rest.substr(0, path_start);
-        this->uri = rest.substr(path_start);
+        this->uri = rest.substr(path_start); // path and query
     }
-
-    this->uri = uri;
+    printf("[HttpRequest::setUri] protocol=%s host=%s uri=%s\n",
+        protocol.c_str(), host.c_str(), this->uri.c_str());
     return *this;
 }
 
