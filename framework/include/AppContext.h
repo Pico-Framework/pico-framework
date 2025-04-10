@@ -1,37 +1,34 @@
 #pragma once
+#include <unordered_map>
+#include <cstdint>
+#include <type_traits>
+#include <string_view>
 
-#include "FatFsStorageManager.h"
-#include "TimeManager.h"
-#include "JwtAuthenticator.h"
-
-#define REGISTER_SERVICE(Type, instancePtr) \
-    AppContext::getInstance().registerService<Type>(instancePtr)
 class AppContext {
 public:
     static AppContext& getInstance();
 
     template<typename T>
-    void registerService(T* instance) {
-        ServiceHolder<T>::instance = instance;
+    void registerService(T* service) {
+        services[getTypeKey<T>()] = reinterpret_cast<void*>(service);
     }
 
     template<typename T>
     T* getService() const {
-        T* ptr = ServiceHolder<T>::instance;
-        if (!ptr) {
-            // Optional: handle or assert here
+        auto it = services.find(getTypeKey<T>());
+        if (it != services.end()) {
+            return reinterpret_cast<T*>(it->second);
         }
-        return ptr;
+        return nullptr;
     }
 
 private:
-
     void initFrameworkServices();
     AppContext() = default;
-    static AppContext* instance;
+    std::unordered_map<std::uintptr_t, void*> services;
 
     template<typename T>
-    struct ServiceHolder {
-        static T* instance;
-    };
+    static constexpr std::uintptr_t getTypeKey() {
+        return reinterpret_cast<std::uintptr_t>(&getTypeKey<T>); // unique per T
+    }
 };

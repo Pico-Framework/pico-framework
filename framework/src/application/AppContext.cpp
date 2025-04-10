@@ -3,14 +3,9 @@
 #include "TimeManager.h"
 #include "JwtAuthenticator.h"
 
-AppContext* AppContext::instance = nullptr;
-
 AppContext& AppContext::getInstance() {
-    if (!instance) {
-        static AppContext ctx;
-        instance = &ctx;
-    }
-    return *instance;
+    static AppContext instance;
+    return instance;
 }
 
 void AppContext::initFrameworkServices() {
@@ -18,7 +13,7 @@ void AppContext::initFrameworkServices() {
     static TimeManager timeMgr = TimeManager::getInstance();
     static JwtAuthenticator jwt = JwtAuthenticator::getInstance();
 
-    REGISTER_SERVICE(FatFsStorageManager, &fatFs);
+    registerService(&fatFs);
     registerService(&timeMgr);
     registerService(&jwt);
 }

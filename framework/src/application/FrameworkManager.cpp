@@ -25,6 +25,7 @@ TRACE_INIT(FrameworkManager); // Initialize tracing for this module
 #include <iostream>
 #include "framework_config.h"
 #include "JwtAuthenticator.h"
+#include "TimeManager.h"
 
 /// @copydoc FrameworkManager::xNetworkTaskBuffer
 StaticTask_t FrameworkManager::xNetworkTaskBuffer;
