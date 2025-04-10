@@ -6,6 +6,9 @@
  * incorporating custom memory, TCP, debugging, and threading settings.
  *
  */
+#include "stdint.h"
+
+extern void sntp_set_system_time(uint32_t sec);
 
 #ifndef LWIPOPTS_H
 #define LWIPOPTS_H
@@ -90,6 +93,8 @@
 #define LWIP_SNTP 1             // Disable SNTP (Simple Network Time Protocol)
 #define SNTP_SERVER_DNS       1 // Enable DNS server for SNTP
 #define SNTP_SET_SYSTEM_TIME  1 // Enable setting system time from SNTP
+// Set system time from SNTP
+#define SNTP_SET_SYSTEM_TIME(sec) sntp_set_system_time(sec) 
 
 // -----------------------------------------------------------------------------
 // Protocols and Raw API

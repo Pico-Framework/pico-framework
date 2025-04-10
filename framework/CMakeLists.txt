@@ -114,6 +114,7 @@ target_link_libraries(pico_framework PUBLIC
         FreeRTOS-Kernel-Heap4               # needed for FreeRTOS kernel, we use heap 4 for now
         pico_stdlib                         # needed for standard functions including printf
         pico_cyw43_arch_lwip_sys_freertos   # needed for lwip and WiFi
+        pico_lwip_sntp                      # needed for SNTP
         hardware_rtc                        # needed for RTC - system date time functions require it
         FreeRTOS+FAT+CLI                    # needed for FatFsStorageManager - SDIO support - installed as submodule
         
