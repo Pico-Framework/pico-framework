@@ -105,10 +105,11 @@
       *     std::bind(&MyApp::handleStatus, this, _1, _2, _3));
       * @endcode
       */
-     virtual void initRoutes() = 0;
 
  
  protected:
+
+    virtual void initRoutes() {}  // Default no-op
      Router router;               ///< Handles path-to-handler mapping
      HttpServer server;           ///< Embedded HTTP server instance
      FrameworkManager* manager;   ///< Responsible for launching system services and networking

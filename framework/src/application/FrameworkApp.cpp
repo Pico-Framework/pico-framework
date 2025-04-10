@@ -22,11 +22,13 @@
  FrameworkApp::FrameworkApp(int port, const char* name, uint16_t stackSize, UBaseType_t priority)
      : FrameworkController(name, stackSize, priority),
        server(port, router),
-       manager(new FrameworkManager(this)) {}
+       manager(new FrameworkManager(this)) {
+            initRoutes();  // Call initRoutes() to set up routes
+       }
  
  /// @copydoc FrameworkApp::start
  void FrameworkApp::start() {
-     manager->start();           // Start network + other core services
+     manager->start();          // Start network + other core services
      FrameworkTask::start();    // Start this app’s task (calls run())
  }
  
