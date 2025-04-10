@@ -3,6 +3,9 @@
 #include "FatFsStorageManager.h"
 #include "TimeManager.h"
 #include "JwtAuthenticator.h"
+
+#define REGISTER_SERVICE(Type, instancePtr) \
+    AppContext::getInstance().registerService<Type>(instancePtr)
 class AppContext {
 public:
     static AppContext& getInstance();
