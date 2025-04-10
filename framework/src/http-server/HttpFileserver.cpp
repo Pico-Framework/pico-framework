@@ -19,6 +19,7 @@
 TRACE_INIT(HttpFileserver)
 
 #include "HttpFileserver.h"
+#include "AppContext.h"
 #include <string>
 #include <vector>
 #include <cstdio>
@@ -47,7 +48,7 @@ FileHandler::FileHandler()
 /// @copydoc FileHandler::init
 bool FileHandler::init()
 {
-    FatFsStorageManager *storage = AppContext::getFatFsStorage();
+    FatFsStorageManager *storage = AppContext::getInstance().getService<FatFsStorageManager>();
     if (storage->mount())
     {
         TRACE("SD Card mounted successfully\n");
@@ -63,7 +64,7 @@ bool FileHandler::init()
 /// @copydoc FileHandler::listDirectory
 void FileHandler::listDirectory(const char *path)
 {
-    FatFsStorageManager *storage = AppContext::getFatFsStorage();
+    FatFsStorageManager *storage = AppContext::getInstance().getService<FatFsStorageManager>();
     if (!storage)
     {
         printf("No storage manager available\n");
@@ -94,7 +95,7 @@ bool FileHandler::serveFile(HttpResponse &res, const char *uri)
 {
     std::string path = uri;
 
-    storageManager = AppContext::getFatFsStorage();
+    storageManager = AppContext::getInstance().getService<FatFsStorageManager>();
 
     if (!storageManager->exists(path))
     {

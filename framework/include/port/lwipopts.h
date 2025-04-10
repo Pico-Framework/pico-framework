@@ -87,7 +87,9 @@
 #define DNS_MAX_SERVERS 2       // Maximum number of DNS servers
 #define LWIP_DHCP 1             // Enable DHCP client support
 #define LWIP_AUTOIP 0           // Disable AutoIP (self-assigned IP addressing)
-#define LWIP_SNTP 0             // Disable SNTP (Simple Network Time Protocol)
+#define LWIP_SNTP 1             // Disable SNTP (Simple Network Time Protocol)
+#define SNTP_SERVER_DNS       1 // Enable DNS server for SNTP
+#define SNTP_SET_SYSTEM_TIME  1 // Enable setting system time from SNTP
 
 // -----------------------------------------------------------------------------
 // Protocols and Raw API

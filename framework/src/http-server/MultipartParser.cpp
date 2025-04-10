@@ -272,7 +272,7 @@ bool MultipartParser::extractFilename(const std::string &contentDisposition)
 bool MultipartParser::processFileData(const std::string &fileData)
 {
     TRACE("Processing file data, size: %zu bytes\n", fileData.size());
-    auto *storage = AppContext::getFatFsStorage();
+    auto *storage = AppContext::getInstance().getService<FatFsStorageManager>();
     if (!storage->appendToFile(filename, (uint8_t *)fileData.c_str(), fileData.size()))
     {
         if (!storage->isMounted())
@@ -293,7 +293,7 @@ bool MultipartParser::processFileData(const std::string &fileData)
 /// @copydoc MultipartParser::file_exists
 int MultipartParser::file_exists(const char *filename)
 {
-    FatFsStorageManager *storage = AppContext::getFatFsStorage();
+    FatFsStorageManager *storage = AppContext::getInstance().getService<FatFsStorageManager>();
     return storage->exists(filename);
 }
 

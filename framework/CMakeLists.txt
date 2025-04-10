@@ -98,6 +98,7 @@ target_sources(pico_framework
         src/network/TcpConnectionSocket.cpp
         src/network/lwip_dns_resolver.cpp
         src/events/GpioEventManager.cpp
+        src/time/TimeManager.cpp
 )
 
 message(STATUS "[framework] Http client support enabled: ${PICO_HTTP_ENABLE_HTTP_CLIENT}")

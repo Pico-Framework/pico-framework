@@ -67,6 +67,8 @@ void FrameworkManager::network_task(void *params)
         vTaskDelay(pdMS_TO_TICKS(1000));
     }
 
+    AppContext::getInstance().getService<TimeManager>()->syncTimeWithNtp();  // Add this after Wi-Fi is connected
+
     std::cout << "Network up. Notifying app task..." << std::endl;
 
     if (manager->app != nullptr)
