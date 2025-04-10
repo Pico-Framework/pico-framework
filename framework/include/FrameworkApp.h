@@ -24,9 +24,9 @@
  
  #include "Router.h"
  #include "HttpServer.h"
- #include "FrameworkTask.h"
- 
- class FrameworkManager;
+ #include "FrameworkManager.h"
+ #include "FrameworkController.h"
+
  
  /**
   * @brief Base class for applications using the framework.
@@ -36,7 +36,7 @@
   * Derived classes override `initRoutes()` to register route handlers,
   * and `run()` to implement application logic.
   */
- class FrameworkApp : public FrameworkTask {
+ class FrameworkApp : public FrameworkController {
  public:
      /**
       * @brief Constructor.
@@ -77,6 +77,13 @@
       * is fully ready before entering the main loop.
       */
      virtual void start();
+     /**
+      * @brief Starts the Framework Manager.
+      * This is called by the FrameworkApp::start() method once the FreeRTOS task has been created
+      */
+     void onStart() override {
+        manager->start();
+    }
  
      /**
       * @brief Define the application's HTTP routes.
@@ -99,23 +106,10 @@
       * @endcode
       */
      virtual void initRoutes() = 0;
- 
-     /**
-      * @brief Main application loop.
-      * 
-      * This method runs in the context of the application task and contains the
-      * core logic of your app — such as handling periodic jobs, state machines,
-      * background tasks, or long-running operations.
-      * 
-      * It typically runs indefinitely. The HTTP server runs independently,
-      * routing requests using the `Router` defined in `initRoutes()`.
-      * 
-      * Consider adding logging or error monitoring here if needed.
-      */
-     virtual void run() = 0;
+
  
  protected:
-     Router router;                ///< Handles path-to-handler mapping
+     Router router;               ///< Handles path-to-handler mapping
      HttpServer server;           ///< Embedded HTTP server instance
      FrameworkManager* manager;   ///< Responsible for launching system services and networking
  };

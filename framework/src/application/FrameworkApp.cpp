@@ -20,7 +20,7 @@
  
  /// @copydoc FrameworkApp::FrameworkApp
  FrameworkApp::FrameworkApp(int port, const char* name, uint16_t stackSize, UBaseType_t priority)
-     : FrameworkTask(name, stackSize, priority),
+     : FrameworkController(name, stackSize, priority),
        server(port, router),
        manager(new FrameworkManager(this)) {}
  

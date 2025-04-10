@@ -19,7 +19,6 @@
  #define FRAMEWORK_MANAGER_H
  #pragma once
  
- #include "FrameworkApp.h"
  #include "FreeRTOS.h"
  #include "task.h"
  #include "Network.h"
@@ -27,6 +26,8 @@
  
  #define NETWORK_STACK_SIZE 1024 / sizeof(StackType_t)
  #define APPLICATION_STACK_SIZE 1024 / sizeof(StackType_t)
+
+ class FrameworkApp;
  
  /**
   * @brief Starts and coordinates core system services like networking and time sync.
