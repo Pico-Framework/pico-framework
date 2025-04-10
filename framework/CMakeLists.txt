@@ -44,7 +44,7 @@ if(PICO_HTTP_ENABLE_JWT)
     target_sources(pico_framework PRIVATE
         ${CMAKE_CURRENT_SOURCE_DIR}/src/http-server/JwtAuthenticator.cpp
     )
-    add_compile_definitions(PICO_HTTP_ENABLE_JWT=1)
+    target_compile_definitions(pico_framework PUBLIC PICO_HTTP_ENABLE_JWT=1)
 endif()
 
 # Read the environment variable at configure time
