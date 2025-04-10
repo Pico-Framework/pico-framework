@@ -82,3 +82,10 @@ void FrameworkController::runEvery(uint32_t intervalMs, const std::function<void
         last = now;
     }
 }
+/// @copydoc FrameworkController::runEvery
+void FrameworkController::runEvery(uint32_t intervalMs, const std::function<void()>& fn) {
+    static int counter = 0;
+    std::string generatedId = "auto_" + std::to_string(counter++);
+    runEvery(intervalMs, fn, generatedId.c_str());
+}
+

@@ -24,6 +24,7 @@ target_compile_definitions(pico_framework PUBLIC
         NO_SYS=0
     ) 
 
+message(STATUS "[framework] TLS verify enabled: ${PICO_HTTP_TLS_VERIFY}")
 if(PICO_HTTP_TLS_VERIFY)
     add_compile_definitions(ALTCP_MBEDTLS_AUTHMODE=MBEDTLS_SSL_VERIFY_REQUIRED)
     target_sources(pico_framework PRIVATE
@@ -33,10 +34,12 @@ else()
     add_compile_definitions(ALTCP_MBEDTLS_AUTHMODE=MBEDTLS_SSL_VERIFY_NONE)
 endif()
 
+message(STATUS "[framework] Http client support enabled: ${PICO_HTTP_CLIENT_ENABLE_TLS}")
 if(PICO_HTTP_CLIENT_ENABLE_TLS)
     add_compile_definitions(PICO_HTTP_CLIENT_ENABLE_TLS=1)
 endif() 
 
+message(STATUS "[framework] JWT support enabled: ${PICO_HTTP_ENABLE_JWT}")
 if(PICO_HTTP_ENABLE_JWT)
     target_sources(pico_framework PRIVATE
         ${CMAKE_CURRENT_SOURCE_DIR}/src/http-server/JwtAuthenticator.cpp
@@ -97,6 +100,7 @@ target_sources(pico_framework
         src/events/GpioEventManager.cpp
 )
 
+message(STATUS "[framework] Http client support enabled: ${PICO_HTTP_ENABLE_HTTP_CLIENT}")
 if(PICO_HTTP_ENABLE_HTTP_CLIENT)
     target_sources(pico_framework PRIVATE
         src/http-client/HttpClient.cpp

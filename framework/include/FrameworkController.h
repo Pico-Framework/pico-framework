@@ -100,6 +100,8 @@
       * @param id Unique ID for this timed function (used to track last execution).
       */
      void runEvery(uint32_t intervalMs, const std::function<void()>& fn, const char* id);
+     void runEvery(uint32_t intervalMs, const std::function<void()>& fn);
+     
  
  private:
      std::unordered_map<std::string, TickType_t> _timers;  ///< Stores last-execution timestamps per ID
