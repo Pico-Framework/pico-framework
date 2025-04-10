@@ -9,6 +9,7 @@
 
 #pragma once
 #include <cstdint>
+#include <cstddef>
 #include "FrameworkNotification.h" // Must be included before alias
 class FrameworkTask;
 /**
