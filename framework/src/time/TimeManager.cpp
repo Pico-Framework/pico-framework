@@ -55,14 +55,6 @@ void TimeManager::syncTimeWithNtp(int timeoutSeconds) {
     std::cerr << "NTP time sync failed after " << timeoutSeconds << " seconds" << std::endl;
 }
 
-static time_t get_seconds_from_datetime_t() {
-    
-    struct tm timeinfo;
-    aon_timer_get_time_calendar(&timeinfo);
-
-    return mktime(&timeinfo);             // Converts to time_t and updates libc time state
-}
-
 void TimeManager::setTimeFromEpoch(uint32_t epoch) {
     struct timespec ts = {
         .tv_sec = epoch,
@@ -80,7 +72,7 @@ void TimeManager::setTimeFromEpoch(uint32_t epoch) {
     fetchAndApplyTimezoneFromWorldTimeApi();
 }
 
-void fetchAndApplyTimezoneFromWorldTimeApi() {
+void TimeManager::fetchAndApplyTimezoneFromWorldTimeApi() {
     HttpRequest req;
     
     HttpResponse res = req.get("http://worldtimeapi.org/api/ip");

@@ -37,7 +37,8 @@ TRACE_INIT(HttpServer)
 #include "semphr.h"
 #include "utility.h"
 #include "url_utils.h"
-// #include "TcpConnectionSocket.h"
+#include "AppContext.h"
+#include "TimeManager.h"
 
 #define BUFFER_SIZE 1024
 
@@ -98,7 +99,8 @@ void HttpServer::run()
     {
         return;
     }
-
+    AppContext::getInstance().getService<TimeManager>()->fetchAndApplyTimezoneFromWorldTimeApi();
+    TRACE("Timezone applied\n");
     sock = initServerSocket();
     if (sock < 0)
     {
