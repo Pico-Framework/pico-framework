@@ -12,6 +12,8 @@
 #include "PicoTime.h"
 #include "FreeRTOS.h"
 #include "FreeRTOS_time.h"
+#include "HttpRequest.h"
+#include "HttpResponse.h"
 
 // Set system time from SNTP - this callback is defined in lwipopts.h
 extern "C" void sntp_set_system_time(uint32_t sec) {
@@ -75,5 +77,38 @@ void TimeManager::setTimeFromEpoch(uint32_t epoch) {
     settimeofday(&tv, NULL);  // this updates c system time
     setrtc(&ts);  //  This updates aon clock, FreeRTOS epochtime and starts the 1s update timer
     printf("[TimeManager] AON and FreeRTOS+FAT time system set via setrtc().\n");
+    fetchAndApplyTimezoneFromWorldTimeApi();
+}
+
+void fetchAndApplyTimezoneFromWorldTimeApi() {
+    HttpRequest req;
+    
+    HttpResponse res = req.get("http://worldtimeapi.org/api/ip");
+
+    const std::string &body = res.getBody();
+    size_t pos = body.find("\"timezone\":\"");
+    if (pos == std::string::npos) {
+        printf("[TimeZone] Timezone not found in response\n");
+        return;
+    }
+
+    pos += strlen("\"timezone\":\"");
+    size_t end = body.find('"', pos);
+    if (end == std::string::npos) {
+        printf("[TimeZone] Malformed timezone string\n");
+        return;
+    }
+
+    std::string timezone = body.substr(pos, end - pos);
+    printf("[TimeZone] Received timezone: %s\n", timezone.c_str());
+
+    // Try setting TZ variable
+    if (setenv("TZ", timezone.c_str(), 1) != 0) {
+        printf("[TimeZone] Failed to set TZ env var\n");
+        return;
+    }
+
+    tzset();  // Apply it
+    printf("[TimeZone] Timezone applied successfully.\n");
 }
     

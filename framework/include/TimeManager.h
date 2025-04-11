@@ -14,4 +14,5 @@ public:
 private:
     TimeManager() = default;
     void initNtpClient();
+    void fetchAndApplyTimezoneFromWorldTimeApi();
 };
