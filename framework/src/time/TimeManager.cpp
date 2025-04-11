@@ -10,6 +10,8 @@
 #include "AppContext.h"
 #include "pico/aon_timer.h"
 #include "PicoTime.h"
+#include "FreeRTOS.h"
+#include "FreeRTOS_time.h"
 
 // Set system time from SNTP - this callback is defined in lwipopts.h
 extern "C" void sntp_set_system_time(uint32_t sec) {
@@ -60,28 +62,18 @@ static time_t get_seconds_from_datetime_t() {
 }
 
 void TimeManager::setTimeFromEpoch(uint32_t epoch) {
-    
     struct timespec ts = {
         .tv_sec = epoch,
         .tv_nsec = 0
-    }; 
-
+    };
     struct timeval tv = {
-        .tv_sec = 0,
+        .tv_sec = epoch,
         .tv_usec = 0
-    }; 
-    
-    if (aon_timer_start(&ts)) {
-        printf("[TimeManager] AON timer started at epoch %u.\n", epoch);
-        PicoTime::printNow(); 
+    };
 
-        aon_timer_get_time(&ts);
-        tv.tv_sec = ts.tv_sec;
-        
-        settimeofday(&tv, nullptr); 
-        printf("[TimeManager] AON timer started at epoch %u.\n", epoch);  
-    } else {
-        printf("[TimeManager] Failed to start AON timer.\n");
-    }
+    FreeRTOS_time_init(); 
+    settimeofday(&tv, NULL);  // this updates c system time
+    setrtc(&ts);  //  This updates aon clock, FreeRTOS epochtime and starts the 1s update timer
+    printf("[TimeManager] AON and FreeRTOS+FAT time system set via setrtc().\n");
 }
     
