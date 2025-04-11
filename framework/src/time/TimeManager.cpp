@@ -67,13 +67,16 @@ void TimeManager::setTimeFromEpoch(uint32_t epoch) {
     }; 
 
     struct timeval tv = {
-        .tv_sec = get_seconds_from_datetime_t(),
+        .tv_sec = 0,
         .tv_usec = 0
     }; 
     
     if (aon_timer_start(&ts)) {
         printf("[TimeManager] AON timer started at epoch %u.\n", epoch);
         PicoTime::printNow(); 
+
+        aon_timer_get_time(&ts);
+        tv.tv_sec = ts.tv_sec;
         
         settimeofday(&tv, nullptr); 
         printf("[TimeManager] AON timer started at epoch %u.\n", epoch);  
