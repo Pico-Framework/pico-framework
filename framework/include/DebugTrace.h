@@ -28,6 +28,8 @@
  #include <cstring>
  #include "framework_config.h"
  #include "FatFsStorageManager.h"
+ #include "AppContext.h"
+ #include "TimeManager.h"
  
  #define TRACE_LVL_INFO  0
  #define TRACE_LVL_WARN  1
@@ -73,6 +75,12 @@
      snprintf(buffer, maxLen, "%s", slash ? slash + 1 : fullPath);
  }
  
+ enum TraceTimeFormat {
+    TRACE_TIME_UTC,
+    TRACE_TIME_LOCAL
+};
+static TraceTimeFormat traceTimeFormat = TRACE_TIME_LOCAL;
+
  /**
   * @brief Internal trace log handler. Formats and dispatches output.
   */
@@ -87,19 +95,18 @@
      va_start(args, format);
      vsnprintf(msgBuf, sizeof(msgBuf), format, args);
      va_end(args);
- 
- #if TRACE_INCLUDE_TIMESTAMP
-     time_t now = time(nullptr);
-     struct tm* t = localtime(&now);
-     char timeBuf[16];
-     strftime(timeBuf, sizeof(timeBuf), "%H:%M:%S", t);
-     std::string formatted = "[" + std::string(timeBuf) + "] [" + traceLevelToString(level) + "] [" +
-                             module + "] " + fileBuf + ":" + std::to_string(line) + " (" + func + "): " + msgBuf + "\n";
- #else
-     std::string formatted = "[" + std::string(module) + "] " + fileBuf + ":" +
-                             std::to_string(line) + " (" + func + "): " + msgBuf + "\n";
- #endif
- 
+     std::string formatted;
+
+#if TRACE_INCLUDE_TIMESTAMP
+    std::string timestamp = AppContext::getInstance().getService<TimeManager>()->currentTimeForTrace();
+
+        
+    formatted = timestamp + "[" + traceLevelToString(level) + "] [" +
+                module + "] " + fileBuf + ":" + std::to_string(line) +
+                " (" + func + "): " + msgBuf + "\n";
+    
+#endif
+
      if (traceToFile && traceStorage) {
          traceStorage->appendToFile(tracePath, reinterpret_cast<const uint8_t*>(formatted.c_str()), formatted.length());
      } else {

@@ -21,9 +21,9 @@ public:
         }
         return nullptr;
     }
+    void initFrameworkServices();
 
 private:
-    void initFrameworkServices();
     AppContext() = default;
     std::unordered_map<std::uintptr_t, void*> services;
 

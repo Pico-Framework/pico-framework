@@ -55,7 +55,6 @@
      TaskHandle_t applicationTaskHandle; ///< (Unused) optional handle for app task
  
      Network network;        ///< Network management
-     NTPClient ntpClient;    ///< NTP time sync client
  
      // Static task allocation buffers
      static StaticTask_t xApplicationTaskBuffer;

@@ -22,11 +22,6 @@ extern "C" void sntp_set_system_time(uint32_t sec) {
     AppContext::getInstance().getService<TimeManager>()->setTimeFromEpoch(sec);
 }
 
-TimeManager& TimeManager::getInstance() {
-    static TimeManager instance;
-    return instance;
-}
-
 void TimeManager::initNtpClient() {
     if (!sntp_enabled()) {
         sntp_setoperatingmode(SNTP_OPMODE_POLL);
@@ -69,38 +64,122 @@ void TimeManager::setTimeFromEpoch(uint32_t epoch) {
     settimeofday(&tv, NULL);  // this updates c system time
     setrtc(&ts);  //  This updates aon clock, FreeRTOS epochtime and starts the 1s update timer
     printf("[TimeManager] AON and FreeRTOS+FAT time system set via setrtc().\n");
-    fetchAndApplyTimezoneFromWorldTimeApi();
 }
 
-void TimeManager::fetchAndApplyTimezoneFromWorldTimeApi() {
+void TimeManager::applyFixedTimezoneOffset(int offsetSeconds, const char* stdName, const char* dstName) {
+    printf("[TimeManager] Setting timezone offset: %d seconds\n", offsetSeconds);
+    printf("[TimeManager] Standard timezone: %s, DST timezone: %s\n", stdName, dstName);
+    timezoneOffsetSeconds = offsetSeconds;
+    timezoneName = stdName;
+
+    // Log for trace/debug purposes
+    printf("[TimeManager] Timezone set to UTC %+d:00 (%s)\n",
+           offsetSeconds / 3600, stdName);
+}
+
+bool TimeManager::getLocationFromIp(std::string& tzName, float& lat, float& lon) {
     HttpRequest req;
-    
-    HttpResponse res = req.get("http://worldtimeapi.org/api/ip");
+    HttpResponse res = req.get("http://ip-api.com/json");
 
-    const std::string &body = res.getBody();
-    size_t pos = body.find("\"timezone\":\"");
-    if (pos == std::string::npos) {
-        printf("[TimeZone] Timezone not found in response\n");
-        return;
+    const std::string& body = res.getBody();
+    if (body.empty()) {
+        printf("[TimeManager] Failed to get IP geolocation.\n");
+        return false;
     }
 
-    pos += strlen("\"timezone\":\"");
-    size_t end = body.find('"', pos);
-    if (end == std::string::npos) {
-        printf("[TimeZone] Malformed timezone string\n");
-        return;
+    // Parse timezone
+    size_t tzPos = body.find("\"timezone\":\"");
+    if (tzPos != std::string::npos) {
+        tzPos += strlen("\"timezone\":\"");
+        size_t end = body.find('"', tzPos);
+        if (end != std::string::npos) {
+            tzName = body.substr(tzPos, end - tzPos);
+        }
+    } else {
+        tzName = "UTC";
     }
 
-    std::string timezone = body.substr(pos, end - pos);
-    printf("[TimeZone] Received timezone: %s\n", timezone.c_str());
-
-    // Try setting TZ variable
-    if (setenv("TZ", timezone.c_str(), 1) != 0) {
-        printf("[TimeZone] Failed to set TZ env var\n");
-        return;
+    // Parse lat/lon
+    size_t latPos = body.find("\"lat\":");
+    size_t lonPos = body.find("\"lon\":");
+    if (latPos == std::string::npos || lonPos == std::string::npos) {
+        printf("[TimeManager] lat/lon not found. Using defaults.\n");
+        lat = 0.0f;
+        lon = 0.0f;
+        return false;
     }
 
-    tzset();  // Apply it
-    printf("[TimeZone] Timezone applied successfully.\n");
+    lat = std::stof(body.substr(latPos + 6));
+    lon = std::stof(body.substr(lonPos + 6));
+    return true;
 }
+
+void TimeManager::fetchAndApplyTimezoneFromOpenMeteo(float lat, float lon, const std::string& tzName) {
+    char url[256];
+    snprintf(url, sizeof(url),
+        "http://api.open-meteo.com/v1/forecast?latitude=%.4f&longitude=%.4f&current_weather=true&timezone=auto",
+        lat, lon);
+
+    printf("url: %s\n", url);    
+
+    HttpRequest req;
+    HttpResponse res = req.get(url);
+
+    const std::string& body = res.getBody();
+    printf("[TimeManager] Open-Meteo response: %s\n", body.c_str());
+    printf("Status code: %d\n", res.getStatusCode());
+    if (body.empty()) {
+        printf("[TimeManager] Open-Meteo response is empty.\n");
+        applyFixedTimezoneOffset(0, tzName.c_str(), tzName.c_str());
+        return;
+    }
+
+    size_t offsetPos = body.find("\"utc_offset_seconds\":");
+    int offsetSeconds = 0;
+    if (offsetPos != std::string::npos) {
+        offsetPos += strlen("\"utc_offset_seconds\":");
+        size_t end = body.find(',', offsetPos);
+        if (end == std::string::npos) end = body.size();
+        offsetSeconds = std::stoi(body.substr(offsetPos, end - offsetPos));
+    }
+    printf("[TimeManager] Timezone: %s, UTC offset: %d sec\n", tzName.c_str(), offsetSeconds);
+    applyFixedTimezoneOffset(offsetSeconds, tzName.c_str(), tzName.c_str());
+}
+
+void TimeManager::detectAndApplyTimezone() {
+    std::string tzName = "UTC";
+    float lat = 0.0f, lon = 0.0f;
+
+    if (getLocationFromIp(tzName, lat, lon)) {
+        fetchAndApplyTimezoneFromOpenMeteo(lat, lon, tzName);
+    } else {
+        printf("[TimeManager] Could not determine location. Using default UTC.\n");
+        applyFixedTimezoneOffset(0, tzName.c_str(), tzName.c_str());
+    }
+}
+
+std::string TimeManager::formatTimeWithZone(time_t utcTime) const {
+    time_t localTime = utcTime + timezoneOffsetSeconds;
+    printf("[TimeManager : formatWithZone] Offset: %d\n", timezoneOffsetSeconds);
+    printf("Timzeone: %s\n", timezoneName.c_str());
+    struct tm tmBuf;
+    gmtime_r(&localTime, &tmBuf);  // Adjusted time treated as UTC
+
+    char timeBuf[16] = {0};
+    strftime(timeBuf, sizeof(timeBuf), "%H:%M:%S", &tmBuf);
+    printf("[TimeManager : formatWithZone] Time: %s\n", timeBuf);
+
+    const char* zone = timezoneName.empty() ? "?" : timezoneName.c_str();
+
+    char formatted[48] = {0};
+    snprintf(formatted, sizeof(formatted), "[%s %s]", timeBuf, zone);
+
+    return std::string(formatted);
+}
+
+
+std::string TimeManager::currentTimeForTrace() const {
+    return formatTimeWithZone(time(nullptr));
+}
+
     

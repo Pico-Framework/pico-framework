@@ -26,6 +26,7 @@ TRACE_INIT(FrameworkManager); // Initialize tracing for this module
 #include "framework_config.h"
 #include "JwtAuthenticator.h"
 #include "TimeManager.h"
+#include "AppContext.h"
 
 /// @copydoc FrameworkManager::xNetworkTaskBuffer
 StaticTask_t FrameworkManager::xNetworkTaskBuffer;
@@ -68,6 +69,7 @@ void FrameworkManager::network_task(void *params)
         vTaskDelay(pdMS_TO_TICKS(1000));
     }
 
+    AppContext::getInstance().initFrameworkServices();
     AppContext::getInstance().getService<TimeManager>()->syncTimeWithNtp();  // Add this after Wi-Fi is connected
 
     std::cout << "Network up. Notifying app task..." << std::endl;

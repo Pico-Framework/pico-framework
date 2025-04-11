@@ -24,6 +24,7 @@ TRACE_INIT(Middileware)
 #include <iostream>
 #include "HttpResponse.h"
 #include "JsonResponse.h"
+#include "AppContext.h"
 
 /// @copydoc authMiddleware
 #ifdef PICO_HTTP_ENABLE_JWT
@@ -38,7 +39,7 @@ Middleware authMiddleware = [](HttpRequest &req, HttpResponse &res, const std::v
     }
 
     token = token.substr(7); // Remove "Bearer " prefix
-    if (!JwtAuthenticator::getInstance().validateJWT(token))
+    if (!AppContext::getInstance().getService<JwtAuthenticator>()->validateJWT(token))
     {
         JsonResponse::sendError(res, 401, "INALID_TOKEN", "Invalid token");
         return false;

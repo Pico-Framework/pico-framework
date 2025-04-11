@@ -99,7 +99,7 @@ void HttpServer::run()
     {
         return;
     }
-    AppContext::getInstance().getService<TimeManager>()->fetchAndApplyTimezoneFromWorldTimeApi();
+    AppContext::getInstance().getService<TimeManager>()->detectAndApplyTimezone();
     TRACE("Timezone applied\n");
     sock = initServerSocket();
     if (sock < 0)

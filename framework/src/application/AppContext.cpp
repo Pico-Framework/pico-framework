@@ -10,8 +10,8 @@ AppContext& AppContext::getInstance() {
 
 void AppContext::initFrameworkServices() {
     static FatFsStorageManager fatFs;
-    static TimeManager timeMgr = TimeManager::getInstance();
-    static JwtAuthenticator jwt = JwtAuthenticator::getInstance();
+    static TimeManager timeMgr;
+    static JwtAuthenticator jwt;
 
     registerService(&fatFs);
     registerService(&timeMgr);
