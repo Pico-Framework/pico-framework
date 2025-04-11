@@ -19,8 +19,8 @@
 
 // === Debug Trace Configuration ===
 
-
-#define TRACE_USE_SD      0          ///< Set to 1 to use SD card for trace output, 0 for UART
+#define TRACE_USE_TIMESTAMP       1
+#define TRACE_USE_SD              0   ///< Set to 1 to use SD card for trace output, 0 for UART
 
 // === Module-specific trace enables ===
 #define TRACE_FrameworkManager    1

@@ -56,11 +56,19 @@ void TimeManager::setTimeFromEpoch(uint32_t epoch) {
     struct timespec ts = {
         .tv_sec = epoch,
         .tv_nsec = 0
-    };  
+    }; 
+
+    struct timeval tv = {
+        .tv_sec = epoch,
+        .tv_usec = 0
+    }; 
     
     if (aon_timer_start(&ts)) {
         printf("[TimeManager] AON timer started at epoch %u.\n", epoch);
-        PicoTime::printNow();    
+        PicoTime::printNow(); 
+        
+        settimeofday(&tv, nullptr); 
+        printf("[TimeManager] AON timer started at epoch %u.\n", epoch);  
     } else {
         printf("[TimeManager] Failed to start AON timer.\n");
     }
