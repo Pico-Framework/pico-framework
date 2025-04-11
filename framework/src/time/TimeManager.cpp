@@ -64,5 +64,5 @@ void TimeManager::setTimeFromEpoch(uint32_t epoch) {
     } else {
         printf("[TimeManager] Failed to start AON timer.\n");
     }
-    }
+}
     
