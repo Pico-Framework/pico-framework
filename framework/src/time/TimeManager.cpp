@@ -51,6 +51,14 @@ void TimeManager::syncTimeWithNtp(int timeoutSeconds) {
     std::cerr << "NTP time sync failed after " << timeoutSeconds << " seconds" << std::endl;
 }
 
+static time_t get_seconds_from_datetime_t() {
+    
+    struct tm timeinfo;
+    aon_timer_get_time_calendar(&timeinfo);
+
+    return mktime(&timeinfo);             // Converts to time_t and updates libc time state
+}
+
 void TimeManager::setTimeFromEpoch(uint32_t epoch) {
     
     struct timespec ts = {
@@ -59,7 +67,7 @@ void TimeManager::setTimeFromEpoch(uint32_t epoch) {
     }; 
 
     struct timeval tv = {
-        .tv_sec = epoch,
+        .tv_sec = get_seconds_from_datetime_t(),
         .tv_usec = 0
     }; 
     
