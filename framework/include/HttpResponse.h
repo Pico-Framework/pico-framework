@@ -135,6 +135,10 @@ public:
      */
     void send(const std::string &body);
 
+    void renderView(const std::string& filename, const std::map<std::string, std::string>& context);
+    
+    void send(const std::string& body, const std::string& contentType);
+
     /**
      * @brief Send only the headers (for chunked/streaming responses).
      */

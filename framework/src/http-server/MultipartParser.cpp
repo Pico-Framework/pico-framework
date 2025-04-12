@@ -38,6 +38,9 @@ TRACE_INIT(MultipartParser)
 #include <cctype>
 #include <filesystem>
 #include "AppContext.h"
+#include "StorageManager.h"
+#include "FreeRTOS.h"
+#include "task.h"
 
 State MultipartParser::currentState = SEARCHING_FOR_BOUNDARY; // Initialize state
 
@@ -272,7 +275,7 @@ bool MultipartParser::extractFilename(const std::string &contentDisposition)
 bool MultipartParser::processFileData(const std::string &fileData)
 {
     TRACE("Processing file data, size: %zu bytes\n", fileData.size());
-    auto *storage = AppContext::getInstance().getService<FatFsStorageManager>();
+    auto *storage = AppContext::getInstance().getService<StorageManager>();
     if (!storage->appendToFile(filename, (uint8_t *)fileData.c_str(), fileData.size()))
     {
         if (!storage->isMounted())
@@ -293,7 +296,7 @@ bool MultipartParser::processFileData(const std::string &fileData)
 /// @copydoc MultipartParser::file_exists
 int MultipartParser::file_exists(const char *filename)
 {
-    FatFsStorageManager *storage = AppContext::getInstance().getService<FatFsStorageManager>();
+    StorageManager *storage = AppContext::getInstance().getService<StorageManager>();
     return storage->exists(filename);
 }
 

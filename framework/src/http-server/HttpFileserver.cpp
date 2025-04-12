@@ -29,10 +29,12 @@ TRACE_INIT(HttpFileserver)
 
 #include "utility.h"
 #include "url_utils.h"
-#include "FatFsStorageManager.h"
+#include "StorageManager.h"
 #include "AppContext.h"
 #include "framework_config.h"
 #include "JsonResponse.h"
+#include "FreeRTOS.h"
+#include "task.h"
 
 #define TRACE_ON
 
@@ -48,7 +50,7 @@ FileHandler::FileHandler()
 /// @copydoc FileHandler::init
 bool FileHandler::init()
 {
-    FatFsStorageManager *storage = AppContext::getInstance().getService<FatFsStorageManager>();
+    StorageManager *storage = AppContext::getInstance().getService<StorageManager>();
     if (storage->mount())
     {
         TRACE("SD Card mounted successfully\n");
@@ -64,7 +66,7 @@ bool FileHandler::init()
 /// @copydoc FileHandler::listDirectory
 void FileHandler::listDirectory(const char *path)
 {
-    FatFsStorageManager *storage = AppContext::getInstance().getService<FatFsStorageManager>();
+    StorageManager *storage = AppContext::getInstance().getService<StorageManager>();
     if (!storage)
     {
         printf("No storage manager available\n");
@@ -95,7 +97,7 @@ bool FileHandler::serveFile(HttpResponse &res, const char *uri)
 {
     std::string path = uri;
 
-    storageManager = AppContext::getInstance().getService<FatFsStorageManager>();
+    storageManager = AppContext::getInstance().getService<StorageManager>();
 
     if (!storageManager->exists(path))
     {

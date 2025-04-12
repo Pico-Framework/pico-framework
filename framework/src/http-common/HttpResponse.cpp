@@ -24,6 +24,7 @@ TRACE_INIT(HttpResponse)
 #include <cstring>
 #include <lwip/sockets.h>
 #include "utility.h"
+#include "FrameworkView.h"
 
 // ------------------------------------------------------------------------
 // Constructor
@@ -393,6 +394,23 @@ std::string HttpResponse::renderTemplate(const std::string &tpl, const std::map<
     }
     return result;
 }
+
+
+// ------------------------------------------------------------------------
+// ─────                 View related                                 ─────
+// ------------------------------------------------------------------------
+
+void HttpResponse::renderView(const std::string& filename, const std::map<std::string, std::string>& context) {
+    std::string fullPath = "/www/" + filename;
+    std::string html = FrameworkView::render(fullPath, context);
+    send(html, "text/html");  // ✅ OK here
+}
+
+void HttpResponse::send(const std::string& body, const std::string& contentType) {
+    setHeader("Content-Type", contentType);
+    send(body);
+}
+
 
 HttpResponse& HttpResponse::setBody(const std::string& body) {
     this->body = body;
