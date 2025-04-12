@@ -32,7 +32,7 @@ void TimeManager::initNtpClient() {
 
 void TimeManager::syncTimeWithNtp(int timeoutSeconds) {
     initNtpClient();
-    std::cout << "Waiting for NTP time sync..." << std::endl;
+    printf("Waiting for NTP time sync...\n");
 
     // Wait up to timeoutSeconds for time to be set
     time_t now = 0;
@@ -40,7 +40,7 @@ void TimeManager::syncTimeWithNtp(int timeoutSeconds) {
     while (waited < timeoutSeconds) {
         time(&now);
         if (now > 1670000000) {  // sanity check: after 2022
-            std::cout << "NTP time acquired: " << ctime(&now);
+            printf("NTP time acquired: ");
             return;
         }
         vTaskDelay(pdMS_TO_TICKS(1000));

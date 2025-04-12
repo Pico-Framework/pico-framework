@@ -24,7 +24,7 @@
  #include "Network.h"
  #include "NtpClient.h"
  
- #define NETWORK_STACK_SIZE 1024 / sizeof(StackType_t)
+ #define NETWORK_STACK_SIZE 2048 / sizeof(StackType_t)
  #define APPLICATION_STACK_SIZE 1024 / sizeof(StackType_t)
 
  class FrameworkApp;

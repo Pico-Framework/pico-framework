@@ -3,52 +3,89 @@
 #include <cstring>
 #include <iostream>
 
+extern "C" {
+    extern uint8_t __flash_lfs_start;
+    extern uint8_t __flash_lfs_end;
+}
+
 LittleFsStorageManager::LittleFsStorageManager() {
     configure();
 }
 
+int LittleFsStorageManager::lfs_read_cb(const struct lfs_config* c, lfs_block_t block, lfs_off_t off,
+                                        void* buffer, lfs_size_t size) {
+    auto* self = static_cast<LittleFsStorageManager*>(c->context);
+    uintptr_t addr = self->flashBase + block * c->block_size + off;
+    std::memcpy(buffer, reinterpret_cast<const void*>(addr), size);
+    return 0;
+}
+
+int LittleFsStorageManager::lfs_prog_cb(const struct lfs_config* c, lfs_block_t block, lfs_off_t off,
+                                        const void* buffer, lfs_size_t size) {
+    auto* self = static_cast<LittleFsStorageManager*>(c->context);
+    uintptr_t addr = self->flashBase + block * c->block_size + off;
+    printf("[LFS PROG] block=%lu off=%lu size=%lu addr=0x%08lx\n",
+        (unsigned long)block, (unsigned long)off, (unsigned long)size,
+        (unsigned long)(self->flashBase + block * c->block_size + off));
+    flash_range_program(addr - XIP_BASE, reinterpret_cast<const uint8_t*>(buffer), size);
+    return 0;
+}
+
+int LittleFsStorageManager::lfs_erase_cb(const struct lfs_config* c, lfs_block_t block) {
+    auto* self = static_cast<LittleFsStorageManager*>(c->context);
+    uintptr_t addr = self->flashBase + block * c->block_size;
+    flash_range_erase(addr - XIP_BASE, c->block_size);
+    return 0;
+}
+
+
+extern "C" {
+    extern uint8_t __flash_lfs_start;
+    extern uint8_t __flash_lfs_end;
+}
+
 void LittleFsStorageManager::configure() {
+    flashBase = reinterpret_cast<uintptr_t>(&__flash_lfs_start);
+    flashSize = reinterpret_cast<uintptr_t>(&__flash_lfs_end) - flashBase;
+
+    std::memset(&config, 0, sizeof(config));
+
     config.context = this;
-    config.read = [](const struct lfs_config* c, lfs_block_t block, lfs_off_t off,
-                     void* buffer, lfs_size_t size) -> int {
-        uint32_t addr = FLASH_BASE + block * c->block_size + off;
-        std::memcpy(buffer, (const void*)addr, size);
-        return 0;
-    };
-
-    config.prog = [](const struct lfs_config* c, lfs_block_t block, lfs_off_t off,
-                     const void* buffer, lfs_size_t size) -> int {
-        uint32_t addr = FLASH_BASE + block * c->block_size + off;
-        flash_range_program(addr - XIP_BASE, reinterpret_cast<const uint8_t*>(buffer), size);
-        return 0;
-    };
-
-    config.erase = [](const struct lfs_config* c, lfs_block_t block) -> int {
-        uint32_t addr = FLASH_BASE + block * c->block_size;
-        flash_range_erase(addr - XIP_BASE, c->block_size);
-        return 0;
-    };
-
+    config.read = lfs_read_cb;
+    config.prog = lfs_prog_cb;
+    config.erase = lfs_erase_cb;
     config.sync = [](const struct lfs_config*) -> int { return 0; };
 
-    config.read_size = READ_SIZE;
-    config.prog_size = PROG_SIZE;
-    config.block_size = BLOCK_SIZE;
-    config.block_count = BLOCK_COUNT;
-    config.cache_size = CACHE_SIZE;
-    config.lookahead_size = LOOKAHEAD_SIZE;
+    config.read_size = 256;
+    config.prog_size = 256;
+    config.block_size = 4096;
+    config.block_count = flashSize / config.block_size;
+    config.cache_size = 256;
+    config.lookahead_size = 256;
     config.block_cycles = 500;
+    config.compact_thresh = (lfs_size_t)-1;
+
+    printf("[LittleFS] Flash base: 0x%08x, size: %zu bytes (%zu blocks)\n",
+           static_cast<unsigned>(flashBase), flashSize, config.block_count);
 }
 
 bool LittleFsStorageManager::mount() {
     int err = lfs_mount(&lfs, &config);
     if (err) {
-        lfs_format(&lfs, &config);
+        printf("Mount failed err: %d, erasing and formatting...\n", err);
+        flash_range_erase(flashBase - XIP_BASE, flashSize);  // 🔥 THIS IS THE FIX
+        printf("[LittleFS] Erased %zu bytes at 0x%08lx before format\n", flashSize, flashBase);
+
+        err = lfs_format(&lfs, &config);
+        printf("Formatting complete, remounting...\n");
+
         err = lfs_mount(&lfs, &config);
     }
     mounted = (err == 0);
+    printf("Mount %s\n", mounted ? "successful" : "failed");
     return mounted;
 }
+
 
 bool LittleFsStorageManager::unmount() {
     if (mounted) {

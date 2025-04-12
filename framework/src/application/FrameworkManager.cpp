@@ -61,18 +61,24 @@ void FrameworkManager::network_task(void *params)
 {
     auto *manager = static_cast<FrameworkManager *>(params);
 
-    std::cout << "Starting WiFi..." << std::endl;
-    manager->network.start_wifi(); // Replace with actual network logic
+    printf("Starting WiFi...\n");
+    manager->network.start_wifi(); 
 
     while (!manager->network.isConnected())
     {
         vTaskDelay(pdMS_TO_TICKS(1000));
     }
-
+    printf("WiFi connected.\n");
     AppContext::getInstance().initFrameworkServices();
-    AppContext::getInstance().getService<TimeManager>()->syncTimeWithNtp();  // Add this after Wi-Fi is connected
+    printf("Framework services initialized.\n");
+    
+    TimeManager *timeMgr = AppContext::getInstance().getService<TimeManager>();
+    TRACE("[Framework] TimeManager pointer: %p", timeMgr);
+    configASSERT(timeMgr);  // Will hard fault early if registration failed
+    timeMgr->syncTimeWithNtp();  // Add this after Wi-Fi is connected
+    printf("Time synchronized.\n");
 
-    std::cout << "Network up. Notifying app task..." << std::endl;
+    printf("Network up. Notifying app task...\n");
 
     if (manager->app != nullptr)
     {
