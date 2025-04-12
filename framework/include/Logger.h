@@ -29,7 +29,7 @@
  #include <cstdio>
  #include <ctime>
  #include <string>
- #include "FatFsStorageManager.h"
+ #include "StorageManager.h"
  
  /**
   * @brief Severity levels for logging.
@@ -75,10 +75,9 @@
  
      /**
       * @brief Enable writing logs to SD card via a storage manager.
-      * @param sm Pointer to an initialized FatFsStorageManager.
       * @param path Path to the log file on SD card (e.g. "/log/system.log").
       */
-     static void enableFileLogging(FatFsStorageManager* sm, const std::string& path);
+     static void enableFileLogging(const std::string& path);
  
  private:
      static LogLevel minLevel;
@@ -86,7 +85,6 @@
      static void getTimeString(char* buffer, size_t len);
      static const char* levelToString(LogLevel level);
  
-     static inline FatFsStorageManager* fileLogger = nullptr;
      static inline std::string logPath = "";
      static inline bool logToFile = false;
  };

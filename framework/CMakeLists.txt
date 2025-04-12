@@ -101,6 +101,18 @@ target_sources(pico_framework
         src/time/TimeManager.cpp
 )
 
+message(STATUS "[framework] LittleFS support: ${PICO_HTTP_ENABLE_LITTLEFS}")
+if(PICO_HTTP_ENABLE_LITTLEFS)
+target_sources(pico_framework PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}/lib/littlefs/lfs.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/storage/LittleFsStorageManager.cpp
+)
+
+target_include_directories(pico_framework PUBLIC
+    ${CMAKE_CURRENT_SOURCE_DIR}/lib/littlefs
+)
+endif()
+
 message(STATUS "[framework] Http client support enabled: ${PICO_HTTP_ENABLE_HTTP_CLIENT}")
 if(PICO_HTTP_ENABLE_HTTP_CLIENT)
     target_sources(pico_framework PRIVATE

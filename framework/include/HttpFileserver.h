@@ -18,7 +18,7 @@
  
  #include "HttpRequest.h"
  #include "HttpResponse.h"
- #include "FatFsStorageManager.h"
+ #include "StorageManager.h"
  
  /**
   * @brief Helper class for accessing the file system and serving file content.
@@ -57,7 +57,7 @@
      bool mounted = false;
  
  private:
-     FatFsStorageManager* storageManager;
+     StorageManager* storageManager;
  };
  
  /**

@@ -236,15 +236,15 @@
     return true;
 }
 
-bool FatFsStorageManager::isMounted() {
-    if (!mounted) return false;
+bool FatFsStorageManager::isMounted() const {
+    return mounted;
+}
 
-    if (!probeMountPoint()) {
+void FatFsStorageManager::refreshMountState() {
+    if (mounted && !probeMountPoint()) {
         TRACE("SD no longer accessible — marking as unmounted\n");
         mounted = false;
-        return false;
     }
-    return true;
 }
 
 bool FatFsStorageManager::probeMountPoint() {

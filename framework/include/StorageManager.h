@@ -42,6 +42,9 @@
  
      /** @brief Unmount the storage. */
      virtual bool unmount() = 0;
+    
+     /** @brief Check mounted */
+     virtual bool isMounted() const = 0; 
  
      /** @brief Check whether a file or directory exists at the given path. */
      virtual bool exists(const std::string& path) = 0;
@@ -63,6 +66,13 @@
  
      /** @brief List all entries in the given directory. */
      virtual bool listDirectory(const std::string& path, std::vector<FileInfo>& out) = 0;
+
+     /** @brief Create a directory at the given path (recursive if needed). */
+    virtual bool createDirectory(const std::string& path) = 0;
+
+    /** @brief Remove a directory (must be empty, or recursively if supported). */
+    virtual bool removeDirectory(const std::string& path) = 0;
+
  
      /** @brief Get the size of a file. */
      virtual size_t getFileSize(const std::string& path) = 0;

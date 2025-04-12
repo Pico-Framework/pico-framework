@@ -2,17 +2,17 @@
 #include "CppUTest/TestHarness.h"
 #include <vector>\
 
-#include "FatFsStorageManager.h"
+#include "StorageManager.h"
 #include "JsonService.h"
 
-void writeFileToStorage(FatFsStorageManager& storage, const std::string& path, const std::string& content) {
+void writeFileToStorage(StorageManager& storage, const std::string& path, const std::string& content) {
     std::vector<uint8_t> data(content.begin(), content.end());
     CHECK_TRUE(storage.writeFile(path, data));
 }
 
 TEST_GROUP(JsonService)
 {
-    FatFsStorageManager storage;
+    StorageManager storage;
     const std::string testFile = "/testfile.txt";
     const std::string renamedFile = "/renamed.txt";
 
