@@ -14,243 +14,311 @@
  * @copyright Copyright (c) 2025, Ian Archbell
  */
 
- #include "framework_config.h" // Must be included before DebugTrace.h to ensure framework_config.h is processed first
- #include "DebugTrace.h"
- TRACE_INIT(FatFsStorageManager)
- 
- #include "FatFsStorageManager.h"
- #include <ff_utils.h>
- #include <ff_stdio.h>
- 
- /// @copydoc FatFsStorageManager::FatFsStorageManager()
- FatFsStorageManager::FatFsStorageManager() {}
- 
- /// @copydoc FatFsStorageManager::mount()
- bool FatFsStorageManager::mount() {
-    if (mounted) return true;
+#include "framework_config.h" // Must be included before DebugTrace.h to ensure framework_config.h is processed first
+#include "DebugTrace.h"
+TRACE_INIT(FatFsStorageManager)
+
+#include "FatFsStorageManager.h"
+#include <ff_utils.h>
+#include <ff_stdio.h>
+
+/// @copydoc FatFsStorageManager::FatFsStorageManager()
+FatFsStorageManager::FatFsStorageManager() {}
+
+/// @copydoc FatFsStorageManager::mount()
+bool FatFsStorageManager::mount()
+{
+    if (mounted)
+        return true;
 
     TRACE("Mounting SD card at: %s\n", mountPoint.c_str());
     mounted = ::mount(mountPoint.c_str());
 
-    if (mounted && !probeMountPoint()) {
+    if (mounted && !probeMountPoint())
+    {
         TRACE("SD mount appears successful, but directory listing failed — treating as mount failure\n");
         mounted = false;
     }
 
-    if (!mounted) {
+    if (!mounted)
+    {
         TRACE("ERROR: SD mount FAILED for %s\n", mountPoint.c_str());
-    } else {
+    }
+    else
+    {
         TRACE("SD card mounted successfully\n");
     }
 
     return mounted;
 }
 
- /// @copydoc FatFsStorageManager::unmount()
- bool FatFsStorageManager::unmount() {
-     ::unmount(mountPoint.c_str());
-     mounted = false;
-     return true;
- }
- 
- /// @copydoc FatFsStorageManager::exists()
- bool FatFsStorageManager::exists(const std::string& path) {
-    if (!ensureMounted()) {
+/// @copydoc FatFsStorageManager::unmount()
+bool FatFsStorageManager::unmount()
+{
+    ::unmount(mountPoint.c_str());
+    mounted = false;
+    return true;
+}
+
+/// @copydoc FatFsStorageManager::exists()
+bool FatFsStorageManager::exists(const std::string &path)
+{
+    if (!ensureMounted())
+    {
         TRACE("SD card not mounted — cannot check file exists: %s\n", path.c_str());
         return false;
     }
-     FF_FILE* file = ff_fopen(resolvePath(path).c_str(), "r");
-     if (file) {
-         ff_fclose(file);
-         return true;
-     }
-     return false;
- }
- 
- /// @copydoc FatFsStorageManager::listDirectory()
- bool FatFsStorageManager::listDirectory(const std::string& path, std::vector<FileInfo>& out) {
-    if (!ensureMounted()) {
+    FF_FILE *file = ff_fopen(resolvePath(path).c_str(), "r");
+    if (file)
+    {
+        ff_fclose(file);
+        return true;
+    }
+    return false;
+}
+
+/// @copydoc FatFsStorageManager::listDirectory()
+bool FatFsStorageManager::listDirectory(const std::string &path, std::vector<FileInfo> &out)
+{
+    if (!ensureMounted())
+    {
         TRACE("SD card not mounted — cannot list directory: %s\n", path.c_str());
         return false;
     }
-     FF_FindData_t xFindStruct;
-     memset(&xFindStruct, 0, sizeof(xFindStruct));
- 
-     std::string searchPath = resolvePath(path.empty() ? "/" : path);
-     int result = ff_findfirst(searchPath.c_str(), &xFindStruct);
- 
-     if (result != FF_ERR_NONE) {
-         return false;
-     }
- 
-     do {
-         if (strlen(xFindStruct.pcFileName) > 0) {
-             FileInfo info;
-             info.name = xFindStruct.pcFileName;
-             info.isDirectory = xFindStruct.ucAttributes & FF_FAT_ATTR_DIR;
-             info.isReadOnly = xFindStruct.ucAttributes & FF_FAT_ATTR_READONLY;
-             info.size = static_cast<size_t>(xFindStruct.ulFileSize);
-             out.push_back(info);
-         }
-     } while (ff_findnext(&xFindStruct) == FF_ERR_NONE);
- 
-     return true;
- }
- 
- /// @copydoc FatFsStorageManager::readFile()
- bool FatFsStorageManager::readFile(const std::string& path, std::vector<uint8_t>& buffer) {
-    if (!ensureMounted()) {
+    FF_FindData_t xFindStruct;
+    memset(&xFindStruct, 0, sizeof(xFindStruct));
+
+    std::string searchPath = resolvePath(path.empty() ? "/" : path);
+    int result = ff_findfirst(searchPath.c_str(), &xFindStruct);
+
+    if (result != FF_ERR_NONE)
+    {
+        return false;
+    }
+
+    do
+    {
+        if (strlen(xFindStruct.pcFileName) > 0)
+        {
+            FileInfo info;
+            info.name = xFindStruct.pcFileName;
+            info.isDirectory = xFindStruct.ucAttributes & FF_FAT_ATTR_DIR;
+            info.isReadOnly = xFindStruct.ucAttributes & FF_FAT_ATTR_READONLY;
+            info.size = static_cast<size_t>(xFindStruct.ulFileSize);
+            out.push_back(info);
+        }
+    } while (ff_findnext(&xFindStruct) == FF_ERR_NONE);
+
+    return true;
+}
+
+bool FatFsStorageManager::createDirectory(const std::string &path)
+{
+    if (!ensureMounted())
+    {
+        TRACE("SD card not mounted — cannot create directory: %s\n", path.c_str());
+        return false;
+    }
+    return ff_mkdir(resolvePath(path).c_str()) == FF_ERR_NONE;
+}
+
+bool FatFsStorageManager::removeDirectory(const std::string &path)
+{
+    if (!ensureMounted())
+    {
+        TRACE("SD card not mounted — cannot remove directory: %s\n", path.c_str());
+        return false;
+    }
+    return ff_rmdir(resolvePath(path).c_str()) == FF_ERR_NONE;
+}   
+
+/// @copydoc FatFsStorageManager::readFile()
+bool FatFsStorageManager::readFile(const std::string &path, std::vector<uint8_t> &buffer)
+{
+    if (!ensureMounted())
+    {
         TRACE("SD card not mounted — cannot read file: %s\n", path.c_str());
         return false;
     }
-     FF_FILE* file = ff_fopen(resolvePath(path).c_str(), "r");
-     if (!file) return false;
- 
-     ff_fseek(file, 0, SEEK_END);
-     long fileSize = ff_ftell(file);
-     ff_fseek(file, 0, SEEK_SET);
- 
-     if (fileSize < 0) {
-         ff_fclose(file);
-         return false;
-     }
- 
-     buffer.resize(fileSize);
-     ff_fread(buffer.data(), 1, fileSize, file);
-     ff_fclose(file);
-     return true;
- }
- 
- /// @copydoc FatFsStorageManager::writeFile()
- bool FatFsStorageManager::writeFile(const std::string& path, const std::vector<uint8_t>& data) {
-    if (!ensureMounted()) {
+    FF_FILE *file = ff_fopen(resolvePath(path).c_str(), "r");
+    if (!file)
+        return false;
+
+    ff_fseek(file, 0, SEEK_END);
+    long fileSize = ff_ftell(file);
+    ff_fseek(file, 0, SEEK_SET);
+
+    if (fileSize < 0)
+    {
+        ff_fclose(file);
+        return false;
+    }
+
+    buffer.resize(fileSize);
+    ff_fread(buffer.data(), 1, fileSize, file);
+    ff_fclose(file);
+    return true;
+}
+
+/// @copydoc FatFsStorageManager::writeFile()
+bool FatFsStorageManager::writeFile(const std::string &path, const std::vector<uint8_t> &data)
+{
+    if (!ensureMounted())
+    {
         TRACE("SD card not mounted — cannot write to file: %s\n", path.c_str());
         return false;
     }
-     FF_FILE* file = ff_fopen(resolvePath(path).c_str(), "w");
-     if (!file) return false;
- 
-     ff_fwrite(data.data(), 1, data.size(), file);
-     ff_fclose(file);
-     return true;
- }
- 
- /// @copydoc FatFsStorageManager::remove()
- bool FatFsStorageManager::remove(const std::string& path) {
-    if (!ensureMounted()) {
+    FF_FILE *file = ff_fopen(resolvePath(path).c_str(), "w");
+    if (!file)
+        return false;
+
+    ff_fwrite(data.data(), 1, data.size(), file);
+    ff_fclose(file);
+    return true;
+}
+
+/// @copydoc FatFsStorageManager::remove()
+bool FatFsStorageManager::remove(const std::string &path)
+{
+    if (!ensureMounted())
+    {
         TRACE("SD card not mounted — cannot remove file: %s\n", path.c_str());
         return false;
     }
-     return ff_remove(resolvePath(path).c_str()) == FF_ERR_NONE;
- }
- 
- /// @copydoc FatFsStorageManager::rename()
- bool FatFsStorageManager::rename(const std::string& from, const std::string& to) {
-    if (!ensureMounted()) {
+    return ff_remove(resolvePath(path).c_str()) == FF_ERR_NONE;
+}
+
+/// @copydoc FatFsStorageManager::rename()
+bool FatFsStorageManager::rename(const std::string &from, const std::string &to)
+{
+    if (!ensureMounted())
+    {
         TRACE("SD card not mounted — cannot rename file %s to file: %s\n", from.c_str(), to.c_str());
         return false;
     }
-     return ff_rename(resolvePath(from).c_str(), resolvePath(to).c_str(), false) == 0;
- }
- 
- /// @copydoc FatFsStorageManager::streamFile()
- bool FatFsStorageManager::streamFile(const std::string& path, std::function<void(const uint8_t*, size_t)> chunkCallback) {
-    if (!ensureMounted()) {
+    return ff_rename(resolvePath(from).c_str(), resolvePath(to).c_str(), false) == 0;
+}
+
+/// @copydoc FatFsStorageManager::streamFile()
+bool FatFsStorageManager::streamFile(const std::string &path, std::function<void(const uint8_t *, size_t)> chunkCallback)
+{
+    if (!ensureMounted())
+    {
         TRACE("SD card not mounted — cannot stream file: %s\n", path.c_str());
         return false;
     }
-     FF_FILE* file = ff_fopen(resolvePath(path).c_str(), "r");
-     if (!file) return false;
- 
-     uint8_t buffer[512];
-     size_t bytes;
-     while ((bytes = ff_fread(buffer, 1, sizeof(buffer), file)) > 0) {
-         chunkCallback(buffer, bytes);
-     }
- 
-     ff_fclose(file);
-     return true;
- }
- 
- /// @copydoc FatFsStorageManager::getFileSize()
- size_t FatFsStorageManager::getFileSize(const std::string& path) {
-    if (!ensureMounted()) {
+    FF_FILE *file = ff_fopen(resolvePath(path).c_str(), "r");
+    if (!file)
+        return false;
+
+    uint8_t buffer[512];
+    size_t bytes;
+    while ((bytes = ff_fread(buffer, 1, sizeof(buffer), file)) > 0)
+    {
+        chunkCallback(buffer, bytes);
+    }
+
+    ff_fclose(file);
+    return true;
+}
+
+/// @copydoc FatFsStorageManager::getFileSize()
+size_t FatFsStorageManager::getFileSize(const std::string &path)
+{
+    if (!ensureMounted())
+    {
         TRACE("SD card not mounted — cannot get file size: %s\n", path.c_str());
         return false;
     }
-     FF_FILE* file = ff_fopen(resolvePath(path).c_str(), "r");
-     if (!file) return 0;
- 
-     ff_fseek(file, 0, SEEK_END);
-     long size = ff_ftell(file);
-     ff_fclose(file);
- 
-     return (size >= 0) ? static_cast<size_t>(size) : 0;
- }
- 
- /// @copydoc FatFsStorageManager::appendToFile()
- bool FatFsStorageManager::appendToFile(const std::string& path, const uint8_t* data, size_t size) {
-    if (!ensureMounted()) {
+    FF_FILE *file = ff_fopen(resolvePath(path).c_str(), "r");
+    if (!file)
+        return 0;
+
+    ff_fseek(file, 0, SEEK_END);
+    long size = ff_ftell(file);
+    ff_fclose(file);
+
+    return (size >= 0) ? static_cast<size_t>(size) : 0;
+}
+
+/// @copydoc FatFsStorageManager::appendToFile()
+bool FatFsStorageManager::appendToFile(const std::string &path, const uint8_t *data, size_t size)
+{
+    if (!ensureMounted())
+    {
         TRACE("SD card not mounted — cannot append to file: %s\n", path.c_str());
         return false;
     }
-     FF_FILE* file = ff_fopen(resolvePath(path).c_str(), "a");
-     if (!file) return false;
- 
-     size_t written = ff_fwrite(data, 1, size, file);
-     ff_fclose(file);
-     return written == size;
- }
- 
- /// @brief Helper function to normalize full path based on mountPoint and relative path
- std::string FatFsStorageManager::resolvePath(const std::string& path) const {
-     std::string fullPath = "/" + mountPoint;
-     if (!path.empty()) {
-         if (path[0] != '/')
-             fullPath += "/";
-         fullPath += path;
-     }
- 
-     // Normalize duplicate slashes
-     std::string normalized;
-     bool lastWasSlash = false;
-     for (char c : fullPath) {
-         if (c == '/') {
-             if (!lastWasSlash) {
-                 normalized += c;
-                 lastWasSlash = true;
-             }
-         } else {
-             normalized += c;
-             lastWasSlash = false;
-         }
-     }
- 
-     return normalized;
- }
+    FF_FILE *file = ff_fopen(resolvePath(path).c_str(), "a");
+    if (!file)
+        return false;
 
- bool FatFsStorageManager::ensureMounted() {
-    if (!mounted) {
+    size_t written = ff_fwrite(data, 1, size, file);
+    ff_fclose(file);
+    return written == size;
+}
+
+/// @brief Helper function to normalize full path based on mountPoint and relative path
+std::string FatFsStorageManager::resolvePath(const std::string &path) const
+{
+    std::string fullPath = "/" + mountPoint;
+    if (!path.empty())
+    {
+        if (path[0] != '/')
+            fullPath += "/";
+        fullPath += path;
+    }
+
+    // Normalize duplicate slashes
+    std::string normalized;
+    bool lastWasSlash = false;
+    for (char c : fullPath)
+    {
+        if (c == '/')
+        {
+            if (!lastWasSlash)
+            {
+                normalized += c;
+                lastWasSlash = true;
+            }
+        }
+        else
+        {
+            normalized += c;
+            lastWasSlash = false;
+        }
+    }
+
+    return normalized;
+}
+
+bool FatFsStorageManager::ensureMounted()
+{
+    if (!mounted)
+    {
         return mount();
     }
     return true;
 }
 
-bool FatFsStorageManager::isMounted() const {
+bool FatFsStorageManager::isMounted() const
+{
     return mounted;
 }
 
-void FatFsStorageManager::refreshMountState() {
-    if (mounted && !probeMountPoint()) {
+void FatFsStorageManager::refreshMountState()
+{
+    if (mounted && !probeMountPoint())
+    {
         TRACE("SD no longer accessible — marking as unmounted\n");
         mounted = false;
     }
 }
 
-bool FatFsStorageManager::probeMountPoint() {
+bool FatFsStorageManager::probeMountPoint()
+{
     FF_FindData_t xFindStruct = {};
     std::string root = "/" + mountPoint;
     int result = ff_findfirst(root.c_str(), &xFindStruct);
     return result == FF_ERR_NONE;
 }
- 
