@@ -57,6 +57,19 @@ Tcp &Tcp::operator=(Tcp &&other) noexcept
     return *this;
 }
 
+std::string Tcp::getPeerIp() const
+{
+    sockaddr_in addr;
+    socklen_t len = sizeof(addr);
+    if (lwip_getpeername(sockfd, reinterpret_cast<sockaddr*>(&addr), &len) == 0)
+    {
+        ip_addr_t ip;
+        ip.addr = addr.sin_addr.s_addr;
+        return std::string(ipaddr_ntoa(&ip));
+    }
+    return "0.0.0.0";
+}
+
 void Tcp::setRootCACertificate(const std::string &pem)
 {
     root_ca_cert = pem;
@@ -113,7 +126,7 @@ bool Tcp::connectPlain(const ip_addr_t &ip, int port)
         sockfd = -1;
         return false;
     }
-    printf("[Tcp] Connected to server (plain)\n");
+    TRACE("[Tcp] Connected to server (plain)\n");
     connected = true;
     use_tls = false;
     return true;
@@ -389,7 +402,7 @@ err_t Tcp::acceptCallback(void *arg, struct altcp_pcb *new_conn, err_t err)
     return ERR_OK;
 }
 
-Tcp Tcp::accept()
+Tcp* Tcp::accept()
 {
     if (use_tls)
     {
@@ -403,30 +416,32 @@ Tcp Tcp::accept()
 
         if (pending_client)
         {
-            Tcp client;
-            client.tls_pcb = pending_client;
-            client.use_tls = true;
-            client.connected = true;
+            Tcp* client = new Tcp();
+            client->tls_pcb = pending_client;
+            client->use_tls = true;
+            client->connected = true;
             pending_client = nullptr;
             return client;
         }
 
         // No client was accepted — return invalid
-        return Tcp();
+        return nullptr;
     }
 
     // Plain TCP accept
     struct sockaddr_in client_addr{};
     socklen_t addr_len = sizeof(client_addr);
-
+    TRACE("[Tcp] Accepting client connection...\n");
     int client_fd = lwip_accept(sockfd, reinterpret_cast<struct sockaddr *>(&client_addr), &addr_len);
+    TRACE("[Tcp] Accepted client connection (fd = %d)\n", client_fd);  
     if (client_fd < 0)
     {
         printf("[Tcp] lwip_accept failed\n");
-        return Tcp(); // Invalid
+        return nullptr; // Invalid
     }
-
-    return Tcp(client_fd);
+    Tcp* client = new Tcp(client_fd);
+    TRACE("[Tcp] Created new Tcp client connection (fd = %d)\n", client_fd);
+    return client;
 }
 
 bool Tcp::bindAndListen(int port)
@@ -466,6 +481,8 @@ bool Tcp::bindAndListenPlain(int port)
         sockfd = -1;
         return false;
     }
+
+    printf("[Tcp] Listening on port %d (sockfd = %d)\n", port, sockfd);
 
     use_tls = false;
     connected = true;

@@ -20,7 +20,7 @@
 #include <string>
 #include <map>
 #include <iostream>
-// #include "TcpConnectionSocket.h"
+#include "tcp.h"
 
 class Router; ///< Forward declaration for potential routing needs
 
@@ -44,11 +44,18 @@ public:
     HttpRequest(const char *rawHeaders, const std::string &reqMethod, const std::string &reqPath);
 
     // used by fluent builder - client side
-    HttpRequest(const std::string& raw, const std::string& method, const std::string& path)
-    : method(method), path(path), uri(path) {}
+    HttpRequest(const std::string &raw, const std::string &method, const std::string &path)
+        : method(method), path(path), uri(path) {}
+
+    // Server-side use — accepts Tcp* and parsed info
+    HttpRequest(Tcp *connection, const char *rawHeaders, const std::string &method, const std::string &path)
+        : tcp(connection), method(method), path(path), uri(path)
+    {
+        parseHeaders(rawHeaders);
+    }
 
     HttpRequest() = default;
-    HttpRequest(const HttpRequest&) = default;
+    HttpRequest(const HttpRequest &) = default;
 
     // ─────────────────────────────────────────────────────────────────────────────
     // Store a CA Root Certificate
@@ -56,26 +63,25 @@ public:
 
     /**
      * @brief Set the root CA certificate to use for TLS.
-     * 
+     *
      * @param certData PEM-encoded certificate.
      */
-    HttpRequest& setRootCACertificate(const std::string& certData);
+    HttpRequest &setRootCACertificate(const std::string &certData);
 
 #if defined(PICO_HTTP_ENABLE_STORAGE)
     /**
      * @brief Load and set the root CA certificate from a file using StorageManager.
-     * 
+     *
      * @param path Path to the certificate file.
      * @return true if loaded successfully, false otherwise.
      */
-    bool setRootCACertificateFromFile(const char* path);
+    bool setRootCACertificateFromFile(const char *path);
 #endif
-
 
     // ─────────────────────────────────────────────────────────────────────────────
     // Easy access methods for sending requests
     // ─────────────────────────────────────────────────────────────────────────────
-    
+
     /**
      * @brief Send the request and return the response.
      * @return HttpResponse object containing the response.
@@ -88,14 +94,13 @@ public:
      * @return HttpResponse object containing the response.
      */
     HttpResponse get();
-    HttpResponse get(const std::string& url);
+    HttpResponse get(const std::string &url);
     HttpResponse post();
-    HttpResponse post(const std::string& url, const std::string& body);
+    HttpResponse post(const std::string &url, const std::string &body);
     HttpResponse put();
-    HttpResponse put(const std::string& url, const std::string& body);
+    HttpResponse put(const std::string &url, const std::string &body);
     HttpResponse del();
-    HttpResponse del(const std::string& url);
-
+    HttpResponse del(const std::string &url);
 
     // ─────────────────────────────────────────────────────────────────────────────
     // Header Accessors
@@ -257,7 +262,7 @@ public:
     /**
      * @brief Set the HTTP method (e.g., GET, POST).
      */
-    HttpRequest& setMethod(const std::string &method)
+    HttpRequest &setMethod(const std::string &method)
     {
         this->method = method;
         return *this;
@@ -266,7 +271,7 @@ public:
     /**
      * @brief Set the request path.
      */
-    HttpRequest& setPath(const std::string &path)
+    HttpRequest &setPath(const std::string &path)
     {
         this->path = path;
         return *this;
@@ -305,25 +310,30 @@ public:
     }
 
     // ─────────────────────────────────────────────────────────────────────────────
-    // Client Info
+    // Tcp accessors
     // ─────────────────────────────────────────────────────────────────────────────
 
-    /**
-     * @brief Set the client IP address.
-     * @param ip The IP as a string.
-     */
-    void setClientIp(const std::string &ip)
-    {
-        clientIp = ip;
-    }
 
-    /**
-     * @brief Get the client IP address.
-     */
-    std::string getClientIp() const
+    Tcp *getTcp() const
     {
-        return clientIp;
+        return tcp;
     }
+    // /**
+    //  * @brief Set the client IP address.
+    //  * @param ip The IP as a string.
+    //  */
+    // void setClientIp(const std::string &ip)
+    // {
+    //     clientIp = ip;
+    // }
+
+    // /**
+    //  * @brief Get the client IP address.
+    //  */
+    // std::string getClientIp() const
+    // {
+    //     return clientIp;
+    // }
 
     // ─────────────────────────────────────────────────────────────────────────────
     // Cookie and Parameter Access
@@ -358,29 +368,19 @@ public:
 
     /**
      * @brief Receive and parse an HTTP request from a socket.
-     * @param clientSocket The socket file descriptor.
+     * @param Instance of tcp
      * @return A fully populated HttpRequest object.
      */
-    static HttpRequest receive(int clientSocket);
-
-    /**
-     * @brief Receive raw data from socket into buffer.
-     * @param clientSocket The socket file descriptor.
-     * @param buffer Target buffer.
-     * @param size Size of the buffer.
-     * @return Number of bytes received, or -1 on error.
-     */
-    static int receiveData(int clientSocket, char *buffer, int size);
+    static HttpRequest receive(Tcp *tcp);
 
     /**
      * @brief Parse the HTTP method and path from the first request line.
      * @param buffer Raw request buffer.
-     * @param clientSocket The socket (for logging/debug).
      * @param method Output buffer for method.
      * @param path Output buffer for path.
      * @return True on success.
      */
-    static bool getMethodAndPath(char *buffer, int clientSocket, char *method, char *path);
+    static bool getMethodAndPath(char *buffer, char *method, char *path);
 
     // ─────────────────────────────────────────────────────────────────────────────
     // Multipart Upload Handling
@@ -392,7 +392,7 @@ public:
      * @param req Reference to this request.
      * @return 0 on success, -1 on failure.
      */
-    int handle_multipart(int new_sock, HttpRequest &req);
+    int handle_multipart(HttpRequest &req);
 
     // ─────────────────────────────────────────────────────────────────────────────
     // Fluent Builder Methods (Client Usage)
@@ -409,19 +409,22 @@ public:
 
     /**
      * @brief Get the root CA certificate string, if set.
-     * 
+     *
      * @return const std::string& PEM-encoded root certificate.
      */
-    const std::string& getRootCACertificate() const{
+    const std::string &getRootCACertificate() const
+    {
         return rootCACertificate;
     }
 
-    #if defined(PICO_HTTP_ENABLE_STORAGE)
-    HttpRequest& setBodyFromFile(const std::string& path);
-    #endif
+#if defined(PICO_HTTP_ENABLE_STORAGE)
+    HttpRequest &setBodyFromFile(const std::string &path);
+#endif
 
 private:
     void parseHeaders(const char *raw);
+
+    Tcp *tcp = nullptr;
 
     std::string clientIp;
     std::string method;
@@ -430,7 +433,7 @@ private:
     std::string query;
     std::string host;
     std::string protocol;
-    std::map<std::string, std::string> headers;  // optional
+    std::map<std::string, std::string> headers; // optional
     std::string body;
     std::string rootCACertificate;
     size_t headerEnd = 0;

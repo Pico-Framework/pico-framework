@@ -161,8 +161,7 @@ void HttpFileserver::handle_list_directory(HttpRequest &req, HttpResponse &res, 
     fileHandler.listDirectory(directory_path.c_str());
 
     const char *response = "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\n\r\nDirectory listed successfully.";
-    int client_socket = res.getSocket();
-    lwip_send(client_socket, response, strlen(response), 0);
+    res.getTcp()->send(response, strlen(response)); 
 }
 
 // Helper function to check if a string ends with a given suffix

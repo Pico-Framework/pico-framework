@@ -212,10 +212,11 @@ bool Router::isAuthorizedForRoute(const Route &route, HttpRequest &req, HttpResp
 
 // Handles an incoming request by matching the request method and URI to a registered route.
 /// @copydoc Router::handleRequest
-bool Router::handleRequest(int client_socket, const char *method, const char *uri, HttpRequest &req)
+bool Router::handleRequest(HttpRequest &req, HttpResponse &res)
 {
-    TRACE("Handling request: %s %s on socket %d\n", method, uri, client_socket);
-    HttpResponse res(client_socket);
+    const char *method = req.getMethod().c_str();
+    const char *uri = req.getUri().c_str();
+    printf("[Router] Handling request: %s %s\n", method, uri);
 
     // Look up routes by HTTP method.
     auto it = routes.find(method);

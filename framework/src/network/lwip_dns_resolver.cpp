@@ -3,9 +3,9 @@
 #include "lwip/err.h"
 #include "pico/time.h"
 #include <cstring>
-//#include "framework_config.h"
-//#include "DebugTrace.h"
-//TRACE_INIT(LwipDnsResolver);
+#include "framework_config.h"
+#include "DebugTrace.h"
+TRACE_INIT(LwipDnsResolver);
 
 static volatile bool dns_done = false;
 static ip_addr_t resolved_ip;
@@ -28,7 +28,7 @@ static void dns_callback(const char* name, const ip_addr_t* ipaddr, void* callba
  */
 bool resolveHostnameBlocking(const char* hostname, ip_addr_t* result, uint32_t timeout_ms = 5000) {
 
-    printf("[DNS] Starting DNS lookup for %s\n", hostname);
+    TRACE("[DNS] Starting DNS lookup for %s\n", hostname);
 
     dns_done = false;
     err_t err = dns_gethostbyname(hostname, &resolved_ip, dns_callback, nullptr);
@@ -38,7 +38,7 @@ bool resolveHostnameBlocking(const char* hostname, ip_addr_t* result, uint32_t t
         *result = resolved_ip;
         return true;
     } else if (err == ERR_INPROGRESS) {
-        printf("[DNS] Lookup in progress for %s, waiting...\n", hostname);
+        TRACE("[DNS] Lookup in progress for %s, waiting...\n", hostname);
     } else {
         printf("[DNS] dns_gethostbyname failed with error %d\n", err);
         return false;

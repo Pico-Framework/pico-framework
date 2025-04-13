@@ -106,28 +106,24 @@ public:
 
     /**
      * @brief Handle an incoming HTTP request.
-     * @param client_socket Client socket
-     * @param method HTTP method
-     * @param uri HttpRequest URI
      * @param req Fully parsed HttpRequest object
+     * @param res HttpResponse to send
      * @return true if the request was handled
      * @return false if no matching route was found
      */
-    bool handleRequest(int client_socket,
-                       const char *method,
-                       const char *uri,
-                       HttpRequest &req);
+    bool handleRequest(HttpRequest &req, HttpResponse &res);
 
-/**
- * @brief Built-in route handler for /auth token testing.
- * @param req Incoming request
- * @param res HttpResponse to send
- * @param params Unused in this handler
- * @return true on success
- */
-#ifdef PICO_HTTP_ENABLE_JWT
-    bool handle_auth_req(HttpRequest &req, HttpResponse &res, const std::vector<std::string> &params);
-#endif
+    /**
+     * @brief Built-in route handler for /auth token testing.
+     * @param req Incoming request
+     * @param res HttpResponse to send
+     * @param params Unused in this handler
+     * @return true on success
+     */
+    #ifdef PICO_HTTP_ENABLE_JWT
+        bool handle_auth_req(HttpRequest &req, HttpResponse &res, const std::vector<std::string> &params);
+    #endif
+
     /**
      * @brief Extracts and caches a Bearer token from an Authorization header.
      * @param auth_header Raw header string

@@ -20,6 +20,7 @@
 #include <map>
 #include <vector>
 #include "nlohmann/json.hpp"
+#include "Tcp.h"
 
 // Forward declaration of HttpRequest class
 class HttpRequest;
@@ -34,14 +35,15 @@ class HttpResponse
 {
 
 public:
-
     HttpResponse() = default;
 
     /**
      * @brief Construct a new HttpResponse object with a socket.
      * @param sock The socket file descriptor.
      */
-    explicit HttpResponse(int sock);
+    HttpResponse(Tcp *tcp);
+
+    Tcp* getTcp() const { return tcp; }
 
     // ------------------------------------------------------------------------
     // Status and Header Management
@@ -63,7 +65,7 @@ public:
      * @brief Set the body of the response (string).
      * @param body Response body content
      */
-    HttpResponse& setBody(const std::string &body);
+    HttpResponse &setBody(const std::string &body);
 
     /**
      * @brief Set the Content-Type header.
@@ -135,9 +137,9 @@ public:
      */
     void send(const std::string &body);
 
-    void renderView(const std::string& filename, const std::map<std::string, std::string>& context);
-    
-    void send(const std::string& body, const std::string& contentType);
+    void renderView(const std::string &filename, const std::map<std::string, std::string> &context);
+
+    void send(const std::string &body, const std::string &contentType);
 
     /**
      * @brief Send only the headers (for chunked/streaming responses).
@@ -171,7 +173,8 @@ public:
      * @brief Check if the response status code indicates success.
      * @return True if status code is 2xx, false otherwise.
      */
-    bool ok() const {
+    bool ok() const
+    {
         return status_code >= 200 && status_code < 300;
     }
 
@@ -223,11 +226,11 @@ public:
 #if defined(PICO_HTTP_ENABLE_STORAGE)
     /**
      * @brief Save the response body to a file using StorageManager.
-     * 
+     *
      * @param path The destination file path.
      * @return true on success, false on failure.
      */
-    bool saveFile(const char* path) const;
+    bool saveFile(const char *path) const;
 #endif
 
     /**
@@ -240,12 +243,12 @@ public:
 
     // ───── Shared Response API (Client and Server) ─────
 
-
     /**
      * @brief Get the response status code.
      * @return Status code (e.g., 200)
      */
-    int getStatusCode() const{
+    int getStatusCode() const
+    {
         return status_code;
     }
 
@@ -254,7 +257,8 @@ public:
      * @param key Header name
      * @return Header value (empty string if not found)
      */
-    std::string getHeader(const std::string& key) const {
+    std::string getHeader(const std::string &key) const
+    {
         auto it = headers.find(key);
         return (it != headers.end()) ? it->second : "";
     }
@@ -263,7 +267,8 @@ public:
      * @brief Get all response headers.
      * @return Map of header key/value pairs
      */
-    const std::map<std::string, std::string> &getHeaders() const{
+    const std::map<std::string, std::string> &getHeaders() const
+    {
         return headers;
     }
 
@@ -271,7 +276,8 @@ public:
      * @brief Get the response body.
      * @return Response body string
      */
-    const std::string &getBody() const{
+    const std::string &getBody() const
+    {
         return body;
     }
 
@@ -279,7 +285,6 @@ public:
      * @brief Clear the response status, headers, and body.
      */
     void reset();
-
 
 private:
     /**
@@ -289,15 +294,14 @@ private:
      */
     std::string getStatusMessage(int code);
 
-    int sock;  ///< Underlying socket (server-side only)
-    int status_code = 200;  ///< HTTP status code
-    bool headerSent = false;  ///< Tracks whether headers have already been sent
+    Tcp *tcp;                ///< Pointer to the Tcp object for socket operations
+    int status_code = 200;   ///< HTTP status code
+    bool headerSent = false; ///< Tracks whether headers have already been sent
 
-    std::map<std::string, std::string> headers;  ///< Response headers (server+client)
-    std::vector<std::string> cookies;  ///< Set-Cookie headers (server only)
+    std::map<std::string, std::string> headers; ///< Response headers (server+client)
+    std::vector<std::string> cookies;           ///< Set-Cookie headers (server only)
 
-    std::string body;  ///< Full response body (client-side or buffered server content)
-
+    std::string body; ///< Full response body (client-side or buffered server content)
 };
 
 #endif // HTTPRESPONSE_H

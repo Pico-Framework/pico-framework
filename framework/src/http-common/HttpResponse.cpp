@@ -34,8 +34,8 @@ TRACE_INIT(HttpResponse)
  * @brief Construct a new HttpResponse object.
  * @param sock Socket descriptor for the client connection.
  */
-HttpResponse::HttpResponse(int sock)
-    : sock(sock), status_code(200), headerSent(false)
+HttpResponse::HttpResponse(Tcp* tcp)
+    : tcp(tcp), status_code(200), headerSent(false)
 {
 }
 
@@ -122,7 +122,7 @@ bool HttpResponse::isHeaderSent() const
  */
 int HttpResponse::getSocket() const
 {
-    return sock;
+    return tcp->getSocketFd();
 }
 
 /**
@@ -190,6 +190,7 @@ HttpResponse &HttpResponse::clearCookie(const std::string &name, const std::stri
  */
 void HttpResponse::send(const std::string &body)
 {
+    printf("HttpResponse::send() called\n");
     if (!headerSent)
     {
         if (headers.find("Content-Length") == headers.end())
@@ -214,11 +215,12 @@ void HttpResponse::send(const std::string &body)
         resp << "\r\n";
 
         std::string header_str = resp.str();
-        lwip_send(sock, header_str.c_str(), header_str.size(), 0);
+        tcp->send(header_str.c_str(), header_str.size());
         headerSent = true;
     }
 
-    lwip_send(sock, body.data(), body.size(), 0);
+    tcp->send(body.data(), body.size());
+    printf("HttpResponse::send() completed\n");
 }
 
 /**
@@ -246,7 +248,7 @@ void HttpResponse::sendHeaders()
         resp << "\r\n";
 
         std::string header_str = resp.str();
-        lwip_send(sock, header_str.c_str(), header_str.size(), 0);
+        tcp->send(header_str.c_str(), header_str.size()); 
         headerSent = true;
     }
 }
@@ -273,7 +275,7 @@ void HttpResponse::start(int code, size_t contentLength, const std::string &cont
     resp << "\r\n";
 
     std::string header_str = resp.str();
-    lwip_send(sock, header_str.c_str(), header_str.size(), 0);
+    tcp->send(header_str.c_str(), header_str.size());
     headerSent = true;
 }
 
@@ -288,7 +290,7 @@ void HttpResponse::writeChunk(const char *data, size_t length)
         return;
     }
 
-    ssize_t err = lwip_send(sock, data, length, 0);
+    ssize_t err = tcp->send(data, length); 
     if (err < 0)
     {
         printf("Error sending chunk: %zu\n", err);
@@ -403,7 +405,7 @@ std::string HttpResponse::renderTemplate(const std::string &tpl, const std::map<
 void HttpResponse::renderView(const std::string& filename, const std::map<std::string, std::string>& context) {
     std::string fullPath = "/www/" + filename;
     std::string html = FrameworkView::render(fullPath, context);
-    send(html, "text/html");  // ✅ OK here
+    send(html, "text/html");  
 }
 
 void HttpResponse::send(const std::string& body, const std::string& contentType) {

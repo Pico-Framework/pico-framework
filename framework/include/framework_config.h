@@ -23,28 +23,29 @@
 #define TRACE_USE_SD              0   ///< Set to 1 to use SD card for trace output, 0 for UART
 
 // === Module-specific trace enables ===
-#define TRACE_FrameworkManager    1
+#define TRACE_FrameworkManager    0
 #define TRACE_HttpServer          1
 #define TRACE_HttpRequest         0
 #define TRACE_HttpResponse        0
-#define TRACE_HttpFileserver      1
+#define TRACE_HttpFileserver      0
 #define TRACE_MultipartParser     0
-#define TRACE_JsonRequestHelper   1
-#define TRACE_JwtAuthenticator    1
-#define TRACE_Router              1
-#define TRACE_FatFsStorageManager 1
-#define TRACE_JsonService         1
-#define TRACE_Middileware         1
-#define TRACE_Network             1
-#define TRACE_NtpClient           1
-#define TRACE_utility             1  
-#define TRACE_AppContext          1 
+#define TRACE_JsonRequestHelper   0
+#define TRACE_JwtAuthenticator    0
+#define TRACE_Router              0
+#define TRACE_FatFsStorageManager 0
+#define TRACE_JsonService         0
+#define TRACE_Middileware         0
+#define TRACE_Network             0
+#define TRACE_NtpClient           0
+#define TRACE_utility             0  
+#define TRACE_AppContext          0 
 #define TRACE_Tcp                 0
 #define TRACE_ChunkedDecoder      0
-#define TRACE_JsonParser          1
+#define TRACE_JsonParser          0
 #define TRACE_HttpClient          0
-#define TRACE_LwipDnsResolver     1
+#define TRACE_LwipDnsResolver     0
 #define TRACE_HttpParser          0
+#define TRACE_TimeManager         0
 // etc.
 
 // === Global minimum log level (for all modules) ===

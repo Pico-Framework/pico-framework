@@ -14,11 +14,14 @@
 #include "FreeRTOS_time.h"
 #include "HttpRequest.h"
 #include "HttpResponse.h"
+#include "framework_config.h"
+#include "DebugTrace.h"
+TRACE_INIT(TimeManager);
 
 // Set system time from SNTP - this callback is defined in lwipopts.h
 extern "C" void sntp_set_system_time(uint32_t sec) {
 
-    printf("[SNTP] Setting system time to: %u\n", sec);
+    TRACE("[SNTP] Setting system time to: %u\n", sec);
     AppContext::getInstance().getService<TimeManager>()->setTimeFromEpoch(sec);
 }
 
@@ -32,7 +35,7 @@ void TimeManager::initNtpClient() {
 
 void TimeManager::syncTimeWithNtp(int timeoutSeconds) {
     initNtpClient();
-    printf("Waiting for NTP time sync...\n");
+    printf("[Time Manager] Waiting for NTP time sync...\n");
 
     // Wait up to timeoutSeconds for time to be set
     time_t now = 0;
@@ -40,14 +43,14 @@ void TimeManager::syncTimeWithNtp(int timeoutSeconds) {
     while (waited < timeoutSeconds) {
         time(&now);
         if (now > 1670000000) {  // sanity check: after 2022
-            printf("NTP time acquired: ");
+            printf("[Time Manager] NTP time acquired: ");
             return;
         }
         vTaskDelay(pdMS_TO_TICKS(1000));
         waited++;
     }
 
-    std::cerr << "NTP time sync failed after " << timeoutSeconds << " seconds" << std::endl;
+    std::cerr << "[Time Manager] NTP time sync failed after " << timeoutSeconds << " seconds" << std::endl;
 }
 
 void TimeManager::setTimeFromEpoch(uint32_t epoch) {
@@ -63,12 +66,12 @@ void TimeManager::setTimeFromEpoch(uint32_t epoch) {
     FreeRTOS_time_init(); 
     settimeofday(&tv, NULL);  // this updates c system time
     setrtc(&ts);  //  This updates aon clock, FreeRTOS epochtime and starts the 1s update timer
-    printf("[TimeManager] AON and FreeRTOS+FAT time system set via setrtc().\n");
+    printf("[TimeManager] AON and FreeRTOS time system set.\n");
 }
 
 void TimeManager::applyFixedTimezoneOffset(int offsetSeconds, const char* stdName, const char* dstName) {
-    printf("[TimeManager] Setting timezone offset: %d seconds\n", offsetSeconds);
-    printf("[TimeManager] Standard timezone: %s, DST timezone: %s\n", stdName, dstName);
+    TRACE("[TimeManager] Setting timezone offset: %d seconds\n", offsetSeconds);
+    TRACE("[TimeManager] Standard timezone: %s, DST timezone: %s\n", stdName, dstName);
     timezoneOffsetSeconds = offsetSeconds;
     timezoneName = stdName;
 
@@ -120,14 +123,14 @@ void TimeManager::fetchAndApplyTimezoneFromOpenMeteo(float lat, float lon, const
         "http://api.open-meteo.com/v1/forecast?latitude=%.4f&longitude=%.4f&current_weather=true&timezone=auto",
         lat, lon);
 
-    printf("url: %s\n", url);    
+    TRACE("url: %s\n", url);    
 
     HttpRequest req;
     HttpResponse res = req.get(url);
 
     const std::string& body = res.getBody();
-    printf("[TimeManager] Open-Meteo response: %s\n", body.c_str());
-    printf("Status code: %d\n", res.getStatusCode());
+    TRACE("[TimeManager] Open-Meteo response: %s\n", body.c_str());
+    TRACE("Status code: %d\n", res.getStatusCode());
     if (body.empty()) {
         printf("[TimeManager] Open-Meteo response is empty.\n");
         applyFixedTimezoneOffset(0, tzName.c_str(), tzName.c_str());
@@ -142,7 +145,7 @@ void TimeManager::fetchAndApplyTimezoneFromOpenMeteo(float lat, float lon, const
         if (end == std::string::npos) end = body.size();
         offsetSeconds = std::stoi(body.substr(offsetPos, end - offsetPos));
     }
-    printf("[TimeManager] Timezone: %s, UTC offset: %d sec\n", tzName.c_str(), offsetSeconds);
+    TRACE("[TimeManager] Timezone: %s, UTC offset: %d sec\n", tzName.c_str(), offsetSeconds);
     applyFixedTimezoneOffset(offsetSeconds, tzName.c_str(), tzName.c_str());
 }
 
@@ -160,14 +163,14 @@ void TimeManager::detectAndApplyTimezone() {
 
 std::string TimeManager::formatTimeWithZone(time_t utcTime) const {
     time_t localTime = utcTime + timezoneOffsetSeconds;
-    printf("[TimeManager : formatWithZone] Offset: %d\n", timezoneOffsetSeconds);
-    printf("Timzeone: %s\n", timezoneName.c_str());
+    TRACE("[TimeManager : formatWithZone] Offset: %d\n", timezoneOffsetSeconds);
+    TRACE("Timzeone: %s\n", timezoneName.c_str());
     struct tm tmBuf;
     gmtime_r(&localTime, &tmBuf);  // Adjusted time treated as UTC
 
     char timeBuf[16] = {0};
     strftime(timeBuf, sizeof(timeBuf), "%H:%M:%S", &tmBuf);
-    printf("[TimeManager : formatWithZone] Time: %s\n", timeBuf);
+    TRACE("[TimeManager : formatWithZone] Time: %s\n", timeBuf);
 
     const char* zone = timezoneName.empty() ? "?" : timezoneName.c_str();
 

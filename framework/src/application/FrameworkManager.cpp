@@ -70,7 +70,7 @@ void FrameworkManager::network_task(void *params)
     }
     printf("WiFi connected.\n");
     AppContext::getInstance().initFrameworkServices();
-    printf("Framework services initialized.\n");
+    printf("[Framework Manager] Framework services initialized.\n");
     
     TimeManager *timeMgr = AppContext::getInstance().getService<TimeManager>();
     TRACE("[Framework] TimeManager pointer: %p", timeMgr);
@@ -78,7 +78,7 @@ void FrameworkManager::network_task(void *params)
     timeMgr->syncTimeWithNtp();  // Add this after Wi-Fi is connected
     printf("Time synchronized.\n");
 
-    printf("Network up. Notifying app task...\n");
+    printf("[Framework Manager] Network up. Notifying app task...\n");
 
     if (manager->app != nullptr)
     {

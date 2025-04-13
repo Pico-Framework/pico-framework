@@ -11,7 +11,7 @@
  *
  * Extracts the boundary from the Content-Type header
  * Manages multipart state using a basic state machine (SEARCHING_FOR_BOUNDARY, FOUND_BOUNDARY, etc.)
- * Used a streaming lwip_recv() loop
+ * Used a streaming recv() loop
  * Bufferes data and handles chunk boundaries
  * Writes file data incrementally (appends to file to cope with large file sizes)
  * Rejects uploads with duplicate filenames
@@ -45,8 +45,8 @@ TRACE_INIT(MultipartParser)
 State MultipartParser::currentState = SEARCHING_FOR_BOUNDARY; // Initialize state
 
 /// @copydoc MultipartParser::MultipartParser
-MultipartParser::MultipartParser(int clientSocket, const HttpRequest &request)
-    : clientSocket(clientSocket), request(request)
+MultipartParser::MultipartParser(const HttpRequest &request)
+    : tcp(request.getTcp()), request(request)
 {
     std::string contentType = request.getHeader("Content-Type");
     std::size_t pos = contentType.find("boundary=");
@@ -77,7 +77,7 @@ bool MultipartParser::handleMultipart()
     }
 
     // Stream remaining data from socket
-    while ((len = lwip_recv(clientSocket, buf, sizeof(buf) - 1, 0)) > 0)
+    while ((len = tcp->recv(buf, sizeof(buf) - 1)) > 0)
     {
         buf[len] = '\0';
         std::string chunk(buf, len);
@@ -335,9 +335,7 @@ void MultipartParser::sendHttpResponse(int statusCode, const std::string &messag
         << body;
 
     std::string response = oss.str();
-    lwip_send(clientSocket, response.c_str(), response.length(), 0);
-
-    // Graceful close
+    tcp->send(response.c_str(), response.length());
     vTaskDelay(pdMS_TO_TICKS(50));
-    lwip_close(clientSocket);
+    tcp->close();
 }

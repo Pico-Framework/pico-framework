@@ -145,30 +145,6 @@ void HttpRequest::parseHeaders(const char *raw)
  * @param size Maximum size of the buffer.
  * @return int Number of bytes received, or -1 on error.
  */
-int HttpRequest::receiveData(int clientSocket, char *buffer, int size)
-{
-
-    size_t bytesReceived = lwip_recv(clientSocket, buffer, size - 1, 0);
-    if (bytesReceived < 0)
-    {
-        printf("Error receiving data from client: %zu\n", bytesReceived);
-        return -1;
-    }
-
-    TRACE("Received %zu bytes\n", bytesReceived);
-    TRACE("Buffer: %.*s\n", (int)bytesReceived, buffer);
-
-    if (bytesReceived == 0)
-    {
-        printf("Client disconnected.\n");
-        return -1;
-    }
-
-    buffer[bytesReceived] = '\0'; // Null-terminate the received data
-    TRACE("Received %zu bytes\n", bytesReceived);
-    TRACE("Buffer: %.*s\n", bytesReceived, buffer);
-    return bytesReceived;
-}
 
 /**
  * @brief Extract HTTP method and path from request line.
@@ -179,7 +155,7 @@ int HttpRequest::receiveData(int clientSocket, char *buffer, int size)
  * @param path Output buffer for path.
  * @return true on success, false on failure.
  */
-bool HttpRequest::getMethodAndPath(char *buffer, int clientSocket, char *method, char *path)
+bool HttpRequest::getMethodAndPath(char *buffer, char *method, char *path)
 {
     // Extract the HTTP method and path
     if (sscanf(buffer, "%s %s", method, path) != 2)
@@ -190,27 +166,23 @@ bool HttpRequest::getMethodAndPath(char *buffer, int clientSocket, char *method,
     return true;
 }
 
-/**
- * @brief Receive and parse a full HTTP request from a socket.
- *
- * @param clientSocket The client socket.
- * @return HttpRequest The fully parsed request object.
- */
-HttpRequest HttpRequest::receive(int clientSocket)
+HttpRequest HttpRequest::receive(Tcp* tcp)
 {
-    TRACE("Receiving request on socket %d\n", clientSocket);
+    TRACE("Receiving request on socket %d\n", tcp->getSocketFd());
+
     char buffer[BUFFER_SIZE];                   // Declare buffer size
     std::string body = "";                      // Initialize empty body
     std::map<std::string, std::string> headers; // Initialize empty headers
     char method[16] = {0};                      // Initialize method buffer
     char path[BUFFER_SIZE] = {0};               // Initialize path buffer
 
-    int bytesReceived = receiveData(clientSocket, (char *)&buffer, sizeof(buffer));
-    if (bytesReceived == -1)
+    int bytesReceived = tcp->recv(buffer, sizeof(buffer));
+    if (bytesReceived <= 0)
     {
         return HttpRequest("", "", ""); // Return empty HttpRequest on error
     }
-    if (!getMethodAndPath((char *)&buffer, clientSocket, (char *)&method, (char *)&path))
+
+    if (!getMethodAndPath(buffer, method, path))
     {
         return HttpRequest("", "", ""); // Return empty HttpRequest on error
     }
@@ -218,7 +190,7 @@ HttpRequest HttpRequest::receive(int clientSocket)
     // Identify the raw headers - look for the end of the headers (a double CRLF "\r\n\r\n")
     TRACE("Buffer received: %.*s\n", bytesReceived, buffer);
     size_t headerEnd = 0;
-    while (headerEnd < bytesReceived)
+    while (headerEnd < static_cast<size_t>(bytesReceived))
     {
         if (buffer[headerEnd] == '\r' && buffer[headerEnd + 1] == '\n' &&
             buffer[headerEnd + 2] == '\r' && buffer[headerEnd + 3] == '\n')
@@ -231,10 +203,10 @@ HttpRequest HttpRequest::receive(int clientSocket)
     TRACE("Raw headers length: %zu\n", headerEnd);
 
     // Create the request which will parse the headers
-    HttpRequest request(buffer, std::string(method), std::string(path));
+    HttpRequest request(tcp, buffer, std::string(method), std::string(path));
 
     // Get headers from the HttpRequest object
-    headers = request.getHeaders(); // Retrieve headers from the HttpRequest object
+    headers = request.getHeaders();
 
     TRACE("Parsed headers:\n");
     for (const auto &header : headers)
@@ -242,53 +214,51 @@ HttpRequest HttpRequest::receive(int clientSocket)
         TRACE("%s: %s\n", header.first.c_str(), header.second.c_str());
     }
 
-    // Get the content length from the headers
     int contentLength = request.getContentLength();
     TRACE("Content-Length: %d\n", contentLength);
 
-    // Handle the body only if contentLength is greater than 0
     if (contentLength > 0)
     {
-        // First, handle any body data that might be in the first buffer
         size_t bodyReceived = bytesReceived - headerEnd;
         if (bodyReceived > 0)
         {
             body.append(buffer + headerEnd, bodyReceived);
         }
-        request.setBody(body); // Set the body in the HttpRequest object
+        request.setBody(body);
 
-        // Check for multipart data and delegate to handler if necessary
         if (request.isMultipart())
         {
             TRACE("Multipart request detected\n");
-            request.handle_multipart(clientSocket, request);
+            request.handle_multipart(request);  // tcp is already stored in request
             TRACE("Multipart request handled\n");
             return request;
         }
+
         TRACE("Non-multipart request detected\n");
 
-        // For non-multipart data, continue receiving the body data in chunks
         size_t bodyRemaining = contentLength - body.length();
         TRACE("Body remaining: %zu\n", bodyRemaining);
         while (bodyRemaining > 0)
         {
-            size_t bytesToReceive = std::min(bodyRemaining, sizeof(buffer) - 1); // Limit to buffer size
-            size_t chunkReceived = lwip_recv(clientSocket, buffer, bytesToReceive, 0);
-
+            size_t bytesToReceive = std::min(bodyRemaining, sizeof(buffer) - 1);
+            int chunkReceived = tcp->recv(buffer, bytesToReceive);
             if (chunkReceived <= 0)
             {
-                printf("Error receiving body data, bytes received: %zu\n", chunkReceived);
-                return HttpRequest("", "", ""); // Return empty HttpRequest on error
+                printf("Error receiving body data, bytes received: %d\n", chunkReceived);
+                return HttpRequest("", "", "");
             }
 
-            body.append(buffer, chunkReceived); // Append received data to body
-            bodyRemaining -= chunkReceived;     // Decrease remaining body size
+            body.append(buffer, chunkReceived);
+            bodyRemaining -= chunkReceived;
         }
+
         printf("Body: %s\n", body.c_str());
     }
+
     TRACE("HttpRequest object constructed\n");
-    return request; // Return the constructed HttpRequest object
+    return request;
 }
+
 
 /**
  * @brief Handle multipart/form-data content using MultipartParser.
@@ -297,9 +267,9 @@ HttpRequest HttpRequest::receive(int clientSocket)
  * @param req Reference to this request.
  * @return int 0 on success, -1 on failure.
  */
-int HttpRequest::handle_multipart(int clientSocket, HttpRequest &req)
+int HttpRequest::handle_multipart(HttpRequest &req)
 {
-    MultipartParser parser(clientSocket, req);
+    MultipartParser parser(req);
     return parser.handleMultipart() ? 0 : -1;
 }
 

@@ -39,6 +39,8 @@ TRACE_INIT(HttpServer)
 #include "url_utils.h"
 #include "AppContext.h"
 #include "TimeManager.h"
+#include "Tcp.h"
+#include "JsonResponse.h"
 
 #define BUFFER_SIZE 1024
 
@@ -58,7 +60,7 @@ StaticTask_t HttpServer::xTaskBuffer;
 struct TaskParams
 {
     HttpServer *server; // Pointer to the HttpServer instance
-    int clientSocket;   // The client socket
+    Tcp *tcp;   // The client TCP connection
 };
 
 // ----------------------------------------------------------------------------
@@ -93,29 +95,50 @@ void HttpServer::startServerTask(void *pvParameters)
 /// @copydoc HttpServer::run
 void HttpServer::run()
 {
-    printf("Starting HTTP Server...\n");
+    printf("[Http Server] Starting HTTP Server...\n");
 
     if (!initNetwork())
     {
         return;
     }
+
     AppContext::getInstance().getService<TimeManager>()->detectAndApplyTimezone();
-    TRACE("Timezone applied\n");
-    sock = initServerSocket();
-    if (sock < 0)
+    //TRACE("Timezone applied\n");
+
+    Tcp* listener = initListener();
+    if (!listener)
     {
+        printf("[HttpServer] Failed to initialize listener\n");
         return;
     }
 
-    acceptClientConnections();
+    // Optional: store listener as a class member if needed later
+    while (true)
+    {
+        printf("[HttpServer] Waiting for client connection...\n");
+        Tcp* conn = listener->accept();
+        if (conn)
+        {
+            printf("[HttpServer] Accepted client connection\n");
+            startHandlingClient(conn);
+            vTaskDelay(pdMS_TO_TICKS(100));
+            conn->close();
+            printf("[HttpServer] Client connection handled\n");
+            delete conn;
+        }
+    }
+
+    // Note: we never reach here in this model
+    delete listener;
 }
+
 
 /// @copydoc HttpServer::initNetwork
 bool HttpServer::initNetwork()
 {
     struct netif *netif;
 
-    TRACE("Waiting for DHCP lease...\n");
+    //TRACE("Waiting for DHCP lease...\n");
 
     while (true)
     {
@@ -127,41 +150,20 @@ bool HttpServer::initNetwork()
         vTaskDelay(pdMS_TO_TICKS(100));
     }
 
-    TRACE("Assigned IP Address: %s\n", ip4addr_ntoa(&netif->ip_addr));
+    //TRACE("Assigned IP Address: %s\n", ip4addr_ntoa(&netif->ip_addr));
     return true;
 }
 
 /// @copydoc HttpServer::initServerSocket
-int HttpServer::initServerSocket()
+
+Tcp* HttpServer::initListener()
 {
-    int s = lwip_socket(AF_INET, SOCK_STREAM, 0);
-    if (s < 0)
-    {
-        printf("Error creating socket\n");
-        return -1;
+    Tcp* listener = new Tcp();
+    if (!listener->bindAndListen(port)) {
+        delete listener;
+        return nullptr;
     }
-
-    struct sockaddr_in serverAddr{};
-    serverAddr.sin_family = AF_INET;
-    serverAddr.sin_port = htons(port);
-    serverAddr.sin_addr.s_addr = INADDR_ANY;
-
-    if (lwip_bind(s, (struct sockaddr *)&serverAddr, sizeof(serverAddr)) < 0)
-    {
-        printf("Error binding socket\n");
-        lwip_close(s);
-        return -1;
-    }
-
-    if (lwip_listen(s, 1) < 0)
-    {
-        printf("Error listening on socket\n");
-        lwip_close(s);
-        return -1;
-    }
-
-    printf("HTTP server listening on port %d\n", port);
-    return s;
+    return listener;
 }
 
 // ----------------------------------------------------------------------------
@@ -169,73 +171,73 @@ int HttpServer::initServerSocket()
 // ----------------------------------------------------------------------------
 
 /// @copydoc HttpServer::acceptClientConnections
-void HttpServer::acceptClientConnections()
+// void HttpServer::acceptClientConnections()
+// {
+//     Tcp* listener = initListener();
+//     if (!listener) {
+//         printf("[HttpServer] Failed to initialize listener\n");
+//         return;
+//     }
+
+//     while (true)
+//     {
+//         printf("[HttpServer] Waiting for client connection...\n");
+//         Tcp* conn = listener->accept();
+//         if (!conn)
+//         {
+//             // Accept failed or no client — skip
+//             continue;
+//         }
+//         printf("[HttpServer] Accepted client connection\n");
+//         startHandlingClient(conn);
+//         printf("[HttpServer] Client connection handled\n");
+//         delete conn;
+//     }
+
+//     // Unreachable in current model, but if you ever shut down:
+//     delete listener;
+// }
+
+void HttpServer::startHandlingClient(Tcp* conn)
 {
-    struct sockaddr_in clientAddr;
-    socklen_t clientAddrLen = sizeof(clientAddr);
-
-    while (true)
-    {
-        printf("Waiting for client connection...\n");
-
-        int clientSocket = lwip_accept(sock, (struct sockaddr *)&clientAddr, &clientAddrLen);
-        if (clientSocket < 0)
-        {
-            printf("lwip_accept failed, error: %d\n", errno);
-            vTaskDelay(pdMS_TO_TICKS(1000));
-            continue;
-        }
-        // Could add switch in here to switch between main server task and a task per client
-        printf("Client connected on socket %d, spawning task...\n", clientSocket);
-        handleClient(clientSocket); // Handle the client in same task as we can only handle two max and saves stack size
-        lwip_close(clientSocket);       // Ensure cleanup after handling
-        //startHandlingClient(clientSocket);
-    }
+    // Direct call for now — FreeRTOS task dispatch can be re-enabled later
+    handleClient(conn);
 }
 
+// this is not converted to use tcp class
 /// @copydoc HttpServer::startHandlingClient
-void HttpServer::startHandlingClient(int clientSocket)
-{
-    if (xSemaphoreTake(clientSemaphore, pdMS_TO_TICKS(100)) == pdPASS)
-    {
-        TaskParams *params = new TaskParams{this, clientSocket};
+// void HttpServer::startHandlingClient(Tcp* conn)
+// {
+//     if (xSemaphoreTake(clientSemaphore, pdMS_TO_TICKS(100)) == pdPASS)
+//     {
+//         TaskParams *params = new TaskParams{this, clientSocket};
 
-        if (xTaskCreate(handleClientTask, "HttpClient", 4096, params, tskIDLE_PRIORITY + 1, NULL) == pdPASS)
-        {
-            printf("Client task created successfully for socket %d\n", clientSocket);
-        }
-        else
-        {
-            printf("Failed to create client task for socket %d\n", clientSocket);
-            lwip_close(clientSocket);
-            delete params;
-        }
-    }
-    else
-    {
-        printf("Max concurrent clients reached, closing socket %d\n", clientSocket);
-        lwip_close(clientSocket);
-        // Optionally, you could send a response to the client indicating the server is busy.
-        // semaphore will be released in handleClientTask
-    }
-}
+//         if (xTaskCreate(handleClientTask, "HttpClient", 4096, params, tskIDLE_PRIORITY + 1, NULL) == pdPASS)
+//         {
+//             printf("Client task created successfully for socket %d\n", clientSocket);
+//         }
+//         else
+//         {
+//             printf("Failed to create client task for socket %d\n", clientSocket);
+//             conn->close();
+//             delete params;
+//         }
+//     }
+//     else
+//     {
+//         printf("Max concurrent clients reached, closing socket %d\n", clientSocket);
+//         lwip_close(clientSocket);
+//         // Optionally, you could send a response to the client indicating the server is busy.
+//         // semaphore will be released in handleClientTask
+//     }
+// }
 
 /// @copydoc HttpServer::handleClient
-void HttpServer::handleClient(int clientSocket)
+void HttpServer::handleClient(Tcp* conn)
 {
-    if (clientSocket < 0)
-    {
-        printf("Invalid client socket detected in handleClient: %d\n", clientSocket);
-        return;
-    }
 
-    printf("Handling client socket: %d\n", clientSocket);
+    HttpRequest req = HttpRequest::receive(conn);
 
-    HttpRequest req = HttpRequest::receive(clientSocket);
-    std::string clientIp = getClientIpFromSocket(clientSocket);
-    req.setClientIp(clientIp);
-
-    std::cout << "Client IP: " << clientIp << std::endl;
     std::cout << "HttpRequest received: " << req.getMethod() << " " << req.getPath() << std::endl;
     std::cout << "HttpRequest content length: " << req.getContentLength() << std::endl;
     std::cout << "HttpRequest content type: " << req.getContentType() << std::endl;
@@ -279,36 +281,31 @@ void HttpServer::handleClient(int clientSocket)
     printf("Client request received: %s, path: %s\n", req.getMethod().c_str(), req.getPath().c_str());
     printf("HttpRequest body: %s\n", req.getBody().c_str());
 
-    bool ok = router.handleRequest(clientSocket, req.getMethod().c_str(), req.getPath().c_str(), req);
+    HttpResponse res(conn);
+    bool ok = router.handleRequest(req, res);
     printf("HttpRequest handled: %s\n", ok ? "true" : "false");
 
     if (!ok)
     {
-        const char *notFound =
-            "HTTP/1.1 404 Not Found\r\n"
-            "Content-Type: text/html\r\n\r\n"
-            "<h1>404 Not Found</h1>";
-        lwip_send(clientSocket, notFound, strlen(notFound), 0);
+        JsonResponse::sendError(res, 404, "NOT_FOUND", "route: " + std::string(req.getUri()));
     }
 
-    TRACE("Free Heap: %d bytes\n", xPortGetFreeHeapSize());
-    TRACE("Min Ever Free Heap: %d bytes\n", xPortGetMinimumEverFreeHeapSize());
 }
 
 /// @copydoc HttpServer::handleClientTask
-void HttpServer::handleClientTask(void *pvParameters)
-{
-    TaskParams *params = static_cast<TaskParams *>(pvParameters);
-    HttpServer *server = params->server;
-    int clientSocket = params->clientSocket;
+// void HttpServer::handleClientTask(void *pvParameters)
+// {
+//     TaskParams *params = static_cast<TaskParams *>(pvParameters);
+//     HttpServer *server = params->server;
+//     Tcp* tcp = params->tcp;
 
-    printf("Handling client in task for socket %d\n", clientSocket);
-    server->handleClient(clientSocket);
+//     printf("Handling client in task for socket %d\n", tcp->getSocketFd());  
+//     server->handleClient(tcp);
 
-    lwip_close(clientSocket);
+//     tcp->close();
 
-    delete params;
-    printf("Client socket %d closed and task deleted\n", clientSocket);
-    xSemaphoreGive(clientSemaphore); // Release the semaphore for the next client
-    vTaskDelete(NULL);
-}
+//     delete params;
+//     printf("Client socket %d closed and task deleted\n", tcp->getSocketFd());
+//     xSemaphoreGive(clientSemaphore); // Release the semaphore for the next client
+//     vTaskDelete(NULL);
+// }

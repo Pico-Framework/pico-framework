@@ -50,8 +50,14 @@ option(PICO_HTTP_TLS_VERIFY "Enable certificate verification for TLS connections
 add_subdirectory(framework)
 
 # Dummy executable to measure memory usage of the framework
-add_executable(framework_test framework/src/main.cpp)
+add_executable(framework_test 
+    framework/src/test-app/main.cpp
+    framework/src/test-app/app.cpp
+    )
 target_link_libraries(framework_test pico_framework)
+
+# this needs to be conditional on using littlefs
+target_link_options(framework_test PRIVATE "-T${CMAKE_SOURCE_DIR}/memmap_lfs_fragment.ld")
 
 #get the memory usage
 if (PICO_PRINT_MEM_USAGE)

@@ -48,6 +48,9 @@ public:
     Tcp(Tcp&& other) noexcept;
     Tcp& operator=(Tcp&& other) noexcept;
 
+    // Accessors
+    std::string getPeerIp() const;
+
     /**
      * @brief Set the Root CA certificate to be used for client TLS connections (PEM format).
      */
@@ -95,7 +98,7 @@ public:
      * @brief Accept a new incoming connection (for server use).
      * @return Tcp for the accepted client.
      */
-    Tcp accept();
+    Tcp* accept();
 
     /**
      * @brief Check if the socket is valid.
@@ -110,7 +113,7 @@ public:
     /**
      * @brief Get the raw socket file descriptor (may be -1 for TLS-only connection).
      */
-    int getSocketFd() const;
+    int getSocketFd() const { return sockfd; }
 
     void setHostname(const char* name) {
         if (name) {
