@@ -58,7 +58,7 @@ std::map<std::string, std::string> HttpParser::parseHeaders(const std::string& r
     return headers;
 }
 
-std::pair<std::string, std::string> HttpParser::receiveHeaderAndLeftover(TcpConnectionSocket& socket) {
+std::pair<std::string, std::string> HttpParser::receiveHeaderAndLeftover(Tcp& socket) {
     std::string buffer;
     char temp[1460];
 
@@ -83,7 +83,7 @@ std::pair<std::string, std::string> HttpParser::receiveHeaderAndLeftover(TcpConn
 
 #include "ChunkedDecoder.h"
 
-bool HttpParser::receiveBody(TcpConnectionSocket& socket,
+bool HttpParser::receiveBody(Tcp& socket,
                              const std::map<std::string, std::string>& headers,
                              const std::string& leftoverBody,
                              std::string& outBody) {

@@ -39,7 +39,7 @@
 #define TRACE_NtpClient           1
 #define TRACE_utility             1  
 #define TRACE_AppContext          1 
-#define TRACE_TcpConnectionSocket 0
+#define TRACE_Tcp                 0
 #define TRACE_ChunkedDecoder      0
 #define TRACE_JsonParser          1
 #define TRACE_HttpClient          0

@@ -1,7 +1,7 @@
 #pragma once
 #include <string>
 #include <map>
-#include "TcpConnectionSocket.h"
+#include "Tcp.h"
 
 class HttpParser
 {
@@ -14,12 +14,12 @@ public:
      * @return true on success, false on failure
      */
 
-    static std::pair<std::string, std::string> receiveHeaderAndLeftover(TcpConnectionSocket &socket);
+    static std::pair<std::string, std::string> receiveHeaderAndLeftover(Tcp &socket);
 
     /**
      * @brief Receive the HTTP body from socket, using Content-Length or connection close
      */
-    static bool receiveBody(TcpConnectionSocket& socket,
+    static bool receiveBody(Tcp& socket,
         const std::map<std::string, std::string>& headers,
         const std::string& leftoverBody,
         std::string& outBody);

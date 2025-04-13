@@ -33,6 +33,7 @@ TRACE_INIT(HttpRequest)
 #include "url_utils.h"
 #include "HttpParser.h"
 #include "HttpClient.h"
+#include "Tcp.h"
 
 #define BUFFER_SIZE 1460 // this is the standard MTU size
 

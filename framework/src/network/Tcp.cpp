@@ -1,4 +1,4 @@
-#include "TcpConnectionSocket.h"
+#include "Tcp.h"
 
 #include <lwip/dns.h>
 #include <lwip/altcp.h>
@@ -14,29 +14,29 @@
 
 #include "framework_config.h"
 #include "DebugTrace.h"
-TRACE_INIT(TcpConnectionSocket);
+TRACE_INIT(Tcp);
 
-TcpConnectionSocket::TcpConnectionSocket()
+Tcp::Tcp()
     : sockfd(-1), connected(false), use_tls(false),
       tls_config(nullptr), server_tls_config(nullptr),
       tls_pcb(nullptr) {}
 
-TcpConnectionSocket::TcpConnectionSocket(int fd)
+Tcp::Tcp(int fd)
     : sockfd(fd), connected(true), use_tls(false),
       tls_config(nullptr), server_tls_config(nullptr),
       tls_pcb(nullptr) {}
 
-TcpConnectionSocket::~TcpConnectionSocket()
+Tcp::~Tcp()
 {
     close();
 }
 
-TcpConnectionSocket::TcpConnectionSocket(TcpConnectionSocket &&other) noexcept
+Tcp::Tcp(Tcp &&other) noexcept
 {
     *this = std::move(other);
 }
 
-TcpConnectionSocket &TcpConnectionSocket::operator=(TcpConnectionSocket &&other) noexcept
+Tcp &Tcp::operator=(Tcp &&other) noexcept
 {
     if (this != &other)
     {
@@ -57,12 +57,12 @@ TcpConnectionSocket &TcpConnectionSocket::operator=(TcpConnectionSocket &&other)
     return *this;
 }
 
-void TcpConnectionSocket::setRootCACertificate(const std::string &pem)
+void Tcp::setRootCACertificate(const std::string &pem)
 {
     root_ca_cert = pem;
 }
 
-void TcpConnectionSocket::setServerTlsConfig(const std::string &cert, const std::string &key)
+void Tcp::setServerTlsConfig(const std::string &cert, const std::string &key)
 {
     server_tls_cert = cert;
     server_tls_key = key;
@@ -74,25 +74,25 @@ void TcpConnectionSocket::setServerTlsConfig(const std::string &cert, const std:
     );
     if (!server_tls_config)
     {
-        printf("[TcpConnectionSocket] Failed to create TLS server config\n");
+        printf("[Tcp] Failed to create TLS server config\n");
     }
 }
 
-bool TcpConnectionSocket::connect(const char *host, int port, bool use_tls)
+bool Tcp::connect(const char *host, int port, bool use_tls)
 {
     strncpy(hostname, host, sizeof(hostname) - 1);
     this->use_tls = use_tls;
     ip_addr_t ip;
     if (!resolveHostnameBlocking(host, &ip))
     {
-        printf("[TcpConnectionSocket] DNS resolution failed for %s\n", host);
+        printf("[Tcp] DNS resolution failed for %s\n", host);
         return false;
     }
 
     return use_tls ? connectTls(ip, port) : connectPlain(ip, port);
 }
 
-bool TcpConnectionSocket::connectPlain(const ip_addr_t &ip, int port)
+bool Tcp::connectPlain(const ip_addr_t &ip, int port)
 {
     struct sockaddr_in addr = {};
     addr.sin_family = AF_INET;
@@ -102,45 +102,45 @@ bool TcpConnectionSocket::connectPlain(const ip_addr_t &ip, int port)
     sockfd = lwip_socket(AF_INET, SOCK_STREAM, 0);
     if (sockfd < 0)
     {
-        printf("[TcpConnectionSocket] Failed to create socket\n");
+        printf("[Tcp] Failed to create socket\n");
         return false;
     }
 
     if (lwip_connect(sockfd, reinterpret_cast<struct sockaddr *>(&addr), sizeof(addr)) < 0)
     {
-        printf("[TcpConnectionSocket] Failed to connect to server\n");
+        printf("[Tcp] Failed to connect to server\n");
         lwip_close(sockfd);
         sockfd = -1;
         return false;
     }
-    printf("[TcpConnectionSocket] Connected to server (plain)\n");
+    printf("[Tcp] Connected to server (plain)\n");
     connected = true;
     use_tls = false;
     return true;
 }
 
-bool TcpConnectionSocket::connectTls(const char *host, int port)
+bool Tcp::connectTls(const char *host, int port)
 {
     ip_addr_t ip;
     if (!resolveHostnameBlocking(host, &ip))
     {
-        printf("[TcpConnectionSocket] DNS resolution failed for %s\n", host);
+        printf("[Tcp] DNS resolution failed for %s\n", host);
         return false;
     }
     return connectTls(ip, port);
 }
 
-err_t TcpConnectionSocket::onConnected(void *arg, struct altcp_pcb *conn, err_t err)
+err_t Tcp::onConnected(void *arg, struct altcp_pcb *conn, err_t err)
 {
-    TRACE("[TcpConnectionSocket] onConnected callback\n");
+    TRACE("[Tcp] onConnected callback\n");
     if (err != ERR_OK)
     {
-        printf("[TcpConnectionSocket] Connection failed: %d\n", err);
+        printf("[Tcp] Connection failed: %d\n", err);
      
         return err;
     }
     // Set the context for the callbacks
-    auto *self = static_cast<TcpConnectionSocket *>(arg);
+    auto *self = static_cast<Tcp *>(arg);
 
     self->connectResult = err;
 
@@ -153,9 +153,9 @@ err_t TcpConnectionSocket::onConnected(void *arg, struct altcp_pcb *conn, err_t 
     return ERR_OK;
 }
 
-void TcpConnectionSocket::onError(void* arg, err_t err) {
-    auto* self = static_cast<TcpConnectionSocket*>(arg);
-    printf("[TcpConnectionSocket] altcp error: %d\n", err);
+void Tcp::onError(void* arg, err_t err) {
+    auto* self = static_cast<Tcp*>(arg);
+    printf("[Tcp] altcp error: %d\n", err);
 
     self->connectResult = err;
 
@@ -167,27 +167,27 @@ void TcpConnectionSocket::onError(void* arg, err_t err) {
     self->tls_pcb = nullptr;
 }
 
-bool TcpConnectionSocket::connectTls(const ip_addr_t &ip, int port)
+bool Tcp::connectTls(const ip_addr_t &ip, int port)
 {
     if (!tls_config)
     {
-        TRACE("[TcpConnectionSocket] RootCA Certificate is: %s\n", root_ca_cert.c_str());
+        TRACE("[Tcp] RootCA Certificate is: %s\n", root_ca_cert.c_str());
         tls_config = altcp_tls_create_config_client(
             reinterpret_cast<const uint8_t *>(root_ca_cert.c_str()),
             root_ca_cert.size() + 1); // +1 for null terminator
         //tls_config = altcp_tls_create_config_client(nullptr, 0);
         if (!tls_config)
         {
-            printf("[TcpConnectionSocket] TLS config creation failed %d\n", tls_config);
+            printf("[Tcp] TLS config creation failed %d\n", tls_config);
             return false;
         }
-        TRACE("[TcpConnectionSocket] TLS config created\n");
+        TRACE("[Tcp] TLS config created\n");
     }
     tls_pcb = altcp_tls_new(tls_config, IPADDR_TYPE_ANY);
     //tls_pcb = altcp_tls_new(tls_config, IP_GET_TYPE(&ip));
     if (!tls_pcb)
     {
-        printf("[TcpConnectionSocket] Failed to create TLS connection\n");
+        printf("[Tcp] Failed to create TLS connection\n");
         return false;
     }
     TRACE("Setting tls hostname: %s\n", hostname);
@@ -198,17 +198,17 @@ bool TcpConnectionSocket::connectTls(const ip_addr_t &ip, int port)
 
     // Register recv callback *before* connect
     altcp_arg(tls_pcb, this); // Set the context for the callbacks
-    TRACE("[TcpConnectionSocket] Registering TLS recv callback\n");
+    TRACE("[Tcp] Registering TLS recv callback\n");
     altcp_recv(tls_pcb, tlsRecvCallback); // Register callback
 
     this->connectResult = ERR_OK;
     this->connectingTask = xTaskGetCurrentTaskHandle();
-    altcp_err(tls_pcb, &TcpConnectionSocket::onError);
-    TRACE("[TcpConnectionSocket] TLS Connecting to %s:%d\n", ipaddr_ntoa(&ip), port);
-    err_t err = altcp_connect(tls_pcb, &ip, port, &TcpConnectionSocket::onConnected);
+    altcp_err(tls_pcb, &Tcp::onError);
+    TRACE("[Tcp] TLS Connecting to %s:%d\n", ipaddr_ntoa(&ip), port);
+    err_t err = altcp_connect(tls_pcb, &ip, port, &Tcp::onConnected);
     if (err != ERR_OK)
     {
-        printf("[TcpConnectionSocket] altcp_connect failed: %d\n", err);
+        printf("[Tcp] altcp_connect failed: %d\n", err);
         altcp_close(tls_pcb);
         tls_pcb = nullptr;
         return false;
@@ -217,13 +217,13 @@ bool TcpConnectionSocket::connectTls(const ip_addr_t &ip, int port)
     // Wait briefly for the handshake — altcp doesn't expose state.
     // Wait for notification that TLS handshake completed
     ulTaskNotifyTakeIndexed(NotifyConnect, pdTRUE, pdMS_TO_TICKS(portMAX_DELAY));
-    TRACE("[TcpConnectionSocket] TLS handshake completed\n");
+    TRACE("[Tcp] TLS handshake completed\n");
     if (connectResult == ERR_OK){
-        printf("[TcpConnectionSocket] TLS connection established\n");
+        printf("[Tcp] TLS connection established\n");
         connected = true;
     }
     else{
-        printf("[TcpConnectionSocket] TLS connection failed %d\n", connectResult);
+        printf("[Tcp] TLS connection failed %d\n", connectResult);
         altcp_close(tls_pcb);
         tls_pcb = nullptr;
         return false;   
@@ -232,43 +232,43 @@ bool TcpConnectionSocket::connectTls(const ip_addr_t &ip, int port)
     return true;
 }
 
-int TcpConnectionSocket::send(const char *buffer, size_t size)
+int Tcp::send(const char *buffer, size_t size)
 {
     if (use_tls && tls_pcb)
     {
-        TRACE("[TcpConnectionSocket] Sending %zu bytes over TLS\n", size);
+        TRACE("[Tcp] Sending %zu bytes over TLS\n", size);
         TRACE("Buffer: %s\n", buffer);
            if(tls_pcb->state == nullptr) {
-                printf("[TcpConnectionSocket] TLS connection is not established\n");
+                printf("[Tcp] TLS connection is not established\n");
                 return -1;
             }
             else{
-                TRACE("[TcpConnectionSocket] TLS connection is established\n");
+                TRACE("[Tcp] TLS connection is established\n");
             }
         err_t err = altcp_write(tls_pcb, buffer, size, TCP_WRITE_FLAG_COPY);
 
         if (err == ERR_OK)
         {
-            printf("[TcpConnectionSocket] altcp_write succeeded\n");
+            printf("[Tcp] altcp_write succeeded\n");
             return altcp_output(tls_pcb) == ERR_OK ? static_cast<int>(size) : -1;
         }
         else
         {
-            printf("[TcpConnectionSocket] altcp_write failed: %d\n", err);
+            printf("[Tcp] altcp_write failed: %d\n", err);
         }
         return err;
     }
     else if (sockfd >= 0)
     {
-        TRACE("[TcpConnectionSocket] Sending %zu bytes over plain TCP\n", size);
+        TRACE("[Tcp] Sending %zu bytes over plain TCP\n", size);
         return lwip_send(sockfd, buffer, size, 0);
     }
     return -1;
 }
 
-err_t TcpConnectionSocket::tlsRecvCallback(void *arg, struct altcp_pcb *conn, struct pbuf *p, err_t err)
+err_t Tcp::tlsRecvCallback(void *arg, struct altcp_pcb *conn, struct pbuf *p, err_t err)
 {
-    auto *self = static_cast<TcpConnectionSocket *>(arg);
+    auto *self = static_cast<Tcp *>(arg);
     if (!self)
         return ERR_VAL;
 
@@ -304,7 +304,7 @@ err_t TcpConnectionSocket::tlsRecvCallback(void *arg, struct altcp_pcb *conn, st
     return ERR_OK;
 }
 
-int TcpConnectionSocket::recv(char *buffer, size_t size)
+int Tcp::recv(char *buffer, size_t size)
 {
     if (!use_tls)
     {
@@ -344,7 +344,7 @@ int TcpConnectionSocket::recv(char *buffer, size_t size)
     return static_cast<int>(to_copy);
 }
 
-int TcpConnectionSocket::close()
+int Tcp::close()
 {
     int result = 0;
     if (use_tls && tls_pcb)
@@ -369,9 +369,9 @@ int TcpConnectionSocket::close()
     return result;
 }
 
-err_t TcpConnectionSocket::acceptCallback(void *arg, struct altcp_pcb *new_conn, err_t err)
+err_t Tcp::acceptCallback(void *arg, struct altcp_pcb *new_conn, err_t err)
 {
-    auto *self = static_cast<TcpConnectionSocket *>(arg);
+    auto *self = static_cast<Tcp *>(arg);
 
     if (err != ERR_OK || !new_conn || !self)
     {
@@ -389,7 +389,7 @@ err_t TcpConnectionSocket::acceptCallback(void *arg, struct altcp_pcb *new_conn,
     return ERR_OK;
 }
 
-TcpConnectionSocket TcpConnectionSocket::accept()
+Tcp Tcp::accept()
 {
     if (use_tls)
     {
@@ -403,7 +403,7 @@ TcpConnectionSocket TcpConnectionSocket::accept()
 
         if (pending_client)
         {
-            TcpConnectionSocket client;
+            Tcp client;
             client.tls_pcb = pending_client;
             client.use_tls = true;
             client.connected = true;
@@ -412,7 +412,7 @@ TcpConnectionSocket TcpConnectionSocket::accept()
         }
 
         // No client was accepted — return invalid
-        return TcpConnectionSocket();
+        return Tcp();
     }
 
     // Plain TCP accept
@@ -422,24 +422,24 @@ TcpConnectionSocket TcpConnectionSocket::accept()
     int client_fd = lwip_accept(sockfd, reinterpret_cast<struct sockaddr *>(&client_addr), &addr_len);
     if (client_fd < 0)
     {
-        printf("[TcpConnectionSocket] lwip_accept failed\n");
-        return TcpConnectionSocket(); // Invalid
+        printf("[Tcp] lwip_accept failed\n");
+        return Tcp(); // Invalid
     }
 
-    return TcpConnectionSocket(client_fd);
+    return Tcp(client_fd);
 }
 
-bool TcpConnectionSocket::bindAndListen(int port)
+bool Tcp::bindAndListen(int port)
 {
     return server_tls_config ? bindAndListenTls(port) : bindAndListenPlain(port);
 }
 
-bool TcpConnectionSocket::bindAndListenPlain(int port)
+bool Tcp::bindAndListenPlain(int port)
 {
     sockfd = lwip_socket(AF_INET, SOCK_STREAM, 0);
     if (sockfd < 0)
     {
-        printf("[TcpConnectionSocket] Failed to create socket\n");
+        printf("[Tcp] Failed to create socket\n");
         return false;
     }
 
@@ -453,7 +453,7 @@ bool TcpConnectionSocket::bindAndListenPlain(int port)
 
     if (lwip_bind(sockfd, reinterpret_cast<struct sockaddr *>(&addr), sizeof(addr)) < 0)
     {
-        printf("[TcpConnectionSocket] Failed to bind socket\n");
+        printf("[Tcp] Failed to bind socket\n");
         lwip_close(sockfd);
         sockfd = -1;
         return false;
@@ -461,7 +461,7 @@ bool TcpConnectionSocket::bindAndListenPlain(int port)
 
     if (lwip_listen(sockfd, 5) < 0)
     {
-        printf("[TcpConnectionSocket] Failed to listen on socket\n");
+        printf("[Tcp] Failed to listen on socket\n");
         lwip_close(sockfd);
         sockfd = -1;
         return false;
@@ -472,18 +472,18 @@ bool TcpConnectionSocket::bindAndListenPlain(int port)
     return true;
 }
 
-bool TcpConnectionSocket::bindAndListenTls(int port)
+bool Tcp::bindAndListenTls(int port)
 {
     if (!server_tls_config)
     {
-        printf("[TcpConnectionSocket] TLS config not set for server\n");
+        printf("[Tcp] TLS config not set for server\n");
         return false;
     }
 
     tls_pcb = altcp_tls_new(server_tls_config, IPADDR_TYPE_V4);
     if (!tls_pcb)
     {
-        printf("[TcpConnectionSocket] Failed to create TLS PCB\n");
+        printf("[Tcp] Failed to create TLS PCB\n");
         return false;
     }
 
@@ -495,13 +495,13 @@ bool TcpConnectionSocket::bindAndListenTls(int port)
     err_t err = altcp_bind(tls_pcb, reinterpret_cast<ip_addr_t *>(&addr.sin_addr), port);
     if (err != ERR_OK)
     {
-        printf("[TcpConnectionSocket] altcp_bind failed: %d\n", err);
+        printf("[Tcp] altcp_bind failed: %d\n", err);
         altcp_close(tls_pcb);
         tls_pcb = nullptr;
         return false;
     }
 
-    altcp_accept(tls_pcb, TcpConnectionSocket::acceptCallback);
+    altcp_accept(tls_pcb, Tcp::acceptCallback);
     use_tls = true;
     connected = true;
     return true;

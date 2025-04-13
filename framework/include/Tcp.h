@@ -1,5 +1,5 @@
 /**
- * @file TcpConnectionSocket.h
+ * @file Tcp.h
  * @brief General-purpose TCP socket abstraction with optional TLS support for both client and server use.
  * @author Ian Archbell
  * @date 2023-03-15
@@ -34,19 +34,19 @@ enum NotifyIndex {
 /**
  * @brief General-purpose TCP socket wrapper with optional TLS support via mbedTLS (altcp).
  */
-class TcpConnectionSocket {
+class Tcp {
 public:
-    TcpConnectionSocket();
-    explicit TcpConnectionSocket(int sockfd); ///< For accepted sockets
-    ~TcpConnectionSocket();
+    Tcp();
+    explicit Tcp(int sockfd); ///< For accepted sockets
+    ~Tcp();
 
     // Disable copy
-    TcpConnectionSocket(const TcpConnectionSocket&) = delete;
-    TcpConnectionSocket& operator=(const TcpConnectionSocket&) = delete;
+    Tcp(const Tcp&) = delete;
+    Tcp& operator=(const Tcp&) = delete;
 
     // Enable move
-    TcpConnectionSocket(TcpConnectionSocket&& other) noexcept;
-    TcpConnectionSocket& operator=(TcpConnectionSocket&& other) noexcept;
+    Tcp(Tcp&& other) noexcept;
+    Tcp& operator=(Tcp&& other) noexcept;
 
     /**
      * @brief Set the Root CA certificate to be used for client TLS connections (PEM format).
@@ -93,9 +93,9 @@ public:
 
     /**
      * @brief Accept a new incoming connection (for server use).
-     * @return TcpConnectionSocket for the accepted client.
+     * @return Tcp for the accepted client.
      */
-    TcpConnectionSocket accept();
+    Tcp accept();
 
     /**
      * @brief Check if the socket is valid.

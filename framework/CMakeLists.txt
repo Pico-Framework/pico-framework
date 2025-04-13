@@ -91,8 +91,8 @@ target_sources(pico_framework PRIVATE
 
     # Network + Time
     src/network/Network.cpp
-    src/network/NtpClient.cpp
-    src/network/TcpConnectionSocket.cpp
+    #src/network/NtpClient.cpp
+    src/network/Tcp.cpp
     src/network/lwip_dns_resolver.cpp
     src/time/TimeManager.cpp
     src/time/PicoTime.cpp
