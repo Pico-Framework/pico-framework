@@ -1,5 +1,8 @@
 #include "LittleFsStorageManager.h"
-#include "hardware/flash.h"
+#include "hardware/flash.h"      // for flash_range_program, flash_range_erase
+#include "hardware/sync.h"       // for save_and_disable_interrupts, restore_interrupts
+#include "pico/multicore.h"      // for multicore_lockout_start_blocking / end_blocking
+#include "hardware/regs/addressmap.h" // for XIP_BASE if not already defined
 #include <cstring>
 #include <iostream>
 
@@ -20,21 +23,61 @@ int LittleFsStorageManager::lfs_read_cb(const struct lfs_config* c, lfs_block_t 
     return 0;
 }
 
+// int LittleFsStorageManager::lfs_prog_cb(const struct lfs_config* c, lfs_block_t block, lfs_off_t off,
+//                                         const void* buffer, lfs_size_t size) {
+//     auto* self = static_cast<LittleFsStorageManager*>(c->context);
+//     uintptr_t addr = self->flashBase + block * c->block_size + off;
+//     printf("[LFS PROG] block=%lu off=%lu size=%lu addr=0x%08lx\n",
+//         (unsigned long)block, (unsigned long)off, (unsigned long)size,
+//         (unsigned long)(self->flashBase + block * c->block_size + off));
+//     flash_range_program(addr - XIP_BASE, reinterpret_cast<const uint8_t*>(buffer), size);
+//     return 0;
+// }
+
 int LittleFsStorageManager::lfs_prog_cb(const struct lfs_config* c, lfs_block_t block, lfs_off_t off,
                                         const void* buffer, lfs_size_t size) {
-    auto* self = static_cast<LittleFsStorageManager*>(c->context);
-    uintptr_t addr = self->flashBase + block * c->block_size + off;
-    printf("[LFS PROG] block=%lu off=%lu size=%lu addr=0x%08lx\n",
-        (unsigned long)block, (unsigned long)off, (unsigned long)size,
-        (unsigned long)(self->flashBase + block * c->block_size + off));
-    flash_range_program(addr - XIP_BASE, reinterpret_cast<const uint8_t*>(buffer), size);
+    uintptr_t addr = reinterpret_cast<uintptr_t>(c->context) + block * c->block_size + off;
+    uintptr_t offset = addr - XIP_BASE;
+
+#if defined(PICO_MULTICORE)
+    multicore_lockout_start_blocking();
+#endif
+
+    uint32_t ints = save_and_disable_interrupts();
+    flash_range_program(offset, reinterpret_cast<const uint8_t*>(buffer), size);
+    restore_interrupts(ints);
+
+#if defined(PICO_MULTICORE)
+    multicore_lockout_end_blocking();
+#endif
+
     return 0;
 }
 
+
+// int LittleFsStorageManager::lfs_erase_cb(const struct lfs_config* c, lfs_block_t block) {
+//     auto* self = static_cast<LittleFsStorageManager*>(c->context);
+//     uintptr_t addr = self->flashBase + block * c->block_size;
+//     flash_range_erase(addr - XIP_BASE, c->block_size);
+//     return 0;
+// }
+
 int LittleFsStorageManager::lfs_erase_cb(const struct lfs_config* c, lfs_block_t block) {
-    auto* self = static_cast<LittleFsStorageManager*>(c->context);
-    uintptr_t addr = self->flashBase + block * c->block_size;
-    flash_range_erase(addr - XIP_BASE, c->block_size);
+    uintptr_t addr = reinterpret_cast<uintptr_t>(c->context) + block * c->block_size;
+    uintptr_t offset = addr - XIP_BASE;
+
+#if defined(PICO_MULTICORE)
+    multicore_lockout_start_blocking();
+#endif
+
+    uint32_t ints = save_and_disable_interrupts();
+    flash_range_erase(offset, c->block_size);
+    restore_interrupts(ints);
+
+#if defined(PICO_MULTICORE)
+    multicore_lockout_end_blocking();
+#endif
+
     return 0;
 }
 
