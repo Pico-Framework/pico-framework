@@ -130,18 +130,23 @@
      bool removeDirectory(const std::string& path) override;
  
  private:
+
+ uintptr_t flashBase = 0;
+     size_t flashSize = 0;
+ 
+     static constexpr uint32_t FLASH_BASE = 0x101E0000;
+     static constexpr size_t FLASH_SIZE = 128 * 1024; ///< 128 KB
+
      static constexpr size_t READ_SIZE = 256;
      static constexpr size_t PROG_SIZE = 256;
      static constexpr size_t BLOCK_SIZE = 4096;
-     static constexpr size_t BLOCK_COUNT = 32;
+     static constexpr size_t BLOCK_COUNT = FLASH_SIZE / BLOCK_SIZE;
      static constexpr size_t CACHE_SIZE = 256;
-     static constexpr size_t LOOKAHEAD_SIZE = 16;
+     static constexpr size_t LOOKAHEAD_SIZE = 256;
  
      lfs_t lfs;
      struct lfs_config config;
- 
-     uint32_t flashBase = 0;
-     uint32_t flashSize = 0;
+
      bool mounted = false;
  
      void configure();
