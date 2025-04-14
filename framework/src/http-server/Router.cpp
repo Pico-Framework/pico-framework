@@ -214,22 +214,20 @@ bool Router::isAuthorizedForRoute(const Route &route, HttpRequest &req, HttpResp
 /// @copydoc Router::handleRequest
 bool Router::handleRequest(HttpRequest &req, HttpResponse &res)
 {
-    const char *method = req.getMethod().c_str();
-    const char *uri = req.getUri().c_str();
-    printf("[Router] Handling request: %s %s\n", method, uri);
+    printf("[Router] Handling request: %s %s\n",req.getMethod().c_str(), req.getUri().c_str());
 
     // Look up routes by HTTP method.
-    auto it = routes.find(method);
+    auto it = routes.find(req.getMethod());
     if (it == routes.end())
     {
-        TRACE("No routes found for method: %s\n", method);
+        TRACE("No routes found for method: %s\n",req.getMethod().c_str());
         return false;
     }
 
     // Check each route for a match.
     for (const auto &route : it->second)
     {
-        std::string uri_str(uri);
+        std::string uri_str(req.getUri());
         std::regex route_regex(route.path);
         std::smatch match;
 

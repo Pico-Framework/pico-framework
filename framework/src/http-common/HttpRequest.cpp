@@ -181,6 +181,7 @@ HttpRequest HttpRequest::receive(Tcp* tcp)
     {
         return HttpRequest("", "", ""); // Return empty HttpRequest on error
     }
+    buffer[bytesReceived] = '\0';  // Ensure null-termination for strstr() and strtok()
 
     if (!getMethodAndPath(buffer, method, path))
     {
