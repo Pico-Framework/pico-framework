@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+    <meta charset="UTF-8" />
+    <title>Zone Control</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <style>
+        body {
+            font-family: 'Raleway', sans-serif;
+            background: #e0e0e0;
+            margin: 0;
+            padding: 2rem 1rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 1.5rem;
+        }
+
+        .zone-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            /* exactly 4 columns */
+            gap: 1.5rem;
+            width: 100%;
+            max-width: 700px;
+        }
+
+        .zone-card {
+            background: #e0e0e0;
+            border-radius: 20px;
+            padding: 1rem;
+            text-align: center;
+            box-shadow: inset 2px 2px 6px #bebebe,
+                inset -2px -2px 6px #ffffff;
+            transition: all 0.3s ease;
+        }
+
+        .zone-title {
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+            color: #333;
+        }
+
+        .zone-status {
+            margin-bottom: 0.75rem;
+            font-size: 0.9rem;
+            color: #666;
+        }
+
+        .zone-card button {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 12px;
+            background: #f0f0f0;
+            box-shadow: 5px 5px 10px #bebebe,
+                -5px -5px 10px #ffffff;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.2s ease;
+        }
+
+        .zone-card button:active {
+            box-shadow: inset 2px 2px 5px #bebebe,
+                inset -2px -2px 5px #ffffff;
+            background: #e0e0e0;
+        }
+
+        .zone-card button:hover {
+            box-shadow: 0 0 6px rgba(129, 199, 132, 0.5),
+                5px 5px 10px #bebebe,
+                -5px -5px 10px #ffffff;
+        }
+
+        .zone-card.on {
+            background: #dcedc8;
+        }
+
+        .zone-card.off {
+            background: #f8f8f8;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Zone Control</h1>
+
+    <div class="zone-grid" id="zoneGrid">
+        <!-- Zone cards go here -->
+    </div>
+
+    <script>
+        const NUM_ZONES = 16;
+        const zoneGrid = document.getElementById("zoneGrid");
+
+        const zoneStates = {}; // Track current on/off states
+
+        // Generate the grid
+        for (let i = 1; i <= NUM_ZONES; i++) {
+            const zoneName = `zone${i}`;
+            const card = document.createElement("div");
+            card.className = "zone-card off";
+            card.id = `card-${zoneName}`;
+
+            const title = document.createElement("div");
+            title.className = "zone-title";
+            title.textContent = `Zone ${i}`;
+
+            const status = document.createElement("div");
+            status.className = "zone-status";
+            status.innerHTML = `<i id="icon-${zoneName}" class="fa-solid fa-stop" style="margin-right: 0.5rem;"></i><span id="status-${zoneName}">OFF</span>`;
+
+            const button = document.createElement("button");
+            button.textContent = "START";
+            button.onclick = () => toggleZone(zoneName, button, card, status);
+
+            card.appendChild(title);
+            card.appendChild(status);
+            card.appendChild(button);
+            zoneGrid.appendChild(card);
+        }
+
+        function toggleZone(zoneName, button, card, statusText) {
+            const isOn = zoneStates[zoneName];
+            const url = `/api/v1/zones/${zoneName}/${isOn ? "stop" : "start"}`;
+
+            fetch(url, { method: "POST" })
+                .then(() => {
+                    zoneStates[zoneName] = !isOn;
+                    updateZoneUI(zoneName);
+                })
+                .catch(err => {
+                    console.warn("Failed to toggle zone", zoneName, err);
+                });
+        }
+
+        function updateZoneUI(zoneName) {
+            const isOn = zoneStates[zoneName];
+            const card = document.getElementById(`card-${zoneName}`);
+            const status = document.getElementById(`status-${zoneName}`);
+            const button = card.querySelector("button");
+
+            card.classList.toggle("on", isOn);
+            card.classList.toggle("off", !isOn);
+            status.textContent = isOn ? "ON" : "OFF";
+            const icon = document.getElementById(`icon-${zoneName}`);
+            if (isOn) {
+                icon.className = "fa-solid fa-play";
+                icon.style.color = "#388e3c";
+            } else {
+                icon.className = "fa-solid fa-stop";
+                icon.style.color = "#888";
+            }
+
+            button.textContent = isOn ? "STOP" : "START";
+            button.classList.toggle("active", isOn);
+        }
+
+        // Load initial zone states from API
+        fetch("/api/v1/zones")
+            .then(res => res.json())
+            .then(zones => {
+                for (let i = 1; i <= NUM_ZONES; i++) {
+                    const name = `zone${i}`;
+                    zoneStates[name] = zones[name]?.on || false;
+                    updateZoneUI(name);
+                }
+            })
+            .catch(err => {
+                console.warn("Failed to load zones", err);
+            });
+    </script>
+</body>
+
+</html>

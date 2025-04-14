@@ -13,6 +13,13 @@
 #define FRAMEWORK_CONFIG_H 
 #pragma once
 
+/**
+ * @brief This setting defines where uploads go
+ * The default is "/uploads"
+ * This is used by the MultipartParser class
+ */
+#define MULTIPART_UPLOAD_PATH "/uploads"
+
 // === Framework configuration file ===
 // This file contains various configuration settings for the framework.
 #define STREAM_SEND_DELAY_MS 20

@@ -41,6 +41,7 @@ TRACE_INIT(MultipartParser)
 #include "StorageManager.h"
 #include "FreeRTOS.h"
 #include "task.h"
+#include "AppContext.h" // if not already included
 
 State MultipartParser::currentState = SEARCHING_FOR_BOUNDARY; // Initialize state
 
@@ -259,8 +260,12 @@ bool MultipartParser::extractFilename(const std::string &contentDisposition)
     std::size_t end = contentDisposition.find("\"", start);
     if (end == std::string::npos)
         return false;
-
-    filename = contentDisposition.substr(start, end - start);
+        // Ensure upload directory exists
+        auto storage = AppContext::getInstance().getService<StorageManager>();
+        if (storage && !storage->exists(MULTIPART_UPLOAD_PATH)) {
+        storage->createDirectory(MULTIPART_UPLOAD_PATH);
+        }
+        filename = std::string(MULTIPART_UPLOAD_PATH) + "/" + contentDisposition.substr(start, end - start);
 
     if (file_exists(filename.c_str()))
     {

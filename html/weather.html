@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Pico Weather Dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- Weather Icons CDN -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/weather-icons/2.0.10/css/weather-icons.min.css">
+  <style>
+    body {
+      font-family: 'Raleway', sans-serif;
+      background: #e0e0e0;
+      margin: 0;
+      padding: 2rem 1rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    h1 {
+      color: #333;
+      margin-bottom: 0.5rem;
+    }
+
+    .location {
+      font-size: 1.2rem;
+      color: #666;
+      margin-bottom: 2rem;
+    }
+
+    .content-wrapper {
+      width: 90%;
+      max-width: 500px;
+    }
+
+    .card {
+      background: #e0e0e0;
+      border-radius: 20px;
+      padding: 1.5rem;
+      box-shadow: inset 2px 2px 6px #bebebe,
+                  inset -2px -2px 6px #ffffff;
+      text-align: center;
+      margin-bottom: 1.5rem;
+    }
+
+    .current-weather {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .current-weather .wi {
+      font-size: 4rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .temp {
+      font-size: 2.2rem;
+      font-weight: bold;
+      color: #333;
+    }
+
+    .desc {
+      font-size: 1rem;
+      color: #444;
+    }
+
+    .forecast {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1rem;
+    }
+
+    .forecast-card {
+      background: #e0e0e0;
+      border-radius: 16px;
+      padding: 1rem;
+      box-shadow: inset 2px 2px 6px #bebebe,
+                  inset -2px -2px 6px #ffffff;
+      text-align: center;
+    }
+
+    .forecast-card .wi {
+      font-size: 2rem;
+      margin: 0.5rem 0;
+    }
+
+    .day {
+      font-weight: bold;
+      color: #333;
+    }
+
+    .summary {
+      font-size: 0.9rem;
+      color: #555;
+    }
+
+    @media (max-width: 500px) {
+      .forecast {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <h1>Weather Forecast</h1>
+  <div class="location" id="location">Loading location...</div>
+
+  <div class="content-wrapper">
+    <div class="card">
+      <div class="current-weather">
+        <i class="wi wi-day-cloudy" id="currentIcon"></i>
+        <div class="temp" id="currentTemp">--°C</div>
+        <div class="desc" id="currentDesc">Loading...</div>
+      </div>
+    </div>
+
+    <div class="forecast" id="forecastContainer">
+      <!-- Forecast cards will be inserted here -->
+    </div>
+  </div>
+
+  <script>
+    // Mock weather data for now
+    const mockWeather = {
+      location: "San Francisco, CA",
+      current: {
+        temp: 17.4,
+        desc: "Partly Cloudy",
+        icon: "wi-day-cloudy"
+      },
+      forecast: [
+        { day: "Tue", temp: 14, desc: "Showers", icon: "wi-showers" },
+        { day: "Wed", temp: 18, desc: "Sunny", icon: "wi-day-sunny" },
+        { day: "Thu", temp: 15, desc: "Cloudy", icon: "wi-cloudy" }
+      ]
+    };
+
+    function updateWeather(data) {
+      document.getElementById("location").textContent = data.location;
+      document.getElementById("currentTemp").textContent = `${data.current.temp.toFixed(1)}°C`;
+      document.getElementById("currentDesc").textContent = data.current.desc;
+      document.getElementById("currentIcon").className = `wi ${data.current.icon}`;
+
+      const container = document.getElementById("forecastContainer");
+      container.innerHTML = "";
+      data.forecast.forEach(day => {
+        const card = document.createElement("div");
+        card.className = "forecast-card";
+        card.innerHTML = `
+          <div class="day">${day.day}</div>
+          <i class="wi ${day.icon}"></i>
+          <div class="summary">${day.desc}</div>
+          <div class="temp">${day.temp}°C</div>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    // Simulate async load
+    setTimeout(() => {
+      updateWeather(mockWeather);
+    }, 500);
+
+    // Later, replace with real data:
+    // fetch('/api/v1/weather').then(res => res.json()).then(updateWeather);
+  </script>
+</body>
+</html>

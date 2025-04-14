@@ -70,6 +70,7 @@ target_sources(pico_framework PRIVATE
     src/application/FrameworkManager.cpp
     src/application/FrameworkTask.cpp
     src/application/FrameworkView.cpp
+    src/application/FrameworkModel.cpp
 
     # HTTP Server
     src/http-server/HttpServer.cpp

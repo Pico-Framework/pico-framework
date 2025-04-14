@@ -103,8 +103,8 @@ bool FileHandler::serveFile(HttpResponse &res, const char *uri)
     {
         if (!storageManager->isMounted())
         {
-            TRACE("SD card is not mounted — static file access failed\n");
-            JsonResponse::sendError(res, 500, "SD_CARD_NOT_MOUNTED", "SD card not mounted");
+            TRACE("Storage is not mounted — static file access failed\n");
+            JsonResponse::sendError(res, 500, "NOT_MOUNTED", "Storage not mounted");
             return false;
         }
         else
