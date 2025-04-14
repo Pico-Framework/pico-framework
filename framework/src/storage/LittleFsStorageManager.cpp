@@ -93,7 +93,7 @@ void LittleFsStorageManager::configure() {
 
     std::memset(&config, 0, sizeof(config));
 
-    config.context = this;
+    config.context = reinterpret_cast<void*>(flashBase);
     config.read = lfs_read_cb;
     config.prog = lfs_prog_cb;
     config.erase = lfs_erase_cb;
