@@ -130,8 +130,8 @@ bool LittleFsStorageManager::writeFile(const std::string& path, const std::vecto
     lfs_file_t file;
     if (lfs_file_open(&lfs, &file, path.c_str(), LFS_O_WRONLY | LFS_O_CREAT | LFS_O_TRUNC) < 0) return false;
     int written = lfs_file_write(&lfs, &file, data.data(), data.size());
-    lfs_file_close(&lfs, &file);
-    return written == (int)data.size();
+    int closed = lfs_file_close(&lfs, &file);
+    return (written == static_cast<int>(data.size())) && (closed == 0);
 }
 
 bool LittleFsStorageManager::appendToFile(const std::string& path, const uint8_t* data, size_t size) {
