@@ -3,6 +3,7 @@
 #include "TimeManager.h"
 #include "JwtAuthenticator.h"
 #include "LittleFsStorageManager.h"
+#include "EventManager.h"
 #include "framework_config.h"
 #include "DebugTrace.h"
 TRACE_INIT(AppContext);
@@ -22,9 +23,12 @@ void AppContext::initFrameworkServices() {
         registerService<StorageManager>(&fatfs);
         TRACE("[AppContext] Registered FatFsStorageManager.\n");
     #endif
-            // Time manager (always present)
+        // Time manager (always present)
         static TimeManager timeMgr;
         registerService<TimeManager>(&timeMgr);
+        // Event manager (always present)
+        static EventManager eventMgr;
+        registerService<EventManager>(&eventMgr);
     
     #if PICO_HTTP_ENABLE_JWT
         static JwtAuthenticator jwt;
