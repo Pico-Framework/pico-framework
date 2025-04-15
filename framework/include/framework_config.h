@@ -41,7 +41,7 @@
 #define TRACE_Router              0
 #define TRACE_FatFsStorageManager 0
 #define TRACE_JsonService         0
-#define TRACE_Middileware         0
+#define TRACE_Middleware          0
 #define TRACE_Network             0
 #define TRACE_NtpClient           0
 #define TRACE_utility             0  

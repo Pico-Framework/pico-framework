@@ -172,6 +172,7 @@ target_link_libraries(pico_framework PUBLIC
     pico_stdlib
     pico_cyw43_arch_lwip_sys_freertos
     pico_lwip_sntp
+    pico_flash
     hardware_rtc
     FreeRTOS+FAT+CLI
 )

@@ -162,15 +162,6 @@ bool MultipartParser::handleChunk(std::string &chunkData)
                 return false;
             }
 
-            // If file exists already, send error
-
-            if (file_exists(filename.c_str()))
-            {
-                sendHttpResponse(409, "File already exists");
-                currentState = COMPLETE;
-                return false;
-            }
-
             chunkData = chunkData.substr(headersEnd + 4); // skip headers
             currentState = FOUND_DATA_START;
             continue;
@@ -262,6 +253,7 @@ bool MultipartParser::extractFilename(const std::string &contentDisposition)
         return false;
         // Ensure upload directory exists
         auto storage = AppContext::getInstance().getService<StorageManager>();
+        storage->mount(); // ensure mounted
         if (storage && !storage->exists(MULTIPART_UPLOAD_PATH)) {
         storage->createDirectory(MULTIPART_UPLOAD_PATH);
         }

@@ -53,12 +53,12 @@ bool FileHandler::init()
     StorageManager *storage = AppContext::getInstance().getService<StorageManager>();
     if (storage->mount())
     {
-        TRACE("SD Card mounted successfully\n");
+        TRACE("Storage mounted successfully\n");
         return true;
     }
     else
     {
-        printf("SD Card mount failed\n");
+        printf("Storage mount failed\n");
         return false;
     }
 }
@@ -98,6 +98,12 @@ bool FileHandler::serveFile(HttpResponse &res, const char *uri)
     std::string path = uri;
 
     storageManager = AppContext::getInstance().getService<StorageManager>();
+    if(!storageManager->mount())
+    {
+        printf("Storage mount failed\n");
+        JsonResponse::sendError(res, 500, "MOUNT_FAILED", "Storage mount failed");
+        return false;
+    }
 
     if (!storageManager->exists(path))
     {
