@@ -59,6 +59,8 @@ public:
 
     bool isMounted() const override;
 
+    bool formatStorage() override;
+
 private:
     bool mounted = false;           ///< Indicates if the filesystem is currently mounted
     std::string mountPoint = "sd0"; ///< Default mount point

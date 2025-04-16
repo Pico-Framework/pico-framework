@@ -48,10 +48,10 @@ public:
         : method(method), path(path), uri(path) {}
 
     // Server-side use — accepts Tcp* and parsed info
-    HttpRequest(Tcp *connection, const char *rawHeaders, const std::string &method, const std::string &path)
+    HttpRequest(Tcp *connection, const std::string rawHeaders, const std::string &method, const std::string &path)
         : tcp(connection), method(method), path(path), uri(path)
     {
-        parseHeaders(rawHeaders);
+        parseHeaders(rawHeaders.c_str());
     }
 
     HttpRequest() = default;

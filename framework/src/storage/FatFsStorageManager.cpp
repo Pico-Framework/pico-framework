@@ -322,3 +322,25 @@ bool FatFsStorageManager::probeMountPoint()
     int result = ff_findfirst(root.c_str(), &xFindStruct);
     return result == FF_ERR_NONE;
 }
+
+bool FatFsStorageManager::formatStorage()
+{
+    if (!mounted) {
+        printf("[FatFs] Cannot format: card not mounted\n");
+        return false;
+    }
+
+    if (!format(mountPoint.c_str())) {
+        printf("[FatFs] Format failed for device: %s\n", mountPoint.c_str());
+        return false;
+    }
+
+    printf("[FatFs] Format successful for device: %s\n", mountPoint.c_str());
+
+    // Optionally re-mount to refresh filesystem state
+    unmount();
+    mount();
+
+    return mounted;
+}
+

@@ -122,7 +122,6 @@ void HttpServer::run()
             printf("[HttpServer] Accepted client connection\n");
             startHandlingClient(conn);
             vTaskDelay(pdMS_TO_TICKS(100));
-            conn->close();
             printf("[HttpServer] Client connection handled\n");
             delete conn;
         }

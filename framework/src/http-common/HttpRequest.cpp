@@ -204,7 +204,9 @@ HttpRequest HttpRequest::receive(Tcp* tcp)
     TRACE("Raw headers length: %zu\n", headerEnd);
 
     // Create the request which will parse the headers
-    HttpRequest request(tcp, buffer, std::string(method), std::string(path));
+    std::string rawHeaders(buffer, headerEnd);
+    printf("Raw headers: %s\n", rawHeaders.c_str());
+    HttpRequest request(tcp, rawHeaders, std::string(method), std::string(path));
 
     // Get headers from the HttpRequest object
     headers = request.getHeaders();

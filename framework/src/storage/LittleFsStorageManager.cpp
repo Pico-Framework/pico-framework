@@ -310,3 +310,41 @@ bool LittleFsStorageManager::createDirectory(const std::string& path) {
 bool LittleFsStorageManager::removeDirectory(const std::string& path) {
     return lfs_remove(&lfs, path.c_str()) == 0;
 }
+
+bool LittleFsStorageManager::formatStorage()
+{
+    if (!mounted) {
+        printf("[LittleFs] Cannot format: not mounted\n");
+        return false;
+    }
+
+    bool result = false;
+
+#if configNUM_CORES > 1
+    // Use multicore lockout to ensure atomicity                    
+    // Core-safe execution using flash_safe_execute
+    flash_safe_execute(
+        [](void* param) {
+            auto* ctx = static_cast<std::pair<LittleFsStorageManager*, bool*>*>(param);
+            int err = lfs_format(&ctx->first->lfs, &ctx->first->config);
+            *ctx->second = (err == 0);
+        },
+        static_cast<void*>(new std::pair<LittleFsStorageManager*, bool*>(&(*this), &result)),
+        5000
+    );
+#else
+    // Fallback single-core safe version
+    uint32_t status = save_and_disable_interrupts();
+    int err = lfs_format(&lfs, &config);
+    restore_interrupts(status);
+    result = (err == 0);
+#endif
+
+    if (result) {
+        printf("[LittleFs] Format successful\n");
+    } else {
+        printf("[LittleFs] Format failed\n");
+    }
+
+    return result;
+}

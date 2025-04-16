@@ -130,6 +130,12 @@ public:
      */
     bool removeDirectory(const std::string &path) override;
 
+    /**
+     * @brief Format the filesystem.
+     * @return true if formatted successfully.
+     */
+    bool formatStorage() override;
+
 private:
     uintptr_t flashBase = 0;
     size_t flashSize = 0;

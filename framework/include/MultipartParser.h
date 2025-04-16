@@ -68,7 +68,7 @@ private:
     std::string filename;
     std::string leftoverData;
     std::string buffer;
-    HttpRequest request;
+    const HttpRequest& request;
 
     static State currentState;
 

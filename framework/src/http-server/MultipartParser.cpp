@@ -157,7 +157,7 @@ bool MultipartParser::handleChunk(std::string &chunkData)
 
             if (!gotFilename)
             {
-                sendHttpResponse(400, "Invalid upload: no filename");
+                sendHttpResponse(400, "Invalid upload: no filename or filename exists already");
                 currentState = COMPLETE;
                 return false;
             }
@@ -261,7 +261,7 @@ bool MultipartParser::extractFilename(const std::string &contentDisposition)
 
     if (file_exists(filename.c_str()))
     {
-        sendHttpResponse(400, "File already exists");
+        printf("File already exists: %s\n", filename.c_str());
         return false;
     }
 
@@ -333,6 +333,5 @@ void MultipartParser::sendHttpResponse(int statusCode, const std::string &messag
 
     std::string response = oss.str();
     tcp->send(response.c_str(), response.length());
-    vTaskDelay(pdMS_TO_TICKS(50));
-    tcp->close();
+    vTaskDelay(pdMS_TO_TICKS(50)); // yield to allow send to complete
 }
