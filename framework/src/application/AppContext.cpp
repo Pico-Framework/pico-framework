@@ -1,8 +1,11 @@
 #include "AppContext.h"
-#include "FatFsStorageManager.h"
+#if PICO_HTTP_ENABLE_LITTLEFS
+    #include "LittleFsStorageManager.h"
+#else   
+    #include "FatFsStorageManager.h"
+#endif
 #include "TimeManager.h"
 #include "JwtAuthenticator.h"
-#include "LittleFsStorageManager.h"
 #include "EventManager.h"
 #include "framework_config.h"
 #include "DebugTrace.h"

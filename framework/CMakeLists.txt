@@ -137,7 +137,7 @@ if(PICO_HTTP_ENABLE_LITTLEFS)
 else()
     target_sources(pico_framework PRIVATE 
         src/storage/FatFsStorageManager.cpp
-        hw_config.c
+        src/port/hw_config.c
         src/storage/JsonService.cpp
         )
     target_link_libraries(pico_framework PUBLIC FreeRTOS+FAT+CLI)
