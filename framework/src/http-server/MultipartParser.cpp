@@ -152,6 +152,10 @@ bool MultipartParser::handleChunk(std::string &chunkData)
                 if (line.find("Content-Disposition:") != std::string::npos)
                 {
                     gotFilename = extractFilename(line);
+                    if (gotFilename)
+                    {
+                        TRACE("Filename extracted: %s\n", filename.c_str());
+                    }
                 }
             }
 
@@ -254,8 +258,9 @@ bool MultipartParser::extractFilename(const std::string &contentDisposition)
         // Ensure upload directory exists
         auto storage = AppContext::getInstance().getService<StorageManager>();
         storage->mount(); // ensure mounted
-        if (storage && !storage->exists(MULTIPART_UPLOAD_PATH)) {
-        storage->createDirectory(MULTIPART_UPLOAD_PATH);
+        std::string uploads(MULTIPART_UPLOAD_PATH); 
+        if (storage && !storage->exists(uploads)) {
+            storage->createDirectory(uploads);
         }
         filename = std::string(MULTIPART_UPLOAD_PATH) + "/" + contentDisposition.substr(start, end - start);
 
@@ -332,6 +337,10 @@ void MultipartParser::sendHttpResponse(int statusCode, const std::string &messag
         << body;
 
     std::string response = oss.str();
+    if (!tcp || !tcp->isConnected()) {
+        panic("Attempted to send on invalid socket");
+    }
+    runTimeStats();
     tcp->send(response.c_str(), response.length());
     vTaskDelay(pdMS_TO_TICKS(50)); // yield to allow send to complete
 }

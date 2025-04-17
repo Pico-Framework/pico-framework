@@ -136,6 +136,15 @@ public:
      */
     bool formatStorage() override;
 
+    /**
+     * get Flash base address
+     * @return Flash base address
+     */
+    uintptr_t getFlashBase() const
+    {
+        return flashBase;
+    }
+
 private:
     uintptr_t flashBase = 0;
     size_t flashSize = 0;

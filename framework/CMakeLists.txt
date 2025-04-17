@@ -108,12 +108,6 @@ target_sources(pico_framework PRIVATE
     src/utility/Logger.cpp
     src/utility/utility.cpp
 
-    # Storage (core)
-    src/storage/FatFsStorageManager.cpp
-    src/storage/JsonService.cpp
-
-    # Port and config
-    src/port/hw_config.c
 )
 
 #------------------------------------------------------------------------------
@@ -135,11 +129,17 @@ if(PICO_HTTP_ENABLE_LITTLEFS)
         lib/littlefs/lfs.c
         lib/littlefs/lfs_util.c
         src/storage/LittleFsStorageManager.cpp
+        src/port/idleMemory.c
+        src/port/cppMemory.cpp
     )
     target_include_directories(pico_framework PUBLIC lib/littlefs)
     target_compile_definitions(pico_framework PUBLIC PICO_HTTP_ENABLE_LITTLEFS=1)
 else()
-    target_sources(pico_framework PRIVATE src/storage/FatFsStorageManager.cpp)
+    target_sources(pico_framework PRIVATE 
+        src/storage/FatFsStorageManager.cpp
+        hw_config.c
+        src/storage/JsonService.cpp
+        )
     target_link_libraries(pico_framework PUBLIC FreeRTOS+FAT+CLI)
 endif()
 
@@ -174,7 +174,7 @@ target_link_libraries(pico_framework PUBLIC
     pico_lwip_sntp
     pico_flash
     hardware_rtc
-    FreeRTOS+FAT+CLI
+    pico_aon_timer
 )
 
 if(PICO_HTTP_ENABLE_JWT OR PICO_HTTP_CLIENT_ENABLE_TLS)

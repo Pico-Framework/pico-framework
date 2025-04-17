@@ -11,7 +11,10 @@
 #include "pico/aon_timer.h"
 #include "PicoTime.h"
 #include "FreeRTOS.h"
+
+#ifndef PICO_HTTP_ENABLE_LITTLEFS
 #include "FreeRTOS_time.h"
+#endif
 #include "HttpRequest.h"
 #include "HttpResponse.h"
 #include "framework_config.h"
@@ -62,11 +65,15 @@ void TimeManager::setTimeFromEpoch(uint32_t epoch) {
         .tv_sec = epoch,
         .tv_usec = 0
     };
-
+    #ifndef PICO_HTTP_ENABLE_LITTLEFS
     FreeRTOS_time_init(); 
     settimeofday(&tv, NULL);  // this updates c system time
     setrtc(&ts);  //  This updates aon clock, FreeRTOS epochtime and starts the 1s update timer
     printf("[TimeManager] AON and FreeRTOS time system set.\n");
+    #else
+    settimeofday(&tv, NULL);
+    printf("[TimeManager] System time set.\n");
+    #endif
 }
 
 void TimeManager::applyFixedTimezoneOffset(int offsetSeconds, const char* stdName, const char* dstName) {
