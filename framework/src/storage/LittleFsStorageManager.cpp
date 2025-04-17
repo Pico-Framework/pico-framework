@@ -151,7 +151,7 @@ static int lfs_erase_cb_flashsafe(const struct lfs_config *c, lfs_block_t block)
         .addr = addr - XIP_BASE,
         .size = c->block_size};
     // printf("[LFS ERASE] executing flash_safe_execute\n");
-    runTimeStats();
+    //runTimeStats();
     int result = flash_safe_execute(flash_erase_callback, &eraseParams, 1000);
     // printf("[LFS ERASE] flash_safe_execute result: %d\n", result);
     return (result == PICO_OK) ? 0 : -1;
@@ -382,22 +382,32 @@ bool LittleFsStorageManager::removeDirectory(const std::string &path)
     return lfs_remove(&lfs, path.c_str()) == 0;
 }
 
+struct FormatContext {
+    LittleFsStorageManager *self;
+    bool *result;
+};
+
+void LittleFsStorageManager::formatInner(bool *result) {
+    int err = lfs_format(&lfs, &config);
+    *result = (err == 0);
+}
+
+static void __not_in_flash_func(format_callback)(void *param) {
+    auto *ctx = static_cast<FormatContext *>(param);
+    ctx->self->formatInner(ctx->result);
+}
+
+
 bool LittleFsStorageManager::formatStorage()
 {
     bool result = false;
 
-#if configNUM_CORES > 1
+    #if configNUM_CORES > 1
     // Use multicore lockout to ensure atomicity
     // Core-safe execution using flash_safe_execute
-    flash_safe_execute(
-        [](void *param)
-        {
-            auto *ctx = static_cast<std::pair<LittleFsStorageManager *, bool *> *>(param);
-            int err = lfs_format(&ctx->first->lfs, &ctx->first->config);
-            *ctx->second = (err == 0);
-        },
-        static_cast<void *>(new std::pair<LittleFsStorageManager *, bool *>(&(*this), &result)),
-        5000);
+    FormatContext ctx = { this, &result };
+
+    flash_safe_execute(format_callback, &ctx, 5000);
 #else
     // Fallback single-core safe version
     uint32_t status = save_and_disable_interrupts();
