@@ -10,6 +10,7 @@ project(pico_framework)
 # 1. Framework Feature Options (only these five)
 #------------------------------------------------------------------------------
 
+# Framework Feature Options - if already set by user, use those values
 option(PICO_HTTP_ENABLE_LITTLEFS     "Enable LittleFS-based StorageManager" ON)
 option(PICO_HTTP_ENABLE_HTTP_CLIENT  "Enable HttpClient" ON)
 option(PICO_HTTP_CLIENT_ENABLE_TLS   "Enable TLS support in HttpClient" ON)
@@ -107,7 +108,6 @@ target_sources(pico_framework PRIVATE
     # Utility
     src/utility/Logger.cpp
     src/utility/utility.cpp
-
 )
 
 #------------------------------------------------------------------------------
@@ -135,6 +135,7 @@ if(PICO_HTTP_ENABLE_LITTLEFS)
     target_include_directories(pico_framework PUBLIC lib/littlefs)
     target_compile_definitions(pico_framework PUBLIC PICO_HTTP_ENABLE_LITTLEFS=1)
 else()
+    message(STATUS "[framework] FatFs support enabled")
     target_sources(pico_framework PRIVATE 
         src/storage/FatFsStorageManager.cpp
         src/port/hw_config.c
@@ -153,6 +154,7 @@ if(PICO_HTTP_ENABLE_HTTP_CLIENT)
 endif()
 
 if(PICO_HTTP_CLIENT_ENABLE_TLS)
+    message(STATUS "[framework] HttpClient TLS support enabled")
     target_compile_definitions(pico_framework PUBLIC PICO_HTTP_CLIENT_ENABLE_TLS=1)
 endif()
 

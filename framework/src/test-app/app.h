@@ -21,6 +21,7 @@ public:
     void deleteFile(HttpRequest &req, HttpResponse &res, const std::vector<std::string> &params);
     void getState(HttpRequest &req, HttpResponse &res, const std::vector<std::string> params);
     void setState(HttpRequest &req, HttpResponse &res, const std::vector<std::string> params);
+    void getLedState(HttpRequest& req, HttpResponse& res, const std::vector<std::string>& /*params*/);
 
 private:
 };

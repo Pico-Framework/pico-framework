@@ -1,6 +1,9 @@
 cmake_minimum_required(VERSION 3.12)
 
+#set(PICO_BOARD pico2_w)
+#set(PICO_PLATFORM rp2350)
 set(PICO_BOARD pico_w)
+set(PICO_PLATFORM rp2040)
 
 include(${CMAKE_SOURCE_DIR}/cmake/pico_sdk_import.cmake)
 
@@ -16,7 +19,7 @@ endif()
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_CXX_STANDARD 17)
 
-# we need this to be able to redefine cpp new/delete with freeRTOS
+# we need this to be able to redefine cpp new/delete with freeRTOS to use heap4
 add_compile_definitions(PICO_CXX_DISABLE_ALLOCATION_OVERRIDES=1) 
 
 if (PICO_SDK_VERSION_STRING VERSION_LESS "2.1.0")

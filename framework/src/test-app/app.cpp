@@ -63,6 +63,11 @@ void App::getTemperature(HttpRequest &req, HttpResponse &res, const std::vector<
     res.json({{"temperature", temperature}});
 }
 
+void App::getLedState(HttpRequest& req, HttpResponse& res, const std::vector<std::string>& /*params*/) {
+    bool isOn = cyw43_arch_gpio_get(0); // Read the state of the LED pin
+    res.json({{"state", isOn ? 1 : 0}});
+}
+
 void App::ledOn(HttpRequest &req, HttpResponse &res, const std::vector<std::string> &params)
 {
     printf("[App] LED off\n");
@@ -79,6 +84,9 @@ void App::ledOff(HttpRequest &req, HttpResponse &res, const std::vector<std::str
 
 bool setPin(int pin, int value)
 {
+    gpio_init(pin);
+    gpio_set_function(pin, GPIO_FUNC_SIO);
+    gpio_set_dir(pin, GPIO_OUT);
     if (value == 0)
     {
         gpio_put(pin, false);
@@ -86,6 +94,7 @@ bool setPin(int pin, int value)
     }
     else if (value == 1)
     {
+        
         gpio_put(pin, true);
         return true;
     }
@@ -100,7 +109,7 @@ void App::getState(HttpRequest &req, HttpResponse &res, const std::vector<std::s
 {
     int pin = std::stoi(params[0]);
     bool state = getPin(pin);
-
+    printf("[App] Pin %d get state: %d\n", pin, state);
     res.json({{"pin", pin},
               {"state", state ? 1 : 0}});
 }
@@ -117,6 +126,7 @@ void App::setState(HttpRequest &req, HttpResponse &res, const std::vector<std::s
     }
 
     setPin(pin, value);
+    printf("[App] Pin %d state set to %d\n", pin, value);
     res.json({{"pin", pin},
               {"state", value}});
 }
@@ -156,6 +166,9 @@ void App::initRoutes()
 
     router.addRoute("DELETE", "/uploads/{file}", [this](HttpRequest &req, HttpResponse &res, const std::vector<std::string> &params)
                     { this->deleteFile(req, res, params); });
+
+    router.addRoute("GET", "/api/v1/led", [this](HttpRequest &req, HttpResponse &res, const std::vector<std::string> &params)
+                    { this->getLedState(req, res, params); });
 
     router.addRoute("POST", "/api/v1/led/0", [this](HttpRequest &req, HttpResponse &res, const std::vector<std::string> &params)
                     { this->ledOff(req, res, params); });
