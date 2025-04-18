@@ -54,10 +54,15 @@ add_executable(framework_test
     framework/src/test-app/main.cpp
     framework/src/test-app/app.cpp
     )
-target_link_libraries(framework_test pico_framework)
+target_link_libraries(framework_test 
+    pico_framework
+    hardware_adc
+    )
 
-# this needs to be conditional on using littlefs
-target_link_options(framework_test PRIVATE "-T${CMAKE_SOURCE_DIR}/memmap_lfs_fragment.ld")
+# Only need this if we are using littlefs - reserves a section of flash for the filesystem (128K by default)
+#if(PICO_HTTP_ENABLE_LITTLEFS)
+    target_link_options(framework_test PRIVATE "-T${CMAKE_SOURCE_DIR}/memmap_lfs_fragment.ld")
+#endif()
 
 #get the memory usage
 if (PICO_PRINT_MEM_USAGE)

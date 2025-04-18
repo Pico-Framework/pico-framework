@@ -325,7 +325,8 @@ bool MultipartParser::handleFinalBoundary(std::string &fileData)
 void MultipartParser::sendHttpResponse(int statusCode, const std::string &message)
 {
     std::string code = std::to_string(statusCode);
-    std::string body = R"({"success":false,"error":{"code":")" + code +
+    std::string success = (statusCode >= 200 && statusCode < 300) ? "true" : "false";
+    std::string body = R"({"success":)" + success + R"(,"error":{"code":")" + code +
                        R"(","message":")" + message + R"("}})";
 
     std::ostringstream oss;
