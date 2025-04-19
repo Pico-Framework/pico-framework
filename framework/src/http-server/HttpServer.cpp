@@ -237,52 +237,51 @@ void HttpServer::handleClient(Tcp* conn)
 
     HttpRequest req = HttpRequest::receive(conn);
 
-    std::cout << "HttpRequest received: " << req.getMethod() << " " << req.getPath() << std::endl;
-    std::cout << "HttpRequest content length: " << req.getContentLength() << std::endl;
-    std::cout << "HttpRequest content type: " << req.getContentType() << std::endl;
-    std::cout << "HttpRequest boundary: " << req.getBoundary() << std::endl;
-    std::cout << "HttpRequest is multipart: " << (req.isMultipart() ? "true" : "false") << std::endl;
-    std::cout << "HttpRequest header count: " << req.getHeaders().size() << std::endl;
-    std::cout << "HttpRequest method (lowercase): " << toLower(req.getMethod()) << std::endl;
-    std::cout << "HttpRequest url: " << req.getUri() << std::endl;
-    std::cout << "HttpRequest path: " << req.getPath() << std::endl;
-    std::cout << "HttpRequest query: " << req.getQuery() << std::endl;
+    TRACE("HttpRequest received: %s, %s\n",req.getMethod().c_str(), req.getPath().c_str());
+    TRACE("HttpRequest content length: %s\n", req.getContentLength());
+    TRACE("HttpRequest content type: %s\n", req.getContentType());
+    TRACE("HttpRequest boundary: %s\n", req.getBoundary());
+    TRACE("HttpRequest is multipart: %s\n", (req.isMultipart() ? "true" : "false"));
+    TRACE("HttpRequest header count: %d\n", req.getHeaders().size());;
+    TRACE("HttpRequest url: %s\n", req.getUri().c_str());
+    TRACE("HttpRequest path: %s\n", req.getPath().c_str());
+    TRACE("HttpRequest query: %s\n", req.getQuery().c_str());
 
     for (const auto &param : req.getQueryParams())
     {
-        std::cout << param.first << ": " << param.second << std::endl;
+        TRACE("HttpRequest query parameter %s : %s\n", param.first.c_str(), param.second.c_str()); 
     }
 
     for (const auto &param : req.getFormParams())
     {
-        std::cout << param.first << ": " << param.second << std::endl;
+        TRACE("HttpRequest form parameter %s : %s\n", param.first.c_str(), param.second.c_str()); 
     }
 
     for (const auto &cookie : req.getCookies())
     {
-        std::cout << cookie.first << ": " << cookie.second << std::endl;
+        TRACE("HttpRequest cookie %s : %s\n", cookie.first.c_str(), cookie.second.c_str()); 
     }
 
     if (req.getContentLength() > 0)
     {
-        std::cout << "HttpRequest body length: " << req.getBody().length() << std::endl;
-        std::cout << "HttpRequest start of body index: " << req.getHeaderEnd() << std::endl;
+        TRACE("HttpRequest body length: %d\n", req.getBody().length());
+        TRACE("HttpRequest start of body index: %d\n", req.getHeaderEnd());
     }
-
-    for (const auto &headr : req.getHeaders())
+    
+    TRACE("HttpRequest headers:\n");
+    for (const auto &headr : req.getHeaders())    
     {
-        std::cout << headr.first << ": " << headr.second << std::endl;
+        TRACE("%s : %s\n", headr.first.c_str(), headr.second.c_str());
     }
 
-    std::cout << "HttpRequest body: " << req.getBody() << std::endl;
+    TRACE("HttpRequest body: %s\n", req.getBody().c_str()); 
 
     printf("\n===== HTTP CLIENT REQUEST =====\n");
     printf("Client request received: %s, path: %s\n", req.getMethod().c_str(), req.getPath().c_str());
-    printf("HttpRequest body: %s\n", req.getBody().c_str());
 
     HttpResponse res(conn);
     bool ok = router.handleRequest(req, res);
-    printf("HttpRequest handled: %s\n", ok ? "true" : "false");
+    TRACE("HttpRequest handled: %s\n", ok ? "true" : "false");
 
     if (!ok)
     {

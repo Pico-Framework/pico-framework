@@ -82,13 +82,14 @@ void TimeManager::setTimeFromEpoch(uint32_t epoch) {
 
 void TimeManager::applyFixedTimezoneOffset(int offsetSeconds, const char* stdName, const char* dstName) {
     TRACE("[TimeManager] Setting timezone offset: %d seconds\n", offsetSeconds);
-    TRACE("[TimeManager] Standard timezone: %s, DST timezone: %s\n", stdName, dstName);
+    printf("[TimeManager] Standard timezone: %s, DST timezone: %s\n", stdName, dstName);
     timezoneOffsetSeconds = offsetSeconds;
     timezoneName = stdName;
 
     // Log for trace/debug purposes
     printf("[TimeManager] Timezone set to UTC %+d:00 (%s)\n",
            offsetSeconds / 3600, stdName);
+    PicoTime::printNow();
 }
 
 bool TimeManager::getLocationFromIp(std::string& tzName, float& lat, float& lon) {

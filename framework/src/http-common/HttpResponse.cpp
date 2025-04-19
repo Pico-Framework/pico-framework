@@ -190,7 +190,7 @@ HttpResponse &HttpResponse::clearCookie(const std::string &name, const std::stri
  */
 void HttpResponse::send(const std::string &body)
 {
-    printf("HttpResponse::send() called\n");
+    TRACE("HttpResponse::send()\n");
     if (!headerSent)
     {
         if (headers.find("Content-Length") == headers.end())
@@ -220,7 +220,7 @@ void HttpResponse::send(const std::string &body)
     }
 
     tcp->send(body.data(), body.size());
-    printf("HttpResponse::send() completed\n");
+    TRACE("HttpResponse::send() completed\n");
 }
 
 /**

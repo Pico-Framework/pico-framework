@@ -31,7 +31,7 @@
 
 // === Module-specific trace enables ===
 #define TRACE_FrameworkManager    0
-#define TRACE_HttpServer          1
+#define TRACE_HttpServer          0
 #define TRACE_HttpRequest         0
 #define TRACE_HttpResponse        0
 #define TRACE_HttpFileserver      0
