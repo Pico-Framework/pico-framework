@@ -6,7 +6,6 @@
 
 App::App(int port) : FrameworkApp(port, "AppTask", 2048, 1)
 {
-    std::cout << "App constructed" << std::endl;
     initRoutes();
 }
 
