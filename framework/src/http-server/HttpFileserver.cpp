@@ -98,7 +98,7 @@ bool FileHandler::serveFile(HttpResponse &res, const char *uri)
     std::string path = uri;
 
     storageManager = AppContext::getInstance().getService<StorageManager>();
-    if(!storageManager->mount())
+    if (!storageManager->mount())
     {
         printf("Storage mount failed\n");
         JsonResponse::sendError(res, 500, "MOUNT_FAILED", "Storage mount failed");
@@ -134,9 +134,10 @@ bool FileHandler::serveFile(HttpResponse &res, const char *uri)
     res.start(200, fileSize, mimeType.c_str());
 
     storageManager->streamFile(path, [&](const uint8_t *data, size_t len)
-                               {
+    {
          res.writeChunk(reinterpret_cast<const char*>(data), len);
-         vTaskDelay(pdMS_TO_TICKS(STREAM_SEND_DELAY_MS)); });
+         vTaskDelay(pdMS_TO_TICKS(STREAM_SEND_DELAY_MS)); 
+    }); // allow tcpip thread to get in
 
     res.finish();
     return true;
@@ -167,7 +168,7 @@ void HttpFileserver::handle_list_directory(HttpRequest &req, HttpResponse &res, 
     fileHandler.listDirectory(directory_path.c_str());
 
     const char *response = "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\n\r\nDirectory listed successfully.";
-    res.getTcp()->send(response, strlen(response)); 
+    res.getTcp()->send(response, strlen(response));
 }
 
 // Helper function to check if a string ends with a given suffix
@@ -216,6 +217,13 @@ std::string HttpFileserver::getMimeType(const std::string &filePath)
         {".xml", "application/xml"},
         {".pdf", "application/pdf"},
         {".zip", "application/zip"},
+        {".gz", "application/x-gzip-compressed"},
+        {".tar", "application/x-tar"},
+        {".mp4", "video/mp4"},
+        {".webm", "video/webm"},
+        {".ogg", "audio/ogg"},
+        {".flac", "audio/flac"},
+        {".aac", "audio/aac"},
         {".mp4", "video/mp4"},
         {".mp3", "audio/mpeg"},
         {".wav", "audio/wav"},

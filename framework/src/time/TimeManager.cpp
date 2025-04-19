@@ -8,7 +8,11 @@
 #include "FreeRTOS.h"
 #include "task.h"
 #include "AppContext.h"
+#if defined(PICO_RP2040)
+#include "hardware/rtc.h"
+#elif defined(PICO_RP2350)
 #include "pico/aon_timer.h"
+#endif
 #include "PicoTime.h"
 #include "FreeRTOS.h"
 

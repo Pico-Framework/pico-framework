@@ -139,13 +139,15 @@
 #define configSUPPORT_PICO_SYNC_INTEROP         1
 #define configSUPPORT_PICO_TIME_INTEROP         1
 
-// #if PICO_RP2350
-// #define configENABLE_MPU                        0
-// #define configENABLE_TRUSTZONE                  0
-// #define configRUN_FREERTOS_SECURE_ONLY          1
-// #define configENABLE_FPU                        1
-// #define configMAX_SYSCALL_INTERRUPT_PRIORITY    16
-// #endif
+#if PICO_RP2350
+#define portHAS_STACK_OVERFLOW_CHECKING         1
+#define portUSING_MPU_WRAPPERS                  0
+#define configENABLE_MPU                        0
+#define configENABLE_TRUSTZONE                  0
+#define configRUN_FREERTOS_SECURE_ONLY          1
+#define configENABLE_FPU                        1
+#define configMAX_SYSCALL_INTERRUPT_PRIORITY    16
+#endif
 
 #include <assert.h>
 /* Define to trap errors during development. */
@@ -171,11 +173,12 @@ to exclude the API function. */
 #define INCLUDE_xQueueGetMutexHolder            1
 
 #if PICO_RP2350
-#define configENABLE_MPU                        0
-#define configENABLE_TRUSTZONE                  0
-#define configRUN_FREERTOS_SECURE_ONLY          1
-#define configENABLE_FPU                        1
-#define configMAX_SYSCALL_INTERRUPT_PRIORITY    16
+#define configENABLE_MPU 0
+#define configENABLE_TRUSTZONE 0
+#define configRUN_FREERTOS_SECURE_ONLY 1
+#define configENABLE_FPU 1
+#define configMAX_SYSCALL_INTERRUPT_PRIORITY 16
+#define configCPU_CLOCK_HZ 150000000
 #endif
 
 // for extended stack information

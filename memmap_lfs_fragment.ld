@@ -1,7 +1,11 @@
 MEMORY
 {
-    LFS_FLASH (rx) : ORIGIN = 0x101E0000, LENGTH = 128K
+  FLASH (rx) : ORIGIN = 0x10000000, LENGTH = 0x1E0000  /* 1920 KB */
+  LFS   (rx) : ORIGIN = 0x101E0000, LENGTH = 0x20000   /* 128 KB */
+  RAM   (rwx): ORIGIN = 0x20000000, LENGTH = 256K
 }
 
 __flash_lfs_start = ORIGIN(LFS_FLASH);
 __flash_lfs_end   = ORIGIN(LFS_FLASH) + LENGTH(LFS_FLASH);
+
+

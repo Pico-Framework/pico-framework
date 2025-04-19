@@ -1,9 +1,9 @@
 cmake_minimum_required(VERSION 3.12)
 
-#set(PICO_BOARD pico2_w)
-#set(PICO_PLATFORM rp2350)
-set(PICO_BOARD pico_w)
-set(PICO_PLATFORM rp2040)
+set(PICO_BOARD pico2_w)
+set(PICO_PLATFORM rp2350-arm-s)
+#set(PICO_BOARD pico_w)
+#set(PICO_PLATFORM rp2040)
 
 include(${CMAKE_SOURCE_DIR}/cmake/pico_sdk_import.cmake)
 

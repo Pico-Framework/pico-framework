@@ -14,88 +14,91 @@
  * @copyright Copyright (c) 2025, Ian Archbell
  */
 
- #pragma once
+#pragma once
 
- #include <ctime>
- #include <string>
- #include "pico/stdlib.h"
- 
- #if PICO_ON_CHIP_RTC
- #include "hardware/rtc.h"
- #endif
- 
- /**
-  * @class PicoTime
-  * @brief Cross-platform time utilities for RP2040 and RP2350.
-  */
- class PicoTime {
- public:
-     /**
-      * @brief Get the current epoch time using platform RTC or AON.
-      * @return Current UNIX timestamp.
-      */
-     static time_t now();
- 
-     /**
-      * @brief Get the current local time as `struct tm`.
-      * @return Current time in `tm` format.
-      */
-     static struct tm nowTm();
- 
-     /**
-      * @brief Get the current time as a `datetime_t`.
-      * @return Time in `datetime_t` format.
-      */
-     static datetime_t nowDatetime();
- 
-     /**
-      * @brief Get a string with the current time formatted as HH:MM:SS.
-      * @return Formatted time string.
-      */
-     static std::string getNowHhMmSs();
- 
-     /**
-      * @brief Construct today's date with a specific time-of-day.
-      * @param hhmmss Pointer to a `tm` with hour/min/sec set.
-      * @return Combined `tm` with today's date and given time.
-      */
-     static struct tm todayAt(const struct tm* hhmmss);
- 
-     /**
-      * @brief Convert a `tm` with today's date and time to epoch.
-      * @param hhmmss Pointer to `tm` with time-of-day.
-      * @return Time as UNIX timestamp.
-      */
-     static time_t todayAtTimeT(const struct tm* hhmmss);
- 
-     /**
-      * @brief Convert a time-of-day to a string for today.
-      * @param hhmmss Pointer to `tm` with hour/min/sec.
-      * @return Formatted string including date and time.
-      */
-     static std::string todayHhMmSsString(const struct tm* hhmmss);
- 
-     /**
-      * @brief Print the current time to stdout.
-      */
-     static void printNow();
- 
-     /**
-      * @brief Print a given UNIX timestamp to stdout.
-      * @param t UNIX time value.
-      */
-     static void print(time_t t);
- 
-     /**
-      * @brief Print a `struct tm` to stdout.
-      * @param t Pointer to `tm` to print.
-      */
-     static void print(const struct tm* t);
- 
-     /**
-      * @brief Print a `datetime_t` to stdout.
-      * @param dt Pointer to `datetime_t` to print.
-      */
-     static void print(const datetime_t* dt);
- };
- 
+#include <ctime>
+#include <string>
+#include "pico/stdlib.h"
+
+#if PICO_ON_CHIP_RTC
+#include "hardware/rtc.h"
+#endif
+
+/**
+ * @class PicoTime
+ * @brief Cross-platform time utilities for RP2040 and RP2350.
+ */
+class PicoTime
+{
+public:
+    /**
+     * @brief Get the current epoch time using platform RTC or AON.
+     * @return Current UNIX timestamp.
+     */
+    static time_t now();
+
+    /**
+     * @brief Get the current local time as `struct tm`.
+     * @return Current time in `tm` format.
+     */
+    static struct tm nowTm();
+
+    /**
+     * @brief Get the current time as a `datetime_t`.
+     * @return Time in `datetime_t` format.
+     */
+    #if PICO_ON_CHIP_RTC
+    static datetime_t nowDatetime();
+    #endif
+    /**
+     * @brief Get a string with the current time formatted as HH:MM:SS.
+     * @return Formatted time string.
+     */
+    static std::string getNowHhMmSs();
+
+    /**
+     * @brief Construct today's date with a specific time-of-day.
+     * @param hhmmss Pointer to a `tm` with hour/min/sec set.
+     * @return Combined `tm` with today's date and given time.
+     */
+    static struct tm todayAt(const struct tm *hhmmss);
+
+    /**
+     * @brief Convert a `tm` with today's date and time to epoch.
+     * @param hhmmss Pointer to `tm` with time-of-day.
+     * @return Time as UNIX timestamp.
+     */
+    static time_t todayAtTimeT(const struct tm *hhmmss);
+
+    /**
+     * @brief Convert a time-of-day to a string for today.
+     * @param hhmmss Pointer to `tm` with hour/min/sec.
+     * @return Formatted string including date and time.
+     */
+    static std::string todayHhMmSsString(const struct tm *hhmmss);
+
+    /**
+     * @brief Print the current time to stdout.
+     */
+    static void printNow();
+
+    /**
+     * @brief Print a given UNIX timestamp to stdout.
+     * @param t UNIX time value.
+     */
+    static void print(time_t t);
+
+    /**
+     * @brief Print a `struct tm` to stdout.
+     * @param t Pointer to `tm` to print.
+     */
+    static void print(const struct tm *t);
+
+    /**
+     * @brief Print a `datetime_t` to stdout.
+     * @param dt Pointer to `datetime_t` to print.
+     */
+    #if PICO_ON_CHIP_RTC
+    static void print(const datetime_t *dt);
+    #endif
+};
