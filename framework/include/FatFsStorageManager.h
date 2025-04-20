@@ -43,6 +43,17 @@ public:
     bool rename(const std::string &from, const std::string &to) override;
 
     bool readFile(const std::string &path, std::vector<uint8_t> &buffer) override;
+
+    /**
+     * @brief Read a file string into a memory buffer.
+     * @param path Path to the file.
+     * @param startPosition Start position in the file.
+     * @param length Length of data to read.
+     * @param buffer Output string to fill with data.
+     * @return true if successful.
+     */
+    bool readFileString(const std::string &path, uint32_t startPosition, uint32_t length, std::string &buffer);
+
     bool writeFile(const std::string &path, const std::vector<uint8_t> &data) override;
 
     bool streamFile(const std::string &path, std::function<void(const uint8_t *, size_t)> chunkCallback) override;

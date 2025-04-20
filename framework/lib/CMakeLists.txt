@@ -32,7 +32,6 @@ set(SRC_PATH ${FAT_CLI_PATH}/src/FreeRTOS+FAT+CLI/src)
 set(INCLUDE_PATH ${FAT_CLI_PATH}/src/FreeRTOS+FAT+CLI/include)
 
 add_library(FreeRTOS+FAT+CLI)
-
 target_sources(FreeRTOS+FAT+CLI PRIVATE
     ${LAB_FAT_PATH}/ff_crc.c
     ${LAB_FAT_PATH}/ff_dir.c
@@ -83,8 +82,18 @@ target_include_directories(FreeRTOS+FAT+CLI PUBLIC
     ${LAB_FAT_PATH}/include
     ${PORTABLE_PATH}
     ${FREERTOS_KERNEL_PATH}/include
-    ${FREERTOS_KERNEL_PATH}/portable/ThirdParty/GCC/RP2040/include
 )
+
+# Conditionally add correct FreeRTOS portmacro include
+if(PICO_PLATFORM STREQUAL "rp2040")
+    target_include_directories(FreeRTOS+FAT+CLI PUBLIC
+        ${FREERTOS_KERNEL_PATH}/portable/ThirdParty/GCC/RP2040/include
+    )
+elseif(PICO_PLATFORM STREQUAL "rp2350-arm-s")
+    target_include_directories(FreeRTOS+FAT+CLI PUBLIC
+        ${FREERTOS_KERNEL_PATH}/portable/ThirdParty/Community-Supported-Ports/GCC/RP2350_ARM_NTZ/non_secure
+    )
+endif()
 
 target_link_libraries(FreeRTOS+FAT+CLI PUBLIC
     cmsis_core

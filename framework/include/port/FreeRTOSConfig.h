@@ -29,7 +29,7 @@
 #define FREERTOS_CONFIG_H
 
 #ifndef portINLINE
-#  define portINLINE __inline
+#define portINLINE __inline
 #endif
 
 /*-----------------------------------------------------------
@@ -119,7 +119,7 @@
 #define configMAX_API_CALL_INTERRUPT_PRIORITY   [dependent on processor and application]
 */
 
-#define configNUMBER_OF_CORES                   1
+#define configNUMBER_OF_CORES                   2
 
 #if FREE_RTOS_KERNEL_SMP // set by the RP2xxx SMP port of FreeRTOS
 /* SMP port only */

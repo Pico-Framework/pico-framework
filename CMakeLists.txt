@@ -43,7 +43,7 @@ pico_sdk_init()
 # we do not link it in unless option is set beow
 include_directories(${PICO_SDK_PATH}/lib/mbedtls/include)
 
-option(PICO_HTTP_ENABLE_LITTLEFS "Enable LittleFS-based StorageManager" ON)
+option(PICO_HTTP_ENABLE_LITTLEFS "Enable LittleFS-based StorageManager" OFF)
 option(PICO_HTTP_ENABLE_HTTP_CLIENT "Enable HttpClient" ON)
 option(PICO_HTTP_CLIENT_ENABLE_TLS "Enable TLS support in HttpClient" ON)
 option(PICO_HTTP_ENABLE_JWT "Enable JWT authentication support" ON)
@@ -56,6 +56,7 @@ add_subdirectory(framework)
 add_executable(framework_test 
     framework/src/test-app/main.cpp
     framework/src/test-app/app.cpp
+    framework/src/test-app/hw_config.c
     )
 target_link_libraries(framework_test 
     pico_framework

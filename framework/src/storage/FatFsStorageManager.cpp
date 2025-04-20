@@ -344,3 +344,31 @@ bool FatFsStorageManager::formatStorage()
     return mounted;
 }
 
+bool FatFsStorageManager::readFileString(const std::string &path, uint32_t startPosition, uint32_t length, std::string &buffer){
+    if (!mounted)
+    {
+        TRACE("SD card not mounted — cannot read file string: %s\n", path.c_str());
+        return false;
+    }
+
+    FF_FILE *file = ff_fopen(resolvePath(path).c_str(), "r");
+    if (!file)
+    {
+        TRACE("Failed to open file: %s\n", path.c_str());
+        return false;
+    }
+
+    ff_fseek(file, startPosition, SEEK_SET);
+    buffer.resize(length);
+    size_t bytesRead = ff_fread(buffer.data(), 1, length, file);
+    ff_fclose(file);
+
+    if (bytesRead < length)
+    {
+        buffer.resize(bytesRead); // Trim to actual size read
+        TRACE("Read only %zu bytes from file: %s\n", bytesRead, path.c_str());
+    }
+
+    return true;
+}
+
