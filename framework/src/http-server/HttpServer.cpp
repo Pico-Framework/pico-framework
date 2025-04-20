@@ -123,6 +123,7 @@ void HttpServer::run()
             startHandlingClient(conn);
             vTaskDelay(pdMS_TO_TICKS(100));
             printf("[HttpServer] Client connection handled\n");
+            printf("==============================\n\n");
             delete conn;
         }
     }
@@ -277,7 +278,7 @@ void HttpServer::handleClient(Tcp* conn)
     TRACE("HttpRequest body: %s\n", req.getBody().c_str()); 
 
     printf("\n===== HTTP CLIENT REQUEST =====\n");
-    printf("Client request received: %s, path: %s\n", req.getMethod().c_str(), req.getPath().c_str());
+    printf("[HttpServer] Client request received: %s, path: %s\n", req.getMethod().c_str(), req.getPath().c_str());
 
     HttpResponse res(conn);
     bool ok = router.handleRequest(req, res);

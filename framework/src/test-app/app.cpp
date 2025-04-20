@@ -70,7 +70,7 @@ void App::getLedState(HttpRequest& req, HttpResponse& res, const std::vector<std
 
 void App::ledOn(HttpRequest &req, HttpResponse &res, const std::vector<std::string> &params)
 {
-    printf("[App] LED off\n");
+    printf("[App] LED on\n");
     cyw43_arch_gpio_put(0, 1); // Turn the LED on
     res.status(200).send("LED turned off");
 }
