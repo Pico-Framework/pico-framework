@@ -273,6 +273,28 @@ bool LittleFsStorageManager::readFile(const std::string &path, std::vector<uint8
     return (bytes >= 0) && (bytes == size);
 }
 
+bool LittleFsStorageManager::readFileString(const std::string &path, uint32_t startPosition, uint32_t length, std::string &buffer){
+    lfs_file_t file;
+    if (lfs_file_open(&lfs, &file, path.c_str(), LFS_O_RDONLY) < 0)
+        return false;
+
+    lfs_soff_t size = lfs_file_size(&lfs, &file);
+    if (size < 0 || startPosition >= size)
+    {
+        lfs_file_close(&lfs, &file);
+        return false;
+    }
+
+    if (startPosition + length > size)
+        length = size - startPosition;
+
+    buffer.resize(length);
+    lfs_file_seek(&lfs, &file, startPosition, LFS_SEEK_SET);
+    int bytesRead = lfs_file_read(&lfs, &file, buffer.data(), length);
+    lfs_file_close(&lfs, &file);
+    return (bytesRead >= 0) && (bytesRead == static_cast<int>(length));
+}
+
 bool LittleFsStorageManager::writeFile(const std::string &path, const std::vector<uint8_t> &data)
 {
     lfs_file_t file;

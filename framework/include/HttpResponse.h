@@ -152,7 +152,8 @@ public:
      * @param contentLength Total length of body.
      * @param contentType MIME type.
      */
-    void start(int code, size_t contentLength, const std::string &contentType = "application/octet-stream");
+    void start(int code, size_t contentLength, const std::string &contentType = "application/octet-stream", 
+                const std::string &contentEncoding = "");
 
     /**
      * @brief Send a chunk of the response body.

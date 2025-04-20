@@ -256,11 +256,15 @@ void HttpResponse::sendHeaders()
 /**
  * @copydoc HttpResponse::start()
  */
-void HttpResponse::start(int code, size_t contentLength, const std::string &contentType)
+void HttpResponse::start(int code, size_t contentLength, const std::string &contentType, const std::string &contentEncoding)
 {
     status_code = code;
     headers["Content-Length"] = std::to_string(contentLength);
     headers["Content-Type"] = contentType;
+    if (!contentEncoding.empty())
+    {
+        headers["Content-Encoding"] = contentEncoding;
+    }
 
     std::ostringstream resp;
     resp << "HTTP/1.1 " << status_code << " " << getStatusMessage(status_code) << "\r\n";

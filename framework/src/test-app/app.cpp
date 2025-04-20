@@ -51,6 +51,7 @@ void App::deleteFile(HttpRequest &req, HttpResponse &res, const std::vector<std:
         printf("[LittleFS Test] File already exists, deleting...\n");
         assert(fs->remove(path) && "Delete failed");
         res.status(200).send("File deleted: " + params[0]);
+        return;
     }
     res.status(404).send("File does not exist: " + params[0]);
 }

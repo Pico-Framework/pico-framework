@@ -131,6 +131,21 @@ bool FileHandler::serveFile(HttpResponse &res, const char *uri)
     std::string mimeType = getMimeType(path);
     printf("Serving file: %s, size: %zu bytes, MIME type: %s\n", path.c_str(), fileSize, mimeType.c_str());
 
+    if (mimeType == "text/html" || mimeType == "application/javascript" || mimeType == "text/css")
+    {
+        // Gzip magic number: 0x1F 0x8B (in little-endian)
+        const uint8_t gzip_magic_number[] = {0x1F, 0x8B};
+        std::string magic_number;
+        if(storageManager->readFileString(path, 0, 2, magic_number)){
+            printf("Read magic number: %s\n", magic_number.c_str());
+            if (magic_number[0] == gzip_magic_number[0] && magic_number[1] == gzip_magic_number[1]) // GZIP magic number
+            {
+                printf("File is already gzipped: %s\n", path.c_str());
+                res.set("Content-Encoding", "gzip");
+            }
+        }
+    }
+    
     res.start(200, fileSize, mimeType.c_str());
 
     storageManager->streamFile(path, [&](const uint8_t *data, size_t len)

@@ -60,6 +60,9 @@ public:
     /** @brief Read a file into a memory buffer. */
     virtual bool readFile(const std::string &path, std::vector<uint8_t> &buffer) = 0;
 
+    /** @brief Read a file string into a memory buffer */
+    virtual bool readFileString(const std::string &path, uint32_t startPosition, uint32_t length, std::string &buffer) = 0;
+
     /** @brief Write a memory buffer to a file. */
     virtual bool writeFile(const std::string &path, const std::vector<uint8_t> &data) = 0;
 
