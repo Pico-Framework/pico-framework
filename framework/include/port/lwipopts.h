@@ -37,12 +37,12 @@ extern void sntp_set_system_time(uint32_t sec);
 #define MEMP_NUM_SYS_TIMEOUT 16   // Maximum number of active timeouts (old value; increased from 10)
 #define NUM_MEMP_PBUF 16          // Number of pbuf structures in the pool
 
-//#define LWIP_ALLOW_MEM_FREE_FROM_OTHER_CONTEXT 1 // Allow freeing memory allocated in different contexts
+// #define LWIP_ALLOW_MEM_FREE_FROM_OTHER_CONTEXT 1 // Allow freeing memory allocated in different contexts
 
 // -----------------------------------------------------------------------------
 // PBUF Buffer Settings
 // -----------------------------------------------------------------------------
-#define PBUF_POOL_SIZE 24       // Total number of pbufs in the pool
+#define PBUF_POOL_SIZE 24      // Total number of pbufs in the pool
 #define PBUF_POOL_BUFSIZE 1460 // Size (in bytes) of each pbuf in the pool - sane as TCP_MSS
 
 #define ETH_PAD_SIZE 0 // Extra padding added to ethernet frames (0 means no extra pad)
@@ -56,13 +56,13 @@ extern void sntp_set_system_time(uint32_t sec);
 #define TCP_QUEUE_OOSEQ 0         // Disable queuing of out-of-order TCP segments
 #define TCP_MSS 1460              // Maximum segment size (bytes)
 #define TCP_SND_BUF (8 * TCP_MSS) // Size of TCP sender buffer (bytes) - may be able to lower
-//#define TCP_WND (PBUF_POOL_SIZE * (PBUF_POOL_BUFSIZE - 60))
-#define TCP_WND (8 * TCP_MSS) // Size of TCP receive window (bytes) - may be able to lower
-#define TCP_SND_QUEUELEN                ((4 * (TCP_SND_BUF) + (TCP_MSS - 1)) / TCP_MSS) // Calculate send queue length
-#define TCP_SND_QUEUELEN 32  // Calculate send queue length
-#define TCP_LISTEN_BACKLOG 1 // Enable support for backlog on TCP listen
-#define TCP_MSL 1000         // Maximum Segment Lifetime (ms) [reduces TIME_WAIT duration]
-#define TCP_SYNMAXRTX 3      // Maximum retransmissions for SYN segments
+// #define TCP_WND (PBUF_POOL_SIZE * (PBUF_POOL_BUFSIZE - 60))
+#define TCP_WND (8 * TCP_MSS)                                            // Size of TCP receive window (bytes) - may be able to lower
+#define TCP_SND_QUEUELEN ((4 * (TCP_SND_BUF) + (TCP_MSS - 1)) / TCP_MSS) // Calculate send queue length
+#define TCP_SND_QUEUELEN 32                                              // Calculate send queue length
+#define TCP_LISTEN_BACKLOG 1                                             // Enable support for backlog on TCP listen
+#define TCP_MSL 1000                                                     // Maximum Segment Lifetime (ms) [reduces TIME_WAIT duration]
+#define TCP_SYNMAXRTX 3                                                  // Maximum retransmissions for SYN segments
 
 // TCP Keepalive settings:
 #define LWIP_TCP_KEEPALIVE 1       // Enable TCP keepalive functionality
@@ -90,16 +90,23 @@ extern void sntp_set_system_time(uint32_t sec);
 #define DNS_MAX_SERVERS 2       // Maximum number of DNS servers
 #define LWIP_DHCP 1             // Enable DHCP client support
 #define LWIP_AUTOIP 0           // Disable AutoIP (self-assigned IP addressing)
-#define LWIP_SNTP 1             // Disable SNTP (Simple Network Time Protocol)
-#define SNTP_SERVER_DNS       1 // Enable DNS server for SNTP
-#define SNTP_SET_SYSTEM_TIME  1 // Enable setting system time from SNTP
+#define LWIP_SNTP 1             // Enable SNTP (Simple Network Time Protocol)
+#define SNTP_SUPPORT 1          // Enable SNTP support
+#define SNTP_CHECK_RESPONSE 1 // Enable SNTP response checking
+#define SNTP_RETRY_TIMEOUT 5000 // Retry timeout for SNTP requests (in ms)
+#define SNTP_SERVER_ADDRESS "pool.ntp.org" // Default NTP server address
+#define SNTP_SERVER_PORT 123     // Default NTP server port
+#define SNTP_SERVER_DNS 1       // Enable DNS server for SNTP
+#define SNTP_MAX_SERVERS 1      // Maximum number of SNTP servers
+#define SNTP_SET_SYSTEM_TIME 1  // Enable setting system time from SNTP
+#define SNTP_UPDATE_DELAY 60000 // Delay (in ms) between SNTP updates
 // Set system time from SNTP
-#define SNTP_SET_SYSTEM_TIME(sec) sntp_set_system_time(sec) 
+#define SNTP_SET_SYSTEM_TIME(sec) sntp_set_system_time(sec)
 
 // -----------------------------------------------------------------------------
 // Protocols and Raw API
 // -----------------------------------------------------------------------------
-#define LWIP_RAW 1            // Disable the raw API (not used)
+#define LWIP_RAW 1            // Enable the RAW API for low-level protocol access
 #define LWIP_NETCONN 0        // Not used
 #define LWIP_SOCKET 1         // Enable socket API support
 #define LWIP_COMPAT_SOCKETS 0 // Use POSIX-like sockets instead of native lwIP sockets
@@ -145,7 +152,7 @@ extern void sntp_set_system_time(uint32_t sec);
 #define LWIP_NETIF_LINK_CALLBACK 1       // Enable callbacks on network link state changes
 #define LWIP_NETIF_EXT_STATUS_CALLBACK 1 // Enable extended status callbacks for network interfaces
 #define DHCP_DOES_ARP_CHECK 0            // Disable ARP check for DHCP responses
-#define LWIP_DHCP_DOES_ACD_CHECK    0    // Disable Address Conflict Detection (ACD) for DHCP
+#define LWIP_DHCP_DOES_ACD_CHECK 0       // Disable Address Conflict Detection (ACD) for DHCP
 #define LWIP_NETIF_TX_SINGLE_PBUF 1      // Transmit a single pbuf per packet (improves performance)
 #define ETHARP_TABLE_SIZE 127            // Set the size of the ARP table
 
@@ -166,35 +173,33 @@ extern void sntp_set_system_time(uint32_t sec);
 #define LWIP_STATS 1         // Enable collection of lwIP statistics
 #define LWIP_STATS_DISPLAY 1 // Enable display routines for statistics
 #define LWIP_PERF 0          // Disable performance testing macros
-// LWIP_TIMEVAL_PRIVATE already set above
 
 // -----------------------------------------------------------------------------
 // Debugging (Individual modules only - LWIP_DEBUG must remain undefined!)
 // See https://savannah.nongnu.org/bugs/index.php?62159
 // -----------------------------------------------------------------------------
 #define LWIP_DEBUG 1 // Globally disable debug output to avoid savannah bug (fix applied)
-#undef LWIP_DEBUG    // Ensure the global debug macro is undefined
-
+//#undef LWIP_DEBUG    // Ensure the global debug macro is undefined
 #ifndef NDEBUG
 // Enable detailed debug flags only if not in release mode and global debug is off (workaround for savannah bug)
 #ifndef LWIP_DEBUG
 #define ETHARP_DEBUG LWIP_DBG_OFF
-#define NETIF_DEBUG LWIP_DBG_ON
+#define NETIF_DEBUG LWIP_DBG_OFF
 #define PBUF_DEBUG LWIP_DBG_OFF
 #define API_LIB_DEBUG LWIP_DBG_OFF
 #define API_MSG_DEBUG LWIP_DBG_OFF
-#define SOCKETS_DEBUG LWIP_DBG_ON
+#define SOCKETS_DEBUG LWIP_DBG_OFF
 #define ICMP_DEBUG LWIP_DBG_OFF
 #define INET_DEBUG LWIP_DBG_OFF
-#define IP_DEBUG LWIP_DBG_ON
+#define IP_DEBUG LWIP_DBG_OFF
 #define IP_REASS_DEBUG LWIP_DBG_OFF
 #define RAW_DEBUG LWIP_DBG_OFF
-#define MEM_DEBUG LWIP_DBG_ON
-#define MEMP_DEBUG LWIP_DBG_ON
+#define MEM_DEBUG LWIP_DBG_OFF
+#define MEMP_DEBUG LWIP_DBG_OFF
 #define SYS_DEBUG LWIP_DBG_OFF
-#define TCP_DEBUG LWIP_DBG_ON
-#define TCP_INPUT_DEBUG LWIP_DBG_ON
-#define TCP_OUTPUT_DEBUG LWIP_DBG_ON
+#define TCP_DEBUG LWIP_DBG_OFF
+#define TCP_INPUT_DEBUG LWIP_DBG_OFF
+#define TCP_OUTPUT_DEBUG LWIP_DBG_OFF
 #define TCP_RTO_DEBUG LWIP_DBG_OFF
 #define TCP_CWND_DEBUG LWIP_DBG_OFF
 #define TCP_WND_DEBUG LWIP_DBG_OFF
@@ -202,10 +207,11 @@ extern void sntp_set_system_time(uint32_t sec);
 #define TCP_QLEN_DEBUG LWIP_DBG_OFF
 #define TCP_RST_DEBUG LWIP_DBG_OFF
 #define UDP_DEBUG LWIP_DBG_OFF
-#define TCPIP_DEBUG LWIP_DBG_ON
+#define TCPIP_DEBUG LWIP_DBG_OFF
 #define PPP_DEBUG LWIP_DBG_OFF
 #define SLIP_DEBUG LWIP_DBG_OFF
 #define DHCP_DEBUG LWIP_DBG_OFF
+#define SNTP_DEBUG LWIP_DBG_ON
 #endif
 #endif
 #define ALTCP_MBEDTLS_DEBUG LWIP_DBG_OFF // Disable debugging for ALTCP mbedTLS

@@ -22,9 +22,10 @@ public:
     std::string formatTimeWithZone(time_t rawTime) const;
     std::string currentTimeForTrace() const;
     void setTime(timespec* ts);
+    bool isTimeSynced() const { return timeSynced; }
 
 private:
-
+    bool timeSynced = false;
     void initNtpClient();
     bool getLocationFromIp(std::string& tzName, float& lat, float& lon);
     int timezoneOffsetSeconds = 0;

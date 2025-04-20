@@ -8,11 +8,10 @@
 #include "FreeRTOS.h"
 #include "task.h"
 #include "AppContext.h"
-// #if defined(PICO_RP2040)
+#if defined(PICO_RP2040)
 #include "hardware/rtc.h"
-// #elif defined(PICO_RP2350)
+#endif
 #include "pico/aon_timer.h"
-// #endif
 #include "PicoTime.h"
 #include "FreeRTOS.h"
 
@@ -28,8 +27,7 @@ TRACE_INIT(TimeManager);
 // Set system time from SNTP - this callback is defined in lwipopts.h
 extern "C" void sntp_set_system_time(uint32_t sec)
 {
-
-    TRACE("[SNTP] Setting system time to: %u\n", sec);
+    TRACE("[SNTP] callback made\n");
     AppContext::getInstance().getService<TimeManager>()->setTimeFromEpoch(sec);
 }
 
@@ -37,7 +35,7 @@ void TimeManager::initNtpClient()
 {
     if (!sntp_enabled())
     {
-        printf("[Time Manager] Initializing SNTP client...\n");
+        TRACE("[Time Manager] Initializing SNTP client...\n");
         sntp_setoperatingmode(SNTP_OPMODE_POLL);
         sntp_setservername(0, "pool.ntp.org");
         sntp_init();
@@ -47,21 +45,35 @@ void TimeManager::initNtpClient()
 bool TimeManager::syncTimeWithNtp(int timeoutSeconds)
 {
     initNtpClient();
-    printf("[Time Manager] Waiting for NTP time sync...\n");
+    TRACE("[Time Manager] Waiting for NTP time sync...\n");
 
     // Wait up to timeoutSeconds for time to be set
-    time_t now = 0;
     int waited = 0;
     while (waited < timeoutSeconds)
     {
-        time(&now);
-        if (now > 1670000000)
-        { // sanity check: after 2022
-            printf("[Time Manager] NTP time acquired: ");
-            return true;
+        if(timeSynced)
+        {
+            timespec ts;
+            if(aon_timer_get_time(&ts)){
+                if (ts.tv_sec > 1735689600)
+                { // sanity check: after Jan 1 2025
+                    printf("[Time Manager] NTP time acquired successfuly\n");
+                    return true;
+                }
+                else
+                {
+                    printf("[Time Manager] System time epoch is invalid: %ld\n", ts.tv_sec);
+                    return false;
+                }
+            }
+            else
+            {
+                printf("[Time Manager] Failed to get system time from AON timer.\n");
+                return false;
+            }
+            vTaskDelay(pdMS_TO_TICKS(1000));
+            waited++;
         }
-        vTaskDelay(pdMS_TO_TICKS(1000));
-        waited++;
     }
 
     std::cerr << "[Time Manager] NTP time sync failed after " << timeoutSeconds << " seconds" << std::endl;
@@ -70,10 +82,13 @@ bool TimeManager::syncTimeWithNtp(int timeoutSeconds)
 
 void TimeManager::setTimeFromEpoch(uint32_t epoch)
 {
+    TRACE("[TimeManager] Setting system time from epoch: %u\n", epoch);
     struct timespec ts = {
         .tv_sec = epoch,
         .tv_nsec = 0};
     setTime(&ts);
+    timeSynced = true;
+    printf("[TimeManager] System time set to: %s\n", ctime(&ts.tv_sec));
 }
 
 /**
@@ -93,15 +108,17 @@ void TimeManager::setTime(timespec *ts)
         return;
     }
     // If the always-on timer is already running, don't set the time again
-    if (aon_timer_is_running())
+    if (aon_timer_is_running()){
+        printf("[TimeManager] Always-on timer is already running. Not setting time again.\n");
         return;
-        TRACE("[TimeManager] Setting time: %ld seconds, %ld nanoseconds\n", ts->tv_sec, ts->tv_nsec);
+    }
     // Initialize the RTC if necessary
 #if HAS_RP2040_RTC
     rtc_init();
 #endif
     // Set the system time using the provided timespec
-    aon_timer_set_time(ts);
+    TRACE("[TimeManager] Setting time: %ld seconds, %ld nanoseconds\n", ts->tv_sec, ts->tv_nsec);
+    aon_timer_start(ts);
 }
 
 void TimeManager::applyFixedTimezoneOffset(int offsetSeconds, const char *stdName, const char *dstName)
