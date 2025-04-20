@@ -294,7 +294,7 @@ void HttpResponse::writeChunk(const char *data, size_t length)
         return;
     }
 
-    ssize_t err = tcp->send(data, length); 
+    int err = tcp->send(data, length); 
     if (err < 0)
     {
         printf("Error sending chunk: %zu\n", err);

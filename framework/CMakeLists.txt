@@ -175,11 +175,8 @@ target_link_libraries(pico_framework PUBLIC
     pico_cyw43_arch_lwip_sys_freertos
     pico_lwip_sntp
     pico_flash
-)
-
-if(PICO_PLATFORM STREQUAL "rp2350-arm-s")
-    target_link_libraries(pico_framework PUBLIC pico_aon_timer)
-endif() 
+    pico_aon_timer
+) 
 
 if(PICO_PLATFORM STREQUAL "rp2040")
     target_link_libraries(pico_framework PUBLIC hardware_rtc)

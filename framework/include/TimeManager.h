@@ -3,12 +3,13 @@
 #include <cstdint>
 #include <string>
 #include <ctime>
+#include <time.h>
 
 class TimeManager {
 public:
 
     TimeManager() = default;
-    void syncTimeWithNtp(int timeoutSeconds = 10);
+    bool syncTimeWithNtp(int timeoutSeconds = 10);
 
     /// @brief Set the system time from an epoch timestamp (e.g. from SNTP)
     void setTimeFromEpoch(uint32_t epochSeconds);
@@ -20,6 +21,7 @@ public:
     const char* getTimezoneName() const { return timezoneName.c_str(); }
     std::string formatTimeWithZone(time_t rawTime) const;
     std::string currentTimeForTrace() const;
+    void setTime(timespec* ts);
 
 private:
 

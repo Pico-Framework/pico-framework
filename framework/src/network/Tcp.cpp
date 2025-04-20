@@ -482,7 +482,7 @@ bool Tcp::bindAndListenPlain(int port)
         return false;
     }
 
-    printf("[Tcp] Listening on port %d (sockfd = %d)\n", port, sockfd);
+    printf("[Tcp] Listening on port: %d, (socket: %d)\n", port, sockfd);
 
     use_tls = false;
     connected = true;

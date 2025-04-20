@@ -20,7 +20,7 @@
 #include <string>
 #include "pico/stdlib.h"
 
-#if PICO_ON_CHIP_RTC
+#if PICO_RP2040
 #include "hardware/rtc.h"
 #endif
 
@@ -47,7 +47,7 @@ public:
      * @brief Get the current time as a `datetime_t`.
      * @return Time in `datetime_t` format.
      */
-    #if PICO_ON_CHIP_RTC
+    #if PICO_RP2040
     static datetime_t nowDatetime();
     #endif
     /**
@@ -98,7 +98,8 @@ public:
      * @brief Print a `datetime_t` to stdout.
      * @param dt Pointer to `datetime_t` to print.
      */
-    #if PICO_ON_CHIP_RTC
+    #if PICO_RP2040
+
     static void print(const datetime_t *dt);
     #endif
 };

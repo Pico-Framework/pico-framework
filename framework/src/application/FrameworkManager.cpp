@@ -75,8 +75,8 @@ void FrameworkManager::network_task(void *params)
     TimeManager *timeMgr = AppContext::getInstance().getService<TimeManager>();
     TRACE("[Framework] TimeManager pointer: %p", timeMgr);
     configASSERT(timeMgr);  // Will hard fault early if registration failed
-    timeMgr->syncTimeWithNtp();  // Add this after Wi-Fi is connected
-    printf("Time synchronized.\n");
+    if (timeMgr->syncTimeWithNtp()) // Add this after Wi-Fi is connected
+        printf("[Framework Manager] Time synchronized.\n");
 
     printf("[Framework Manager] Network up. Notifying app task...\n");
 

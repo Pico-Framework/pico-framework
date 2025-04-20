@@ -1,9 +1,9 @@
 cmake_minimum_required(VERSION 3.12)
 
-set(PICO_BOARD pico2_w)
-set(PICO_PLATFORM rp2350-arm-s)
-#set(PICO_BOARD pico_w)
-#set(PICO_PLATFORM rp2040)
+#set(PICO_BOARD pico2_w)
+#set(PICO_PLATFORM rp2350-arm-s)
+set(PICO_BOARD pico_w)
+set(PICO_PLATFORM rp2040)
 
 include(${CMAKE_SOURCE_DIR}/cmake/pico_sdk_import.cmake)
 
@@ -66,6 +66,12 @@ target_link_libraries(framework_test
 #if(PICO_HTTP_ENABLE_LITTLEFS)
     target_link_options(framework_test PRIVATE "-T${CMAKE_SOURCE_DIR}/memmap_lfs_fragment.ld")
 #endif()
+
+pico_add_extra_outputs(framework_test)
+
+pico_enable_stdio_usb(framework_test 1) # Enable USB output for the test executable
+pico_enable_stdio_uart(framework_test 1) #Enable UART output for the test executable
+# Set the output directory for the executable
 
 #get the memory usage
 if (PICO_PRINT_MEM_USAGE)
