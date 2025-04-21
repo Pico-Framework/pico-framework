@@ -6,8 +6,9 @@
 
 App::App(int port) : FrameworkApp(port, "AppTask", 2048, 1)
 {
-    initRoutes();
+
 }
+
 
 // Function to read the onboard temperature sensor
 float read_onboard_temperature(const char unit)
@@ -192,6 +193,7 @@ void App::initRoutes()
 
 void App::onStart()
 {
+    FrameworkApp::onStart();  // Ensures initRoutes and manager.start() run
     std::cout << "[App] Waiting for network..." << std::endl;
     waitFor(FrameworkNotification::NetworkReady);
 

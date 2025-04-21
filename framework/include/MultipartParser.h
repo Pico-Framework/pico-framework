@@ -107,7 +107,7 @@ private:
      * @param filename Name of the file to check.
      * @return 1 if exists, 0 if not.
      */
-    int file_exists(const char *filename);
+    int file_exists(const std::string& filename);
 
     /**
      * @brief Find the start of the file content in a chunk (after headers).

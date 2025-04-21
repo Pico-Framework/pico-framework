@@ -99,7 +99,7 @@ extern void sntp_set_system_time(uint32_t sec);
 #define SNTP_SERVER_DNS 1       // Enable DNS server for SNTP
 #define SNTP_MAX_SERVERS 1      // Maximum number of SNTP servers
 #define SNTP_SET_SYSTEM_TIME 1  // Enable setting system time from SNTP
-#define SNTP_UPDATE_DELAY 60000 // Delay (in ms) between SNTP updates
+#define SNTP_UPDATE_DELAY 60*60*1000 // Delay (in ms) between SNTP updates - this will set the imer once an hour
 // Set system time from SNTP
 #define SNTP_SET_SYSTEM_TIME(sec) sntp_set_system_time(sec)
 

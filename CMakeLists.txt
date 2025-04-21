@@ -1,9 +1,9 @@
 cmake_minimum_required(VERSION 3.12)
 
-set(PICO_BOARD pico2_w)
-set(PICO_PLATFORM rp2350-arm-s)
-#set(PICO_BOARD pico_w)
-#set(PICO_PLATFORM rp2040)
+# get the board from environment if they exist
+if (NOT DEFINED PICO_BOARD)
+    set(PICO_BOARD pico2_w)
+endif()    
 
 include(${CMAKE_SOURCE_DIR}/cmake/pico_sdk_import.cmake)
 
@@ -25,11 +25,6 @@ add_compile_definitions(PICO_CXX_DISABLE_ALLOCATION_OVERRIDES=1)
 if (PICO_SDK_VERSION_STRING VERSION_LESS "2.1.0")
     message(FATAL_ERROR "Raspberry Pi Pico SDK version 2.1.0 (or later) required. Your version is ${PICO_SDK_VERSION_STRING}")
 	return()
-endif()
-
-# If you want debug output from USB (pass -DPICO_STDIO_USB=1) this ensures you don't lose any debug output while USB is set up
-if (NOT DEFINED PICO_STDIO_USB_CONNECT_WAIT_TIMEOUT_MS)
-    set(PICO_STDIO_USB_CONNECT_WAIT_TIMEOUT_MS 3000)
 endif()
 
 #quiet down warnings on nlohmann json library
@@ -67,6 +62,9 @@ target_link_libraries(framework_test
 #if(PICO_HTTP_ENABLE_LITTLEFS)
     target_link_options(framework_test PRIVATE "-T${CMAKE_SOURCE_DIR}/memmap_lfs_fragment.ld")
 #endif()
+
+#mbed has unused args warnings - this ignores them
+set(PICO_SDK_WARNINGS_DISABLE "-Wno-unused-result")
 
 pico_add_extra_outputs(framework_test)
 

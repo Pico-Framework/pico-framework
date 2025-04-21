@@ -255,21 +255,31 @@ bool MultipartParser::extractFilename(const std::string &contentDisposition)
     std::size_t end = contentDisposition.find("\"", start);
     if (end == std::string::npos)
         return false;
-        // Ensure upload directory exists
-        auto storage = AppContext::getInstance().getService<StorageManager>();
-        storage->mount(); // ensure mounted
-        std::string uploads(MULTIPART_UPLOAD_PATH); 
-        if (storage && !storage->exists(uploads)) {
-            storage->createDirectory(uploads);
-        }
-        filename = std::string(MULTIPART_UPLOAD_PATH) + "/" + contentDisposition.substr(start, end - start);
-
-    if (file_exists(filename.c_str()))
-    {
-        printf("File already exists: %s\n", filename.c_str());
+    // Ensure upload directory exists
+    auto storage = AppContext::getInstance().getService<StorageManager>();
+    if(!storage) {
+        printf("[MultipartParser] StorageManager service not available\n");
+        sendHttpResponse(500, "StorageManager service not available");
         return false;
     }
-
+    storage->mount(); // ensure mounted
+    std::string uploads(MULTIPART_UPLOAD_PATH); 
+    TRACE("Checking if upload directory exists: %s\n", uploads.c_str());
+    if (!storage->exists(uploads)) {
+        TRACE("Upload directory does not exist, creating: %s\n", uploads.c_str());
+        if(!(storage->createDirectory(uploads))) {
+            TRACE("Failed to create upload directory: %s\n", uploads.c_str());
+            sendHttpResponse(500, "Failed to create upload directory");
+            return false;
+        }
+    }
+    filename = std::string(MULTIPART_UPLOAD_PATH) + "/" + contentDisposition.substr(start, end - start);
+    TRACE("checking if filename: %s exists\n", filename.c_str());
+    if (file_exists(filename))
+    {
+        printf("[MultipartParser] File already exists: %s\n", filename.c_str());
+        return false;
+    }
     return true;
 }
 
@@ -296,9 +306,10 @@ bool MultipartParser::processFileData(const std::string &fileData)
 }
 
 /// @copydoc MultipartParser::file_exists
-int MultipartParser::file_exists(const char *filename)
+int MultipartParser::file_exists(const std::string& filename)
 {
     StorageManager *storage = AppContext::getInstance().getService<StorageManager>();
+    printf("[MultipartParser] Checking if file exists: %s\n", filename.c_str());
     return storage->exists(filename);
 }
 

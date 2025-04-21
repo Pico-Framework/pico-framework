@@ -323,7 +323,7 @@ FAT type. */
 Note that the value of this define is directly related to the maximum stack
 use of the +FAT library. In some API's, a character buffer of size
 'ffconfigMAX_FILENAME' will be declared on stack. */
-#define	ffconfigMAX_FILENAME 250
+#define	ffconfigMAX_FILENAME 96 // was 250 but stack requirement can be very large
 
 /* Defined in main.c as Visual Studio does not provide its own implementation. */
 struct tm *gmtime_r( const time_t *pxTime, struct tm *tmStruct );

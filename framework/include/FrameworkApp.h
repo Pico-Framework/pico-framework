@@ -82,7 +82,8 @@
       * This is called by the FrameworkApp::start() method once the FreeRTOS task has been created
       */
      void onStart() override {
-        manager->start();
+        initRoutes(); // Initialize routes before starting framework
+        manager.start();       // Start network + other core services
     }
  
      /**
@@ -112,7 +113,7 @@
     virtual void initRoutes() {}  // Default no-op
      Router router;               ///< Handles path-to-handler mapping
      HttpServer server;           ///< Embedded HTTP server instance
-     FrameworkManager* manager;   ///< Responsible for launching system services and networking
+     FrameworkManager manager;    ///< Responsible for launching system services and networking
  };
  
  #endif // FRAMEWORK_APP_H

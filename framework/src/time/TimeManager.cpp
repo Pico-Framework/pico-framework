@@ -45,7 +45,7 @@ void TimeManager::initNtpClient()
 bool TimeManager::syncTimeWithNtp(int timeoutSeconds)
 {
     initNtpClient();
-    TRACE("[Time Manager] Waiting for NTP time sync...\n");
+    printf("[Time Manager] Waiting for NTP time sync...\n");
 
     // Wait up to timeoutSeconds for time to be set
     int waited = 0;
@@ -109,8 +109,8 @@ void TimeManager::setTime(timespec *ts)
     }
     // If the always-on timer is already running, don't set the time again
     if (aon_timer_is_running()){
-        printf("[TimeManager] Always-on timer is already running. Not setting time again.\n");
-        return;
+        aon_timer_start(ts);
+        printf("[TimeManager] Always-on timer is running.Setting time: %ld seconds, %ld nanoseconds\n", ts->tv_sec, ts->tv_nsec);
     }
     // Initialize the RTC if necessary
 #if HAS_RP2040_RTC

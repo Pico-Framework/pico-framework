@@ -63,17 +63,24 @@ bool FatFsStorageManager::unmount()
 /// @copydoc FatFsStorageManager::exists()
 bool FatFsStorageManager::exists(const std::string &path)
 {
+   TRACE("[FatFs] Checking if path exists: %s\n", path.c_str());
     if (!ensureMounted())
     {
-        TRACE("SD card not mounted — cannot check file exists: %s\n", path.c_str());
+        printf("SD card not mounted — cannot check path exists: %s\n", path.c_str());
         return false;
     }
-    FF_FILE *file = ff_fopen(resolvePath(path).c_str(), "r");
-    if (file)
-    {
-        ff_fclose(file);
+    TRACE("[FatFs] Checking if exists: %s\n", resolvePath(path).c_str());
+    FF_Stat_t xStat;
+
+    // Use ff_stat to check if the file or directory exists
+    TRACE("[FatFs] Calling ff_stat on path: %s\n",resolvePath(path).c_str());
+    int err = ff_stat(resolvePath(path).c_str(), &xStat);
+    TRACE("[FatFs] ff_stat returned: %d\n", err);
+    if (err == FF_ERR_NONE){
+        TRACE("[FatFs] Path exists: %s, size: %ld bytes\n", resolvePath(path).c_str(), xStat.st_size);
         return true;
     }
+    TRACE("Path does not exist: %s\n", path.c_str());
     return false;
 }
 
@@ -119,6 +126,7 @@ bool FatFsStorageManager::createDirectory(const std::string &path)
         TRACE("SD card not mounted — cannot create directory: %s\n", path.c_str());
         return false;
     }
+    printf("[FatFs] Creating directory: %s\n", path.c_str());
     return ff_mkdir(resolvePath(path).c_str()) == FF_ERR_NONE;
 }
 
