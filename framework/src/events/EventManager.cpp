@@ -58,7 +58,6 @@ void EventManager::subscribe(uint32_t eventMask, FrameworkController* controller
 /// @copydoc EventManager::postEvent
 void EventManager::postEvent(const Event& event) {
     BaseType_t xHigherPriTaskWoken = pdFALSE;
-    debug_print("[Eventmanager] posting event\n");
 
     if (is_in_interrupt()) {
         for (auto& sub : subscribers_) {
@@ -71,7 +70,6 @@ void EventManager::postEvent(const Event& event) {
                     if (result != pdPASS) {
                         debug_print("[EventManager] xQueueSendFromISR FAILED — queue full!\n");
                     } else {
-                        debug_print("[Eventmanager] notifying from ISR\n");
                         sub.controller->notifyFromISR(static_cast<uint8_t>(event.type), 1, &xHigherPriTaskWoken);
                     }
                 }

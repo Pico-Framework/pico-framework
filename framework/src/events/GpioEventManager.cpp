@@ -29,10 +29,6 @@ void GpioEventManager::unregisterAll(uint pin) {
 
 void GpioEventManager::gpio_event_handler(uint gpio, uint32_t events) {
     GpioEvent* data = new  GpioEvent{gpio, events};
-    const char* msg = "[IRQ] GPIO 16 triggered\n";
-    for (const char* p = msg; *p; ++p) {
-        uart_putc(uart0, *p);
-    }
 
     // Dispatch to listeners
     auto it = listeners.find(gpio);
@@ -44,6 +40,5 @@ void GpioEventManager::gpio_event_handler(uint gpio, uint32_t events) {
 
     // Also send an Event to EventManager if anyone wants to subscribe
     Event evt(EventType::GpioChange, &data, sizeof(data)); // broadcast event to anyone subscribed as target isn't specified
-    //printf("[GpioEventManager] Posting event for GPIO %d with edge %d\n", gpio, events);
     EventManager::getInstance().postEvent(evt); // EventManager knows whther it's an ISR or not
 }

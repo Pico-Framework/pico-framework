@@ -42,14 +42,12 @@ void App::onStart()
 
 void App::onEvent(const Event &e)
 {
-    printf("[App] Event received: %d\n", e.data);
     if (e.type == EventType::GpioChange)
     {
         const GpioEvent *data = static_cast<const GpioEvent *>(e.data);
         printf("[App] GPIO changed - pin %d: %s\n",
                data->pin,
-               (data->edge & static_cast<uint32_t>(GpioEdge::Rising)) ? "rising" : (data->edge & static_cast<uint32_t>(GpioEdge::Falling)) ? "falling"
-                                                                                                                                           : "unknown");
+               (data->edge & GPIO_IRQ_EDGE_RISE) ? "rising" : (data->edge & GPIO_IRQ_EDGE_FALL) ? "falling" : "unknown");
     }
 }
 
