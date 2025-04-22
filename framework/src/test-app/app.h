@@ -23,6 +23,10 @@ public:
     void setState(HttpRequest &req, HttpResponse &res, const std::vector<std::string> params);
     void getLedState(HttpRequest& req, HttpResponse& res, const std::vector<std::string>& /*params*/);
 
+    enum class UserNotification : uint8_t { // user-defined notifications
+        Heartbeat = 0
+    };
+
 private:
 };
 

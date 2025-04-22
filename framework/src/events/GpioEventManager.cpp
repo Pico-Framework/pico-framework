@@ -28,17 +28,17 @@ void GpioEventManager::unregisterAll(uint pin) {
 }
 
 void GpioEventManager::gpio_event_handler(uint gpio, uint32_t events) {
-    GpioEvent* data = new  GpioEvent{gpio, events};
+    GpioEvent* gpioEvent = new  GpioEvent{static_cast<uint32_t>(gpio), static_cast<uint32_t>(events)};
 
     // Dispatch to listeners
     auto it = listeners.find(gpio);
     if (it != listeners.end()) {
         for (auto& cb : it->second) {
-            cb(*data);
+            cb(*gpioEvent);
         }
     }
 
     // Also send an Event to EventManager if anyone wants to subscribe
-    Event evt(EventType::GpioChange, &data, sizeof(data)); // broadcast event to anyone subscribed as target isn't specified
+    Event evt = Event(SystemNotification::GpioChange, gpioEvent, sizeof(GpioEvent)); // broadcast event to anyone subscribed as target isn't specified
     EventManager::getInstance().postEvent(evt); // EventManager knows whther it's an ISR or not
 }

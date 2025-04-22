@@ -81,7 +81,7 @@ void FrameworkManager::network_task(void *params)
 
     if (manager->app != nullptr)
     {
-        manager->app->notify(FrameworkNotification::NetworkReady);
+        manager->app->notify(SystemNotification::NetworkReady);
     }
 
     vTaskDelete(nullptr); // Done

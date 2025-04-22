@@ -123,7 +123,7 @@
  
  /// @copydoc TimerService::scheduleEvery
  void TimerService::scheduleEvery(uint32_t intervalMs, const Event& event) {
-     std::string defaultId = "interval_" + std::to_string((uint32_t)event.type);
+     std::string defaultId = "interval_" + std::to_string((uint32_t)event.notification.code());
      scheduleEvery(intervalMs, event, defaultId);
  }
  
@@ -144,7 +144,8 @@
  
  /// @copydoc TimerService::scheduleDailyAt
  void TimerService::scheduleDailyAt(TimeOfDay time, DaysOfWeek days, const Event& event) {
-     std::string defaultId = "daily_" + std::to_string((uint32_t)event.type) + "_" + std::to_string(toSeconds(time));
+     std::string defaultId = "daily_" + std::to_string((uint32_t)event.notification.code()
+    ) + "_" + std::to_string(toSeconds(time));
      scheduleDailyAt(time, days, event, defaultId);
  }
  
@@ -173,7 +174,7 @@
  /// @copydoc TimerService::scheduleDuration
  void TimerService::scheduleDuration(TimeOfDay start, DaysOfWeek days, uint32_t durationMs,
                                      const Event& startEvent, const Event& stopEvent) {
-     std::string baseId = "duration_" + std::to_string((uint32_t)startEvent.type);
+     std::string baseId = "duration_" + std::to_string((uint32_t)startEvent.notification.code());
      scheduleDuration(start, days, durationMs, startEvent, stopEvent, baseId);
  }
  

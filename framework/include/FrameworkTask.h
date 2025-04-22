@@ -24,7 +24,7 @@
 #include "task.h"
 #include "queue.h"
 #include "Event.h"
-#include "FrameworkNotification.h"
+#include "Notification.h"
 
 /**
  * @brief Base class for FreeRTOS-aware tasks in the framework.
@@ -105,7 +105,7 @@ public:
     /**
      * @brief Sends a notification using a framework-defined enum.
      */
-    void notify(FrameworkNotification n, uint32_t value = 1);
+    void notify(Notification n, uint32_t value = 1);
 
     /**
      * @brief Sends a notification from an ISR (by index).
@@ -115,7 +115,7 @@ public:
     /**
      * @brief Sends a notification from ISR using enum identifier.
      */
-    void notifyFromISR(FrameworkNotification n, uint32_t value = 1, BaseType_t *pxHigherPriorityTaskWoken = nullptr);
+    void notifyFromISR(Notification n, uint32_t value = 1, BaseType_t *pxHigherPriorityTaskWoken = nullptr);
 
     /**
      * @brief Waits for a notification (by index).
@@ -129,7 +129,7 @@ public:
     /**
      * @brief Waits for a notification (by enum identifier).
      */
-    bool waitFor(FrameworkNotification n, TickType_t timeout = portMAX_DELAY);
+    bool waitFor(Notification n, TickType_t timeout = portMAX_DELAY);
 
 protected:
     /**

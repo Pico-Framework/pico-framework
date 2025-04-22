@@ -2,24 +2,24 @@
  * @file FrameworkController.h
  * @author Ian Archbell
  * @brief The FrameworkController class for event-driven control logic in embedded applications.
- * 
+ *
  * Extends FrameworkTask to provide a convenient structure for application logic
  * with periodic polling, event handling, and timed function execution.
- * 
+ *
  * Your application will typically implement one or more controllers to manage
  * different aspects of your system. Each controller can handle its own events,
  * perform background tasks, and run periodic functions.
- * 
- * You will typically use the EventManager, which provides pub/sub capabilities 
- * to dispatch events to the appropriate controller. The architucture allows for both event 
+ *
+ * You will typically use the EventManager, which provides pub/sub capabilities
+ * to dispatch events to the appropriate controller. The architucture allows for both event
  * handling and polling in the same controller
- * 
+ *
  * This class is designed to be flexible and modular, allowing you to
  * create multiple instances for different parts of your application.
  * For example, you might have a `SensorController` for reading sensor data,
  * a `NetworkController` for handling communication, and a `MainController`
  * to coordinate overall application behavior.
- * 
+ *
  * Intended to be subclassed. You override `onStart()`, `onEvent()`, and `poll()`
  * to define your application's behavior.
  *
@@ -37,18 +37,20 @@
 #include "Router.h"
 #include "GpioEvent.h" // temporary include for testing
 
-FrameworkController::FrameworkController(const char* name, Router& sharedRouter, uint16_t stackSize, UBaseType_t priority)
+FrameworkController::FrameworkController(const char *name, Router &sharedRouter, uint16_t stackSize, UBaseType_t priority)
     : FrameworkTask(name, stackSize, priority),
       router(sharedRouter) {}
 
 /// @copydoc FrameworkController::run
-void FrameworkController::run() {
+void FrameworkController::run()
+{
     printf("Starting controller: %s\n", getName());
-    enableEventQueue();  // ← MUST be here to initialize queue before use
+    enableEventQueue(); // ← MUST be here to initialize queue before use
     onStart();
-    while (true) {
-        waitAndDispatch(100);  // Wait for notifications or timeout
-        poll();                // Call user logic
+    while (true)
+    {
+        waitAndDispatch(100); // Wait for notifications or timeout
+        poll();               // Call user logic
     }
 }
 
@@ -66,49 +68,71 @@ void FrameworkController::initRoutes()
 }
 
 /// @copydoc FrameworkController::onEvent
-void FrameworkController::onEvent(const Event& event) {
+void FrameworkController::onEvent(const Event &event)
+{
     // Default: do nothing
 }
 
 /// @copydoc FrameworkController::poll
-void FrameworkController::poll() {
+void FrameworkController::poll()
+{
     // Default no-op
 }
 
 /// @copydoc FrameworkController::waitAndDispatch
-void FrameworkController::waitAndDispatch(uint32_t timeoutMs) {
+void FrameworkController::waitAndDispatch(uint32_t timeoutMs)
+{
     Event event;
-    if (getNextEvent(event, timeoutMs)) {
-        printf("[FrameworkController] Event received: %d\n", event.type);
-        printf("[FrameworkController] Event target: %s\n", event.target ? event.target->getName() : "null");
+    if (getNextEvent(event, timeoutMs))
+    {
+        printf("\n[FrameworkController] Event received\n");
+        printf("  Kind     : %s\n", event.notification.kind == NotificationKind::System ? "System" : "User");
+        printf("  Code     : %u\n", event.notification.code());
+        printf("  Target   : %s\n", event.target ? event.target->getName() : "(broadcast)");
+        printf("  Source   : %s\n", event.source ? "set" : "(anonymous)");
+        printf("  Data     : %s\n", event.data ? "present" : "(none)");
 
-        if (event.type == EventType::GpioChange) {
-            printf("[FrameworkController] Event data: %p\n", event.data);
-            printf("GpioEvent pin: %d, edge: %d\n", 
-                   event.data ? static_cast<const GpioEvent*>(event.data)->pin : -1,
-                   event.data ? static_cast<const GpioEvent*>(event.data)->edge : -1);  
+        if (event.size > 0)
+            printf("  Size     : %zu bytes\n", event.size);
+
+        if (event.notification.kind == NotificationKind::System)
+        {
+            switch (event.notification.system)
+            {
+                case SystemNotification::GpioChange:
+                    if (event.data && event.size >= sizeof(GpioEvent))
+                    {
+                        auto *gpio = static_cast<const GpioEvent *>(event.data);
+                        printf("  GpioEvent => pin: %d, edge: %d\n", gpio->pin, gpio->edge);
+                    }
+                    break;
+
+                default:
+                    printf("  [System] Unhandled system notification\n");
+                    break;
+            }
         }
 
-        // No longer need to filter by target — this controller owns this queue
         onEvent(event);
     }
 }
 
-
 /// @copydoc FrameworkController::runEvery
-void FrameworkController::runEvery(uint32_t intervalMs, const std::function<void()>& fn, const char* id) {
+void FrameworkController::runEvery(uint32_t intervalMs, const std::function<void()> &fn, const char *id)
+{
     TickType_t now = xTaskGetTickCount();
-    TickType_t& last = _timers[std::string(id)];
+    TickType_t &last = _timers[std::string(id)];
 
-    if ((now - last) >= pdMS_TO_TICKS(intervalMs)) {
+    if ((now - last) >= pdMS_TO_TICKS(intervalMs))
+    {
         fn();
         last = now;
     }
 }
 /// @copydoc FrameworkController::runEvery
-void FrameworkController::runEvery(uint32_t intervalMs, const std::function<void()>& fn) {
+void FrameworkController::runEvery(uint32_t intervalMs, const std::function<void()> &fn)
+{
     static int counter = 0;
     std::string generatedId = "auto_" + std::to_string(counter++);
     runEvery(intervalMs, fn, generatedId.c_str());
 }
-

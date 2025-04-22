@@ -27,87 +27,93 @@
  * @note This is designed to be used in conjunction with the FrameworkTask class,
  * which provides the `onEvent()` method for handling events.
  *
- * @version 0.1
- * @date 2025-03-26
+ * @version 0.2
+ * @date 2025-04-22
  *
  * @license MIT License
  * @copyright Copyright (c) 2025, Ian Archbell
  */
 
-#ifndef EVENT_MANAGER_H
-#define EVENT_MANAGER_H
-#pragma once
-
-#include <vector>
-#include "FreeRTOS.h"
-#include "task.h"
-#include "queue.h"
-#include "Event.h"
-#include "FrameworkController.h"
-
-// Forward declaration
-class FrameworkTask;
-
-/**
- * @brief Manages the system-wide event queue and subscriptions.
- *
- * Allows tasks to:
- * - Subscribe to specific event types (via bitmask)
- * - Post events (from task or ISR context)
- * - Receive and process events via `onEvent()`
- *
- * Implemented as a singleton.
- */
-class EventManager
-{
-public:
-    /**
-     * @brief Get the global EventManager instance.
-     */
-    static EventManager &getInstance()
-    {
-        static EventManager instance;
-        return instance;
-    }
-
-    /**
-     * @brief Constructor with optional queue size override.
-     *
-     * @param queueSize Maximum number of events in the internal queue.
-     */
-    explicit EventManager(size_t queueSize = 0); // remove later
-
-    /**
-     * @brief Subscribe a task to specific event types.
-     *
-     * @param eventMask Bitmask of `(1 << static_cast<uint8_t>(EventType))`.
-     * @param task Pointer to the FrameworkTask to notify.
-     */
-    void subscribe(uint32_t eventMask,FrameworkController *controller);
-
-    /**
-     * @brief Post an event to the queue and notify subscribers.
-     *
-     * Can be safely called from task or ISR context.
-     *
-     * @param event The event to post.
-     */
-    void postEvent(const Event &event);
-
-    /**
-     * @brief Returns true if there are any pending events in the queue.
-     */
-    bool hasPendingEvents(FrameworkController* controller) const;
-
-private:
-    struct Subscriber
-    {
-        uint32_t eventMask;  ///< Bitmask of subscribed event types
-        FrameworkController *controller; ///< Target task to notify
-    };
-
-    std::vector<Subscriber> subscribers_;
-    // QueueHandle_t eventQueue_;   ///< FreeRTOS queue for pending events
-};
-
-#endif // EVENT_MANAGER_H
+ #ifndef EVENT_MANAGER_H
+ #define EVENT_MANAGER_H
+ #pragma once
+ 
+ #include <vector>
+ #include "FreeRTOS.h"
+ #include "task.h"
+ #include "queue.h"
+ #include "Event.h"
+ #include "FrameworkController.h"
+ 
+ // Forward declaration
+ class FrameworkTask;
+ 
+ /**
+  * @brief Manages the system-wide event queue and subscriptions.
+  *
+  * Allows tasks to:
+  * - Subscribe to specific event types (via bitmask)
+  * - Post events (from task or ISR context)
+  * - Receive and process events via `onEvent()`
+  *
+  * Implemented as a singleton.
+  */
+ class EventManager
+ {
+ public:
+     /**
+      * @brief Get the global EventManager instance.
+      */
+     static EventManager& getInstance()
+     {
+         static EventManager instance;
+         return instance;
+     }
+ 
+     /**
+      * @brief Constructor with optional queue size override.
+      *
+      * @param queueSize Maximum number of events in the internal queue.
+      */
+     explicit EventManager(size_t queueSize = 0); // Optional override
+ 
+     /**
+      * @brief Subscribe a task to specific event types.
+      *
+      * Each controller provides a bitmask of events it is interested in.
+      *
+      * @param eventMask Bitmask of `(1 << event.notification.code())`.
+      * @param controller Pointer to the FrameworkController to notify.
+      */
+     void subscribe(uint32_t eventMask, FrameworkController* controller);
+ 
+     /**
+      * @brief Post an event to the queue and notify matching subscribers.
+      *
+      * Safe to call from task or ISR context.
+      *
+      * @param event The event to post.
+      */
+     void postEvent(const Event& event);
+ 
+     /**
+      * @brief Returns true if there are any pending events for a given controller.
+      *
+      * @param controller Pointer to the controller.
+      * @return True if any matching events exist.
+      */
+     bool hasPendingEvents(FrameworkController* controller) const;
+ 
+ private:
+     struct Subscriber
+     {
+         uint32_t eventMask;               ///< Bitmask of subscribed event codes
+         FrameworkController* controller;  ///< Target controller to notify
+     };
+ 
+     std::vector<Subscriber> subscribers_;
+     // QueueHandle_t eventQueue_;  ///< Optional: FreeRTOS queue for queued delivery
+ };
+ 
+ #endif // EVENT_MANAGER_H
+ 

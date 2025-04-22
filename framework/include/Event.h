@@ -1,8 +1,8 @@
 /**
  * @file Event.h
  * @brief Defines the Event structure and related utilities for event messaging.
- * @version 1.0
- * @date 2025-04-09
+ * @version 1.1
+ * @date 2025-04-22
  * @copyright Copyright (c) 2025, Ian Archbell
  * @license MIT
  */
@@ -10,59 +10,49 @@
 #pragma once
 #include <cstdint>
 #include <cstddef>
-#include "FrameworkNotification.h" // Must be included before alias
+#include "Notification.h"
+
 class FrameworkTask;
-/**
- * @brief Alias for the type used to identify events.
- */
-using EventType = FrameworkNotification;
 
 /**
  * @brief Represents a framework event, optionally carrying payload data.
  */
 struct Event
 {
-    EventType type = EventType::None; ///< Event type identifier
-    const void *data = nullptr;       ///< Pointer to event payload data
-    size_t size = 0;                  ///< Size of payload data
-    void *source = nullptr;           ///< Optional source (e.g. task)
-    FrameworkTask *target = nullptr;  ///< Optional specific target (for directed delivery)
-
-    enum class FrameworkNotification : uint8_t
-    {
-        // Reserved for system/framework use
-        None = 0,
-        NetworkReady = 1,
-        TimeSync = 2,
-        ConfigUpdated = 3,
-        OTAAvailable = 4,
-        GpioChange = 5,
-
-        // Users are free to add their own from here
-        UserBase = 16,
-
-        // Example user-defined notifications
-        ControllerReady = UserBase,
-        ProgramEnd = 17,
-        RunProgram = 18,
-        ZoneEndTime = 19,
-        ProgramStartTime = 20,
-        TimerTick = 21,
-    };
+    Notification notification;       ///< Notification identifier (system or user)
+    const void *data = nullptr;      ///< Pointer to event payload data
+    size_t size = 0;                 ///< Size of payload data
+    void *source = nullptr;          ///< Optional source (e.g. task)
+    FrameworkTask *target = nullptr; ///< Optional specific target (for directed delivery)
 
     /**
-     * @brief Default constructor (creates a None event).
+     * @brief Default constructor (creates a SystemNotification::None event).
      */
     Event() = default;
 
     /**
-     * @brief Construct a new Event with optional payload.
+     * @brief Construct an event with a system notification.
      *
-     * @param type   Event type (e.g. EventType::RunProgram)
-     * @param data   Pointer to optional payload
-     * @param size   Size of payload
-     * @param source Optional source (e.g. task pointer)
+     * @param type   System notification type
+     * @param data   Optional pointer to payload
+     * @param size   Payload size
+     * @param source Optional source pointer
+     * @param target Optional target task
      */
-    Event(EventType type, const void* data = nullptr, size_t size = 0, void* source = nullptr, FrameworkTask* target = nullptr)
-    : type(type), data(data), size(size), source(source), target(target) {}
+    Event(SystemNotification type, const void *data = nullptr, size_t size = 0,
+          void *source = nullptr, FrameworkTask *target = nullptr)
+        : notification(type), data(data), size(size), source(source), target(target) {}
+
+    /**
+     * @brief Construct an event with a user-defined notification.
+     *
+     * @param userCode User-defined notification value
+     * @param data     Optional pointer to payload
+     * @param size     Payload size
+     * @param source   Optional source pointer
+     * @param target   Optional target task
+     */
+    Event(uint8_t userCode, const void *data = nullptr, size_t size = 0,
+          void *source = nullptr, FrameworkTask *target = nullptr)
+        : notification(userCode), data(data), size(size), source(source), target(target) {}
 };
