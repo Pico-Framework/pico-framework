@@ -44,6 +44,7 @@ FrameworkController::FrameworkController(const char* name, Router& sharedRouter,
 /// @copydoc FrameworkController::run
 void FrameworkController::run() {
     printf("Starting controller: %s\n", getName());
+    enableEventQueue();  // ← MUST be here to initialize queue before use
     onStart();
     while (true) {
         waitAndDispatch(100);  // Wait for notifications or timeout
@@ -77,23 +78,22 @@ void FrameworkController::poll() {
 /// @copydoc FrameworkController::waitAndDispatch
 void FrameworkController::waitAndDispatch(uint32_t timeoutMs) {
     Event event;
-    if (EventManager::getInstance().getNextEvent(event, timeoutMs)) {
+    if (getNextEvent(event, timeoutMs)) {
         printf("[FrameworkController] Event received: %d\n", event.type);
         printf("[FrameworkController] Event target: %s\n", event.target ? event.target->getName() : "null");
-        // If the event is a GPIO event, cast and handle it
-        // Note: This is a temporary check for testing purposes.
-        // In a real application, you would likely have a more structured way to handle different event types.
+
         if (event.type == EventType::GpioChange) {
             printf("[FrameworkController] Event data: %p\n", event.data);
             printf("GpioEvent pin: %d, edge: %d\n", 
                    event.data ? static_cast<const GpioEvent*>(event.data)->pin : -1,
                    event.data ? static_cast<const GpioEvent*>(event.data)->edge : -1);  
-        }      
-        if (event.target == nullptr || event.target == this) {
-            onEvent(event);
         }
+
+        // No longer need to filter by target — this controller owns this queue
+        onEvent(event);
     }
 }
+
 
 /// @copydoc FrameworkController::runEvery
 void FrameworkController::runEvery(uint32_t intervalMs, const std::function<void()>& fn, const char* id) {

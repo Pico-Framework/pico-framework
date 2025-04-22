@@ -31,7 +31,7 @@ void GpioController::setState(HttpRequest& req, HttpResponse& res, const std::ve
     gpio_init(pin);
     gpio_set_dir(pin, GPIO_OUT);
     gpio_put(pin, value);
-    printf("[GpioController] Pin %d set to %d\n", pin, value);
+    //printf("[GpioController] Pin %d set to %d\n", pin, value);
     res.json({{"pin", pin}, {"state", value}});
 }
 

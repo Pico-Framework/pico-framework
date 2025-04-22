@@ -41,74 +41,67 @@
 #include "task.h"
 #include "portmacro.h"
 #include "utility.h" // for is_in_interrupt()
+#include "FrameworkController.h"
 
 /// @copydoc EventManager::EventManager
 EventManager::EventManager(size_t queueSize)
 {
-    eventQueue_ = xQueueCreate(queueSize, sizeof(Event));
+
 }
 
 /// @copydoc EventManager::subscribe
-void EventManager::subscribe(uint32_t eventMask, FrameworkTask *task)
-{
-    subscribers_.push_back({eventMask, task});
+void EventManager::subscribe(uint32_t eventMask, FrameworkController* controller) {
+    subscribers_.push_back({eventMask, controller});
 }
 
 /// @copydoc EventManager::postEvent
-void EventManager::postEvent(const Event &event)
-{
+/// @copydoc EventManager::postEvent
+void EventManager::postEvent(const Event& event) {
     BaseType_t xHigherPriTaskWoken = pdFALSE;
     debug_print("[Eventmanager] posting event\n");
 
-    if (is_in_interrupt())
-    {
-        BaseType_t result = xQueueSendToBackFromISR(eventQueue_, &event, &xHigherPriTaskWoken);
-        if (result != pdPASS) {
-            debug_print("[EventManager] xQueueSendFromISR FAILED — queue full!\n");
-        }
-        debug_print("[Eventmanager] posted event from ISR\n");
-
-        for (auto &sub : subscribers_)
-        {
+    if (is_in_interrupt()) {
+        for (auto& sub : subscribers_) {
             if ((sub.eventMask & (1u << static_cast<uint8_t>(event.type))) &&
-                (event.target == nullptr || sub.task == event.target))
-            {
-                debug_print("[Eventmanager] notifying from ISR\n");
-  
-                sub.task->notifyFromISR(static_cast<uint8_t>(event.type), 1, &xHigherPriTaskWoken);
-            }
-        }
+                (event.target == nullptr || sub.controller == event.target)) {
 
-        portYIELD_FROM_ISR(xHigherPriTaskWoken);
-    }
-    else
-    {
-        xQueueSendToBack(eventQueue_, &event, 0);
-
-        for (auto &sub : subscribers_)
-        {
-            if ((sub.eventMask & (1u << static_cast<uint8_t>(event.type))) &&
-                (event.target == nullptr || sub.task == event.target))
-            {
-                const char *msg = "[Eventmanager] calling onEvent\n";
-                for (const char *p = msg; *p; ++p)
-                {
-                    uart_putc(uart0, *p);
+                QueueHandle_t q = sub.controller->getEventQueue();
+                if (q) {
+                    BaseType_t result = xQueueSendToBackFromISR(q, &event, &xHigherPriTaskWoken);
+                    if (result != pdPASS) {
+                        debug_print("[EventManager] xQueueSendFromISR FAILED — queue full!\n");
+                    } else {
+                        debug_print("[Eventmanager] notifying from ISR\n");
+                        sub.controller->notifyFromISR(static_cast<uint8_t>(event.type), 1, &xHigherPriTaskWoken);
+                    }
                 }
-                sub.task->onEvent(event);
+            }
+        }
+        portYIELD_FROM_ISR(xHigherPriTaskWoken);
+    } else {
+        for (auto& sub : subscribers_) {
+            if ((sub.eventMask & (1u << static_cast<uint8_t>(event.type))) &&
+                (event.target == nullptr || sub.controller == event.target)) {
+
+                QueueHandle_t q = sub.controller->getEventQueue();
+                if (q) {
+                    if (xQueueSendToBack(q, &event, 0) != pdPASS) {
+                        debug_print("[EventManager] xQueueSend FAILED — queue full!\n");
+                    } else {
+                        const char* msg = "[Eventmanager] delivered to queue\n";
+                        for (const char* p = msg; *p; ++p) {
+                            uart_putc(uart0, *p);
+                        }
+                    }
+                }
             }
         }
     }
-}
-
-/// @copydoc EventManager::getNextEvent
-bool EventManager::getNextEvent(Event &event, uint32_t timeoutMs) const
-{
-    return xQueueReceive(eventQueue_, &event, pdMS_TO_TICKS(timeoutMs)) == pdTRUE;
 }
 
 /// @copydoc EventManager::hasPendingEvents
-bool EventManager::hasPendingEvents() const
-{
-    return uxQueueMessagesWaiting(eventQueue_) > 0;
+bool EventManager::hasPendingEvents(FrameworkController* controller) const {
+    QueueHandle_t q = controller->getEventQueue();
+    return q && uxQueueMessagesWaiting(q) > 0;
 }
+

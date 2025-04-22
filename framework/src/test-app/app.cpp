@@ -56,13 +56,13 @@ void App::onEvent(const Event &e)
 void App::poll()
 {
     vTaskDelay(pdMS_TO_TICKS(100)); // Yield to other tasks
-    // // This function is called continuously (non-blocking) from the App task.
-    // // Use RUN_EVERY to do periodic background work:
+    // This function is called continuously (non-blocking) from the App task.
+    // Use RUN_EVERY to do periodic background work:
 
-    // runEvery(15000, [&]()
-    //     { 
-    //         printf("[App] Running main polling loop...\n"); 
-    //         // this yield is not essential, but without yielding you can miss events
-    //         vTaskDelay(pdMS_TO_TICKS(1)); 
-    //     }, "logLoop"); // <-- Unique ID for this timer (enables it to be cancelled)
+    runEvery(15000, [&]()
+        { 
+            printf("[App] Running main polling loop...\n"); 
+            // this yield is not essential, but without yielding you can miss events
+            vTaskDelay(pdMS_TO_TICKS(1)); 
+        }, "logLoop"); // <-- Unique ID for this timer (enables it to be cancelled)
 }
