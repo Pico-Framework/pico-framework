@@ -388,12 +388,10 @@ public:
 
     /**
      * @brief Handle multipart/form-data uploads.
-     * @param new_sock The socket.
-     * @param req Reference to this request.
+     * @param res Reference to the response.
      * @return 0 on success, -1 on failure.
      */
-    int handle_multipart(HttpRequest &req);
-
+    int handle_multipart(HttpResponse &res);
     // ─────────────────────────────────────────────────────────────────────────────
     // Fluent Builder Methods (Client Usage)
     // ─────────────────────────────────────────────────────────────────────────────

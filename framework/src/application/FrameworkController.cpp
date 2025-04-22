@@ -33,13 +33,17 @@
 #include "EventManager.h"
 #include "FrameworkTask.h"
 #include "Event.h"
+#include "AppContext.h"
+#include "Router.h"
+#include "GpioEvent.h" // temporary include for testing
 
-/// @copydoc FrameworkController::FrameworkController
-FrameworkController::FrameworkController(const char* name, uint16_t stackSize, UBaseType_t priority)
-    : FrameworkTask(name, stackSize, priority) {}
+FrameworkController::FrameworkController(const char* name, Router& sharedRouter, uint16_t stackSize, UBaseType_t priority)
+    : FrameworkTask(name, stackSize, priority),
+      router(sharedRouter) {}
 
 /// @copydoc FrameworkController::run
 void FrameworkController::run() {
+    printf("Starting controller: %s\n", getName());
     onStart();
     while (true) {
         waitAndDispatch(100);  // Wait for notifications or timeout
@@ -48,8 +52,16 @@ void FrameworkController::run() {
 }
 
 /// @copydoc FrameworkController::onStart
-void FrameworkController::onStart() {
-    // Default no-op
+void FrameworkController::onStart()
+{
+    initRoutes(); // Call base class start logic (including any route initialization)
+}
+
+/// @bcopydoc FrameworkController::initRoutes
+void FrameworkController::initRoutes()
+{
+    // Default implementation does nothing
+    // Override in derived classes to set up routes
 }
 
 /// @copydoc FrameworkController::onEvent
@@ -66,6 +78,17 @@ void FrameworkController::poll() {
 void FrameworkController::waitAndDispatch(uint32_t timeoutMs) {
     Event event;
     if (EventManager::getInstance().getNextEvent(event, timeoutMs)) {
+        printf("[FrameworkController] Event received: %d\n", event.type);
+        printf("[FrameworkController] Event target: %s\n", event.target ? event.target->getName() : "null");
+        // If the event is a GPIO event, cast and handle it
+        // Note: This is a temporary check for testing purposes.
+        // In a real application, you would likely have a more structured way to handle different event types.
+        if (event.type == EventType::GpioChange) {
+            printf("[FrameworkController] Event data: %p\n", event.data);
+            printf("GpioEvent pin: %d, edge: %d\n", 
+                   event.data ? static_cast<const GpioEvent*>(event.data)->pin : -1,
+                   event.data ? static_cast<const GpioEvent*>(event.data)->edge : -1);  
+        }      
         if (event.target == nullptr || event.target == this) {
             onEvent(event);
         }

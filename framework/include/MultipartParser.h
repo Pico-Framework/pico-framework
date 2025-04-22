@@ -49,7 +49,7 @@ public:
      * @param clientSocket The socket for the HTTP client connection.
      * @param request The full HTTP request object.
      */
-    MultipartParser(const HttpRequest &request);
+    MultipartParser();
 
     /**
      * @brief Begin processing the multipart upload from the socket.
@@ -60,7 +60,13 @@ public:
      * @return true if upload succeeds.
      * @return false on failure (mazlformed request, existing file, or write error).
      */
-    bool handleMultipart();
+    bool handleMultipart(HttpRequest& req, HttpResponse& res); // external interface for handling multipart uploads
+
+    /**
+     * @brief sets the boundary from the Content-Type header.
+     * @param contentType The Content-Type header value.
+     */
+    void setBoundaryFromContentType(const std::string& contentType);
 
 private:
     Tcp* tcp; ///< The client TCP connection
@@ -68,7 +74,7 @@ private:
     std::string filename;
     std::string leftoverData;
     std::string buffer;
-    const HttpRequest& request;
+
 
     static State currentState;
 

@@ -1,6 +1,9 @@
 #include "GpioEventManager.h"
+#include <cstdio>
 #include "hardware/gpio.h"
 #include "Event.h"
+#include "EventManager.h"
+
 
 GpioEventManager& GpioEventManager::getInstance() {
     static GpioEventManager instance;
@@ -25,13 +28,17 @@ void GpioEventManager::unregisterAll(uint pin) {
 }
 
 void GpioEventManager::gpio_event_handler(uint gpio, uint32_t events) {
-    GpioEventData data{gpio, events};
+    GpioEvent* data = new  GpioEvent{gpio, events};
+    const char* msg = "[IRQ] GPIO 16 triggered\n";
+    for (const char* p = msg; *p; ++p) {
+        uart_putc(uart0, *p);
+    }
 
     // Dispatch to listeners
     auto it = listeners.find(gpio);
     if (it != listeners.end()) {
         for (auto& cb : it->second) {
-            cb(data);
+            cb(*data);
         }
     }
 

@@ -25,6 +25,7 @@ TRACE_INIT(utility) // Initialize tracing for this module
 #include <string>
 #include <algorithm>
 #include <sstream>
+#include "pico/stdlib.h"
 
 #ifndef UNIT_TEST
 #include "lwip/memp.h"
@@ -177,4 +178,35 @@ int is_in_interrupt(void)
     ipsr_value = 0;
 #endif
     return (ipsr_value != 0);
+}
+
+/// @copydoc debug_print(const char *msg)
+void debug_print(const char *msg)
+{
+    if (msg)
+    {
+        for (const char *p = msg; *p; ++p)
+        {
+            uart_putc(uart0, *p);
+        }
+    }
+}
+/// @copydoc debug_print(const std::string &msg)
+void debug_print(const std::string &msg)
+{
+    for (const char *p = msg.c_str(); *p; ++p)
+    {
+        uart_putc(uart0, *p);
+    }
+}
+/// @copydoc debug_print(const char *msg, size_t len)       
+void debug_print(const char *msg, size_t len)
+{
+    if (msg && len > 0)
+    {
+        for (size_t i = 0; i < len; ++i)
+        {
+            uart_putc(uart0, msg[i]);
+        }
+    }
 }

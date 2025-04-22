@@ -43,7 +43,7 @@
       * 
       * @return int CYW43_LINK_UP, CYW43_LINK_DOWN, etc.
       */
-     static int getLinkStatus();
+     static int getLinkStatus(int lastStatus);
  
      /**
       * @brief Check whether the device is connected to Wi-Fi.

@@ -68,7 +68,6 @@ void FrameworkManager::network_task(void *params)
     {
         vTaskDelay(pdMS_TO_TICKS(1000));
     }
-    printf("WiFi connected.\n");
     AppContext::getInstance().initFrameworkServices();
     printf("[Framework Manager] Framework services initialized.\n");
     

@@ -195,8 +195,8 @@ endif()
 #------------------------------------------------------------------------------
 
 #mbed has unused args warnings - this ignores them
-target_compile_options(pico_framework PRIVATE
-  $<$<COMPILE_LANGUAGE:C>:-Wno-unused-result>
+add_compile_options(
+  -Wno-unused-result
 )
 
 target_compile_options(pico_framework PRIVATE -Wno-psabi)

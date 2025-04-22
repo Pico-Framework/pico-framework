@@ -25,6 +25,7 @@ TRACE_INIT(HttpResponse)
 #include <lwip/sockets.h>
 #include "utility.h"
 #include "FrameworkView.h"
+#include "HttpFileserver.h"
 
 // ------------------------------------------------------------------------
 // Constructor
@@ -428,6 +429,13 @@ void HttpResponse::reset() {
     headers.clear();
     body.clear();
 }
+
+bool HttpResponse::sendFile(const std::string& path)
+{
+    FileHandler fileHandler;
+    return fileHandler.serveFile(*this, path.c_str());
+}
+
 
 #if defined(PICO_HTTP_ENABLE_STORAGE)
 bool HttpResponse::saveFile(const char* path) const {

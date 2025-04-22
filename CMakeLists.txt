@@ -32,13 +32,14 @@ set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-psabi")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-psabi")
 
 # Initialize the SDK
+
 pico_sdk_init()
 
 # global include because pico sdk has includes that will fail if not included
 # we do not link it in unless option is set beow
 include_directories(${PICO_SDK_PATH}/lib/mbedtls/include)
 
-option(PICO_HTTP_ENABLE_LITTLEFS "Enable LittleFS-based StorageManager" OFF)
+option(PICO_HTTP_ENABLE_LITTLEFS "Enable LittleFS-based StorageManager" ON)
 option(PICO_HTTP_ENABLE_HTTP_CLIENT "Enable HttpClient" ON)
 option(PICO_HTTP_CLIENT_ENABLE_TLS "Enable TLS support in HttpClient" ON)
 option(PICO_HTTP_ENABLE_JWT "Enable JWT authentication support" ON)
@@ -51,7 +52,8 @@ add_subdirectory(framework)
 add_executable(framework_test 
     framework/src/test-app/main.cpp
     framework/src/test-app/app.cpp
-    framework/src/test-app/hw_config.c
+    framework/src/test-app/DashboardController.cpp
+    framework/src/test-app/GpioController.cpp
     )
 target_link_libraries(framework_test 
     pico_framework
@@ -59,12 +61,15 @@ target_link_libraries(framework_test
     )
 
 # Only need this if we are using littlefs - reserves a section of flash for the filesystem (128K by default)
-#if(PICO_HTTP_ENABLE_LITTLEFS)
+if(PICO_HTTP_ENABLE_LITTLEFS)
     target_link_options(framework_test PRIVATE "-T${CMAKE_SOURCE_DIR}/memmap_lfs_fragment.ld")
-#endif()
-
-#mbed has unused args warnings - this ignores them
-set(PICO_SDK_WARNINGS_DISABLE "-Wno-unused-result")
+else()
+    # If not using LittleFS we must be ing FAT so, we use the standard memory map (no need to define it)
+    # and include the hardware config file for the sd card
+    target_sources(framework_test 
+        framework/src/test-app/hw_config.c
+    )    
+endif()
 
 pico_add_extra_outputs(framework_test)
 

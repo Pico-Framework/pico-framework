@@ -194,6 +194,7 @@ bool ends_with(const std::string &str, const std::string &suffix)
     return std::equal(suffix.rbegin(), suffix.rend(), str.rbegin());
 }
 
+// Fallback route for serving any static file detected in router
 /// @copydoc HttpFileserver::handle_static_request
 void HttpFileserver::handle_static_request(HttpRequest &req, HttpResponse &res, const std::vector<std::string> &params)
 {

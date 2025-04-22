@@ -13,14 +13,8 @@
  #include <vector>
  #include <functional>
  #include "EventManager.h"
- 
- /**
-  * @brief Event payload for GpioChange events.
-  */
- struct GpioEventData {
-     uint pin;         ///< GPIO pin number
-     uint32_t edge;    ///< GPIO_IRQ_EDGE_RISE or GPIO_IRQ_EDGE_FALL
- };
+ #include "GpioEvent.h"
+
  
  /**
   * @brief GpioEventManager registers interrupts and posts GpioChange events to multiple listeners per pin.
@@ -29,7 +23,7 @@
  public:
      static GpioEventManager& getInstance();
  
-     using GpioCallback = std::function<void(const GpioEventData&)>;
+     using GpioCallback = std::function<void(const GpioEvent&)>;
  
      void enableInterrupt(uint pin, uint32_t edgeMask);
      void disableInterrupt(uint pin);

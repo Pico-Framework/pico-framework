@@ -232,8 +232,9 @@ HttpRequest HttpRequest::receive(Tcp* tcp)
         if (request.isMultipart())
         {
             TRACE("Multipart request detected\n");
-            request.handle_multipart(request);  // tcp is already stored in request
-            TRACE("Multipart request handled\n");
+            //HttpResponse response;
+            //request.handle_multipart(response);  // tcp is already stored in request
+            TRACE("Multipart request created\n");
             return request;
         }
 
@@ -270,10 +271,10 @@ HttpRequest HttpRequest::receive(Tcp* tcp)
  * @param req Reference to this request.
  * @return int 0 on success, -1 on failure.
  */
-int HttpRequest::handle_multipart(HttpRequest &req)
+int HttpRequest::handle_multipart(HttpResponse &res)
 {
-    MultipartParser parser(req);
-    return parser.handleMultipart() ? 0 : -1;
+    MultipartParser parser;
+    return parser.handleMultipart(*this, res) ? 0 : -1;
 }
 
 /**

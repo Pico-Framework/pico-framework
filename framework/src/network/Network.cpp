@@ -64,7 +64,7 @@ void Network::start_wifi(){
 
     int status = 0;
     do {
-        status = getLinkStatus();
+        status = getLinkStatus(status);
         vTaskDelay(1000 / portTICK_PERIOD_MS);
     } while (status != CYW43_LINK_UP);
     wifiConnected = true;
@@ -92,21 +92,34 @@ void Network::wifi_deinit(){
 //  - CYW43_LINK_JOIN: The device is in the process of joining a network.
 //  - CYW43_LINK_DOWN: The link is down and not connected to any network.
 //  @note The function prints the current link status to the console for debugging purposes.
-int Network::getLinkStatus(){
+int Network::getLinkStatus(int lastStatus) {
 
     int status = cyw43_tcpip_link_status( &cyw43_state,  CYW43_ITF_STA);  
     switch(status){
         case CYW43_LINK_UP:
-            printf("Link is up\n");
+            printf("\nLink is up\n");                    
             break;
+
         case CYW43_LINK_NOIP:
-            printf("Link is up but no IP address\n");
+            if (lastStatus == CYW43_LINK_NOIP) {
+                printf(".");
+            } 
+            else{
+                printf("\nAcquiring IP address ");
+            }
             break;
+
         case CYW43_LINK_JOIN:
-            printf("Link is joining network\n");
+            if (lastStatus == CYW43_LINK_JOIN) {
+                printf(".");
+            } 
+            else{
+                printf("\nJoining network ");
+            }
             break;
+            
         case CYW43_LINK_DOWN:
-            printf("Link is down\n");
+            printf("\nLink is down\n");
             break;
     }
     return status;

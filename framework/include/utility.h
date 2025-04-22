@@ -50,4 +50,8 @@ void printMemsize();
 /// @brief Check whether currently in interrupt context.
 int is_in_interrupt(void);
 
+void debug_print(const char *msg);
+void debug_print(const std::string &msg);
+void debug_print(const char *msg, size_t len);
+
 #endif // UTILITY_H

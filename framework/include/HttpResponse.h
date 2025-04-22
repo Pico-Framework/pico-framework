@@ -43,7 +43,7 @@ public:
      */
     HttpResponse(Tcp *tcp);
 
-    Tcp* getTcp() const { return tcp; }
+    Tcp *getTcp() const { return tcp; }
 
     // ------------------------------------------------------------------------
     // Status and Header Management
@@ -152,8 +152,8 @@ public:
      * @param contentLength Total length of body.
      * @param contentType MIME type.
      */
-    void start(int code, size_t contentLength, const std::string &contentType = "application/octet-stream", 
-                const std::string &contentEncoding = "");
+    void start(int code, size_t contentLength, const std::string &contentType = "application/octet-stream",
+               const std::string &contentEncoding = "");
 
     /**
      * @brief Send a chunk of the response body.
@@ -223,6 +223,15 @@ public:
      * @return Reference to this HttpResponse object.
      */
     HttpResponse &redirect(const std::string &url, int statusCode);
+
+    /**
+     * @brief Sends the specified file from mounted storage to the client.
+     *
+     * @param path Relative path to the file (e.g. "/index.html").
+     * @return true if the file was successfully sent.
+     * @return false if the file was not found or an error occurred.
+     */
+    bool sendFile(const std::string &path);
 
 #if defined(PICO_HTTP_ENABLE_STORAGE)
     /**

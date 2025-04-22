@@ -3,16 +3,13 @@
 #include "task.h"
 #include "app.h"
 
-//App myApp(80);  
-
 int main() {
 
     int64_t start = to_ms_since_boot(get_absolute_time());
     stdio_init_all();
 
     static App app(80);  // <-- construct in main(), safe
-    //App* app = new App(80); // <-- or use dynamic allocation, but ensure to delete later
-    int64_t end = to_ms_since_boot(get_absolute_time());
+     int64_t end = to_ms_since_boot(get_absolute_time());
     printf("[BootTimer] App constructed in %lld ms\n", end - start);
 
     std::cout << "System Booting..." << std::endl;

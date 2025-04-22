@@ -46,27 +46,45 @@ TRACE_INIT(MultipartParser)
 State MultipartParser::currentState = SEARCHING_FOR_BOUNDARY; // Initialize state
 
 /// @copydoc MultipartParser::MultipartParser
-MultipartParser::MultipartParser(const HttpRequest &request)
-    : tcp(request.getTcp()), request(request)
+MultipartParser::MultipartParser()
+
 {
-    std::string contentType = request.getHeader("Content-Type");
-    std::size_t pos = contentType.find("boundary=");
-    if (pos != std::string::npos)
-    {
-        boundary = contentType.substr(pos + 9);
+
+}
+
+void MultipartParser::setBoundaryFromContentType(const std::string& contentType){
+    size_t boundaryPos = contentType.find("boundary=");
+    if (boundaryPos != std::string::npos) {
+        boundary = contentType.substr(boundaryPos + 9); // 9 is the length of "boundary="
+        // Remove any leading/trailing whitespace
+        boundary.erase(0, boundary.find_first_not_of(" \t\r\n"));
+        boundary.erase(boundary.find_last_not_of(" \t\r\n") + 1);
+        TRACE("Boundary set to: '%s'\n", boundary.c_str());
+    } else {
+        boundary.clear();
+        TRACE("No boundary found in Content-Type header\n");
     }
 }
 
-/// @copydoc MultipartParser::handleMultipart
-bool MultipartParser::handleMultipart()
+bool MultipartParser::handleMultipart(HttpRequest& req, HttpResponse& res)
 {
+    tcp = req.getTcp();  // extract here — don't store in ctor
+
+    std::string contentType = req.getHeader("Content-Type");
+    setBoundaryFromContentType(contentType);
+
+    if (boundary.empty()) {
+        res.status(400).send("Missing boundary");
+        return false;
+    }
+
     char buf[1460];
     int len;
 
     currentState = SEARCHING_FOR_BOUNDARY;
 
     // Handle any body data included with the initial request
-    const std::string &initialBody = request.getBody();
+    const std::string &initialBody = req.getBody();
     if (!initialBody.empty())
     {
         std::string chunk = initialBody;
