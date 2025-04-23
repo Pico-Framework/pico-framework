@@ -3,6 +3,7 @@
 #include "hardware/gpio.h"
 #include "Event.h"
 #include "EventManager.h"
+#include "AppContext.h"
 
 
 GpioEventManager& GpioEventManager::getInstance() {
@@ -45,5 +46,5 @@ void GpioEventManager::gpio_event_handler(uint gpio, uint32_t events) {
 
     // Also send an Event to EventManager if anyone wants to subscribe
     Event evt = Event(SystemNotification::GpioChange, gpioEvent, sizeof(GpioEvent)); // broadcast event to anyone subscribed as target isn't specified
-    EventManager::getInstance().postEvent(evt); // EventManager knows whther it's an ISR or not
+    AppContext::getInstance().getService<EventManager>()->postEvent(evt); // EventManager knows whther it's an ISR or not
 }

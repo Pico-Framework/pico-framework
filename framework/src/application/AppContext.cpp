@@ -7,6 +7,7 @@
 #include "TimeManager.h"
 #include "JwtAuthenticator.h"
 #include "EventManager.h"
+#include "GpioEventManager.h"
 #include "framework_config.h"
 #include "DebugTrace.h"
 TRACE_INIT(AppContext);
@@ -32,6 +33,10 @@ void AppContext::initFrameworkServices() {
         // Event manager (always present)
         static EventManager eventMgr;
         registerService<EventManager>(&eventMgr);
+    #if defined(ENABLE_GPIO_EVENTS)
+        static GpioEventManager gpioEventManager = GpioEventManager::getInstance();
+        AppContext::registerService<GpioEventManager>(&gpioEventManager);
+    #endif
     
     #if PICO_HTTP_ENABLE_JWT
         static JwtAuthenticator jwt;

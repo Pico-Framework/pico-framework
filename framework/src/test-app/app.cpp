@@ -17,34 +17,70 @@ App::App(int port) : FrameworkApp(port, "AppTask", 1024, 1)
 
 void App::initRoutes()
 {
+    // This method is called by the base class to initialize HTTP routes.
+    // You can add your application's routes here.
+    // All FrameWorkController instances will have their initRoutes called
+    // when the application starts, so you can add routes in your controllers.
+    // See the GpioController and DashboardController classes for examples.
+    // Add a simple route for testing
     router.addRoute("GET", "/hello", [](HttpRequest &req, HttpResponse &res, const auto &)
                     { res.send("Welcome to PicoFramework!"); });
 }
 
 void App::onStart()
 {
+    // Call the base class to ensure application state is initialized
     FrameworkApp::onStart();
 
+    // These are two controllers derived from FrameworkController that add event support to the FrameworkTask base class.
+    // They are started here to ensure they are ready to handle events and HTTP requests.
+    std::cout << "[App] Initializing application..." << std::endl;
     static GpioController gpioController(routerInstance);
     gpioController.start();
     static DashboardController dashboardController(routerInstance);
     dashboardController.start();
 
-    EventManager::getInstance().subscribe(mask(SystemNotification::GpioChange), this);
-    GpioEventManager::getInstance().enableInterrupt(16, GPIO_IRQ_EDGE_RISE | GPIO_IRQ_EDGE_FALL);
-    GpioEventManager::getInstance().enableInterrupt(17, GPIO_IRQ_EDGE_RISE | GPIO_IRQ_EDGE_FALL);
+    // Here we are setting up event handlers - we get the EventManager and GpioEventManager from the AppContext.
+    EventManager* eventManager = AppContext::getInstance().getService<EventManager>();
+    GpioEventManager* gpioEventManager = AppContext::getInstance().getService<GpioEventManager>();
 
-    EventManager::getInstance().subscribe(mask(UserNotification::Heartbeat), this);
+    // Subscribe to GPIO change events
+    // This will call onEvent() in this App class when a GPIO change event occurs.
+    // Note: The GpioEventManager will call the gpio_event_handler() function when a GPIO interrupt occurs.
+    // The gpio_event_handler() will then post an Event to the EventManager, which posts to the FRameworkController event queue.
+    // FrameworkController has a waitAndDispatch function that polls the queue and will call onEvent() in this App class.
+    // Events can be SystemNotification or UserNotification types, which are defined in enum class UserNotification (see the App.h file).
+    eventManager->subscribe(mask(SystemNotification::GpioChange), this);
+    gpioEventManager->enableInterrupt(16, GPIO_IRQ_EDGE_RISE | GPIO_IRQ_EDGE_FALL);
+    gpioEventManager->enableInterrupt(17, GPIO_IRQ_EDGE_RISE | GPIO_IRQ_EDGE_FALL);
+
+    eventManager->subscribe(mask(UserNotification::Heartbeat), this);
 
     std::cout << "[App] Waiting for network..." << std::endl;
+    // Wait for the network to be ready before starting services
+    // This is a blocking call that waits for the NetworkReady notification
+    // You could use a non-blocking wait if you want to do other work in the meantime
+    // waitfor is provided by the FrameworkTask base class and has a timeout parameter, unused here
+    // The underlying imlementation uses FreeRTOS notifications
     waitFor(SystemNotification::NetworkReady);
 
     std::cout << "[App] Network ready. Starting services..." << std::endl;
+    // Now that the network is ready, we can start services that depend on it
+    // For example, you might want to start an HTTP server or other network services here
     server.start();
 }
 
 void App::onEvent(const Event &e)
 {
+    // This method is called when an event is posted to the App's event queue.
+    // It is called by the FrameworkController base class when an event is received.
+    // You can handle different types of events here based on the notification kind.
+    // For example, you can handle GPIO change events or user-defined events.
+    // You subscribe for events in the onStart() method (for example), so this will be called
+    // when an event is posted to the App's event queue. The Eventmanager operates as a true
+    // publish-subscribe system, so you can post events from anywhere in the application
+    // and they will be delivered to ALL subscribers that have registered for that event type.
+
     if (e.notification.kind == NotificationKind::System &&
         e.notification.system == SystemNotification::GpioChange)
     {
@@ -74,7 +110,7 @@ void App::poll()
              { 
             printf("[App] Running main polling loop...\n"); 
             Event userEvt(static_cast<uint8_t>(UserNotification::Heartbeat));
-            EventManager::getInstance().postEvent(userEvt);
+            AppContext::getInstance().getService<EventManager>()->postEvent(userEvt);
             // this yield is not essential, but without yielding you can miss events
             vTaskDelay(pdMS_TO_TICKS(1)); }, "logLoop"); // <-- Unique ID for this timer (enables it to be cancelled)
 }

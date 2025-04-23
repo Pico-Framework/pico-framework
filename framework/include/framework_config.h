@@ -24,6 +24,8 @@
 // This file contains various configuration settings for the framework.
 #define STREAM_SEND_DELAY_MS 20
 
+#define ENABLE_GPIO_EVENTS ///< Set to enable GPIO event handling, don't define to disable
+
 #define QUIET_MODE ///< Set to disable all normal behavior print output, don't define to print
 
 #ifdef QUIET_MODE
