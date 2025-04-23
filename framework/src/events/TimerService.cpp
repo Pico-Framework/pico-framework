@@ -122,7 +122,7 @@ void TimerService::scheduleAt(time_t unixTime, const Event &event, const std::st
                                             Event *evt = static_cast<Event *>(pvTimerGetTimerID(xTimer));
                                             if (evt)
                                             {
-                                                AppContext::getInstance().getService<EventManager>()->postEvent(*evt);
+                                                AppContext::get<EventManager>()->postEvent(*evt);
                                                 delete evt;
                                             }
                                             xTimerDelete(xTimer, 0);
@@ -150,7 +150,7 @@ void TimerService::scheduleEvery(uint32_t intervalMs, const Event &event, const 
                                             Event *evt = static_cast<Event *>(pvTimerGetTimerID(xTimer));
                                             if (evt)
                                             {
-                                                AppContext::getInstance().getService<EventManager>()->postEvent(*evt);
+                                                AppContext::get<EventManager>()->postEvent(*evt);
                                             }
                                         });
 
@@ -179,7 +179,7 @@ void TimerService::scheduleDailyAt(TimeOfDay time, DaysOfWeek days, const Event 
                                             Event *evt = static_cast<Event *>(pvTimerGetTimerID(xTimer));
                                             if (evt)
                                             {
-                                                AppContext::getInstance().getService<EventManager>()->postEvent(*evt);
+                                                AppContext::get<EventManager>()->postEvent(*evt);
                                                 delete evt;
                                             }
                                             xTimerDelete(xTimer, 0);
@@ -217,7 +217,7 @@ void TimerService::scheduleDuration(TimeOfDay start, DaysOfWeek days, uint32_t d
                                                  Event *evt = static_cast<Event *>(pvTimerGetTimerID(xTimer));
                                                  if (evt)
                                                  {
-                                                     AppContext::getInstance().getService<EventManager>()->postEvent(*evt);
+                                                     AppContext::get<EventManager>()->postEvent(*evt);
                                                      delete evt;
                                                  }
                                                  xTimerDelete(xTimer, 0);
@@ -237,7 +237,7 @@ void TimerService::scheduleDuration(TimeOfDay start, DaysOfWeek days, uint32_t d
                                                 Event *evt = static_cast<Event *>(pvTimerGetTimerID(xTimer));
                                                 if (evt)
                                                 {
-                                                    AppContext::getInstance().getService<EventManager>()->postEvent(*evt);
+                                                    AppContext::get<EventManager>()->postEvent(*evt);
                                                     delete evt;
                                                 }
                                                 xTimerDelete(xTimer, 0);

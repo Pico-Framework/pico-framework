@@ -21,6 +21,12 @@ public:
         }
         return nullptr;
     }
+    // short form
+    template<typename T>
+    static T* get() {
+        return getInstance().getService<T>();
+    }
+
     void initFrameworkServices();
 
 private:

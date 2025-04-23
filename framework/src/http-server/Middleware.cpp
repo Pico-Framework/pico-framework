@@ -42,7 +42,7 @@ Middleware authMiddleware = [](HttpRequest &req, HttpResponse &res, const std::v
     }
 
     token = token.substr(7); // Remove "Bearer " prefix
-    if (!AppContext::getInstance().getService<JwtAuthenticator>()->validateJWT(token))
+    if (!AppContext::get<JwtAuthenticator>()->validateJWT(token))
     {
         JsonResponse::sendError(res, 401, "INALID_TOKEN", "Invalid token");
         return false;

@@ -55,7 +55,7 @@ void DashboardController::initRoutes()
                     { deleteFile(req, res, params); });
 
     router.addRoute("GET", "/", [](auto &req, auto &res, const auto &)
-                    { res.sendFile("/pico_gpios.html"); });
+                    { res.sendFile("/uploads/pico_gpios.html"); });
 
     // Catch-all route for static files
     router.addRoute("GET", "/(.*)", [this](HttpRequest &req, HttpResponse &res, const std::vector<std::string> &params)
@@ -92,10 +92,10 @@ void DashboardController::uploadHandler(HttpRequest &req, HttpResponse &res, con
 
 void DashboardController::deleteFile(HttpRequest &req, HttpResponse &res, const std::vector<std::string> &params)
 {
-    auto *fs = AppContext::getInstance().getService<StorageManager>();
+    auto *fs = AppContext::get<StorageManager>();
     if (!fs->isMounted() && !fs->mount())
     {
-        res.status(500).send("Failed to mount filesystem");
+        res.sendError(500, "mount_failed", "Failed to mount filesystem");
         return;
     }
 
@@ -103,10 +103,10 @@ void DashboardController::deleteFile(HttpRequest &req, HttpResponse &res, const 
     if (fs->exists(path))
     {
         fs->remove(path);
-        res.send("File deleted: " + params[0]);
+        res.sendSuccess({{"file", params[0]}}, "File deleted");
     }
     else
     {
-        res.status(404).send("File not found");
+        res.sendError(404, "File not found");
     }
 }

@@ -2,7 +2,7 @@
  * @file HttpParser.cpp
  * @author Ian Archbell 
  * @brief HTTP parser for status codes, headers, and body handling. 
- * Part of the PicoFramework.
+ * * Part of the PicoFramework HTTP server.
  * This module provides methods to parse HTTP status lines, headers, and
  * handle HTTP body content, including chunked transfer encoding and
  * content-length handling.
@@ -60,3 +60,28 @@ void sendError(HttpResponse& res, int statusCode, const std::string& code, const
 }
 
 } // namespace JsonResponse
+
+HttpResponse& HttpResponse::sendSuccess(const nlohmann::json& data, const std::string& message) {
+    JsonResponse::sendSuccess(*this, data, message);
+    return *this;
+}
+
+HttpResponse& HttpResponse::sendCreated(const nlohmann::json& data, const std::string& message) {
+    JsonResponse::sendCreated(*this, data, message);
+    return *this;
+}
+
+HttpResponse& HttpResponse::sendMessage(const std::string& message) {
+    JsonResponse::sendMessage(*this, message);
+    return *this;
+}
+
+HttpResponse& HttpResponse::sendNoContent() {
+    JsonResponse::sendNoContent(*this);
+    return *this;
+}
+
+HttpResponse& HttpResponse::sendError(int statusCode, const std::string& code, const std::string& message) {
+    JsonResponse::sendError(*this, statusCode, code, message);
+    return *this;
+}

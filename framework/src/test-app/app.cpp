@@ -49,8 +49,8 @@ void App::onStart()
     dashboardController.start();
 
     // Here we are setting up event handlers - we get the EventManager and GpioEventManager from the AppContext.
-    EventManager* eventManager = AppContext::getInstance().getService<EventManager>();
-    GpioEventManager* gpioEventManager = AppContext::getInstance().getService<GpioEventManager>();
+    EventManager* eventManager = AppContext::get<EventManager>();
+    GpioEventManager* gpioEventManager = AppContext::get<GpioEventManager>();
 
     // Subscribe to GPIO change events
     // This will call onEvent() in this App class when a GPIO change event occurs.
@@ -118,7 +118,7 @@ void App::poll()
              { 
             printf("[App] Running main polling loop...\n"); 
             Event userEvt(static_cast<uint8_t>(UserNotification::Heartbeat));
-            AppContext::getInstance().getService<EventManager>()->postEvent(userEvt);
+            AppContext::get<EventManager>()->postEvent(userEvt);
             // this yield is not essential, but without yielding you can miss events
             vTaskDelay(pdMS_TO_TICKS(1)); }, "logLoop"); // <-- Unique ID for this timer (enables it to be cancelled)
 }

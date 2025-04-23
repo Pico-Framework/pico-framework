@@ -32,7 +32,7 @@ TRACE_INIT(TimeManager);
 extern "C" void sntp_set_system_time(uint32_t sec)
 {
     TRACE("[SNTP] callback made\n");
-    AppContext::getInstance().getService<TimeManager>()->setTimeFromEpoch(sec);
+    AppContext::get<TimeManager>()->setTimeFromEpoch(sec);
 }
 
 void TimeManager::initNtpClient()

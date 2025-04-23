@@ -296,6 +296,15 @@ public:
      */
     void reset();
 
+
+    // Convenience wrappers enabling fluent chaining
+    HttpResponse& sendSuccess(const nlohmann::json& data = {}, const std::string& message = "");
+    HttpResponse& sendCreated(const nlohmann::json& data = {}, const std::string& message = "");
+    HttpResponse& sendMessage(const std::string& message);
+    HttpResponse& sendNoContent();
+    HttpResponse& sendError(int statusCode, const std::string& code, const std::string& message);
+    HttpResponse& sendError(int statusCode, const std::string& message);  // simpler form
+
 private:
     /**
      * @brief Convert an HTTP status code to its standard message.
@@ -312,6 +321,7 @@ private:
     std::vector<std::string> cookies;           ///< Set-Cookie headers (server only)
 
     std::string body; ///< Full response body (client-side or buffered server content)
+
 };
 
 #endif // HTTPRESPONSE_H

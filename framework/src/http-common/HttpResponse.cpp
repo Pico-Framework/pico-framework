@@ -16,7 +16,7 @@
  */
 
 #include "http/HttpResponse.h"
-
+#include "http/JsonResponse.h"
 #include "framework_config.h" 
 #include "DebugTrace.h"
 TRACE_INIT(HttpResponse)
@@ -437,6 +437,10 @@ bool HttpResponse::sendFile(const std::string& path)
     return fileHandler.serveFile(*this, path.c_str());
 }
 
+HttpResponse& HttpResponse::sendError(int statusCode, const std::string& message) {
+    JsonResponse::sendError(*this, statusCode, "error", message);
+    return *this;
+}
 
 #if defined(PICO_HTTP_ENABLE_STORAGE)
 bool HttpResponse::saveFile(const char* path) const {

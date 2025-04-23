@@ -274,7 +274,7 @@ bool MultipartParser::extractFilename(const std::string &contentDisposition)
     if (end == std::string::npos)
         return false;
     // Ensure upload directory exists
-    auto storage = AppContext::getInstance().getService<StorageManager>();
+    auto storage = AppContext::get<StorageManager>();
     if(!storage) {
         printf("[MultipartParser] StorageManager service not available\n");
         sendHttpResponse(500, "StorageManager service not available");
@@ -305,7 +305,7 @@ bool MultipartParser::extractFilename(const std::string &contentDisposition)
 bool MultipartParser::processFileData(const std::string &fileData)
 {
     TRACE("Processing file data, size: %zu bytes\n", fileData.size());
-    auto *storage = AppContext::getInstance().getService<StorageManager>();
+    auto *storage = AppContext::get<StorageManager>();
     if (!storage->appendToFile(filename, (uint8_t *)fileData.c_str(), fileData.size()))
     {
         if (!storage->isMounted())
@@ -326,7 +326,7 @@ bool MultipartParser::processFileData(const std::string &fileData)
 /// @copydoc MultipartParser::file_exists
 int MultipartParser::file_exists(const std::string& filename)
 {
-    StorageManager *storage = AppContext::getInstance().getService<StorageManager>();
+    StorageManager *storage = AppContext::get<StorageManager>();
     printf("[MultipartParser] Checking if file exists: %s\n", filename.c_str());
     return storage->exists(filename);
 }

@@ -53,7 +53,7 @@ FileHandler::FileHandler()
 /// @copydoc FileHandler::init
 bool FileHandler::init()
 {
-    StorageManager *storage = AppContext::getInstance().getService<StorageManager>();
+    StorageManager *storage = AppContext::get<StorageManager>();
     if (storage->mount())
     {
         TRACE("Storage mounted successfully\n");
@@ -67,32 +67,10 @@ bool FileHandler::init()
 }
 
 /// @copydoc FileHandler::listDirectory
-void FileHandler::listDirectory(const char *path)
+bool FileHandler::listDirectory(const std::string& path, std::vector<FileInfo>& out)
 {
-    StorageManager *storage = AppContext::getInstance().getService<StorageManager>();
-    if (!storage)
-    {
-        printf("No storage manager available\n");
-        return;
-    }
-
-    std::string dir = path ? path : "/";
-    std::vector<FileInfo> files;
-
-    if (!storage->listDirectory(dir, files))
-    {
-        printf("Failed to list directory: %s\n", dir.c_str());
-        return;
-    }
-
-    printf("Directory Listing: %s\n", dir.c_str());
-    for (const auto &f : files)
-    {
-        const char *attr = f.isDirectory ? "directory" : f.isReadOnly ? "read-only file"
-                                                                      : "writable file";
-
-        printf("%s\t[%s]\t[size=%zu]\n", f.name.c_str(), attr, f.size);
-    }
+    auto* storage = AppContext::get<StorageManager>();
+    return storage->listDirectory(path, out);
 }
 
 /// @copydoc FileHandler::serveFile
@@ -100,7 +78,7 @@ bool FileHandler::serveFile(HttpResponse &res, const char *uri)
 {
     std::string path = uri;
 
-    storageManager = AppContext::getInstance().getService<StorageManager>();
+    storageManager = AppContext::get<StorageManager>();
     if (!storageManager->mount())
     {
         printf("Storage mount failed\n");
@@ -175,19 +153,38 @@ HttpFileserver::HttpFileserver()
 void HttpFileserver::handle_list_directory(HttpRequest &req, HttpResponse &res, const std::vector<std::string> &params)
 {
     std::string directory_path = req.getPath();
-    printf("Handling list directory request for URI: %s\n", directory_path.c_str());
-
     int pos = directory_path.find("/api/v1/ls");
-    if (pos != std::string::npos)
-    {
+    if (pos != std::string::npos) {
         directory_path = directory_path.substr(pos + strlen("/api/v1/ls"));
     }
 
-    fileHandler.listDirectory(directory_path.c_str());
+    if (directory_path.empty()) {
+        directory_path = "/";
+    }
 
-    const char *response = "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\n\r\nDirectory listed successfully.";
-    res.getTcp()->send(response, strlen(response));
+    std::vector<FileInfo> entries;
+    if (!fileHandler.listDirectory(directory_path, entries)) {
+        res.sendError(404, "not_found", "Directory not found or inaccessible");
+        return;
+    }
+
+    nlohmann::json fileArray = nlohmann::json::array();
+    for (const auto& entry : entries) {
+        fileArray.push_back({
+            {"name", entry.name},
+            {"size", entry.size},
+            {"type", entry.isDirectory ? "directory" : "file"}
+        });
+    }
+
+    nlohmann::json result = {
+        {"path", directory_path},
+        {"files", fileArray}
+    };
+
+    res.sendSuccess(result, "Directory listed successfully.");
 }
+
 
 // Helper function to check if a string ends with a given suffix
 bool ends_with(const std::string &str, const std::string &suffix)

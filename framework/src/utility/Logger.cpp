@@ -64,7 +64,7 @@ void Logger::log(LogLevel level, const char *msg)
 
     // Optionally append to log file
     if (logToFile) {
-        auto* storage = AppContext::getInstance().getService<StorageManager>();
+        auto* storage = AppContext::get<StorageManager>();
         if (storage) {
             char fullMsg[256];
             snprintf(fullMsg, sizeof(fullMsg), "[%s] [%s] %s\n", timeBuf, levelStr, msg);

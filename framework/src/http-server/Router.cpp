@@ -195,7 +195,7 @@ bool Router::isAuthorizedForRoute(const Route &route, HttpRequest &req, HttpResp
         std::string token = getAuthorizationToken(req);
         TRACE("Token: %s\n", token.c_str());
         // Fixed the conditional check: removed the erroneous comma operator.
-        if (token.empty() || !AppContext::getInstance().getService<JwtAuthenticator>()->validateJWT(token))
+        if (token.empty() || !AppContext::get<JwtAuthenticator>()->validateJWT(token))
         {
             JsonResponse::sendError(res, 401, "UNAUTHORIZED", "Missing authorization header");
             TRACE("Authorization failed\n");

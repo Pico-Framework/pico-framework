@@ -50,6 +50,6 @@ void GpioEventManager::gpio_event_handler(uint gpio, uint32_t events) {
     // Also send an Event to EventManager if anyone wants to subscribe
 #if GPIO_EVENT_HANDLING & GPIO_EVENTS
     Event evt = Event(SystemNotification::GpioChange, gpioEvent, sizeof(GpioEvent)); // broadcast event to anyone subscribed as target isn't specified
-    AppContext::getInstance().getService<EventManager>()->postEvent(evt); // EventManager knows whther it's an ISR or not
+    AppContext::get<EventManager>()->postEvent(evt); // EventManager knows whther it's an ISR or not
 #endif
 }

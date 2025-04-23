@@ -104,7 +104,7 @@ void HttpServer::run()
         return;
     }
 
-    AppContext::getInstance().getService<TimeManager>()->detectAndApplyTimezone();
+    AppContext::get<TimeManager>()->detectAndApplyTimezone();
 
     Tcp* listener = initListener();
     if (!listener)
