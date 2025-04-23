@@ -14,6 +14,8 @@
 #include "lfs.h"
 #include <vector>
 #include <string>
+#include <FreeRTOS.h> // for FreeRTOS types and functions
+#include <semphr.h>   // for SemaphoreHandle_t, StaticSemaphore_t, xSemaphoreCreateMutexStatic, xSemaphoreTake, xSemaphoreGive
 
 /**
  * @brief A LittleFS-based implementation of StorageManager, storing files in flash memory.
@@ -175,6 +177,11 @@ private:
     struct lfs_config config;
 
     bool mounted = false;
+
+    // --- LittleFS Thread Safety Lock (FreeRTOS mutex, statically allocated) ---
+
+    static StaticSemaphore_t lfs_mutex_buf;
+    static SemaphoreHandle_t lfs_mutex;
 
     void configure();
     static int lfs_read_cb(const struct lfs_config *c, lfs_block_t block, lfs_off_t off, void *buffer, lfs_size_t size);

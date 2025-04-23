@@ -16,10 +16,9 @@ extern "C"
     extern uint8_t __flash_lfs_end;
 }
 
-// --- LittleFS Thread Safety Lock (FreeRTOS mutex, statically allocated) ---
-// At global level
-static StaticSemaphore_t lfs_mutex_buf;
-static SemaphoreHandle_t lfs_mutex = xSemaphoreCreateMutexStatic(&lfs_mutex_buf);
+// Static mutex for LittleFS thread safety
+StaticSemaphore_t LittleFsStorageManager::lfs_mutex_buf;
+SemaphoreHandle_t LittleFsStorageManager::lfs_mutex = xSemaphoreCreateMutexStatic(&lfs_mutex_buf);
 
 int LittleFsStorageManager::lfs_lock(const struct lfs_config *c) {
     assert(lfs_mutex != nullptr);
