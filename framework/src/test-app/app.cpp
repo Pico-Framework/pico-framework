@@ -13,6 +13,7 @@
 #include "events/GpioEvent.h"
 #include "events/EventManager.h"
 #include "events/GpioEventManager.h"
+#include "http/HttpFileserver.h"
 
 #include "GpioController.h"
 #include "DashboardController.h"
@@ -33,6 +34,10 @@ void App::initRoutes()
     // Add a simple route for testing
     router.addRoute("GET", "/hello", [](HttpRequest &req, HttpResponse &res, const auto &)
                     { res.send("Welcome to PicoFramework!"); });
+    // router.addRoute("GET", "/api/v1/ls(.*)", [this](HttpRequest &req, HttpResponse &res, const std::vector<std::string> &params) {
+    //     HttpFileserver fileServer; // temporary only!
+    //     fileServer.handle_list_directory(req, res, params);
+    // });
 }
 
 void App::onStart()
@@ -44,6 +49,7 @@ void App::onStart()
     // They are started here to ensure they are ready to handle events and HTTP requests.
     std::cout << "[App] Initializing application..." << std::endl;
     static GpioController gpioController(routerInstance);
+    printf("[App] Starting GPIO controller...\n");
     gpioController.start();
     static DashboardController dashboardController(routerInstance);
     dashboardController.start();

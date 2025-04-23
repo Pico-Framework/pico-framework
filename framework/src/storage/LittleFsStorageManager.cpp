@@ -358,7 +358,7 @@ size_t LittleFsStorageManager::getFileSize(const std::string &path)
 bool LittleFsStorageManager::listDirectory(const std::string &path, std::vector<FileInfo> &out)
 {
     lfs_dir_t dir;
-    struct lfs_info info;
+    struct lfs_info info = {};
 
     if (lfs_dir_open(&lfs, &dir, path.c_str()) < 0)
         return false;
@@ -367,17 +367,19 @@ bool LittleFsStorageManager::listDirectory(const std::string &path, std::vector<
     {
         if (strcmp(info.name, ".") == 0 || strcmp(info.name, "..") == 0)
             continue;
+
         FileInfo entry;
         entry.name = info.name;
         entry.size = info.size;
         entry.isDirectory = (info.type == LFS_TYPE_DIR);
-        entry.isReadOnly = false;
+        entry.isReadOnly = false;  // LittleFS doesn't expose this, so hardcoded
         out.push_back(entry);
     }
 
     lfs_dir_close(&lfs, &dir);
     return true;
 }
+
 
 bool LittleFsStorageManager::createDirectory(const std::string &path)
 {

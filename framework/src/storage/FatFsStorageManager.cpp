@@ -87,26 +87,21 @@ bool FatFsStorageManager::exists(const std::string &path)
 /// @copydoc FatFsStorageManager::listDirectory()
 bool FatFsStorageManager::listDirectory(const std::string &path, std::vector<FileInfo> &out)
 {
-    if (!ensureMounted())
-    {
+    if (!ensureMounted()) {
         TRACE("SD card not mounted — cannot list directory: %s\n", path.c_str());
         return false;
     }
-    FF_FindData_t xFindStruct;
-    memset(&xFindStruct, 0, sizeof(xFindStruct));
 
+    FF_FindData_t xFindStruct{};
     std::string searchPath = resolvePath(path.empty() ? "/" : path);
     int result = ff_findfirst(searchPath.c_str(), &xFindStruct);
 
-    if (result != FF_ERR_NONE)
-    {
+    if (result != FF_ERR_NONE) {
         return false;
     }
 
-    do
-    {
-        if (strlen(xFindStruct.pcFileName) > 0)
-        {
+    do {
+        if (xFindStruct.pcFileName && strlen(xFindStruct.pcFileName) > 0) {
             FileInfo info;
             info.name = xFindStruct.pcFileName;
             info.isDirectory = xFindStruct.ucAttributes & FF_FAT_ATTR_DIR;
