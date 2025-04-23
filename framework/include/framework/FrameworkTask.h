@@ -20,11 +20,11 @@
 #define FREERTOS_TASK_H
 #pragma once
 
-#include "FreeRTOS.h"
-#include "task.h"
-#include "queue.h"
-#include "Event.h"
-#include "Notification.h"
+#include <FreeRTOS.h>
+#include <task.h>
+#include <queue.h>
+#include "events/Event.h"
+#include "events/Notification.h"
 
 /**
  * @brief Base class for FreeRTOS-aware tasks in the framework.

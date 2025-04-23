@@ -16,19 +16,22 @@
  * @license MIT License
  * @copyright Copyright (c) 2025, Ian Archbell
  */
+
+
+#include "http/Middleware.h"
+
 #include "framework_config.h" // Must be included before DebugTrace.h to ensure framework_config.h is processed first
 #include "DebugTrace.h"
 TRACE_INIT(Middleware)
 
-#include "Middleware.h"
 #include <iostream>
-#include "HttpResponse.h"
-#include "JsonResponse.h"
-#include "AppContext.h"
+#include "http/HttpResponse.h"
+#include "http/JsonResponse.h"
+#include "framework/AppContext.h"
 
 /// @copydoc authMiddleware
 #ifdef PICO_HTTP_ENABLE_JWT
-#include "JwtAuthenticator.h"
+#include "http/JwtAuthenticator.h"
 Middleware authMiddleware = [](HttpRequest &req, HttpResponse &res, const std::vector<std::string> &params)
 {
     std::string token = req.getHeader("Authorization");

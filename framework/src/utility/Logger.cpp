@@ -12,9 +12,9 @@
  * @copyright Copyright (c) 2025, Ian Archbell
  */
 
-#include "Logger.h"
+#include "utility/Logger.h"
 #include <cstring>
-#include "AppContext.h"
+#include "framework/AppContext.h"
 
 LogLevel Logger::minLevel = LOG_INFO;
 

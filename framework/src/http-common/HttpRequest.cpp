@@ -18,22 +18,26 @@
 #include "DebugTrace.h"
 TRACE_INIT(HttpRequest)
 
-#include "HttpRequest.h"
+#include "http/HttpRequest.h"
 #include <sstream>
 #include <algorithm>
 #include <cctype>
 #include <iostream>
-#include "HttpServer.h"
 #include <cstring>
 #include <cstdio>
 #include <unordered_map>
-#include "lwip/sockets.h"
-#include "utility.h"
-#include "MultipartParser.h"
-#include "url_utils.h"
-#include "HttpParser.h"
-#include "HttpClient.h"
-#include "Tcp.h"
+//#include <lwip/sockets.h>
+
+#include "http/HttpServer.h"
+#include "utility/utility.h"
+#include "http/MultipartParser.h"
+#include "http/url_utils.h"
+#include "http/HttpParser.h"
+#include "network/Tcp.h"
+
+#ifdef  PICO_HTTP_ENABLE_HTTP_CLIENT
+#include "http/HttpClient.h"
+#endif // PICO_HTTP_ENABLE_HTTP_CLIENT
 
 #define BUFFER_SIZE 1460 // this is the standard MTU size
 
@@ -93,10 +97,15 @@ HttpResponse HttpRequest::del(const std::string &url)
 
 HttpResponse HttpRequest::send()
 {
+#ifdef PICO_HTTP_ENABLE_HTTP_CLIENT
     HttpResponse response;
     HttpClient client;
     client.sendRequest(*this, response);
     return response;
+#else
+    // If HTTP client is not enabled, return an empty response
+    return HttpResponse(nullptr);
+#endif
 }
 
 /**

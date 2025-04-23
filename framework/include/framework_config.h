@@ -26,6 +26,19 @@
 
 #define ENABLE_GPIO_EVENTS ///< Set to enable GPIO event handling, don't define to disable
 
+// GPIO events can be configured to use either FreeRTOS notifications or event queues
+// Notifications are faster and more efficient, but events allow for data passing and broadcasting).
+// They can also be configured to do both
+#define GPIO_NOTIFICATIONS           1
+#define GPIO_EVENTS                  2
+#define GPIO_EVENTS_AND_NOTIFICATIONS (GPIO_NOTIFICATIONS | GPIO_EVENTS)
+
+#ifndef GPIO_EVENT_HANDLING
+#define GPIO_EVENT_HANDLING GPIO_EVENTS_AND_NOTIFICATIONS
+#endif
+
+// === Debug Trace Configuration ===
+
 #define QUIET_MODE ///< Set to disable all normal behavior print output, don't define to print
 
 #ifdef QUIET_MODE

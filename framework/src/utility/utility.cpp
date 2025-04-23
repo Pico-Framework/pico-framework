@@ -16,7 +16,7 @@
 #include "DebugTrace.h"
 TRACE_INIT(utility) // Initialize tracing for this module
 
-#include "utility.h"
+#include "utility/utility.h"
 #include "FreeRTOS.h"
 #include "task.h"
 #include <stdio.h>
@@ -28,12 +28,12 @@ TRACE_INIT(utility) // Initialize tracing for this module
 #include "pico/stdlib.h"
 
 #ifndef UNIT_TEST
-#include "lwip/memp.h"
+#include <lwip/memp.h>
 #endif
-#include "lwip/stats.h"
-#include "lwip/pbuf.h"
-#include "lwip/sockets.h"
-#include "lwip/ip_addr.h"
+#include <lwip/stats.h>
+#include <lwip/pbuf.h>
+#include <lwip/sockets.h>
+#include <lwip/ip_addr.h>
 
 /// @copydoc printTaskStackSizes
 void printTaskStackSizes()

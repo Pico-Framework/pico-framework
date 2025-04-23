@@ -10,8 +10,8 @@
 #pragma once
 #include <cstdint>
 #include <cstddef>
-#include "Notification.h"
-#include "GpioEvent.h"
+#include "events/Notification.h"
+#include "events/GpioEvent.h"
 
 class FrameworkTask;
 

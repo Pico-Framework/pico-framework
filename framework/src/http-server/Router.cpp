@@ -29,16 +29,17 @@
 #include "DebugTrace.h"
 TRACE_INIT(Router)
 
-#include "Router.h"
-#include "HttpRequest.h"
-#include "HttpResponse.h"
-#include "JwtAuthenticator.h"
-#include "Middleware.h"
 #include <regex>
-#include "utility.h"
-#include "url_utils.h"
-#include "JsonResponse.h"
-#include "AppContext.h"
+
+#include "http/Router.h"
+#include "http/HttpRequest.h"
+#include "http/HttpResponse.h"
+#include "http/JwtAuthenticator.h"
+#include "http/Middleware.h"
+#include "utility/utility.h"
+#include "http/url_utils.h"
+#include "http/JsonResponse.h"
+#include "framework/AppContext.h"
 
 // -----------------------------------------------------------------------------
 // Helper function to extract a bearer token from an Authorization header.

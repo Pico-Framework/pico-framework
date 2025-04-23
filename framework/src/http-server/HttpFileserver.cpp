@@ -18,8 +18,8 @@
 #include "DebugTrace.h"
 TRACE_INIT(HttpFileserver)
 
-#include "HttpFileserver.h"
-#include "AppContext.h"
+#include "http/HttpFileserver.h"
+
 #include <string>
 #include <vector>
 #include <cstdio>
@@ -27,14 +27,17 @@ TRACE_INIT(HttpFileserver)
 #include <lwip/sockets.h>
 #include <unordered_map>
 
-#include "utility.h"
-#include "url_utils.h"
-#include "StorageManager.h"
-#include "AppContext.h"
+#include <FreeRTOS.h>
+#include <task.h>
+
+#include "framework/AppContext.h"
+#include "utility/utility.h"
+#include "http/url_utils.h"
+#include "storage/StorageManager.h"
+#include "framework/AppContext.h"
 #include "framework_config.h"
-#include "JsonResponse.h"
-#include "FreeRTOS.h"
-#include "task.h"
+#include "http/JsonResponse.h"
+
 
 #define TRACE_ON
 

@@ -12,7 +12,7 @@
  * @copyright Copyright (c) 2025, Ian Archbell
  */
 
-#include "FrameworkTask.h"
+#include "framework/FrameworkTask.h"
 
 /// @copydoc FrameworkTask::FrameworkTask
 FrameworkTask::FrameworkTask(const char *name, uint16_t stackSize, UBaseType_t priority)

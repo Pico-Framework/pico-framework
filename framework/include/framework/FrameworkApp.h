@@ -22,11 +22,11 @@
 #define FRAMEWORK_APP_H
 #pragma once
 
-#include "Router.h"
-#include "HttpServer.h"
-#include "FrameworkManager.h"
-#include "FrameworkController.h"
-#include "AppContext.h"
+#include "framework/FrameworkManager.h"
+#include "framework/FrameworkController.h"
+#include "framework/AppContext.h"
+#include "http/Router.h"
+#include "http/HttpServer.h"
 
 /**
  * @brief Base class for applications using the framework.

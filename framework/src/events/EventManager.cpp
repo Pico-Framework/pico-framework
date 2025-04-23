@@ -34,14 +34,14 @@
  * @copyright Copyright (c) 2025, Ian Archbell
  */
 
-#include "EventManager.h"
-#include "FrameworkTask.h"
+#include "events/EventManager.h"
 #include "pico/stdlib.h"
 #include "FreeRTOS.h"
 #include "task.h"
 #include "portmacro.h"
-#include "utility.h" // for is_in_interrupt()
-#include "FrameworkController.h"
+#include "framework/FrameworkTask.h"
+#include "utility/utility.h" // for is_in_interrupt()
+#include "framework/FrameworkController.h"
 
 /// @copydoc EventManager::EventManager
 EventManager::EventManager(size_t queueSize)
@@ -92,12 +92,7 @@ void EventManager::postEvent(const Event& event)
                 if (q) {
                     if (xQueueSendToBack(q, &event, 0) != pdPASS) {
                         debug_print("[EventManager] xQueueSend FAILED — queue full!\n");
-                    } else {
-                        const char* msg = "[EventManager] delivered to queue\n";
-                        for (const char* p = msg; *p; ++p) {
-                            uart_putc(uart0, *p);
-                        }
-                    }
+                    } 
                 }
             }
         }

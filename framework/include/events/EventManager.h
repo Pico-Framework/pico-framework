@@ -39,11 +39,11 @@
  #pragma once
  
  #include <vector>
- #include "FreeRTOS.h"
- #include "task.h"
- #include "queue.h"
- #include "Event.h"
- #include "FrameworkController.h"
+ #include <FreeRTOS.h>
+ #include <task.h>
+ #include <queue.h>
+ #include "events/Event.h"
+ #include "framework/FrameworkController.h"
  
  // Forward declaration
  class FrameworkTask;

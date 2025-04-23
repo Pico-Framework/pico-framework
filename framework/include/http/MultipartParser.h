@@ -20,8 +20,8 @@
 
 #include <string>
 #include <unordered_map>
-#include "HttpRequest.h"
-#include "Tcp.h"
+#include "http/HttpRequest.h"
+#include "network/Tcp.h"
 
 enum State
 {

@@ -51,11 +51,11 @@
  * - Automatic recovery of missed events after reboot
  */
 
-#include "TimerService.h"
-#include "PicoTime.h"
-#include "EventManager.h"
+#include "time/TimerService.h"
 #include <cstdio>
-#include "AppContext.h"
+#include "time/PicoTime.h"
+#include "events/EventManager.h"
+#include "framework/AppContext.h"
 
 TimeOfDay TimeOfDay::fromString(const char *hhmm)
 {

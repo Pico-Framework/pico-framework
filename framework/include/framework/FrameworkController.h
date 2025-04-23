@@ -35,10 +35,10 @@
 #include <unordered_map>
 #include <functional>
 #include <string>
-#include "FreeRTOS.h"
-#include "task.h"
-#include "Event.h"
-#include "Router.h"
+#include <FreeRTOS.h>
+#include <task.h>
+#include "events/Event.h"
+#include "http/Router.h"
 
 /**
  * @brief Base class for event-driven control logic in embedded applications.

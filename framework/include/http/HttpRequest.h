@@ -15,12 +15,13 @@
 #define HTTPREQUEST_H
 #pragma once
 
-#include "utility.h"
-#include "HttpResponse.h"
+
 #include <string>
 #include <map>
 #include <iostream>
-#include "tcp.h"
+#include "network/tcp.h"
+#include "utility/utility.h"
+#include "http/HttpResponse.h"
 
 class Router; ///< Forward declaration for potential routing needs
 

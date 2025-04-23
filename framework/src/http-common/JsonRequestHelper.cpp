@@ -19,8 +19,8 @@
  #include "DebugTrace.h" 
  TRACE_INIT(JsonRequestHelper)
 
- #include "JsonRequestHelper.h"
- #include "HttpRequest.h"
+ #include "http/JsonRequestHelper.h"
+ #include "http/HttpRequest.h"
  
  using json = nlohmann::json;
  

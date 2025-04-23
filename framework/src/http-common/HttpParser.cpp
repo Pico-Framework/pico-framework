@@ -1,12 +1,35 @@
-#include "HttpParser.h"
+/**
+ * @file HttpParser.cpp
+ * @author Ian Archbell 
+ * @brief HTTP parser for status codes, headers, and body handling.
+ * * Part of the PicoFramework HTTP server.
+ * This module provides methods to parse HTTP status lines, headers, and
+ * handle HTTP body content, including chunked transfer encoding and    
+ * content-length handling.
+ * It is designed for use in embedded systems with FreeRTOS and lwIP.
+ * @version 0.1
+ * @date 2025-03-26
+ * 
+ * @license MIT License
+ * @copyright Copyright (c) 2025, Ian Archbell
+ *      
+ */
+
+#include "http/HttpParser.h"
 #include <sstream>
 #include <algorithm>
 #include <map>
- #include "utility.h"
- #include "framework_config.h"
- #include "DebugTrace.h"
-TRACE_INIT(HttpParser)
 
+#include "http/ChunkedDecoder.h"
+#include "utility/utility.h"
+#include "framework_config.h"
+#include "DebugTrace.h"
+TRACE_INIT(HttpParser)
+/**
+ * @brief Parses the HTTP status line to extract the status code.   
+ * @param statusLine The HTTP status line (e.g., "HTTP/1.1 200 OK").
+ * @return The HTTP status code as an integer (e.g., 200).
+ */
 int HttpParser::parseStatusCode(const std::string& statusLine) {
     std::istringstream stream(statusLine);
     std::string httpVersion;
@@ -14,7 +37,11 @@ int HttpParser::parseStatusCode(const std::string& statusLine) {
     stream >> httpVersion >> code;
     return code;
 }
-
+/**
+ * @brief Parses the HTTP headers from a raw header string.
+ * @param rawHeaders The raw HTTP headers as a string.
+ * @return A map of header names to their values.
+ */
 std::map<std::string, std::string> HttpParser::parseHeaders(const std::string& rawHeaders) {
     std::map<std::string, std::string> headers;
     std::istringstream stream(rawHeaders);
@@ -58,6 +85,21 @@ std::map<std::string, std::string> HttpParser::parseHeaders(const std::string& r
     return headers;
 }
 
+/**
+ * @brief Receives HTTP headers and any leftover body data from a TCP socket.
+ * @param socket The TCP socket to read from.
+ * @return A pair containing the full header text and any leftover body data.
+ * If an error occurs, returns an empty header and leftover.
+ * This function reads data from the socket until it finds the end of the headers
+ * (indicated by a double CRLF "\r\n\r\n"). It accumulates data in a buffer
+ * and returns the complete header text along with any leftover body data that
+ * may have been received after the headers.
+ * It handles cases where the header may be split across multiple TCP packets.
+ * If the end of the headers is not found, it continues to read from the socket
+ * until it is found or an error occurs.
+ * @note This function is blocking and will wait until the header is fully received.
+ * It is designed for use in an embedded system with FreeRTOS and lwIP.
+ */
 std::pair<std::string, std::string> HttpParser::receiveHeaderAndLeftover(Tcp& socket) {
     std::string buffer;
     char temp[1460];
@@ -80,8 +122,6 @@ std::pair<std::string, std::string> HttpParser::receiveHeaderAndLeftover(Tcp& so
         vTaskDelay(pdMS_TO_TICKS(1));
     }
 }
-
-#include "ChunkedDecoder.h"
 
 bool HttpParser::receiveBody(Tcp& socket,
                              const std::map<std::string, std::string>& headers,

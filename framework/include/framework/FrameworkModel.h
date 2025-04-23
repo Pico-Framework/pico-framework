@@ -22,8 +22,8 @@ using json = nlohmann::json;
 #include <string>
 #include <vector>
 #include <optional>
-#include "JsonService.h"
-#include "nlohmann/json.hpp"
+#include <nlohmann/json.hpp>
+#include "storage/JsonService.h"
 
 /**
  * @brief Provides a basic JSON-backed record model.

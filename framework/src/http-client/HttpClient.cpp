@@ -1,9 +1,9 @@
-#include "HttpClient.h"
-#include "HttpRequest.h"
-#include "HttpResponse.h"
-#include "HttpParser.h"
-#include "ChunkedDecoder.h"
-#include "Tcp.h"
+#include "http/HttpClient.h"
+#include "http/HttpRequest.h"
+#include "http/HttpResponse.h"
+#include "http/HttpParser.h"
+#include "http/ChunkedDecoder.h"
+#include "network/Tcp.h"
 
 #include <sstream>
 #include <cstring>

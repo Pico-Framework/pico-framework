@@ -28,7 +28,7 @@
 #include "DebugTrace.h"
 TRACE_INIT(MultipartParser)
 
-#include "MultipartParser.h"
+#include "http/MultipartParser.h"
 #include <lwip/sockets.h>
 #include <iostream>
 #include <cstring>
@@ -36,12 +36,12 @@ TRACE_INIT(MultipartParser)
 #include <fstream>
 #include <algorithm>
 #include <cctype>
-#include <filesystem>
-#include "AppContext.h"
-#include "StorageManager.h"
-#include "FreeRTOS.h"
-#include "task.h"
-#include "AppContext.h" // if not already included
+//#include <filesystem>
+#include <FreeRTOS.h>
+#include <task.h>
+
+#include "framework/AppContext.h"
+#include "storage/StorageManager.h"
 
 State MultipartParser::currentState = SEARCHING_FOR_BOUNDARY; // Initialize state
 

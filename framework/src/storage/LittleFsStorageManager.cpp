@@ -1,14 +1,14 @@
-#include "LittleFsStorageManager.h"
-#include "hardware/flash.h"           // for flash_range_program, flash_range_erase
-#include "hardware/sync.h"            // for save_and_disable_interrupts, restore_interrupts
-#include "pico/multicore.h"           // for multicore_lockout_start_blocking / end_blocking
-#include "hardware/regs/addressmap.h" // for XIP_BASE if not already defined
+#include "storage/LittleFsStorageManager.h"
+#include <hardware/flash.h>           // for flash_range_program, flash_range_erase
+#include <hardware/sync.h>            // for save_and_disable_interrupts, restore_interrupts
+#include <pico/multicore.h>           // for multicore_lockout_start_blocking / end_blocking
+#include <hardware/regs/addressmap.h> // for XIP_BASE if not already defined
 #include <cstring>
 #include <iostream>
 #include <FreeRTOS.h> // for FreeRTOS types and functions
 #include <semphr.h>   // for SemaphoreHandle_t, StaticSemaphore_t, xSemaphoreCreateMutexStatic, xSemaphoreTake, xSemaphoreGive
 #include <pico/flash.h> // for flash_safe_execute
-#include "utility.h"    // for runtimeStats
+#include "utility/utility.h"    // for runtimeStats
 
 extern "C"
 {

@@ -29,13 +29,12 @@
  * @copyright Copyright (c) 2025, Ian Archbell
  */
 
-#include "FrameworkController.h"
-#include "EventManager.h"
-#include "FrameworkTask.h"
-#include "Event.h"
-#include "AppContext.h"
-#include "Router.h"
-#include "GpioEvent.h" // temporary include for testing
+#include "framework/FrameworkController.h"
+#include "framework/AppContext.h"
+#include "framework/FrameworkTask.h"
+#include "events/EventManager.h"
+#include "events/Event.h"
+#include "http/Router.h"
 
 FrameworkController::FrameworkController(const char *name, Router &sharedRouter, uint16_t stackSize, UBaseType_t priority)
     : FrameworkTask(name, stackSize, priority),

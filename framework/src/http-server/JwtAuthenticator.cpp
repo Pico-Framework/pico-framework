@@ -20,7 +20,7 @@
 #include "DebugTrace.h"
 TRACE_INIT(JwtAuthenticator)
 
-#include "JwtAuthenticator.h"
+#include "http/JwtAuthenticator.h"
 
 #include <iostream>
 #include <chrono>

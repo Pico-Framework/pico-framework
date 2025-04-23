@@ -15,17 +15,18 @@
  * @copyright Copyright (c) 2025, Ian Archbell
  */
 
-#include "framework_config.h" // Must be included before DebugTrace.h to ensure framework_config.h is processed first
+#include "http/HttpResponse.h"
+
+#include "framework_config.h" 
 #include "DebugTrace.h"
 TRACE_INIT(HttpResponse)
 
-#include "HttpResponse.h"
 #include <sstream>
 #include <cstring>
 #include <lwip/sockets.h>
-#include "utility.h"
-#include "FrameworkView.h"
-#include "HttpFileserver.h"
+#include "utility/utility.h"
+#include "framework/FrameworkView.h"
+#include "http/HttpFileserver.h"
 
 // ------------------------------------------------------------------------
 // Constructor

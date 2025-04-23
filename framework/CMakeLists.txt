@@ -65,13 +65,13 @@ endif()
 # Core sources
 target_sources(pico_framework PRIVATE
     # App and core structure
-    src/application/AppContext.cpp
-    src/application/FrameworkApp.cpp
-    src/application/FrameworkController.cpp
-    src/application/FrameworkManager.cpp
-    src/application/FrameworkTask.cpp
-    src/application/FrameworkView.cpp
-    src/application/FrameworkModel.cpp
+    src/framework/AppContext.cpp
+    src/framework/FrameworkApp.cpp
+    src/framework/FrameworkController.cpp
+    src/framework/FrameworkManager.cpp
+    src/framework/FrameworkTask.cpp
+    src/framework/FrameworkView.cpp
+    src/framework/FrameworkModel.cpp
 
     # HTTP Server
     src/http-server/HttpServer.cpp
@@ -117,7 +117,7 @@ target_sources(pico_framework PRIVATE
 if(PICO_HTTP_ENABLE_JWT)
     target_sources(pico_framework PRIVATE
         src/http-server/JwtAuthenticator.cpp
-        src/application/PasswordHasher.cpp
+        src/framework/PasswordHasher.cpp
     )
     target_compile_definitions(pico_framework PUBLIC PICO_HTTP_ENABLE_JWT=1)
 endif()

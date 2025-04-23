@@ -14,15 +14,15 @@
  * @copyright Copyright (c) 2025, Ian Archbell
  */
 
-#include "url_utils.h"
+#include "http/url_utils.h"
 #include <sstream>
-#include "lwip/sockets.h"
-#include "lwip/ip_addr.h"
-#include "lwip/memp.h"
+#include <lwip/sockets.h>
+#include <lwip/ip_addr.h>
+#include <lwip/memp.h>
 #include <string>
 #include <algorithm>
 #include <cctype>
-#include "Tcp.h"
+#include "network/Tcp.h"
 
 /// @copydoc urlDecode
 std::string urlDecode(const std::string &src)

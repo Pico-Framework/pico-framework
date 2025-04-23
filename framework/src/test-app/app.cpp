@@ -1,14 +1,22 @@
+/**
+ * @file App.cpp
+ */
+
 #include "App.h"
+
+
 #include <hardware/adc.h>
 #include <pico/cyw43_arch.h>
-#include "AppContext.h"
-#include "StorageManager.h"
+
+#include "framework/AppContext.h"
+#include "storage/StorageManager.h"
+#include "events/GpioEvent.h"
+#include "events/EventManager.h"
+#include "events/GpioEventManager.h"
 
 #include "GpioController.h"
 #include "DashboardController.h"
-#include "GpioEvent.h"
-#include "EventManager.h"
-#include "GpioEventManager.h"
+
 // #include <iostream>
 
 App::App(int port) : FrameworkApp(port, "AppTask", 1024, 1)

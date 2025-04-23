@@ -27,9 +27,9 @@
 #include <string>
 #include <cstring>
 #include "framework_config.h"
-#include "StorageManager.h"
-#include "AppContext.h"
-#include "TimeManager.h"
+#include "storage/StorageManager.h"
+#include "framework/AppContext.h"
+#include "time/TimeManager.h"
 
 #define TRACE_LVL_INFO 0
 #define TRACE_LVL_WARN 1

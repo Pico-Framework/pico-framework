@@ -1,10 +1,12 @@
 // DashboardController.cpp
 #include "DashboardController.h"
-#include "AppContext.h"
-#include "StorageManager.h"
-#include "hardware/adc.h"
+
 #include <pico/cyw43_arch.h>
+#include <hardware/adc.h>
 #include <cstdio>
+
+#include "framework/AppContext.h"
+#include "storage/StorageManager.h"
 
 DashboardController::DashboardController(Router &r)
     : FrameworkController("DashboardController", r, 1024, 1) {}

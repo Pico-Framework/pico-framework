@@ -31,7 +31,7 @@
  * @copyright Copyright (c) 2025, Ian Archbell
  */
 
-#include "FrameworkView.h"
+#include "framework/FrameworkView.h"
 #include <fstream>
 #include <sstream>
 

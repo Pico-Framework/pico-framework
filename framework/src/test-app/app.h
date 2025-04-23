@@ -1,7 +1,22 @@
+/**
+ * @file App.cpp
+ * @brief Application class for the PicoFramework test application.
+ * This class extends the FrameworkApp to provide application-specific functionality,
+ * including route initialization, event handling, and test functions.
+ * @version 0.1
+ *  
+ * @date 2025-04-14
+ * 
+ * @license MIT License
+ * 
+ * @copyright Copyright (c) 2025, Ian Archbell
+ *  
+ */
+
 #ifndef APP_H
 #define APP_H
 
-#include "FrameworkApp.h"
+#include "framework/FrameworkApp.h"
 
 class App : public FrameworkApp
 {

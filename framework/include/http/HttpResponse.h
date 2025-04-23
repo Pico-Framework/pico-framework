@@ -19,8 +19,8 @@
 #include <unordered_map>
 #include <map>
 #include <vector>
-#include "nlohmann/json.hpp"
-#include "Tcp.h"
+#include <nlohmann/json.hpp>
+#include "network/Tcp.h"
 
 // Forward declaration of HttpRequest class
 class HttpRequest;

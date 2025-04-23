@@ -19,14 +19,18 @@
 #include "framework_config.h" // Must be included before DebugTrace.h to ensure framework_config.h is processed first
 #include "DebugTrace.h"       // For trace logging
 TRACE_INIT(FrameworkManager); // Initialize tracing for this module
-#include "FrameworkManager.h"
-#include "FrameworkApp.h"
-#include "AppContext.h"
+#include "framework/FrameworkManager.h"
+
 #include <iostream>
+#include "framework/FrameworkApp.h"
+#include "framework/AppContext.h"
 #include "framework_config.h"
-#include "JwtAuthenticator.h"
-#include "TimeManager.h"
-#include "AppContext.h"
+#include "framework/AppContext.h"
+#include "time/TimeManager.h"
+#ifdef PICO_HTTP_ENABLE_JWT
+#include "http/JwtAuthenticator.h"
+#endif // PICO_HTTP_ENABLE_JWT
+
 
 /// @copydoc FrameworkManager::xNetworkTaskBuffer
 StaticTask_t FrameworkManager::xNetworkTaskBuffer;

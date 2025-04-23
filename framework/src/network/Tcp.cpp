@@ -1,4 +1,4 @@
-#include "Tcp.h"
+#include "network/Tcp.h"
 
 #include <lwip/dns.h>
 #include <lwip/altcp.h>
@@ -10,7 +10,8 @@
 #include <cstdio>
 #include <FreeRTOS.h>
 #include <task.h>
-#include "lwip_dns_resolver.h"
+
+#include "network/lwip_dns_resolver.h"
 
 #include "framework_config.h"
 #include "DebugTrace.h"

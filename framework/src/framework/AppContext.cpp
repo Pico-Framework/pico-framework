@@ -1,13 +1,13 @@
-#include "AppContext.h"
+#include "framework/AppContext.h"
+#include "time/TimeManager.h"
+#include "http/JwtAuthenticator.h"
+#include "events/EventManager.h"
+#include "events/GpioEventManager.h"
 #if PICO_HTTP_ENABLE_LITTLEFS
-    #include "LittleFsStorageManager.h"
+    #include "storage/LittleFsStorageManager.h"
 #else   
     #include "FatFsStorageManager.h"
 #endif
-#include "TimeManager.h"
-#include "JwtAuthenticator.h"
-#include "EventManager.h"
-#include "GpioEventManager.h"
 #include "framework_config.h"
 #include "DebugTrace.h"
 TRACE_INIT(AppContext);

@@ -16,9 +16,9 @@
  #include <string>
  #include <vector>
  
- #include "HttpRequest.h"
- #include "HttpResponse.h"
- #include "StorageManager.h"
+ #include "http/HttpRequest.h"
+ #include "http/HttpResponse.h"
+ #include "storage/StorageManager.h"
  
  /**
   * @brief Helper class for accessing the file system and serving file content.

@@ -15,8 +15,8 @@
  * @copyright Copyright (c) 2025, Ian Archbell
  */
 
-#include "FrameworkApp.h"
-#include "FrameworkManager.h" // <-- This is important for wiring up system services, right now that means starting WiFi and setting the system time from a network time server
+#include "framework/FrameworkApp.h"
+#include "framework/FrameworkManager.h" // <-- This is important for wiring up system services, right now that means starting WiFi and setting the system time from a network time server
 
 /// @copydoc FrameworkApp::FrameworkApp
 FrameworkApp::FrameworkApp(int port, const char* name, uint16_t stackSize, UBaseType_t priority)

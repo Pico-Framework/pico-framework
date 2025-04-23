@@ -15,7 +15,7 @@
  * @copyright Copyright (c) 2025, Ian Archbell
  */
 
-#include "FrameworkModel.h"
+#include "framework/FrameworkModel.h"
 
 /// @copydoc FrameworkModel::FrameworkModel
 FrameworkModel::FrameworkModel(StorageManager *storage, const std::string &path)

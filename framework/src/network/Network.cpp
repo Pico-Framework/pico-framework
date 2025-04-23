@@ -18,7 +18,7 @@
  #include "DebugTrace.h"
  TRACE_INIT(Network)
 
-#include "Network.h"
+#include "network/Network.h"
 #include <pico/cyw43_arch.h>
 #include <FreeRTOS.h>
 #include <task.h>

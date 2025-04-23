@@ -1,27 +1,31 @@
 // TimeManager.cpp
-#include "TimeManager.h"
-#include "pico/stdlib.h"
-#include "pico/cyw43_arch.h"
-#include "lwip/apps/sntp.h"
+#include "time/TimeManager.h"
+
 #include <ctime>
 #include <iostream>
-#include "FreeRTOS.h"
-#include "task.h"
-#include "AppContext.h"
+#include <pico/stdlib.h>
+#include <pico/cyw43_arch.h>
+#include "pico/aon_timer.h"
+#include <lwip/apps/sntp.h>
+#include <FreeRTOS.h>
+#include <task.h>
+
+#include "framework/AppContext.h"
+#include "http/HttpRequest.h"
+#include "http/HttpResponse.h"
+#include "framework_config.h"
+#include "DebugTrace.h"
+
 #if defined(PICO_RP2040)
 #include "hardware/rtc.h"
 #endif
-#include "pico/aon_timer.h"
-#include "PicoTime.h"
-#include "FreeRTOS.h"
+#include "time/PicoTime.h"
+
 
 #ifndef PICO_HTTP_ENABLE_LITTLEFS
 #include "FreeRTOS_time.h"
 #endif
-#include "HttpRequest.h"
-#include "HttpResponse.h"
-#include "framework_config.h"
-#include "DebugTrace.h"
+
 TRACE_INIT(TimeManager);
 
 // Set system time from SNTP - this callback is defined in lwipopts.h

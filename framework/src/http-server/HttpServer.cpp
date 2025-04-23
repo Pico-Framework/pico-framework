@@ -21,7 +21,7 @@
 #include "DebugTrace.h"
 TRACE_INIT(HttpServer)
 
-#include "HttpServer.h"
+#include "http/HttpServer.h"
 #include <lwip/sockets.h>
 #include <lwip/netif.h>
 #include <lwip/ip4_addr.h>
@@ -32,15 +32,16 @@ TRACE_INIT(HttpServer)
 #include <cstring>
 #include <cstdio>
 #include <cstdlib>
-#include "FreeRTOS.h"
-#include "task.h"
-#include "semphr.h"
-#include "utility.h"
-#include "url_utils.h"
-#include "AppContext.h"
-#include "TimeManager.h"
-#include "Tcp.h"
-#include "JsonResponse.h"
+#include <FreeRTOS.h>
+#include <task.h>
+#include <semphr.h>
+
+#include "utility/utility.h"
+#include "http/url_utils.h"
+#include "framework/AppContext.h"
+#include "time/TimeManager.h"
+#include "network/Tcp.h"
+#include "http/JsonResponse.h"
 
 #define BUFFER_SIZE 1024
 
@@ -277,8 +278,8 @@ void HttpServer::handleClient(Tcp* conn)
 
     TRACE("HttpRequest body: %s\n", req.getBody().c_str()); 
 
-    printf("\n===== HTTP CLIENT REQUEST =====\n");
-    printf("[HttpServer] Client request received: %s, path: %s\n", req.getMethod().c_str(), req.getPath().c_str());
+    QUIET_PRINTF("\n===== HTTP CLIENT REQUEST =====\n");
+    QUIET_PRINTF("[HttpServer] Client request received: %s, path: %s\n", req.getMethod().c_str(), req.getPath().c_str());
 
     HttpResponse res(conn);
     bool ok = router.handleRequest(req, res);

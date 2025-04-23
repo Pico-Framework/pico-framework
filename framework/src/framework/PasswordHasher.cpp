@@ -7,7 +7,7 @@
 #include <mbedtls/base64.h>
 #include <mbedtls/pkcs5.h>
 #include "pico/rand.h"
-#include "PasswordHasher.h"
+#include "framework/PasswordHasher.h"
 
 PasswordHasher::PasswordHasher(int iterations)
     : iterations(iterations) {}

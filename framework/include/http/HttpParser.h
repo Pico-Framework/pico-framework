@@ -1,7 +1,23 @@
+/**
+ * @file HttpParser.cpp
+ * @author Ian Archbell
+ * @brief HTTP parser for status codes, headers, and body handling.
+ * Part of the PicoFramework HTTP server.
+ * This module provides methods to parse HTTP status lines, headers, and
+ * handle HTTP body content, including chunked transfer encoding and
+ * content-length handling.
+ * It is designed for use in embedded systems with FreeRTOS and lwIP.
+ * @version 0.1
+ * @date 2025-03-26 
+ * @license MIT License
+ * @copyright (c) 2025, Ian Archbell
+ *  
+ */
+
 #pragma once
 #include <string>
 #include <map>
-#include "Tcp.h"
+#include "network/Tcp.h"
 
 class HttpParser
 {

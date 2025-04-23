@@ -21,8 +21,7 @@
  
  #include "FreeRTOS.h"
  #include "task.h"
- #include "Network.h"
- #include "NtpClient.h"
+ #include "network/Network.h"
  
  #define NETWORK_STACK_SIZE 2048 / sizeof(StackType_t)
  #define APPLICATION_STACK_SIZE 1024 / sizeof(StackType_t)
