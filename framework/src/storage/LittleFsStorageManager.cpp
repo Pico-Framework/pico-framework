@@ -5,6 +5,8 @@
 #include "hardware/regs/addressmap.h" // for XIP_BASE if not already defined
 #include <cstring>
 #include <iostream>
+#include <FreeRTOS.h> // for FreeRTOS types and functions
+#include <semphr.h>   // for SemaphoreHandle_t, StaticSemaphore_t, xSemaphoreCreateMutexStatic, xSemaphoreTake, xSemaphoreGive
 #include <pico/flash.h> // for flash_safe_execute
 #include "utility.h"    // for runtimeStats
 
@@ -12,6 +14,20 @@ extern "C"
 {
     extern uint8_t __flash_lfs_start;
     extern uint8_t __flash_lfs_end;
+}
+
+// --- LittleFS Thread Safety Lock (FreeRTOS mutex, statically allocated) ---
+// At global level
+static StaticSemaphore_t lfs_mutex_buf;
+static SemaphoreHandle_t lfs_mutex = xSemaphoreCreateMutexStatic(&lfs_mutex_buf);
+
+int LittleFsStorageManager::lfs_lock(const struct lfs_config *c) {
+    assert(lfs_mutex != nullptr);
+    return (xSemaphoreTake(lfs_mutex, portMAX_DELAY) == pdTRUE) ? 0 : -1;
+}
+
+int LittleFsStorageManager::lfs_unlock(const struct lfs_config *c) {
+    return (xSemaphoreGive(lfs_mutex) == pdTRUE) ? 0 : -1;
 }
 
 LittleFsStorageManager::LittleFsStorageManager()
@@ -44,20 +60,7 @@ int LittleFsStorageManager::lfs_prog_cb_singlecore(const struct lfs_config *c, l
                                                    const void *buffer, lfs_size_t size)
 {
     auto *self = static_cast<LittleFsStorageManager *>(c->context);
-    // printf("Self: %p\n", self);
-    // printf("Number of cores: in cb_prog: %d\n", configNUM_CORES);
     uintptr_t addr = self->flashBase + block * c->block_size + off;
-    // printf("Flash base: %p\n", self->flashBase);
-    // printf("Addr: %p\n", addr);
-    // printf("Buffer: %s\n", buffer);
-    // printf("Starting to prog\n");
-    // printf("[LFS PROG] block=%lu off=%lu size=%lu addr=0x%08lx\n",
-    //        (unsigned long)block, (unsigned long)off, (unsigned long)size,
-    //        (unsigned long)(self->flashBase + block * c->block_size + off));
-    // printf("Buffer ptr: %p\n", buffer);
-    // printf("First 8 bytes: %02x %02x %02x %02x %02x %02x %02x %02x\n",
-    //        ((uint8_t *)buffer)[0], ((uint8_t *)buffer)[1], ((uint8_t *)buffer)[2], ((uint8_t *)buffer)[3],
-    //        ((uint8_t *)buffer)[4], ((uint8_t *)buffer)[5], ((uint8_t *)buffer)[6], ((uint8_t *)buffer)[7]);
     uint32_t ints = save_and_disable_interrupts();
     flash_range_program(addr - XIP_BASE, reinterpret_cast<const uint8_t *>(buffer), size);
     restore_interrupts(ints);
@@ -100,10 +103,6 @@ int LittleFsStorageManager::lfs_prog_cb_multicore(const struct lfs_config *c, lf
 {
     auto *self = static_cast<LittleFsStorageManager *>(c->context);
     uintptr_t addr = self->flashBase + block * c->block_size + off;
-    // printf("Starting to prog\n");
-    // printf("[LFS PROG] block=%lu off=%lu size=%lu addr=0x%08lx\n",
-    //        (unsigned long)block, (unsigned long)off, (unsigned long)size,
-    //        (unsigned long)(self->flashBase + block * c->block_size + off));
     return lfs_prog_multicore(c, block, off, buffer, size);
 }
 
@@ -144,16 +143,12 @@ static void __not_in_flash_func(flash_erase_callback)(void *p)
 static int lfs_erase_cb_flashsafe(const struct lfs_config *c, lfs_block_t block)
 {
     auto *self = static_cast<LittleFsStorageManager *>(c->context);
-    // printf("[LFS ERASE] lfs_erase_cb_flashsafe\n");
     uintptr_t addr = self->getFlashBase() + block * c->block_size;
 
     FlashEraseParams eraseParams = {
         .addr = addr - XIP_BASE,
         .size = c->block_size};
-    // printf("[LFS ERASE] executing flash_safe_execute\n");
-    //runTimeStats();
     int result = flash_safe_execute(flash_erase_callback, &eraseParams, 1000);
-    // printf("[LFS ERASE] flash_safe_execute result: %d\n", result);
     return (result == PICO_OK) ? 0 : -1;
 }
 
@@ -161,11 +156,8 @@ static int lfs_erase_cb_flashsafe(const struct lfs_config *c, lfs_block_t block)
 int LittleFsStorageManager::lfs_erase_cb_multicore(const struct lfs_config *c, lfs_block_t block)
 {
     auto *self = static_cast<LittleFsStorageManager *>(c->context);
-    // printf("[LFS ERASE] lfs_erase_cb_multicore\n");
     uintptr_t addr = static_cast<LittleFsStorageManager *>(c->context)->flashBase + block * c->block_size;
-    // printf("[LittleFs] Erase block %lu at 0x%08lx (size %lu)\n", block, addr, c->block_size);
     int err = lfs_erase_cb_flashsafe(c, block);
-    // printf("[LittleFs] flash_range_erase return: %d\n", err);
     return err;
 }
 
@@ -198,26 +190,29 @@ void LittleFsStorageManager::configure()
     config.block_cycles = 500;
     config.compact_thresh = (lfs_size_t)-1;
 
+    config.lock = lfs_lock;
+    config.unlock = lfs_unlock;
+
     printf("[LittleFS] Flash base: 0x%08x, size: %zu bytes (%zu blocks)\n",
            static_cast<unsigned>(flashBase), flashSize, config.block_count);
 }
 
 bool LittleFsStorageManager::mount()
 {
-    int err = lfs_mount(&lfs, &config);
-    if (err)
+    if( mounted)
     {
-        printf("Mount failed err: %d, erasing and formatting...\n", err);
-        formatStorage();
- 
-        err = lfs_format(&lfs, &config);
-        printf("Formatting complete, remounting...\n");
-
-        err = lfs_mount(&lfs, &config);
+        printf("[LittleFs] Already mounted\n");
+        return true;
     }
-    mounted = (err == 0);
-    printf("Mount %s\n", mounted ? "successful" : "failed");
-    return mounted;
+    printf("[LittleFs] Mounting LittleFS...\n");
+    int err = lfs_mount(&lfs, &config);
+    if (err < 0)
+    {
+        printf("[LittleFs] Mount failed with error %d\n", err);
+        return false;
+    }
+    printf("[LittleFs] Mounted successfully\n");
+    return mounted = true;
 }
 
 bool LittleFsStorageManager::unmount()
@@ -238,9 +233,7 @@ bool LittleFsStorageManager::isMounted() const
 bool LittleFsStorageManager::exists(const std::string &path)
 {
     struct lfs_info info;
-    //printf("[LittleFS] Checking existence of '%s'\n", path.c_str());
     int err = lfs_stat(&lfs, path.c_str(), &info);
-    //printf("[LittleFS] lfs_stat returned %d\n", err);
     return (err == 0);
 }
 

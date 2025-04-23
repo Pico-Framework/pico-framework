@@ -24,6 +24,14 @@
 // This file contains various configuration settings for the framework.
 #define STREAM_SEND_DELAY_MS 20
 
+#define QUIET_MODE ///< Set to disable all normal behavior print output, don't define to print
+
+#ifdef QUIET_MODE
+  #define QUIET_PRINTF(...) do {} while (0)
+#else
+  #define QUIET_PRINTF(...) printf(__VA_ARGS__)
+#endif
+
 // === Debug Trace Configuration ===
 
 #define TRACE_USE_TIMESTAMP       1

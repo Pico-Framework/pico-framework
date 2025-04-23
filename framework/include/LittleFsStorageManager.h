@@ -184,6 +184,8 @@ private:
     static int lfs_erase_cb_singlecore(const struct lfs_config *c, lfs_block_t block);
     static int lfs_prog_cb_multicore(const struct lfs_config *c, lfs_block_t block, lfs_off_t off, const void *buffer, lfs_size_t size);
     static int lfs_erase_cb_multicore(const struct lfs_config *c, lfs_block_t block);
+    static int lfs_lock(const struct lfs_config *c);
+    static int lfs_unlock(const struct lfs_config *c);
 
     /**
      * @brief Mount automatically if not mounted yet.

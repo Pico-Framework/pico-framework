@@ -134,6 +134,7 @@ if(PICO_HTTP_ENABLE_LITTLEFS)
     )
     target_include_directories(pico_framework PUBLIC lib/littlefs)
     target_compile_definitions(pico_framework PUBLIC PICO_HTTP_ENABLE_LITTLEFS=1)
+    target_compile_definitions(pico_framework PUBLIC LFS_THREADSAFE=1)
 else()
     message(STATUS "[framework] FatFs support enabled")
     target_sources(pico_framework PRIVATE 

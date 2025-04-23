@@ -214,7 +214,7 @@ bool Router::isAuthorizedForRoute(const Route &route, HttpRequest &req, HttpResp
 /// @copydoc Router::handleRequest
 bool Router::handleRequest(HttpRequest &req, HttpResponse &res)
 {
-    printf("[Router] Handling request: %s %s\n",req.getMethod().c_str(), req.getUri().c_str());
+    QUIET_PRINTF("[Router] Handling request: %s %s\n",req.getMethod().c_str(), req.getUri().c_str());
 
     // Look up routes by HTTP method.
     auto it = routes.find(req.getMethod());

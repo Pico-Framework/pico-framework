@@ -95,7 +95,8 @@ void HttpServer::startServerTask(void *pvParameters)
 /// @copydoc HttpServer::run
 void HttpServer::run()
 {
-    printf("[Http Server] Starting HTTP Server...\n");
+
+    QUIET_PRINTF("[HttpServer] Starting HTTP Server on port %d\n", port);
 
     if (!initNetwork())
     {
@@ -103,7 +104,6 @@ void HttpServer::run()
     }
 
     AppContext::getInstance().getService<TimeManager>()->detectAndApplyTimezone();
-    //TRACE("Timezone applied\n");
 
     Tcp* listener = initListener();
     if (!listener)
@@ -115,15 +115,15 @@ void HttpServer::run()
     // Optional: store listener as a class member if needed later
     while (true)
     {
-        printf("[HttpServer] Waiting for client connection...\n");
+        QUIET_PRINTF("[HttpServer] Waiting for client connection...\n");
         Tcp* conn = listener->accept();
         if (conn)
         {
-            printf("[HttpServer] Accepted client connection\n");
+            QUIET_PRINTF("[HttpServer] Accepted client connection\n");
             startHandlingClient(conn);
             vTaskDelay(pdMS_TO_TICKS(100));
-            printf("[HttpServer] Client connection handled\n");
-            printf("===============================\n\n");
+            QUIET_PRINTF("[HttpServer] Client connection handled\n");
+            QUIET_PRINTF("===============================\n\n");
             delete conn;
         }
     }
