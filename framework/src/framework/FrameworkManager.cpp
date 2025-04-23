@@ -49,6 +49,8 @@ void FrameworkManager::start()
     setupTraceFromConfig();
     std::cout << "Initializing framework..." << std::endl;
 
+    AppContext::getInstance().initFrameworkServices();
+
     // Launch only the network task
     networkTaskHandle = xTaskCreateStatic(
         network_task,
@@ -72,7 +74,7 @@ void FrameworkManager::network_task(void *params)
     {
         vTaskDelay(pdMS_TO_TICKS(1000));
     }
-    AppContext::getInstance().initFrameworkServices();
+   
     printf("[Framework Manager] Framework services initialized.\n");
     
     TimeManager *timeMgr = AppContext::get<TimeManager>();
