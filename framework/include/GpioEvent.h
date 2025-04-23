@@ -4,6 +4,7 @@
 #include <cstdint>
 
 struct GpioEvent {
-    uint32_t pin;
-    uint32_t edge;
+    uint16_t pin;
+    uint16_t edge;
 };
+

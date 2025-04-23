@@ -43,31 +43,18 @@ void App::onStart()
     server.start();
 }
 
-void App::onEvent(const Event& e)
+void App::onEvent(const Event &e)
 {
     if (e.notification.kind == NotificationKind::System &&
         e.notification.system == SystemNotification::GpioChange)
     {
-        printf("[App] Raw event: data=%p, size=%zu\n", e.data, e.size);
-        const GpioEvent* data = static_cast<const GpioEvent*>(e.data);
-        if (e.size == sizeof(GpioEvent)) {
-            printf("[App] Pin = %u, Edge = 0x%X\n", data->pin, data->edge);
-        } else {
-            printf("[App] BAD EVENT: size=%zu (expected %zu)\n", e.size, sizeof(GpioEvent));
-        }
-        if (e.data && e.size >= sizeof(GpioEvent))
-        {
-            const GpioEvent* gpioEvent = static_cast<const GpioEvent*>(e.data);
-            const char* edgeStr =
-                (gpioEvent->edge & GPIO_IRQ_EDGE_RISE) ? "rising" :
-                (gpioEvent->edge & GPIO_IRQ_EDGE_FALL) ? "falling" : "unknown";
+        printf("[App] GpioChange received\n");
+        printf("[App] Pin = %u, Edge = 0x%X\n", e.gpioEvent.pin, e.gpioEvent.edge);
 
-            printf("[App] GPIO changed - pin %u: %s\n", gpioEvent->pin, edgeStr);
-        }
-        else
-        {
-            printf("[App] GpioChange event missing or malformed\n");
-        }
+        const GpioEvent &data = e.gpioEvent;
+        printf("[App] GPIO changed - pin %u: %s\n",
+               data.pin,
+               (data.edge & GPIO_IRQ_EDGE_RISE) ? "rising" : (data.edge & GPIO_IRQ_EDGE_FALL) ? "falling" : "unknown");
     }
 
     if (e.notification.kind == NotificationKind::User &&
@@ -77,7 +64,6 @@ void App::onEvent(const Event& e)
     }
 }
 
-
 void App::poll()
 {
     vTaskDelay(pdMS_TO_TICKS(100)); // Yield to other tasks
@@ -85,11 +71,10 @@ void App::poll()
     // Use RUN_EVERY to do periodic background work:
 
     runEvery(15000, [&]()
-        { 
+             { 
             printf("[App] Running main polling loop...\n"); 
             Event userEvt(static_cast<uint8_t>(UserNotification::Heartbeat));
             EventManager::getInstance().postEvent(userEvt);
             // this yield is not essential, but without yielding you can miss events
-            vTaskDelay(pdMS_TO_TICKS(1)); 
-        }, "logLoop"); // <-- Unique ID for this timer (enables it to be cancelled)
+            vTaskDelay(pdMS_TO_TICKS(1)); }, "logLoop"); // <-- Unique ID for this timer (enables it to be cancelled)
 }

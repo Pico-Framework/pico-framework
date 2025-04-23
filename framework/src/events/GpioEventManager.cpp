@@ -28,13 +28,18 @@ void GpioEventManager::unregisterAll(uint pin) {
 }
 
 void GpioEventManager::gpio_event_handler(uint gpio, uint32_t events) {
-    GpioEvent* gpioEvent = new  GpioEvent{static_cast<uint32_t>(gpio), static_cast<uint32_t>(events)};
+    GpioEvent gpioEvent = {
+        static_cast<uint16_t>(gpio),
+        static_cast<uint16_t>(events)
+    };
+
+    //GpioEvent* gpioEvent = new  GpioEvent{static_cast<uint32_t>(gpio), static_cast<uint32_t>(events)};
 
     // Dispatch to listeners
     auto it = listeners.find(gpio);
     if (it != listeners.end()) {
         for (auto& cb : it->second) {
-            cb(*gpioEvent);
+            cb(gpioEvent);
         }
     }
 

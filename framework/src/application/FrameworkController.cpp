@@ -44,7 +44,6 @@ FrameworkController::FrameworkController(const char *name, Router &sharedRouter,
 /// @copydoc FrameworkController::run
 void FrameworkController::run()
 {
-    printf("Starting controller: %s\n", getName());
     enableEventQueue(); // ← MUST be here to initialize queue before use
     onStart();
     while (true)
@@ -85,34 +84,6 @@ void FrameworkController::waitAndDispatch(uint32_t timeoutMs)
     Event event;
     if (getNextEvent(event, timeoutMs))
     {
-        printf("\n[FrameworkController] Event received\n");
-        printf("  Kind     : %s\n", event.notification.kind == NotificationKind::System ? "System" : "User");
-        printf("  Code     : %u\n", event.notification.code());
-        printf("  Target   : %s\n", event.target ? event.target->getName() : "(broadcast)");
-        printf("  Source   : %s\n", event.source ? "set" : "(anonymous)");
-        printf("  Data     : %s\n", event.data ? "present" : "(none)");
-
-        if (event.size > 0)
-            printf("  Size     : %zu bytes\n", event.size);
-
-        if (event.notification.kind == NotificationKind::System)
-        {
-            switch (event.notification.system)
-            {
-                case SystemNotification::GpioChange:
-                    if (event.data && event.size >= sizeof(GpioEvent))
-                    {
-                        auto *gpio = static_cast<const GpioEvent *>(event.data);
-                        printf("  GpioEvent => pin: %d, edge: %d\n", gpio->pin, gpio->edge);
-                    }
-                    break;
-
-                default:
-                    printf("  [System] Unhandled system notification\n");
-                    break;
-            }
-        }
-
         onEvent(event);
     }
 }
