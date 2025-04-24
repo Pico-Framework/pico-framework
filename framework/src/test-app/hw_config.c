@@ -31,6 +31,45 @@
 
  #include "hw_config.h"
 
+ /**
+  * 
+  * PicoFramework Storage Configuration
+  * 
+  * You can use either littlefs flash storage or SD card storage with the PicoFramework.
+  * If you choose to use SD card storage, you will need to configure the SDIO or SPI interface.
+  * Carl John Kugler III has adapted the FatFs library for use with the Raspberry Pi Pico,
+  * and we use it as a submodule. the "hw_config.c" file is used to configure the SD card interface.
+  * 
+  * Note that his library supports multipe cards. The PicoFramework does not. You can only use one SD card.
+  * 
+  * This configuration as shipped is setup to use SDIO on the Raspberry Pi Pico
+  * with a Pico Expansion Plus S1 board (available on Amazon) or similar board that has the SDIO pins
+  * connected to the SD card slot in sequental fashion.
+  * 
+  * Only boards that have consecutive GPIO pins connected to the SDIO interface
+  * will work with this library in SDIO mode. This restriction does not a apply to SPI mode.
+  * 
+  * We are considering putting out a custom board that has the SDIO pins connected to a microSD slot
+  * in the future, but for now this is a good starting point for using SDIO on the Pico. Our board will also
+  * include battery-backed RTC and other features that make it suitable for IoT applications.
+  * Let us know at PicoFramework.com.
+  * 
+  * The SDIO interface uses the following GPIO pins:
+  * 
+  * CLK: GPIO 10
+  * CMD: GPIO 11
+  * DAT0: GPIO 12
+  * DAT1: GPIO 13
+  * DAT2: GPIO 14
+  * DAT3: GPIO 15
+  * 
+  * You can find out how to configure an SPI SD card interface at 
+  * Carl's Github page:
+  * 
+  * https://github.com/carlk3/FreeRTOS-FAT-CLI-for-RPi-Pico
+  * 
+  */
+
  // SDIO Interface configuration
  static sd_sdio_if_t sdio_if = {
      .CMD_gpio = 11,
