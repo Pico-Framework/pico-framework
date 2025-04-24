@@ -25,10 +25,11 @@
 #include <functional>
 #include <FreeRTOS.h>
 #include <semphr.h>
+#include "http/RouteTypes.h" // for RouteMatch
+#include "http/HttpRequest.h"
+#include "http/HttpResponse.h"
+#include "http/HttpFileserver.h" // for HttpFileserver
 
-#include "HttpRequest.h"
-#include "HttpResponse.h"
-#include "HttpFileserver.h" // for HttpFileserver
 
 /**
  * @brief Function signature for HTTP route handlers.
@@ -36,40 +37,15 @@
  * Route handlers receive the parsed request, response object, and any
  * captured parameters from dynamic paths (e.g., /device/{id}).
  */
-using RouteHandler = std::function<void(HttpRequest &, HttpResponse &, const std::vector<std::string> &)>;
+
+using RouteHandler = std::function<void(HttpRequest &, HttpResponse &, const RouteMatch &)>;
 
 /**
  * @brief Function signature for middleware.
  *
  * Middleware may short-circuit request handling by returning false.
  */
-using Middleware = std::function<bool(HttpRequest &, HttpResponse &, const std::vector<std::string> &)>;
-
-/**
- * @brief A single route entry in the Router.
- */
-struct Route
-{
-    std::string method;   ///< HTTP method (GET, POST, etc.)
-    std::string path;     ///< Regex path pattern
-    RouteHandler handler; ///< Handler to invoke if matched
-    bool is_dynamic;      ///< Whether the route uses parameter matching
-    bool requires_auth;   ///< If true, route requires JWT auth
-
-    /**
-     * @brief Construct a new Route.
-     * @param method HTTP method
-     * @param path Regex path pattern
-     * @param handler The handler function
-     * @param is_dynamic True if the route includes parameters
-     * @param requires_auth True if JWT auth is required
-     */
-    Route(const std::string &method,
-          const std::string &path,
-          RouteHandler handler,
-          bool is_dynamic,
-          bool requires_auth);
-};
+using Middleware = std::function<bool(HttpRequest &, HttpResponse &, const RouteMatch &)>;
 
 /**
  * @brief The central router for handling HTTP requests and middleware.
@@ -115,16 +91,16 @@ public:
      */
     bool handleRequest(HttpRequest &req, HttpResponse &res);
 
-    /**
-     * @brief Built-in route handler for /auth token testing.
-     * @param req Incoming request
-     * @param res HttpResponse to send
-     * @param params Unused in this handler
-     * @return true on success
-     */
-    #ifdef PICO_HTTP_ENABLE_JWT
-        bool handle_auth_req(HttpRequest &req, HttpResponse &res, const std::vector<std::string> &params);
-    #endif
+/**
+ * @brief Built-in route handler for /auth token testing.
+ * @param req Incoming request
+ * @param res HttpResponse to send
+ * @param params Unused in this handler
+ * @return true on success
+ */
+#ifdef PICO_HTTP_ENABLE_JWT
+    bool handle_auth_req(HttpRequest &req, HttpResponse &res, const std::vector<std::string> &params);
+#endif
 
     /**
      * @brief Extracts and caches a Bearer token from an Authorization header.
@@ -147,7 +123,7 @@ public:
      * @param res HTTP response
      * @return true if access is granted
      */
-#ifdef PICO_HTTP_ENABLE_JWT    
+#ifdef PICO_HTTP_ENABLE_JWT
     bool isAuthorizedForRoute(const Route &route, HttpRequest &req, HttpResponse &res);
 #else
     bool isAuthorizedForRoute(const Route &route, HttpRequest &req, HttpResponse &res) { return true; }
@@ -166,12 +142,12 @@ public:
     /**
      * @brief Serve static files from the internal HttpFileserver.
      */
-    void serveStatic(HttpRequest &req, HttpResponse &res, const std::vector<std::string> &params);
+    void serveStatic(HttpRequest &req, HttpResponse &res, const RouteMatch &match);
 
     /**
      * @brief Convenience method to list directory from the internal HttpFileserver.
      */
-    void listDirectory(HttpRequest &req, HttpResponse &res, const std::vector<std::string> &params);
+    void listDirectory(HttpRequest &req, HttpResponse &res, const RouteMatch &match);
 
 private:
     HttpFileserver fileServer; ///< Internal file server instance
@@ -181,7 +157,7 @@ private:
 
     SemaphoreHandle_t lock_ = nullptr;
 
-    void withRoutes(const std::function<void(std::unordered_map<std::string, std::vector<Route>>&)> &fn);
+    void withRoutes(const std::function<void(std::unordered_map<std::string, std::vector<Route>> &)> &fn);
 };
 
 #endif // ROUTER_HPP

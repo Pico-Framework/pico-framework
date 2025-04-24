@@ -32,7 +32,7 @@ TRACE_INIT(Middleware)
 /// @copydoc authMiddleware
 #ifdef PICO_HTTP_ENABLE_JWT
 #include "http/JwtAuthenticator.h"
-Middleware authMiddleware = [](HttpRequest &req, HttpResponse &res, const std::vector<std::string> &params)
+Middleware authMiddleware = [](HttpRequest &req, HttpResponse &res, const RouteMatch &)
 {
     std::string token = req.getHeader("Authorization");
     if (token.empty() || token.find("Bearer ") != 0)
@@ -44,17 +44,19 @@ Middleware authMiddleware = [](HttpRequest &req, HttpResponse &res, const std::v
     token = token.substr(7); // Remove "Bearer " prefix
     if (!AppContext::get<JwtAuthenticator>()->validateJWT(token))
     {
-        JsonResponse::sendError(res, 401, "INALID_TOKEN", "Invalid token");
+        JsonResponse::sendError(res, 401, "INVALID_TOKEN", "Invalid token");
         return false;
     }
 
     return true; // Authorized
 };
+
 #endif
 
 /// @copydoc loggingMiddleware
-Middleware loggingMiddleware = [](HttpRequest &req, HttpResponse &res, const std::vector<std::string> &params)
+Middleware loggingMiddleware = [](HttpRequest &req, HttpResponse &res, const RouteMatch &)
 {
     std::cout << "Received request: " << req.getMethod() << " " << req.getPath() << std::endl;
     return true;
 };
+

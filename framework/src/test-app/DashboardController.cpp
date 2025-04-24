@@ -17,7 +17,7 @@ void DashboardController::initRoutes()
     printf("[DashboardController] Initializing routes...\n");
 
     // Serve embedded upload HTML - you can also use a static file
-    router.addRoute("GET", "/upload", [this](HttpRequest &req, HttpResponse &res, const std::vector<std::string> &params)
+    router.addRoute("GET", "/upload", [this](HttpRequest &req, HttpResponse &res, const RouteMatch &match)
                     {
         static const char* uploadHtml = R"rawliteral(
         <!DOCTYPE html>
@@ -39,33 +39,33 @@ void DashboardController::initRoutes()
 
         res.setContentType("text/html");
         res.send(uploadHtml); });
-    router.addRoute("GET", "/api/v1/temperature", [this](auto &req, auto &res, const auto &params)
-                    { getTemperature(req, res, params); });
+    router.addRoute("GET", "/api/v1/temperature", [this](auto &req, auto &res, const auto &match)
+                    { getTemperature(req, res, match); });
 
-    router.addRoute("GET", "/api/v1/led", [this](auto &req, auto &res, const auto &params)
-                    { getLedState(req, res, params); });
+    router.addRoute("GET", "/api/v1/led", [this](auto &req, auto &res, const auto &match)
+                    { getLedState(req, res, match); });
 
-    router.addRoute("POST", "/api/v1/led/{value}", [this](auto &req, auto &res, const auto &params)
-                    { setLedState(req, res, params); });
+    router.addRoute("POST", "/api/v1/led/{value}", [this](auto &req, auto &res, const auto &match)
+                    { setLedState(req, res, match); });
 
     router.addRoute("POST", "/api/v1/upload", [this](auto &req, auto &res, const auto &)
                     { uploadHandler(req, res, {}); });
 
-    router.addRoute("DELETE", "/uploads/{file}", [this](auto &req, auto &res, const auto &params)
-                    { deleteFile(req, res, params); });
+    router.addRoute("DELETE", "/uploads/{file}", [this](auto &req, auto &res, const auto &match)
+                    { deleteFile(req, res, match); });
 
     router.addRoute("GET", "/", [](auto &req, auto &res, const auto &)
                     { res.sendFile("/uploads/pico_gpios.html"); });
 
-    router.addRoute("GET", "/api/v1/ls(.*)", [this](HttpRequest &req, HttpResponse &res, const std::vector<std::string> &params)
-                    { this->router.listDirectory(req, res, params); });
+    router.addRoute("GET", "/api/v1/ls(.*)", [this](HttpRequest &req, HttpResponse &res, const RouteMatch &match)
+                    { this->router.listDirectory(req, res, match); });
 
     // Catch-all route for static files
-    router.addRoute("GET", "/(.*)", [this](HttpRequest &req, HttpResponse &res, const std::vector<std::string> &params)
-                    { this->router.serveStatic(req, res, params); });
+    router.addRoute("GET", "/(.*)", [this](HttpRequest &req, HttpResponse &res, const RouteMatch &match)
+                    { this->router.serveStatic(req, res, match); });
 }
 
-void DashboardController::getTemperature(HttpRequest &req, HttpResponse &res, const std::vector<std::string> &)
+void DashboardController::getTemperature(HttpRequest &req, HttpResponse &res, const RouteMatch &)
 {
     adc_init();
     adc_set_temp_sensor_enabled(true);
@@ -75,25 +75,25 @@ void DashboardController::getTemperature(HttpRequest &req, HttpResponse &res, co
     res.json({{"temperature", tempC}});
 }
 
-void DashboardController::getLedState(HttpRequest &req, HttpResponse &res, const std::vector<std::string> &)
+void DashboardController::getLedState(HttpRequest &req, HttpResponse &res, const RouteMatch &)
 {
     bool isOn = cyw43_arch_gpio_get(0);
     res.json({{"state", isOn ? 1 : 0}});
 }
 
-void DashboardController::setLedState(HttpRequest &req, HttpResponse &res, const std::vector<std::string> &params)
+void DashboardController::setLedState(HttpRequest &req, HttpResponse &res, const RouteMatch &match)
 {
-    int value = std::stoi(params[0]);
+    int value = std::stoi(match.getParam("value").value_or("0"));
     cyw43_arch_gpio_put(0, value ? 1 : 0);
     res.json({{"state", value}});
 }
 
-void DashboardController::uploadHandler(HttpRequest &req, HttpResponse &res, const std::vector<std::string> &)
+void DashboardController::uploadHandler(HttpRequest &req, HttpResponse &res, const RouteMatch &match)
 {
     req.handle_multipart(res);
 }
 
-void DashboardController::deleteFile(HttpRequest &req, HttpResponse &res, const std::vector<std::string> &params)
+void DashboardController::deleteFile(HttpRequest &req, HttpResponse &res, const RouteMatch &match)
 {
     auto *fs = AppContext::get<StorageManager>();
     if (!fs->isMounted() && !fs->mount())
@@ -102,11 +102,11 @@ void DashboardController::deleteFile(HttpRequest &req, HttpResponse &res, const 
         return;
     }
 
-    std::string path = "/uploads/" + params[0];
+    std::string path = "/uploads/" + match.getParam("file").value_or("");
     if (fs->exists(path))
     {
         fs->remove(path);
-        res.sendSuccess({{"file", params[0]}}, "File deleted");
+        res.sendSuccess({{"file", match.getParam("file")}}, "File deleted");
     }
     else
     {

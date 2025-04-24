@@ -20,7 +20,7 @@
 
 #include "http/HttpRequest.h"
 #include "http/HttpResponse.h"
-
+#include "http/RouteTypes.h"
 
 class DashboardController : public FrameworkController {
 public:
@@ -28,9 +28,9 @@ public:
     void initRoutes() override;
 
 private:
-    void getTemperature(HttpRequest& req, HttpResponse& res, const std::vector<std::string>& params);
-    void getLedState(HttpRequest& req, HttpResponse& res, const std::vector<std::string>& params);
-    void setLedState(HttpRequest& req, HttpResponse& res, const std::vector<std::string>& params);
-    void uploadHandler(HttpRequest& req, HttpResponse& res, const std::vector<std::string>& params);
-    void deleteFile(HttpRequest& req, HttpResponse& res, const std::vector<std::string>& params);
+    void getTemperature(HttpRequest& req, HttpResponse& res, const RouteMatch & match);
+    void getLedState(HttpRequest& req, HttpResponse& res, const RouteMatch & match);
+    void setLedState(HttpRequest& req, HttpResponse& res, const RouteMatch & match);
+    void uploadHandler(HttpRequest& req, HttpResponse& res, const RouteMatch & match);
+    void deleteFile(HttpRequest& req, HttpResponse& res, const RouteMatch & match);
 };

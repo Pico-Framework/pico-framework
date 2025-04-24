@@ -19,6 +19,7 @@
 #include "http/HttpRequest.h"
 #include "http/HttpResponse.h"
 #include "storage/StorageManager.h"
+#include "http/RouteTypes.h"
 
 /**
  * @brief Helper class for accessing the file system and serving file content.
@@ -77,7 +78,7 @@ public:
      * @param res The HTTP response object.
      * @param params Route parameters (unused).
      */
-    void handle_static_request(HttpRequest &req, HttpResponse &res, const std::vector<std::string> &params);
+    void handle_static_request(HttpRequest &req, HttpResponse &res, const RouteMatch &match);
 
     /**
      * @brief Handle requests to list directory contents.
@@ -85,7 +86,7 @@ public:
      * @param res The HTTP response object.
      * @param params Route parameters (unused).
      */
-    void handle_list_directory(HttpRequest &req, HttpResponse &res, const std::vector<std::string> &params);
+    void handle_list_directory(HttpRequest &req, HttpResponse &res, const RouteMatch &match);
 
     /**
      * @brief Get the MIME type based on the file extension.

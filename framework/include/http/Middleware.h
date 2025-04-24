@@ -34,6 +34,7 @@
  #include "JwtAuthenticator.h"
  #include <functional>
  #include <vector>
+ #include "router.h"
  
  /**
   * @brief Function signature for middleware components.
@@ -46,7 +47,8 @@
   * @param params Path parameters captured by the router.
   * @return true to continue to the next middleware or handler; false to halt processing.
   */
- using Middleware = std::function<bool(HttpRequest&, HttpResponse&, const std::vector<std::string>&)>;
+ using Middleware = std::function<bool(HttpRequest &, HttpResponse &, const RouteMatch &)>;
+
  
  /**
   * @brief Authentication middleware that checks for a valid JWT in the Authorization header.

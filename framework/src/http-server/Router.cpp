@@ -53,21 +53,6 @@ static std::string extractBearerToken(const std::string &auth_header)
     return "";
 }
 
-// ----- Route struct constructor
-/// @copydoc Route::Route
-Route::Route(const std::string &method,
-             const std::string &path,
-             RouteHandler handler,
-             bool is_dynamic,
-             bool requires_auth)
-    : method(method),
-      path(path),
-      handler(handler),
-      is_dynamic(is_dynamic),
-      requires_auth(requires_auth)
-{
-}
-
 // ----- Router constructor
 /// @copydoc Router::Router
 Router::Router()
@@ -117,67 +102,6 @@ bool Router::handle_auth_req(HttpRequest &req, HttpResponse &res, const std::vec
 }
 #endif
 
-// Adds a route to the router, converting dynamic segments (e.g. {id}) to regex groups.
-/// @copydoc Router::addRoute
-void Router::addRoute(const std::string &method,
-                      const std::string &path,
-                      RouteHandler handler,
-                      std::vector<Middleware> middleware)
-{
-    TRACE("Adding route: %s %s\n", method.c_str(), path.c_str());
-
-    // Build regex pattern from path.
-    std::string regex_pattern = "^" + path;
-    bool is_dynamic = false;
-    size_t pos = 0;
-    while ((pos = regex_pattern.find("{", pos)) != std::string::npos)
-    {
-        size_t end_pos = regex_pattern.find("}", pos);
-        if (end_pos != std::string::npos)
-        {
-            // Replace dynamic segment with capturing group for URL parameters.
-            regex_pattern.replace(pos, end_pos - pos + 1, "([^/]+)");
-            is_dynamic = true;
-            pos += std::string("([^/]+)").size();
-        }
-        else
-        {
-            break;
-        }
-    }
-
-    // Handle catch-all route scenario.
-    if (regex_pattern == "/.*")
-    {
-        regex_pattern = "^/(.*)$";
-        is_dynamic = true;
-    }
-    regex_pattern += "$"; // Anchor the regex.
-
-    // Final handler executes global middleware, then route-specific middleware, then the actual handler.
-    RouteHandler finalHandler = [handler, this, middleware](HttpRequest &req, HttpResponse &res, const std::vector<std::string> &params)
-    {
-        // Execute global middleware.
-        for (const auto &mw : this->globalMiddleware)
-        {
-            if (!mw(req, res, params))
-                return;
-        }
-        // Execute per-route middleware.
-        for (const auto &mw : middleware)
-        {
-            if (!mw(req, res, params))
-                return;
-        }
-        // Execute the route handler.
-        handler(req, res, params);
-    };
-
-    // Store the route; note: using !middleware.empty() as a simple indicator of auth requirement.
-    withRoutes([&](auto &r)
-               { r[method].emplace_back(method, regex_pattern, finalHandler, is_dynamic, !middleware.empty()); });
-}
-
 // Adds a middleware to be executed for all routes.
 /// @copydoc Router::use
 void Router::use(Middleware middleware)
@@ -191,7 +115,7 @@ void Router::use(Middleware middleware)
 bool Router::isAuthorizedForRoute(const Route &route, HttpRequest &req, HttpResponse &res)
 {
 
-    if (route.requires_auth)
+    if (route.requiresAuth)
     {
         TRACE("Authorization required for route: %s\n", route.path.c_str());
         std::string token = getAuthorizationToken(req);
@@ -213,48 +137,65 @@ bool Router::isAuthorizedForRoute(const Route &route, HttpRequest &req, HttpResp
 }
 #endif
 
-// Handles an incoming request by matching the request method and URI to a registered route.
-/// @copydoc Router::handleRequest
-// bool Router::handleRequest(HttpRequest &req, HttpResponse &res)
-// {
-//     QUIET_PRINTF("[Router] Handling request: %s %s\n",req.getMethod().c_str(), req.getUri().c_str());
+/// @copydoc Router::addRoute
+void Router::addRoute(const std::string &method,
+                      const std::string &path,
+                      RouteHandler handler,
+                      std::vector<Middleware> middleware)
+{
+    TRACE("Adding route: %s %s\n", method.c_str(), path.c_str());
 
-//     // Look up routes by HTTP method.
-//     auto it = routes.find(req.getMethod());
-//     if (it == routes.end())
-//     {
-//         TRACE("No routes found for method: %s\n",req.getMethod().c_str());
-//         return false;
-//     }
+    std::string regex_pattern = "^" + path;
+    bool is_dynamic = false;
+    std::vector<std::string> paramNames;
+    size_t pos = 0;
 
-//     // Check each route for a match.
-//     for (const auto &route : it->second)
-//     {
-//         std::string uri_str(req.getUri());
-//         std::regex route_regex(route.path);
-//         std::smatch match;
+    while ((pos = regex_pattern.find("{", pos)) != std::string::npos)
+    {
+        size_t end = regex_pattern.find("}", pos);
+        if (end != std::string::npos)
+        {
+            std::string paramName = regex_pattern.substr(pos + 1, end - pos - 1);
+            paramNames.push_back(paramName);
+            regex_pattern.replace(pos, end - pos + 1, "([^/]+)");
+            is_dynamic = true;
+            pos += std::string("([^/]+)").size();
+        }
+        else
+        {
+            break;
+        }
+    }
 
-//         if (std::regex_match(uri_str, match, route_regex))
-//         {
-//             // Extract parameters from the capturing groups.
-//             std::vector<std::string> params;
-//             for (size_t i = 1; i < match.size(); ++i)
-//             {
-//                 params.push_back(urlDecode(match[i].str()));
-//             }
+    if (regex_pattern == "/.*")
+    {
+        regex_pattern = "^/(.*)$";
+        is_dynamic = true;
+    }
+    regex_pattern += "$";
 
-//             TRACE("Matched route: %s\n", route.path.c_str());
-//             route.handler(req, res, params);
-//             return true;
-//         }
-//     }
+    RouteHandler finalHandler = [handler, paramNames, this, middleware](HttpRequest &req, HttpResponse &res, const RouteMatch &match)
+    {
+        for (const auto &mw : this->globalMiddleware)
+        {
+            if (!mw(req, res, match))
+                return;
+        }
 
-//     TRACE("No matching route found\n");
-//     printRoutes();
-//     return false;
-// }
+        for (const auto &mw : middleware)
+        {
+            if (!mw(req, res, match))
+                return;
+        }
 
-/// @copydoc Router::handleRequest
+        handler(req, res, match);
+    };
+
+    withRoutes([&](auto &r)
+               { r[method].emplace_back(method, regex_pattern, finalHandler, is_dynamic, !middleware.empty(), paramNames);
+               });
+}
+
 bool Router::handleRequest(HttpRequest &req, HttpResponse &res)
 {
     bool matched = false;
@@ -262,33 +203,41 @@ bool Router::handleRequest(HttpRequest &req, HttpResponse &res)
     std::vector<std::string> params;
 
     withRoutes([&](auto &r)
-               {
-    auto it = r.find(req.getMethod());
-    if (it == r.end()) {
-        TRACE("No routes found for method: %s\n", req.getMethod().c_str());
-        return;
-    }
+    {
+        auto it = r.find(req.getMethod());
+        if (it == r.end()) return;
 
-    for (const auto& route : it->second) {
-        std::string uri_str(req.getUri());
-        std::regex route_regex(route.path);
-        std::smatch match;
-
-        if (std::regex_match(uri_str, match, route_regex)) {
-            for (size_t i = 1; i < match.size(); ++i) {
-                params.push_back(urlDecode(match[i].str()));
+        for (const auto &route : it->second)
+        {
+            std::regex route_regex(route.path);
+            std::smatch match;
+            const std::string& uri = req.getUri();
+            if (std::regex_match(uri, match, route_regex))
+            {
+                for (size_t i = 1; i < match.size(); ++i)
+                {
+                    params.push_back(urlDecode(match[i].str()));
+                }
+                matchedRoute = &route;
+                matched = true;
+                return;
             }
-
-            matchedRoute = &route;
-            matched = true;
-            return;
         }
-    } });
+    });
 
     if (matched && matchedRoute)
     {
+        RouteMatch match;
+        match.ordered = params;
+        const auto &names = matchedRoute->paramNames;
+
+        for (size_t i = 0; i < names.size() && i < params.size(); ++i)
+        {
+            match.named[names[i]] = params[i];
+        }
+
         TRACE("Matched route: %s\n", matchedRoute->path.c_str());
-        matchedRoute->handler(req, res, params);
+        matchedRoute->handler(req, res, match);
         return true;
     }
 
@@ -296,6 +245,8 @@ bool Router::handleRequest(HttpRequest &req, HttpResponse &res)
     printRoutes();
     return false;
 }
+
+
 
 // Prints all registered routes (for debugging).
 /// @copydoc Router::iprintRoutes
@@ -308,26 +259,26 @@ void Router::printRoutes()
         for (const auto &route : method_pair.second)
         {
             TRACE("  Route: %s, Dynamic: %s, Requires Auth: %s\n",
-                  route.path.c_str(),
-                  route.is_dynamic ? "true" : "false",
-                  route.requires_auth ? "true" : "false");
+                route.path.c_str(),
+                route.isDynamic ? "true" : "false",
+                route.requiresAuth ? "true" : "false");
         }
     }
 }
 
 // Serve static files using the HttpFileserver instance.
 /// @copydoc Router::serveStatic
-void Router::serveStatic(HttpRequest &req, HttpResponse &res, const std::vector<std::string> &params)
+void Router::serveStatic(HttpRequest &req, HttpResponse &res, const RouteMatch &match)
 {
-    fileServer.handle_static_request(req, res, params);
+    fileServer.handle_static_request(req, res, match);
 }
 
 // Handle list directory using HttpFileserver instance.
 /// @copydoc Router::listDirectory
-void Router::listDirectory(HttpRequest &req, HttpResponse &res, const std::vector<std::string> &params)
+void Router::listDirectory(HttpRequest &req, HttpResponse &res, const RouteMatch &match)
 {
  
-    fileServer.handle_list_directory(req, res, params); ;
+    fileServer.handle_list_directory(req, res, match); ;
 }
 
 void Router::withRoutes(const std::function<void(std::unordered_map<std::string, std::vector<Route>> &)> &fn)
@@ -336,3 +287,6 @@ void Router::withRoutes(const std::function<void(std::unordered_map<std::string,
     fn(routes);
     xSemaphoreGive(lock_);
 }
+
+
+

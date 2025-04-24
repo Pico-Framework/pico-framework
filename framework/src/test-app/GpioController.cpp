@@ -9,12 +9,12 @@ void GpioController::initRoutes() {
 
     printf("[GpioController] Initializing GPIO routes...\n");
 
-    router.addRoute("GET", "/api/v1/gpio/{pin}", [this](HttpRequest& req, HttpResponse& res, const std::vector<std::string>& params) {
-        getState(req, res, params);
+    router.addRoute("GET", "/api/v1/gpio/{pin}", [this](HttpRequest& req, HttpResponse& res, const RouteMatch& match) {
+        getState(req, res, match.ordered);
     });
-
-    router.addRoute("POST", "/api/v1/gpio/{pin}/{value}", [this](HttpRequest& req, HttpResponse& res, const std::vector<std::string>& params) {
-        setState(req, res, params);
+    
+    router.addRoute("POST", "/api/v1/gpio/{pin}/{value}", [this](HttpRequest& req, HttpResponse& res, const RouteMatch& match) {
+        setState(req, res, match.ordered);
     });
 }
 

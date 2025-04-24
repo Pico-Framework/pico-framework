@@ -155,7 +155,7 @@ HttpFileserver::HttpFileserver()
 }
 
 /// @copydoc HttpFileserver::handle_list_directory
-void HttpFileserver::handle_list_directory(HttpRequest &req, HttpResponse &res, const std::vector<std::string> &params)
+void HttpFileserver::handle_list_directory(HttpRequest &req, HttpResponse &res, const RouteMatch &match)
 {
     std::string directory_path = req.getPath();
     int pos = directory_path.find("/api/v1/ls");
@@ -201,7 +201,7 @@ bool ends_with(const std::string &str, const std::string &suffix)
 
 // Fallback route for serving any static file detected in router
 /// @copydoc HttpFileserver::handle_static_request
-void HttpFileserver::handle_static_request(HttpRequest &req, HttpResponse &res, const std::vector<std::string> &params)
+void HttpFileserver::handle_static_request(HttpRequest &req, HttpResponse &res, const RouteMatch &match)
 {
     const std::string &uri = req.getPath();
     printf("Serving static request for URI: %s\n", uri.c_str());

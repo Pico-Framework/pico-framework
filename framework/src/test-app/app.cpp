@@ -14,6 +14,8 @@
 #include "events/EventManager.h"
 #include "events/GpioEventManager.h"
 #include "http/HttpFileserver.h"
+#include "http/JsonResponse.h"
+#include "http/Router.h"
 
 #include "GpioController.h"
 #include "DashboardController.h"
@@ -34,6 +36,14 @@ void App::initRoutes()
     // Add a simple route for testing
     router.addRoute("GET", "/hello", [](HttpRequest &req, HttpResponse &res, const auto &)
                     { res.send("Welcome to PicoFramework!"); });
+    router.addRoute("GET", "/zones/{name}", [](HttpRequest& req, HttpResponse& res, const RouteMatch& match) {
+        if (auto name = match.getParam("name")) {
+            printf("Named zone: %s\n", name->c_str());
+            JsonResponse::sendSuccess(res, {{"zone", *name}});
+        } else {
+            JsonResponse::sendError(res, 400, "MISSING_NAME", "No zone name provided");
+        }
+    });
 }
 
 void App::onStart()
