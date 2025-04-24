@@ -108,6 +108,9 @@ target_sources(pico_framework PRIVATE
     # Utility
     src/utility/Logger.cpp
     src/utility/utility.cpp
+
+    #Storage - littlefs or fatfs are only included conditionally
+    src/storage/JsonService.cpp
 )
 
 #------------------------------------------------------------------------------
@@ -140,7 +143,6 @@ else()
     target_sources(pico_framework PRIVATE 
         src/storage/FatFsStorageManager.cpp
         src/port/hw_config.c
-        src/storage/JsonService.cpp
         )
     target_link_libraries(pico_framework PUBLIC FreeRTOS+FAT+CLI)
 endif()

@@ -322,11 +322,12 @@ void Router::serveStatic(HttpRequest &req, HttpResponse &res, const std::vector<
     fileServer.handle_static_request(req, res, params);
 }
 
-// Convenience method to list directory contents using the HttpFileserver instance.
+// Handle list directory using HttpFileserver instance.
 /// @copydoc Router::listDirectory
 void Router::listDirectory(HttpRequest &req, HttpResponse &res, const std::vector<std::string> &params)
 {
-    fileServer.handle_list_directory(req, res, params);
+ 
+    fileServer.handle_list_directory(req, res, params); ;
 }
 
 void Router::withRoutes(const std::function<void(std::unordered_map<std::string, std::vector<Route>> &)> &fn)

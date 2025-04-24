@@ -39,7 +39,7 @@
 
 // === Debug Trace Configuration ===
 
-#define QUIET_MODE ///< Set to disable all normal behavior print output, don't define to print
+//#define QUIET_MODE ///< Set to disable all normal behavior print output, don't define to print
 
 #ifdef QUIET_MODE
   #define QUIET_PRINTF(...) do {} while (0)
@@ -52,6 +52,8 @@
 #define TRACE_USE_TIMESTAMP       1
 #define TRACE_USE_SD              0   ///< Set to 1 to use SD card for trace output, 0 for UART
 
+//#define LFS_TRACE_YES // set to enable LittleFS trace output, comment out to disable
+
 // === Module-specific trace enables ===
 #define TRACE_FrameworkManager    0
 #define TRACE_HttpServer          0
@@ -63,6 +65,7 @@
 #define TRACE_JwtAuthenticator    0
 #define TRACE_Router              0
 #define TRACE_FatFsStorageManager 0
+#define TRACE_LittleFsStorageManager 1
 #define TRACE_JsonService         0
 #define TRACE_Middleware          0
 #define TRACE_Network             0

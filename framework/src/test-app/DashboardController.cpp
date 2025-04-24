@@ -57,6 +57,9 @@ void DashboardController::initRoutes()
     router.addRoute("GET", "/", [](auto &req, auto &res, const auto &)
                     { res.sendFile("/uploads/pico_gpios.html"); });
 
+    router.addRoute("GET", "/api/v1/ls(.*)", [this](HttpRequest &req, HttpResponse &res, const std::vector<std::string> &params)
+                    { this->router.listDirectory(req, res, params); });
+
     // Catch-all route for static files
     router.addRoute("GET", "/(.*)", [this](HttpRequest &req, HttpResponse &res, const std::vector<std::string> &params)
                     { this->router.serveStatic(req, res, params); });

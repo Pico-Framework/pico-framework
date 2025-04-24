@@ -34,10 +34,6 @@ void App::initRoutes()
     // Add a simple route for testing
     router.addRoute("GET", "/hello", [](HttpRequest &req, HttpResponse &res, const auto &)
                     { res.send("Welcome to PicoFramework!"); });
-    // router.addRoute("GET", "/api/v1/ls(.*)", [this](HttpRequest &req, HttpResponse &res, const std::vector<std::string> &params) {
-    //     HttpFileserver fileServer; // temporary only!
-    //     fileServer.handle_list_directory(req, res, params);
-    // });
 }
 
 void App::onStart()
@@ -65,8 +61,8 @@ void App::onStart()
     // FrameworkController has a waitAndDispatch function that polls the queue and will call onEvent() in this App class.
     // Events can be SystemNotification or UserNotification types, which are defined in enum class UserNotification (see the App.h file).
     eventManager->subscribe(mask(SystemNotification::GpioChange), this);
-    gpioEventManager->enableInterrupt(16, GPIO_IRQ_EDGE_RISE | GPIO_IRQ_EDGE_FALL);
-    gpioEventManager->enableInterrupt(17, GPIO_IRQ_EDGE_RISE | GPIO_IRQ_EDGE_FALL);
+    gpioEventManager->enableInterrupt(16, GPIO_IRQ_EDGE_RISE | GPIO_IRQ_EDGE_FALL); // multicore issue
+    gpioEventManager->enableInterrupt(17, GPIO_IRQ_EDGE_RISE | GPIO_IRQ_EDGE_FALL); // multcore issue
 
     eventManager->subscribe(mask(UserNotification::Heartbeat), this);
 

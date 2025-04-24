@@ -18,7 +18,7 @@
 #include "DebugTrace.h"
 TRACE_INIT(FatFsStorageManager)
 
-#include "FatFsStorageManager.h"
+#include "storage/FatFsStorageManager.h"
 #include <ff_utils.h>
 #include <ff_stdio.h>
 
@@ -91,12 +91,14 @@ bool FatFsStorageManager::listDirectory(const std::string &path, std::vector<Fil
         TRACE("SD card not mounted — cannot list directory: %s\n", path.c_str());
         return false;
     }
-
+    printf("[FatFs] Listing directory: %s\n", path.c_str());
     FF_FindData_t xFindStruct{};
     std::string searchPath = resolvePath(path.empty() ? "/" : path);
+    printf("[FatFs] Search path: %s\n", searchPath.c_str());
     int result = ff_findfirst(searchPath.c_str(), &xFindStruct);
 
     if (result != FF_ERR_NONE) {
+        printf("[FatFs] ff_findfirst failed with error: %d\n", result);
         return false;
     }
 

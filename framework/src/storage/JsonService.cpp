@@ -17,7 +17,7 @@
 #include "DebugTrace.h"
 TRACE_INIT(JsonService)
 
-#include "JsonService.h"
+#include "storage/JsonService.h"
 #include <cstdio>
 #include <cstdint>
 #include <vector>

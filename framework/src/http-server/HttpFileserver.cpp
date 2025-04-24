@@ -118,10 +118,15 @@ bool FileHandler::serveFile(HttpResponse &res, const char *uri)
         const uint8_t gzip_magic_number[] = {0x1F, 0x8B};
         std::string magic_number;
         if(storageManager->readFileString(path, 0, 2, magic_number)){
-            printf("Read magic number: %s\n", magic_number.c_str());
+            printf("Read magic number in hex: ");
+            for (size_t i = 0; i < magic_number.size(); ++i) {
+                printf("%02X ", static_cast<unsigned char>(magic_number[i]));
+            }
+            printf("\n");
             if (magic_number[0] == gzip_magic_number[0] && magic_number[1] == gzip_magic_number[1]) // GZIP magic number
             {
                 printf("File is already gzipped: %s\n", path.c_str());
+                printf("Setting Content-Encoding to gzip\n");
                 res.set("Content-Encoding", "gzip");
             }
         }
@@ -159,7 +164,7 @@ void HttpFileserver::handle_list_directory(HttpRequest &req, HttpResponse &res, 
     }
 
     if (directory_path.empty()) {
-        directory_path = "/";
+        directory_path = "/"; // Default to root directory if no path is specified
     }
 
     std::vector<FileInfo> entries;

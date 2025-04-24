@@ -48,13 +48,16 @@ option(PICO_HTTP_TLS_VERIFY "Enable certificate verification for TLS connections
 # Add subdirectories
 add_subdirectory(framework)
 
+add_executable(framework_test)
+
 # Dummy executable to measure memory usage of the framework
-add_executable(framework_test 
+target_sources(framework_test PRIVATE
     framework/src/test-app/main.cpp
     framework/src/test-app/app.cpp
     framework/src/test-app/DashboardController.cpp
     framework/src/test-app/GpioController.cpp
     )
+
 target_link_libraries(framework_test 
     pico_framework
     hardware_adc
@@ -66,7 +69,7 @@ if(PICO_HTTP_ENABLE_LITTLEFS)
 else()
     # If not using LittleFS we must be ing FAT so, we use the standard memory map (no need to define it)
     # and include the hardware config file for the sd card
-    target_sources(framework_test 
+    target_sources(framework_test PRIVATE
         framework/src/test-app/hw_config.c
     )    
 endif()

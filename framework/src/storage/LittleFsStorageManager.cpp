@@ -20,6 +20,11 @@ extern "C"
 StaticSemaphore_t LittleFsStorageManager::lfs_mutex_buf;
 SemaphoreHandle_t LittleFsStorageManager::lfs_mutex = xSemaphoreCreateMutexStatic(&lfs_mutex_buf);
 
+LittleFsStorageManager::LittleFsStorageManager()
+{
+    configure();
+}
+
 int LittleFsStorageManager::lfs_lock(const struct lfs_config *c) {
     assert(lfs_mutex != nullptr);
     return (xSemaphoreTake(lfs_mutex, portMAX_DELAY) == pdTRUE) ? 0 : -1;
@@ -27,11 +32,6 @@ int LittleFsStorageManager::lfs_lock(const struct lfs_config *c) {
 
 int LittleFsStorageManager::lfs_unlock(const struct lfs_config *c) {
     return (xSemaphoreGive(lfs_mutex) == pdTRUE) ? 0 : -1;
-}
-
-LittleFsStorageManager::LittleFsStorageManager()
-{
-    configure();
 }
 
 int LittleFsStorageManager::lfs_read_cb(const struct lfs_config *c, lfs_block_t block, lfs_off_t off,
@@ -188,10 +188,10 @@ void LittleFsStorageManager::configure()
     config.lookahead_size = 256;
     config.block_cycles = 500;
     config.compact_thresh = (lfs_size_t)-1;
-
+#if defined(LFS_THREADSAFE)
     config.lock = lfs_lock;
     config.unlock = lfs_unlock;
-
+#endif
     printf("[LittleFS] Flash base: 0x%08x, size: %zu bytes (%zu blocks)\n",
            static_cast<unsigned>(flashBase), flashSize, config.block_count);
 }
@@ -357,11 +357,15 @@ size_t LittleFsStorageManager::getFileSize(const std::string &path)
 
 bool LittleFsStorageManager::listDirectory(const std::string &path, std::vector<FileInfo> &out)
 {
+    if(!mounted)
+    {
+        mount();
+    }
     lfs_dir_t dir;
     struct lfs_info info = {};
 
     if (lfs_dir_open(&lfs, &dir, path.c_str()) < 0)
-        return false;
+        return false;  
 
     while (lfs_dir_read(&lfs, &dir, &info) > 0)
     {

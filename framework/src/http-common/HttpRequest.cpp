@@ -265,7 +265,7 @@ HttpRequest HttpRequest::receive(Tcp* tcp)
             bodyRemaining -= chunkReceived;
         }
 
-        printf("Body: %s\n", body.c_str());
+       QUIET_PRINTF("Body: %s\n", body.c_str());
     }
 
     TRACE("HttpRequest object constructed\n");

@@ -6,7 +6,7 @@
 #if PICO_HTTP_ENABLE_LITTLEFS
     #include "storage/LittleFsStorageManager.h"
 #else   
-    #include "FatFsStorageManager.h"
+    #include "storage/FatFsStorageManager.h"
 #endif
 #include "framework_config.h"
 #include "DebugTrace.h"
