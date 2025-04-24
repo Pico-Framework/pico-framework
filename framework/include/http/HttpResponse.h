@@ -308,7 +308,6 @@ public:
      */
     void markBodyTruncated() { bodyTruncated = true; }
 
-
     // Convenience wrappers enabling fluent chaining
     HttpResponse& sendSuccess(const nlohmann::json& data = {}, const std::string& message = "");
     HttpResponse& sendCreated(const nlohmann::json& data = {}, const std::string& message = "");
@@ -316,6 +315,10 @@ public:
     HttpResponse& sendNoContent();
     HttpResponse& sendError(int statusCode, const std::string& code, const std::string& message);
     HttpResponse& sendError(int statusCode, const std::string& message);  // simpler form
+
+    #if defined(PICO_HTTP_ENABLE_STORAGE)
+    bool toFile(const std::string& path, StorageManager* storage) const;
+    #endif
 
 private:
     /**

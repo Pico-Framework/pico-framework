@@ -472,3 +472,17 @@ bool HttpRequest::setRootCACertificateFromFile(const char *path)
     return true;
 }
 #endif
+
+
+HttpRequest& HttpRequest::toFile(const std::string& path) {
+    this->outputFilePath = path;
+    return *this;
+}
+
+bool HttpRequest::wantsToFile() const {
+    return !outputFilePath.empty();
+}
+
+std::string HttpRequest::getOutputFilePath() const {
+    return outputFilePath;
+}

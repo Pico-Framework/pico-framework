@@ -98,14 +98,49 @@ bool HttpClient::sendRequest(const HttpRequest &request, HttpResponse &response)
         response.setHeader(key, value);
     }
 
-    std::string bodyData;
     bool truncated = false;
+
+    if (request.wantsToFile()) {
+        StorageManager* storage = AppContext::get<StorageManager>();
+        const std::string& path = request.getOutputFilePath();
     
-    if (!HttpParser::receiveBody(socket, parsedHeaders, leftover, bodyData, MAX_HTTP_BODY_LENGTH, &truncated))
-    {
-        return false;
+        bool ok = false;
+        if (HttpParser::isChunkedEncoding(parsedHeaders)) {
+            ok = HttpParser::receiveChunkedBodyToFile(socket, leftover,
+                [&](const char* data, size_t len) {
+                    return storage->appendToFile(path, reinterpret_cast<const uint8_t*>(data), len);
+                },
+                MAX_HTTP_BODY_LENGTH,
+                &truncated);
+        } else {
+            ok = HttpParser::receiveFixedLengthBodyToFile(socket, parsedHeaders, leftover,
+                [&](const char* data, size_t len) {
+                    return storage->appendToFile(path, reinterpret_cast<const uint8_t*>(data), len);
+                },
+                MAX_HTTP_BODY_LENGTH,
+                &truncated);
+        }
+    
+        if (!ok)
+            return false;
+    
+        if (truncated)
+            response.markBodyTruncated();
+    
+        response.setHeader("X-Body-Saved", path);
     }
-    response.setBody(bodyData);
-    if (truncated) response.markBodyTruncated();
+    
+    else
+    {
+        std::string bodyData;
+        if (!HttpParser::receiveBody(socket, parsedHeaders, leftover, bodyData, MAX_HTTP_BODY_LENGTH, &truncated))
+        {
+            return false;
+        }
+        response.setBody(bodyData);
+        if (truncated)
+            response.markBodyTruncated();
+    }
+
     return true;
 }

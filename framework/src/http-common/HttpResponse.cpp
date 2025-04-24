@@ -443,7 +443,7 @@ HttpResponse& HttpResponse::sendError(int statusCode, const std::string& message
 }
 
 #if defined(PICO_HTTP_ENABLE_STORAGE)
-bool HttpResponse::saveFile(const char* path) const {
+bool HttpResponse::toFile(const char* path) const {
     return StorageManager::instance().writeFile(path, body_);
 }
 #endif

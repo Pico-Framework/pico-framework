@@ -397,6 +397,18 @@ public:
     HttpRequest &setUserAgent(const std::string &userAgent);
     HttpRequest &setAcceptEncoding(const std::string &encoding);
 
+
+    // ─────────────────────────────────────────────────────────────────────────────
+    // toFile: Save the request body to a file
+    // ─────────────────────────────────────────────────────────────────────────────
+
+    HttpRequest& toFile(const std::string& path);
+    std::string getOutputFilePath() const;
+    bool wantsToFile() const;
+
+    // ─────────────────────────────────────────────────────────────────────────────
+    // Root CA Certificate Access
+    // ─────────────────────────────────────────────────────────────────────────────
     /**
      * @brief Get the root CA certificate string, if set.
      *
@@ -429,6 +441,8 @@ private:
     std::string rootCACertificate;
     size_t headerEnd = 0;
     bool bodyTruncated = false;
+    std::string outputFilePath;
+    
 };
 
 #endif // HTTPREQUEST_H

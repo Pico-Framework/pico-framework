@@ -1,18 +1,18 @@
 /**
  * @file HttpParser.cpp
- * @author Ian Archbell 
+ * @author Ian Archbell
  * @brief HTTP parser for status codes, headers, and body handling.
  * * Part of the PicoFramework HTTP server.
  * This module provides methods to parse HTTP status lines, headers, and
- * handle HTTP body content, including chunked transfer encoding and    
+ * handle HTTP body content, including chunked transfer encoding and
  * content-length handling.
  * It is designed for use in embedded systems with FreeRTOS and lwIP.
  * @version 0.1
  * @date 2025-03-26
- * 
+ *
  * @license MIT License
  * @copyright Copyright (c) 2025, Ian Archbell
- *      
+ *
  */
 
 #include "http/HttpParser.h"
@@ -26,11 +26,12 @@
 #include "DebugTrace.h"
 TRACE_INIT(HttpParser)
 /**
- * @brief Parses the HTTP status line to extract the status code.   
+ * @brief Parses the HTTP status line to extract the status code.
  * @param statusLine The HTTP status line (e.g., "HTTP/1.1 200 OK").
  * @return The HTTP status code as an integer (e.g., 200).
  */
-int HttpParser::parseStatusCode(const std::string& statusLine) {
+int HttpParser::parseStatusCode(const std::string &statusLine)
+{
     std::istringstream stream(statusLine);
     std::string httpVersion;
     int code = 0;
@@ -42,19 +43,23 @@ int HttpParser::parseStatusCode(const std::string& statusLine) {
  * @param rawHeaders The raw HTTP headers as a string.
  * @return A map of header names to their values.
  */
-std::map<std::string, std::string> HttpParser::parseHeaders(const std::string& rawHeaders) {
+std::map<std::string, std::string> HttpParser::parseHeaders(const std::string &rawHeaders)
+{
     std::map<std::string, std::string> headers;
     std::istringstream stream(rawHeaders);
     std::string line;
 
-    while (std::getline(stream, line)) {
+    while (std::getline(stream, line))
+    {
         // Stop on blank line (end of headers)
-        if (line == "\r" || line.empty()) {
+        if (line == "\r" || line.empty())
+        {
             break;
         }
 
         auto colon = line.find(':');
-        if (colon == std::string::npos || colon + 1 >= line.size()) {
+        if (colon == std::string::npos || colon + 1 >= line.size())
+        {
             continue;
         }
 
@@ -73,9 +78,12 @@ std::map<std::string, std::string> HttpParser::parseHeaders(const std::string& r
         // Trim whitespace from value
         size_t start = value.find_first_not_of(" \t");
         size_t end = value.find_last_not_of(" \t");
-        if (start != std::string::npos && end != std::string::npos) {
+        if (start != std::string::npos && end != std::string::npos)
+        {
             value = value.substr(start, end - start + 1);
-        } else {
+        }
+        else
+        {
             value = "";
         }
 
@@ -100,20 +108,24 @@ std::map<std::string, std::string> HttpParser::parseHeaders(const std::string& r
  * @note This function is blocking and will wait until the header is fully received.
  * It is designed for use in an embedded system with FreeRTOS and lwIP.
  */
-std::pair<std::string, std::string> HttpParser::receiveHeaderAndLeftover(Tcp& socket) {
+std::pair<std::string, std::string> HttpParser::receiveHeaderAndLeftover(Tcp &socket)
+{
     std::string buffer;
     char temp[1460];
 
-    while (true) {
+    while (true)
+    {
         int n = socket.recv(temp, sizeof(temp));
-        if (n <= 0) {
+        if (n <= 0)
+        {
             return {"", ""}; // signal error (empty header)
         }
 
         buffer.append(temp, n);
         std::size_t headerEnd = buffer.find("\r\n\r\n");
 
-        if (headerEnd != std::string::npos) {
+        if (headerEnd != std::string::npos)
+        {
             std::string headerText = buffer.substr(0, headerEnd + 4);
             std::string leftover = buffer.substr(headerEnd + 4);
             return {headerText, leftover};
@@ -123,96 +135,121 @@ std::pair<std::string, std::string> HttpParser::receiveHeaderAndLeftover(Tcp& so
     }
 }
 
-bool HttpParser::receiveBody(Tcp& socket,
-                             const std::map<std::string, std::string>& headers,
-                             const std::string& leftoverBody,
-                             std::string& outBody,
+/**
+ * @brief Receives the HTTP body from a TCP socket based on headers.
+ * @param socket The TCP socket to read from.
+ * @param headers The parsed HTTP headers.
+ * @param leftoverBody Any body data that was received after the headers.   
+ * @param outBody The output string to store the received body.
+ * @param maxLength The maximum length of the body to receive.
+ * @param wasTruncated Pointer to a boolean that will be set to true if the body was truncated.
+ * @return True if the body was successfully received, false on error or EOF.
+ * This function handles different content transfer methods:
+ * - Chunked transfer encoding
+ * - Content-Length specified in headers
+ * - Unknown length (just read until EOF)
+ */
+bool HttpParser::receiveBody(Tcp &socket,
+                             const std::map<std::string, std::string> &headers,
+                             const std::string &leftoverBody,
+                             std::string &outBody,
                              size_t maxLength,
-                             bool* wasTruncated)
+                             bool *wasTruncated)
 {
-    if (wasTruncated) *wasTruncated = false;
+    if (wasTruncated)
+        *wasTruncated = false;
 
-    auto transferEncodingIt = headers.find("transfer-encoding");
-    if (transferEncodingIt != headers.end() &&
-        toLower(transferEncodingIt->second) == "chunked") {
+    if (isChunkedEncoding(headers))
+    {
+        return receiveChunkedBodyToString(socket, leftoverBody, outBody, maxLength, wasTruncated);
+    }
 
-        ChunkedDecoder decoder;
-        decoder.feed(leftoverBody);
+    if (headers.count("content-length"))
+    {
+        return receiveFixedLengthBodyToString(socket, headers, leftoverBody, outBody, maxLength, wasTruncated);
+    }
 
-        char temp[1460];
-        while (!decoder.isComplete()) {
-            int n = socket.recv(temp, sizeof(temp));
-            if (n <= 0) {
-                printf("Chunked: recv() failed or EOF");
-                return false;
-            }
-            decoder.feed(std::string(temp, n), maxLength);
+    return receiveUnknownLengthBodyToString(socket, leftoverBody, outBody, maxLength, wasTruncated);
+}
 
-            if (decoder.wasTruncated()) {
-                outBody = decoder.getDecoded();
-                if (wasTruncated) *wasTruncated = true;
-                return true;
-            }
+bool HttpParser::isChunkedEncoding(const std::map<std::string, std::string>& headers)
+{
+    auto it = headers.find("transfer-encoding");
+    return (it != headers.end() && toLower(it->second) == "chunked");
+}
+
+bool HttpParser::receiveChunkedBodyToString(Tcp& socket, const std::string& leftover, std::string& outBody, size_t maxLength, bool* wasTruncated)
+{
+    ChunkedDecoder decoder;
+    decoder.feed(leftover, maxLength);
+
+    char temp[1460];
+    while (!decoder.isComplete()) {
+        int n = socket.recv(temp, sizeof(temp));
+        if (n <= 0) {
+            printf("Chunked: recv() failed or EOF");
+            return false;
         }
+        decoder.feed(std::string(temp, n), maxLength);
+        if (decoder.wasTruncated()) {
+            outBody = decoder.getDecoded();
+            if (wasTruncated) *wasTruncated = true;
+            return true;
+        }
+    }
 
-        outBody = decoder.getDecoded();
-        TRACE("Chunked: decoded size = %d", outBody.size());
-        TRACE("Chunked: decoded body = %s", outBody.c_str());
+    outBody = decoder.getDecoded();
+    return true;
+}
+
+bool HttpParser::receiveFixedLengthBodyToString(Tcp& socket, const std::map<std::string, std::string>& headers, const std::string& leftover, std::string& outBody, size_t maxLength, bool* wasTruncated)
+{
+    int contentLength = std::stoi(headers.at("content-length"));
+    outBody = leftover;
+
+    if ((int)outBody.size() >= contentLength) {
+        outBody = outBody.substr(0, std::min((size_t)contentLength, maxLength));
+        if ((size_t)contentLength > maxLength && wasTruncated) *wasTruncated = true;
         return true;
     }
 
-    auto it = headers.find("content-length");
-    if (it != headers.end()) {
-        int contentLength = std::stoi(it->second);
-        outBody = leftoverBody;
+    int attempts = 0;
+    int idleCycles = 0;
+    while ((int)outBody.size() < contentLength && attempts++ < 2000) {
+        char buffer[1460];
+        int toRead = std::min<int>(sizeof(buffer), contentLength - (int)outBody.size());
+        int n = socket.recv(buffer, toRead);
 
-        if ((int)outBody.size() >= contentLength) {
-            outBody = outBody.substr(0, std::min((size_t)contentLength, maxLength));
-            if ((size_t)contentLength > maxLength && wasTruncated) *wasTruncated = true;
+        if (n <= 0) {
+            idleCycles++;
+            vTaskDelay(pdMS_TO_TICKS(10));
+            if (idleCycles > 20) return false;
+            continue;
+        }
+
+        idleCycles = 0;
+        if (outBody.size() + n > maxLength) {
+            outBody.append(buffer, maxLength - outBody.size());
+            if (wasTruncated) *wasTruncated = true;
             return true;
         }
 
-        int attempts = 0;
-        int idleCycles = 0;
-
-        while ((int)outBody.size() < contentLength && attempts++ < 2000) {
-            char buffer[1460];
-            int toRead = std::min<int>(sizeof(buffer), contentLength - (int)outBody.size());
-            int n = socket.recv(buffer, toRead);
-
-            if (n <= 0) {
-                idleCycles++;
-                vTaskDelay(pdMS_TO_TICKS(10));
-                if (idleCycles > 20) return false;
-                continue;
-            }
-
-            idleCycles = 0;
-
-            if (outBody.size() + n > maxLength) {
-                size_t allowed = maxLength - outBody.size();
-                outBody.append(buffer, allowed);
-                if (wasTruncated) *wasTruncated = true;
-                return true;
-            }
-
-            outBody.append(buffer, n);
-        }
-
-        if ((size_t)outBody.size() > maxLength && wasTruncated) *wasTruncated = true;
-        return ((int)outBody.size() == contentLength || *wasTruncated);
+        outBody.append(buffer, n);
     }
 
-    // No known content length or transfer encoding — fallback
-    outBody = leftoverBody;
+    return ((int)outBody.size() == contentLength);
+}
+
+bool HttpParser::receiveUnknownLengthBodyToString(Tcp& socket, const std::string& leftover, std::string& outBody, size_t maxLength, bool* wasTruncated)
+{
+    outBody = leftover;
     char buffer[1460];
     while (true) {
         int n = socket.recv(buffer, sizeof(buffer));
         if (n <= 0) break;
 
         if (outBody.size() + n > maxLength) {
-            size_t allowed = maxLength - outBody.size();
-            outBody.append(buffer, allowed);
+            outBody.append(buffer, maxLength - outBody.size());
             if (wasTruncated) *wasTruncated = true;
             return true;
         }
@@ -223,3 +260,214 @@ bool HttpParser::receiveBody(Tcp& socket,
     return !outBody.empty();
 }
 
+
+bool HttpParser::receiveChunkedBodyToFile(
+    Tcp& socket,
+    const std::string& leftover,
+    std::function<bool(const char*, size_t)> writeFn,
+    size_t maxLength,
+    bool* wasTruncated)
+{
+    ChunkedDecoder decoder;
+    decoder.feedToFile(leftover, writeFn, maxLength);
+
+    char buffer[1460];
+    while (!decoder.isComplete()) {
+        int n = socket.recv(buffer, sizeof(buffer));
+        if (n <= 0) {
+            printf("Chunked: recv() failed or EOF\n");
+            return false;
+        }
+
+        if (!decoder.feedToFile(std::string(buffer, n), writeFn, maxLength)) {
+            printf("Chunked: writeFn failed\n");
+            return false;
+        }
+
+        if (decoder.wasTruncated()) {
+            if (wasTruncated) *wasTruncated = true;
+            return true;
+        }
+    }
+
+    if (wasTruncated) *wasTruncated = decoder.wasTruncated();
+    return true;
+}
+
+bool HttpParser::receiveFixedLengthBodyToFile(
+    Tcp& socket,
+    const std::map<std::string, std::string>& headers,
+    const std::string& leftover,
+    std::function<bool(const char*, size_t)> writeFn,
+    size_t maxLength,
+    bool* wasTruncated)
+{
+    if (wasTruncated) *wasTruncated = false;
+
+    auto it = headers.find("content-length");
+    if (it == headers.end()) return false;
+
+    int contentLength = std::stoi(it->second);
+    size_t totalWritten = 0;
+
+    // Write leftover first
+    if (!leftover.empty()) {
+        size_t toWrite = std::min(leftover.size(), maxLength);
+        if (!writeFn(leftover.data(), toWrite)) return false;
+        totalWritten += toWrite;
+
+        if (leftover.size() > maxLength) {
+            if (wasTruncated) *wasTruncated = true;
+            return true;
+        }
+    }
+
+    char buffer[1460];
+    int idleCycles = 0;
+    while (totalWritten < (size_t)contentLength) {
+        size_t remaining = contentLength - totalWritten;
+        int toRead = std::min((int)sizeof(buffer), (int)remaining);
+        int n = socket.recv(buffer, toRead);
+
+        if (n <= 0) {
+            vTaskDelay(pdMS_TO_TICKS(10));
+            if (++idleCycles > 20) return false;
+            continue;
+        }
+
+        idleCycles = 0;
+
+        size_t available = maxLength - totalWritten;
+        size_t toWrite = std::min((size_t)n, available);
+        if (!writeFn(buffer, toWrite)) return false;
+        totalWritten += toWrite;
+
+        if (toWrite < (size_t)n) {
+            if (wasTruncated) *wasTruncated = true;
+            return true;
+        }
+    }
+
+    return true;
+}
+
+
+
+// bool HttpParser::receiveBody(Tcp &socket,
+//                              const std::map<std::string, std::string> &headers,
+//                              const std::string &leftoverBody,
+//                              std::string &outBody,
+//                              size_t maxLength,
+//                              bool *wasTruncated)
+// {
+//     if (wasTruncated)
+//         *wasTruncated = false;
+
+//     auto transferEncodingIt = headers.find("transfer-encoding");
+//     if (transferEncodingIt != headers.end() &&
+//         toLower(transferEncodingIt->second) == "chunked")
+//     {
+
+//         ChunkedDecoder decoder;
+//         decoder.feed(leftoverBody);
+
+//         char temp[1460];
+//         while (!decoder.isComplete())
+//         {
+//             int n = socket.recv(temp, sizeof(temp));
+//             if (n <= 0)
+//             {
+//                 printf("Chunked: recv() failed or EOF");
+//                 return false;
+//             }
+//             decoder.feed(std::string(temp, n), maxLength);
+
+//             if (decoder.wasTruncated())
+//             {
+//                 outBody = decoder.getDecoded();
+//                 if (wasTruncated)
+//                     *wasTruncated = true;
+//                 return true;
+//             }
+//         }
+
+//         outBody = decoder.getDecoded();
+//         TRACE("Chunked: decoded size = %d", outBody.size());
+//         TRACE("Chunked: decoded body = %s", outBody.c_str());
+//         return true;
+//     }
+
+//     auto it = headers.find("content-length");
+//     if (it != headers.end())
+//     {
+//         int contentLength = std::stoi(it->second);
+//         outBody = leftoverBody;
+
+//         if ((int)outBody.size() >= contentLength)
+//         {
+//             outBody = outBody.substr(0, std::min((size_t)contentLength, maxLength));
+//             if ((size_t)contentLength > maxLength && wasTruncated)
+//                 *wasTruncated = true;
+//             return true;
+//         }
+
+//         int attempts = 0;
+//         int idleCycles = 0;
+
+//         while ((int)outBody.size() < contentLength && attempts++ < 2000)
+//         {
+//             char buffer[1460];
+//             int toRead = std::min<int>(sizeof(buffer), contentLength - (int)outBody.size());
+//             int n = socket.recv(buffer, toRead);
+
+//             if (n <= 0)
+//             {
+//                 idleCycles++;
+//                 vTaskDelay(pdMS_TO_TICKS(10));
+//                 if (idleCycles > 20)
+//                     return false;
+//                 continue;
+//             }
+
+//             idleCycles = 0;
+
+//             if (outBody.size() + n > maxLength)
+//             {
+//                 size_t allowed = maxLength - outBody.size();
+//                 outBody.append(buffer, allowed);
+//                 if (wasTruncated)
+//                     *wasTruncated = true;
+//                 return true;
+//             }
+
+//             outBody.append(buffer, n);
+//         }
+
+//         if ((size_t)outBody.size() > maxLength && wasTruncated)
+//             *wasTruncated = true;
+//         return ((int)outBody.size() == contentLength || *wasTruncated);
+//     }
+
+//     // No known content length or transfer encoding — fallback
+//     outBody = leftoverBody;
+//     char buffer[1460];
+//     while (true)
+//     {
+//         int n = socket.recv(buffer, sizeof(buffer));
+//         if (n <= 0)
+//             break;
+
+//         if (outBody.size() + n > maxLength)
+//         {
+//             size_t allowed = maxLength - outBody.size();
+//             outBody.append(buffer, allowed);
+//             if (wasTruncated)
+//                 *wasTruncated = true;
+//             return true;
+//         }
+
+//         outBody.append(buffer, n);
+//     }
+
+//     return !outBody.empty();
+// }
