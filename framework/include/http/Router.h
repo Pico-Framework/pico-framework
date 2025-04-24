@@ -23,6 +23,8 @@
 #include <string>
 #include <unordered_map>
 #include <functional>
+#include <FreeRTOS.h>
+#include <semphr.h>
 
 #include "HttpRequest.h"
 #include "HttpResponse.h"
@@ -176,6 +178,10 @@ private:
     std::unordered_map<std::string, std::vector<Route>> routes;
     std::string cached_token; ///< Cached Bearer token
     std::vector<Middleware> globalMiddleware;
+
+    SemaphoreHandle_t lock_ = nullptr;
+
+    void withRoutes(const std::function<void(std::unordered_map<std::string, std::vector<Route>>&)> &fn);
 };
 
 #endif // ROUTER_HPP

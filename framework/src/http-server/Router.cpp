@@ -72,7 +72,8 @@ Route::Route(const std::string &method,
 /// @copydoc Router::Router
 Router::Router()
 {
-    // Initialization if needed.
+    lock_ = xSemaphoreCreateMutex();
+    configASSERT(lock_);
 }
 
 // Returns the bearer token from the request's Authorization header.
@@ -173,7 +174,8 @@ void Router::addRoute(const std::string &method,
     };
 
     // Store the route; note: using !middleware.empty() as a simple indicator of auth requirement.
-    routes[method].emplace_back(method, regex_pattern, finalHandler, is_dynamic, !middleware.empty());
+    withRoutes([&](auto &r)
+               { r[method].emplace_back(method, regex_pattern, finalHandler, is_dynamic, !middleware.empty()); });
 }
 
 // Adds a middleware to be executed for all routes.
@@ -188,7 +190,7 @@ void Router::use(Middleware middleware)
 #ifdef PICO_HTTP_ENABLE_JWT
 bool Router::isAuthorizedForRoute(const Route &route, HttpRequest &req, HttpResponse &res)
 {
-  
+
     if (route.requires_auth)
     {
         TRACE("Authorization required for route: %s\n", route.path.c_str());
@@ -206,45 +208,88 @@ bool Router::isAuthorizedForRoute(const Route &route, HttpRequest &req, HttpResp
     {
         TRACE("No authorization required for route: %s\n", route.path.c_str());
     }
-   
+
     return true;
 }
 #endif
 
 // Handles an incoming request by matching the request method and URI to a registered route.
 /// @copydoc Router::handleRequest
+// bool Router::handleRequest(HttpRequest &req, HttpResponse &res)
+// {
+//     QUIET_PRINTF("[Router] Handling request: %s %s\n",req.getMethod().c_str(), req.getUri().c_str());
+
+//     // Look up routes by HTTP method.
+//     auto it = routes.find(req.getMethod());
+//     if (it == routes.end())
+//     {
+//         TRACE("No routes found for method: %s\n",req.getMethod().c_str());
+//         return false;
+//     }
+
+//     // Check each route for a match.
+//     for (const auto &route : it->second)
+//     {
+//         std::string uri_str(req.getUri());
+//         std::regex route_regex(route.path);
+//         std::smatch match;
+
+//         if (std::regex_match(uri_str, match, route_regex))
+//         {
+//             // Extract parameters from the capturing groups.
+//             std::vector<std::string> params;
+//             for (size_t i = 1; i < match.size(); ++i)
+//             {
+//                 params.push_back(urlDecode(match[i].str()));
+//             }
+
+//             TRACE("Matched route: %s\n", route.path.c_str());
+//             route.handler(req, res, params);
+//             return true;
+//         }
+//     }
+
+//     TRACE("No matching route found\n");
+//     printRoutes();
+//     return false;
+// }
+
+/// @copydoc Router::handleRequest
 bool Router::handleRequest(HttpRequest &req, HttpResponse &res)
 {
-    QUIET_PRINTF("[Router] Handling request: %s %s\n",req.getMethod().c_str(), req.getUri().c_str());
+    bool matched = false;
+    const Route *matchedRoute = nullptr;
+    std::vector<std::string> params;
 
-    // Look up routes by HTTP method.
-    auto it = routes.find(req.getMethod());
-    if (it == routes.end())
-    {
-        TRACE("No routes found for method: %s\n",req.getMethod().c_str());
-        return false;
+    withRoutes([&](auto &r)
+               {
+    auto it = r.find(req.getMethod());
+    if (it == r.end()) {
+        TRACE("No routes found for method: %s\n", req.getMethod().c_str());
+        return;
     }
 
-    // Check each route for a match.
-    for (const auto &route : it->second)
-    {
+    for (const auto& route : it->second) {
         std::string uri_str(req.getUri());
         std::regex route_regex(route.path);
         std::smatch match;
 
-        if (std::regex_match(uri_str, match, route_regex))
-        {
-            // Extract parameters from the capturing groups.
-            std::vector<std::string> params;
-            for (size_t i = 1; i < match.size(); ++i)
-            {
+        if (std::regex_match(uri_str, match, route_regex)) {
+            for (size_t i = 1; i < match.size(); ++i) {
                 params.push_back(urlDecode(match[i].str()));
             }
 
-            TRACE("Matched route: %s\n", route.path.c_str());
-            route.handler(req, res, params);
-            return true;
+            matchedRoute = &route;
+            matched = true;
+            return;
         }
+    } });
+
+    if (matched && matchedRoute)
+    {
+        TRACE("Matched route: %s\n", matchedRoute->path.c_str());
+        matchedRoute->handler(req, res, params);
+        return true;
     }
 
     TRACE("No matching route found\n");
@@ -282,4 +327,11 @@ void Router::serveStatic(HttpRequest &req, HttpResponse &res, const std::vector<
 void Router::listDirectory(HttpRequest &req, HttpResponse &res, const std::vector<std::string> &params)
 {
     fileServer.handle_list_directory(req, res, params);
+}
+
+void Router::withRoutes(const std::function<void(std::unordered_map<std::string, std::vector<Route>> &)> &fn)
+{
+    xSemaphoreTake(lock_, portMAX_DELAY);
+    fn(routes);
+    xSemaphoreGive(lock_);
 }

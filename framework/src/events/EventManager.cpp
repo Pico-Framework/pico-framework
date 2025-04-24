@@ -35,10 +35,11 @@
  */
 
 #include "events/EventManager.h"
-#include "pico/stdlib.h"
-#include "FreeRTOS.h"
-#include "task.h"
-#include "portmacro.h"
+#include <pico/stdlib.h>
+#include <FreeRTOS.h>
+#include <semphr.h>
+#include <task.h>
+#include <portmacro.h>
 #include "framework/FrameworkTask.h"
 #include "utility/utility.h" // for is_in_interrupt()
 #include "framework/FrameworkController.h"
@@ -46,62 +47,72 @@
 /// @copydoc EventManager::EventManager
 EventManager::EventManager(size_t queueSize)
 {
-    // Future: queueSize could be used for centralized queue management
+    lock = xSemaphoreCreateMutex();
+    configASSERT(lock);
 }
 
 /// @copydoc EventManager::subscribe
-void EventManager::subscribe(uint32_t eventMask, FrameworkController* controller)
+void EventManager::subscribe(uint32_t mask, FrameworkController* target)
 {
-    subscribers_.push_back({ eventMask, controller });
+    withSubscribers([&](auto& subs) {
+        subs.push_back({mask, target});
+    });
+}
+
+void EventManager::withSubscribers(const std::function<void(std::vector<Subscriber>&)>& fn)
+{
+    xSemaphoreTake(lock, portMAX_DELAY);
+    fn(subscribers_);
+    xSemaphoreGive(lock);
 }
 
 /// @copydoc EventManager::postEvent
 void EventManager::postEvent(const Event& event)
 {
-    BaseType_t xHigherPriTaskWoken = pdFALSE;
-    uint8_t code = event.notification.code();
+    const uint8_t code = event.notification.code();
 
     if (is_in_interrupt()) {
-        for (auto& sub : subscribers_) {
-            if ((sub.eventMask & (1u << code)) &&
-                (event.target == nullptr || sub.controller == event.target))
-            {
-                QueueHandle_t q = sub.controller->getEventQueue();
-                if (q) {
-                    printf("[EventManager] postEvent: kind=%u, code=%u, size=%zu, data=%p\n",
-                        static_cast<uint8_t>(event.notification.kind),
-                        event.notification.code(),
-                        event.size,
-                        event.data);
-                    BaseType_t result = xQueueSendToBackFromISR(q, &event, &xHigherPriTaskWoken);
-                    if (result != pdPASS) {
-                        debug_print("[EventManager] xQueueSendFromISR FAILED — queue full!\n");
-                    } else {
-                        sub.controller->notifyFromISR(code, 1, &xHigherPriTaskWoken);
+        BaseType_t xHigherPriTaskWoken = pdFALSE;
+
+        withSubscribers([&](auto& subs) {
+            for (auto& sub : subs) {
+                if ((sub.eventMask & (1u << code)) &&
+                    (event.target == nullptr || sub.controller == event.target))
+                {
+                    QueueHandle_t q = sub.controller->getEventQueue();
+                    if (q) {
+                        printf("[EventManager] postEvent (ISR): kind=%u, code=%u, size=%zu, data=%p\n",
+                            static_cast<uint8_t>(event.notification.kind),
+                            event.notification.code(),
+                            event.size,
+                            event.data);
+
+                        BaseType_t result = xQueueSendToBackFromISR(q, &event, &xHigherPriTaskWoken);
+                        if (result != pdPASS) {
+                            debug_print("[EventManager] xQueueSendFromISR FAILED — queue full!\n");
+                        } else {
+                            sub.controller->notifyFromISR(code, 1, &xHigherPriTaskWoken);
+                        }
                     }
                 }
             }
-        }
+        });
+
         portYIELD_FROM_ISR(xHigherPriTaskWoken);
     } else {
-        for (auto& sub : subscribers_) {
-            if ((sub.eventMask & (1u << code)) &&
-                (event.target == nullptr || sub.controller == event.target))
-            {
-                QueueHandle_t q = sub.controller->getEventQueue();
-                if (q) {
-                    if (xQueueSendToBack(q, &event, 0) != pdPASS) {
-                        debug_print("[EventManager] xQueueSend FAILED — queue full!\n");
-                    } 
+        withSubscribers([&](auto& subs) {
+            for (auto& sub : subs) {
+                if ((sub.eventMask & (1u << code)) &&
+                    (event.target == nullptr || sub.controller == event.target))
+                {
+                    QueueHandle_t q = sub.controller->getEventQueue();
+                    if (q) {
+                        if (xQueueSendToBack(q, &event, 0) != pdPASS) {
+                            debug_print("[EventManager] xQueueSend FAILED — queue full!\n");
+                        }
+                    }
                 }
             }
-        }
+        });
     }
-}
-
-/// @copydoc EventManager::hasPendingEvents
-bool EventManager::hasPendingEvents(FrameworkController* controller) const
-{
-    QueueHandle_t q = controller->getEventQueue();
-    return q && uxQueueMessagesWaiting(q) > 0;
 }
