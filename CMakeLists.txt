@@ -39,6 +39,8 @@ pico_sdk_init()
 # we do not link it in unless option is set beow
 include_directories(${PICO_SDK_PATH}/lib/mbedtls/include)
 
+# When you change options make sure you do a clean build otherwises parts of the framework may not have integrity
+# Especially if you change the PICO_HTTP_ENABLE_LITTLEFS option CMAKE can't tell the difference if built with FatFs or littlefs
 option(PICO_HTTP_ENABLE_LITTLEFS "Enable LittleFS-based StorageManager" ON)
 option(PICO_HTTP_ENABLE_HTTP_CLIENT "Enable HttpClient" ON)
 option(PICO_HTTP_CLIENT_ENABLE_TLS "Enable TLS support in HttpClient" ON)

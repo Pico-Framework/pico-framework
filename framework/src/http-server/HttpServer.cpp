@@ -43,6 +43,11 @@ TRACE_INIT(HttpServer)
 #include "network/Tcp.h"
 #include "http/JsonResponse.h"
 
+// #define HTTP_SERVER_USE_TASK_PER_CLIENT  // ⚠️ NOT READY FOR PRODUCTION – Known instability with task-per-client mode
+#ifdef HTTP_SERVER_USE_TASK_PER_CLIENT
+#warning "⚠️ HTTP_SERVER_USE_TASK_PER_CLIENT is experimental and not yet production-ready. Use with caution."
+#endif
+
 #define BUFFER_SIZE 1024
 
 static constexpr int MAX_CONCURRENT_CLIENTS = 1;
@@ -125,7 +130,14 @@ void HttpServer::run()
             vTaskDelay(pdMS_TO_TICKS(100));
             QUIET_PRINTF("[HttpServer] Client connection handled\n");
             QUIET_PRINTF("===============================\n\n");
-            delete conn;
+            #if !defined(HTTP_SERVER_USE_TASK_PER_CLIENT)
+                delete conn;
+            #endif
+        }
+        else
+        {
+            QUIET_PRINTF("[HttpServer] Failed to accept client connection\n");
+            vTaskDelay(pdMS_TO_TICKS(100)); // Wait before retrying 
         }
     }
 
@@ -167,71 +179,36 @@ Tcp* HttpServer::initListener()
     return listener;
 }
 
-// ----------------------------------------------------------------------------
-// Connection Handling
-// ----------------------------------------------------------------------------
-
-/// @copydoc HttpServer::acceptClientConnections
-// void HttpServer::acceptClientConnections()
-// {
-//     Tcp* listener = initListener();
-//     if (!listener) {
-//         printf("[HttpServer] Failed to initialize listener\n");
-//         return;
-//     }
-
-//     while (true)
-//     {
-//         printf("[HttpServer] Waiting for client connection...\n");
-//         Tcp* conn = listener->accept();
-//         if (!conn)
-//         {
-//             // Accept failed or no client — skip
-//             continue;
-//         }
-//         printf("[HttpServer] Accepted client connection\n");
-//         startHandlingClient(conn);
-//         printf("[HttpServer] Client connection handled\n");
-//         delete conn;
-//     }
-
-//     // Unreachable in current model, but if you ever shut down:
-//     delete listener;
-// }
-
 void HttpServer::startHandlingClient(Tcp* conn)
 {
-    // Direct call for now — FreeRTOS task dispatch can be re-enabled later
+#ifdef HTTP_SERVER_USE_TASK_PER_CLIENT
+    if (xSemaphoreTake(clientSemaphore, pdMS_TO_TICKS(100)) == pdPASS)
+    {
+        TaskParams *params = new TaskParams{this, conn};
+
+        if (xTaskCreate(handleClientTask, "HttpClient", 4096, params, tskIDLE_PRIORITY + 1, NULL) == pdPASS)
+        {
+            TRACE("Client task created successfully");
+        }
+        else
+        {
+            TRACE("Failed to create client task");
+            conn->close();
+            delete params;
+            xSemaphoreGive(clientSemaphore);
+        }
+    }
+    else
+    {
+        TRACE("Max concurrent clients reached, closing connection");
+        conn->close();
+        // Optional: return a "503 Service Unavailable" if desired
+    }
+#else
     handleClient(conn);
+
+#endif
 }
-
-// this is not converted to use tcp class
-/// @copydoc HttpServer::startHandlingClient
-// void HttpServer::startHandlingClient(Tcp* conn)
-// {
-//     if (xSemaphoreTake(clientSemaphore, pdMS_TO_TICKS(100)) == pdPASS)
-//     {
-//         TaskParams *params = new TaskParams{this, clientSocket};
-
-//         if (xTaskCreate(handleClientTask, "HttpClient", 4096, params, tskIDLE_PRIORITY + 1, NULL) == pdPASS)
-//         {
-//             printf("Client task created successfully for socket %d\n", clientSocket);
-//         }
-//         else
-//         {
-//             printf("Failed to create client task for socket %d\n", clientSocket);
-//             conn->close();
-//             delete params;
-//         }
-//     }
-//     else
-//     {
-//         printf("Max concurrent clients reached, closing socket %d\n", clientSocket);
-//         lwip_close(clientSocket);
-//         // Optionally, you could send a response to the client indicating the server is busy.
-//         // semaphore will be released in handleClientTask
-//     }
-// }
 
 /// @copydoc HttpServer::handleClient
 void HttpServer::handleClient(Tcp* conn)
@@ -292,20 +269,22 @@ void HttpServer::handleClient(Tcp* conn)
 
 }
 
-/// @copydoc HttpServer::handleClientTask
-// void HttpServer::handleClientTask(void *pvParameters)
-// {
-//     TaskParams *params = static_cast<TaskParams *>(pvParameters);
-//     HttpServer *server = params->server;
-//     Tcp* tcp = params->tcp;
+#ifdef HTTP_SERVER_USE_TASK_PER_CLIENT
+void HttpServer::handleClientTask(void *pvParameters)
+{
+    TaskParams *params = static_cast<TaskParams *>(pvParameters);
+    HttpServer *server = params->server;
+    Tcp* tcp = params->tcp;
 
-//     printf("Handling client in task for socket %d\n", tcp->getSocketFd());  
-//     server->handleClient(tcp);
+    TRACE("Handling client in task for socket %d\n", tcp->getSocketFd()); 
 
-//     tcp->close();
+    server->handleClient(tcp);
 
-//     delete params;
-//     printf("Client socket %d closed and task deleted\n", tcp->getSocketFd());
-//     xSemaphoreGive(clientSemaphore); // Release the semaphore for the next client
-//     vTaskDelete(NULL);
-// }
+    tcp->close();
+    delete tcp;
+    delete params;
+
+    xSemaphoreGive(clientSemaphore);
+    vTaskDelete(NULL);
+}
+#endif
