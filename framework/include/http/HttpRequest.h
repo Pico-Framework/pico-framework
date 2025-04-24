@@ -191,6 +191,9 @@ public:
         return it != headers.end() && it->second.find("application/json") != std::string::npos;
     }
 
+
+
+
     /**
      * @brief Get the raw Content-Type string.
      */
@@ -234,6 +237,10 @@ public:
     {
         return body;
     }
+
+    /** @brief Check if the request body was truncated due to memory limits */
+    bool isBodyTruncated() const { return bodyTruncated; }
+    void markBodyTruncated() { bodyTruncated = true; }
 
     /**
      * @brief Set the body of the request.
@@ -319,22 +326,6 @@ public:
     {
         return tcp;
     }
-    // /**
-    //  * @brief Set the client IP address.
-    //  * @param ip The IP as a string.
-    //  */
-    // void setClientIp(const std::string &ip)
-    // {
-    //     clientIp = ip;
-    // }
-
-    // /**
-    //  * @brief Get the client IP address.
-    //  */
-    // std::string getClientIp() const
-    // {
-    //     return clientIp;
-    // }
 
     // ─────────────────────────────────────────────────────────────────────────────
     // Cookie and Parameter Access
@@ -422,6 +413,7 @@ public:
 
 private:
     void parseHeaders(const char *raw);
+    void appendToBody(const char* data, size_t len);
 
     Tcp *tcp = nullptr;
 
@@ -436,6 +428,7 @@ private:
     std::string body;
     std::string rootCACertificate;
     size_t headerEnd = 0;
+    bool bodyTruncated = false;
 };
 
 #endif // HTTPREQUEST_H

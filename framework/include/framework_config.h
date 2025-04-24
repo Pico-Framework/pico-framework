@@ -20,6 +20,8 @@
  */
 #define MULTIPART_UPLOAD_PATH "/uploads"
 
+#define MAX_HTTP_BODY_LENGTH 4 * 1024 ///< Maximum HTTP body size in bytes 
+
 // === Framework configuration file ===
 // This file contains various configuration settings for the framework.
 #define STREAM_SEND_DELAY_MS 20

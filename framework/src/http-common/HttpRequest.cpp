@@ -26,7 +26,7 @@ TRACE_INIT(HttpRequest)
 #include <cstring>
 #include <cstdio>
 #include <unordered_map>
-//#include <lwip/sockets.h>
+// #include <lwip/sockets.h>
 
 #include "http/HttpServer.h"
 #include "utility/utility.h"
@@ -35,7 +35,7 @@ TRACE_INIT(HttpRequest)
 #include "http/HttpParser.h"
 #include "network/Tcp.h"
 
-#ifdef  PICO_HTTP_ENABLE_HTTP_CLIENT
+#ifdef PICO_HTTP_ENABLE_HTTP_CLIENT
 #include "http/HttpClient.h"
 #endif // PICO_HTTP_ENABLE_HTTP_CLIENT
 
@@ -147,15 +147,6 @@ void HttpRequest::parseHeaders(const char *raw)
 }
 
 /**
- * @brief Receive raw bytes from the client socket into a buffer.
- *
- * @param clientSocket The socket descriptor.
- * @param buffer The buffer to fill.
- * @param size Maximum size of the buffer.
- * @return int Number of bytes received, or -1 on error.
- */
-
-/**
  * @brief Extract HTTP method and path from request line.
  *
  * @param buffer The raw request buffer.
@@ -175,7 +166,16 @@ bool HttpRequest::getMethodAndPath(char *buffer, char *method, char *path)
     return true;
 }
 
-HttpRequest HttpRequest::receive(Tcp* tcp)
+/**
+ * @brief Receive raw bytes from the client socket into a buffer.
+ *
+ * @param Tcp* The TCP connection to read from.
+ * @return HttpRequest Parsed HttpRequest object containing method, path, headers, and body.
+ * @note This function reads the request line, headers, and body from the TCP socket.
+ * It handles both multipart and non-multipart requests, parsing headers and body accordingly.
+ */
+
+HttpRequest HttpRequest::receive(Tcp *tcp)
 {
     TRACE("Receiving request on socket %d\n", tcp->getSocketFd());
 
@@ -190,7 +190,7 @@ HttpRequest HttpRequest::receive(Tcp* tcp)
     {
         return HttpRequest("", "", ""); // Return empty HttpRequest on error
     }
-    buffer[bytesReceived] = '\0';  // Ensure null-termination for strstr() and strtok()
+    buffer[bytesReceived] = '\0'; // Ensure null-termination for strstr() and strtok()
 
     if (!getMethodAndPath(buffer, method, path))
     {
@@ -241,8 +241,8 @@ HttpRequest HttpRequest::receive(Tcp* tcp)
         if (request.isMultipart())
         {
             TRACE("Multipart request detected\n");
-            //HttpResponse response;
-            //request.handle_multipart(response);  // tcp is already stored in request
+            // HttpResponse response;
+            // request.handle_multipart(response);  // tcp is already stored in request
             TRACE("Multipart request created\n");
             return request;
         }
@@ -261,17 +261,33 @@ HttpRequest HttpRequest::receive(Tcp* tcp)
                 return HttpRequest("", "", "");
             }
 
-            body.append(buffer, chunkReceived);
+            // Enforce maximum body length
+            size_t currentSize = body.size();
+            if (currentSize >= MAX_HTTP_BODY_LENGTH)
+            {
+                TRACE("Body length exceeds max allowed (%d bytes). Truncating.\n", MAX_HTTP_BODY_LENGTH);
+                break;
+            }
+
+            size_t allowed = MAX_HTTP_BODY_LENGTH - currentSize;
+            size_t toAppend = std::min(static_cast<size_t>(chunkReceived), allowed);
+            body.append(buffer, toAppend);
+
+            if (toAppend < static_cast<size_t>(chunkReceived))
+            {
+                TRACE("Chunk truncated due to body size limit.\n");
+                request.markBodyTruncated();
+                break;
+            }
+
             bodyRemaining -= chunkReceived;
         }
-
-       QUIET_PRINTF("Body: %s\n", body.c_str());
+        request.setBody(body);
+        TRACE("Final body length: %zu\n", body.length());
+        TRACE("HttpRequest object constructed\n");
     }
-
-    TRACE("HttpRequest object constructed\n");
     return request;
 }
-
 
 /**
  * @brief Handle multipart/form-data content using MultipartParser.
@@ -360,9 +376,11 @@ HttpRequest HttpRequest::create()
  * @param uri The URI to set.
  * @return Reference to this request.
  */
-HttpRequest& HttpRequest::setUri(const std::string& uri) {
+HttpRequest &HttpRequest::setUri(const std::string &uri)
+{
     const auto proto_end = uri.find("://");
-    if (proto_end == std::string::npos) {
+    if (proto_end == std::string::npos)
+    {
         // Relative URI — just set it, do not overwrite protocol or host
         this->uri = uri;
         return *this;
@@ -373,10 +391,13 @@ HttpRequest& HttpRequest::setUri(const std::string& uri) {
     std::string rest = uri.substr(proto_end + 3); // skip "://"
 
     const auto path_start = rest.find('/');
-    if (path_start == std::string::npos) {
+    if (path_start == std::string::npos)
+    {
         host = rest;
         this->uri = "/";
-    } else {
+    }
+    else
+    {
         host = rest.substr(0, path_start);
         this->uri = rest.substr(path_start);
     }

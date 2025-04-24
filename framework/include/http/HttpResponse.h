@@ -296,6 +296,18 @@ public:
      */
     void reset();
 
+    /**
+     * @brief Check if the response body was truncated.
+     * @return True if the body was truncated, false otherwise.
+     */
+    bool isBodyTruncated() const { return bodyTruncated; }
+
+    /**
+     * @brief Mark the response body as truncated.
+     * This is used when the body exceeds the maximum allowed size.
+     */
+    void markBodyTruncated() { bodyTruncated = true; }
+
 
     // Convenience wrappers enabling fluent chaining
     HttpResponse& sendSuccess(const nlohmann::json& data = {}, const std::string& message = "");
@@ -316,6 +328,7 @@ private:
     Tcp *tcp;                ///< Pointer to the Tcp object for socket operations
     int status_code = 200;   ///< HTTP status code
     bool headerSent = false; ///< Tracks whether headers have already been sent
+    bool bodyTruncated = false;
 
     std::map<std::string, std::string> headers; ///< Response headers (server+client)
     std::vector<std::string> cookies;           ///< Set-Cookie headers (server only)

@@ -38,7 +38,9 @@ public:
     static bool receiveBody(Tcp& socket,
         const std::map<std::string, std::string>& headers,
         const std::string& leftoverBody,
-        std::string& outBody);
+        std::string& outBody,
+        size_t maxLength,
+        bool* wasTruncated);
     static int parseStatusCode(const std::string &statusLine);
     static std::map<std::string, std::string> parseHeaders(const std::string &rawHeaders);
 };

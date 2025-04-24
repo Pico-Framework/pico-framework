@@ -126,7 +126,12 @@ std::pair<std::string, std::string> HttpParser::receiveHeaderAndLeftover(Tcp& so
 bool HttpParser::receiveBody(Tcp& socket,
                              const std::map<std::string, std::string>& headers,
                              const std::string& leftoverBody,
-                             std::string& outBody) {
+                             std::string& outBody,
+                             size_t maxLength,
+                             bool* wasTruncated)
+{
+    if (wasTruncated) *wasTruncated = false;
+
     auto transferEncodingIt = headers.find("transfer-encoding");
     if (transferEncodingIt != headers.end() &&
         toLower(transferEncodingIt->second) == "chunked") {
@@ -141,11 +146,17 @@ bool HttpParser::receiveBody(Tcp& socket,
                 printf("Chunked: recv() failed or EOF");
                 return false;
             }
-            decoder.feed(std::string(temp, n));
+            decoder.feed(std::string(temp, n), maxLength);
+
+            if (decoder.wasTruncated()) {
+                outBody = decoder.getDecoded();
+                if (wasTruncated) *wasTruncated = true;
+                return true;
+            }
         }
 
         outBody = decoder.getDecoded();
-        TRACE("Chunked: decoded size = d", outBody.size());
+        TRACE("Chunked: decoded size = %d", outBody.size());
         TRACE("Chunked: decoded body = %s", outBody.c_str());
         return true;
     }
@@ -156,7 +167,8 @@ bool HttpParser::receiveBody(Tcp& socket,
         outBody = leftoverBody;
 
         if ((int)outBody.size() >= contentLength) {
-            outBody = outBody.substr(0, contentLength);
+            outBody = outBody.substr(0, std::min((size_t)contentLength, maxLength));
+            if ((size_t)contentLength > maxLength && wasTruncated) *wasTruncated = true;
             return true;
         }
 
@@ -176,10 +188,19 @@ bool HttpParser::receiveBody(Tcp& socket,
             }
 
             idleCycles = 0;
+
+            if (outBody.size() + n > maxLength) {
+                size_t allowed = maxLength - outBody.size();
+                outBody.append(buffer, allowed);
+                if (wasTruncated) *wasTruncated = true;
+                return true;
+            }
+
             outBody.append(buffer, n);
         }
 
-        return ((int)outBody.size() == contentLength);
+        if ((size_t)outBody.size() > maxLength && wasTruncated) *wasTruncated = true;
+        return ((int)outBody.size() == contentLength || *wasTruncated);
     }
 
     // No known content length or transfer encoding — fallback
@@ -188,8 +209,17 @@ bool HttpParser::receiveBody(Tcp& socket,
     while (true) {
         int n = socket.recv(buffer, sizeof(buffer));
         if (n <= 0) break;
+
+        if (outBody.size() + n > maxLength) {
+            size_t allowed = maxLength - outBody.size();
+            outBody.append(buffer, allowed);
+            if (wasTruncated) *wasTruncated = true;
+            return true;
+        }
+
         outBody.append(buffer, n);
     }
 
     return !outBody.empty();
 }
+

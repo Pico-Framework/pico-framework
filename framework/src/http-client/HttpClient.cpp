@@ -99,11 +99,13 @@ bool HttpClient::sendRequest(const HttpRequest &request, HttpResponse &response)
     }
 
     std::string bodyData;
-    if (!HttpParser::receiveBody(socket, parsedHeaders, leftover, bodyData))
+    bool truncated = false;
+    
+    if (!HttpParser::receiveBody(socket, parsedHeaders, leftover, bodyData, MAX_HTTP_BODY_LENGTH, &truncated))
     {
         return false;
     }
-
     response.setBody(bodyData);
+    if (truncated) response.markBodyTruncated();
     return true;
 }
