@@ -44,6 +44,6 @@ struct Notification {
 };
 
 template<typename Enum>
-inline constexpr uint32_t mask(Enum e) {
+inline constexpr uint32_t eventMask(Enum e) {
     return 1u << static_cast<uint8_t>(e);
 }

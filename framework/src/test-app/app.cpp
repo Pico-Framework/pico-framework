@@ -70,11 +70,11 @@ void App::onStart()
     // The gpio_event_handler() will then post an Event to the EventManager, which posts to the FRameworkController event queue.
     // FrameworkController has a waitAndDispatch function that polls the queue and will call onEvent() in this App class.
     // Events can be SystemNotification or UserNotification types, which are defined in enum class UserNotification (see the App.h file).
-    eventManager->subscribe(mask(SystemNotification::GpioChange), this);
-    gpioEventManager->enableInterrupt(16, GPIO_IRQ_EDGE_RISE | GPIO_IRQ_EDGE_FALL); // multicore issue
-    gpioEventManager->enableInterrupt(17, GPIO_IRQ_EDGE_RISE | GPIO_IRQ_EDGE_FALL); // multcore issue
+    eventManager->subscribe(eventMask(SystemNotification::GpioChange), this);
+    gpioEventManager->enableInterrupt(16, GPIO_IRQ_EDGE_RISE | GPIO_IRQ_EDGE_FALL); 
+    gpioEventManager->enableInterrupt(17, GPIO_IRQ_EDGE_RISE | GPIO_IRQ_EDGE_FALL); 
 
-    eventManager->subscribe(mask(UserNotification::Heartbeat), this);
+    eventManager->subscribe(eventMask(UserNotification::Heartbeat), this);
 
     std::cout << "[App] Waiting for network..." << std::endl;
     // Wait for the network to be ready before starting services
