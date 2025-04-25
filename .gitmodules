@@ -7,3 +7,6 @@
 [submodule "framework/lib/littlefs"]
 	path = framework/lib/littlefs
 	url = https://github.com/littlefs-project/littlefs.git
+[submodule "framework/tests/embedded/lib/cpuutest"]
+	path = tests/embedded/lib/cpputest 
+	url = https://github.com/cpputest/cpputest.git
