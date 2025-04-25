@@ -15,7 +15,10 @@ Makefile
 install_manifest.txt
 
 # === Editor settings ===
-.vscode/
+
+settings.json
+
+
 .idea/
 
 # === macOS system files ===
