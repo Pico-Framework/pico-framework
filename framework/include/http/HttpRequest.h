@@ -15,7 +15,6 @@
 #define HTTPREQUEST_H
 #pragma once
 
-
 #include <string>
 #include <map>
 #include <iostream>
@@ -46,11 +45,11 @@ public:
 
     // used by fluent builder - client side
     HttpRequest(const std::string &raw, const std::string &method, const std::string &path)
-        : method(method), path(path), uri(path) {}
+        : method(method), uri(path), path(path) {}
 
     // Server-side use — accepts Tcp* and parsed info
     HttpRequest(Tcp *connection, const std::string rawHeaders, const std::string &method, const std::string &path)
-        : tcp(connection), method(method), path(path), uri(path)
+        : tcp(connection), method(method), uri(path), path(path)
     {
         parseHeaders(rawHeaders.c_str());
     }
@@ -191,9 +190,6 @@ public:
         return it != headers.end() && it->second.find("application/json") != std::string::npos;
     }
 
-
-
-
     /**
      * @brief Get the raw Content-Type string.
      */
@@ -321,7 +317,6 @@ public:
     // Tcp accessors
     // ─────────────────────────────────────────────────────────────────────────────
 
-
     Tcp *getTcp() const
     {
         return tcp;
@@ -397,12 +392,11 @@ public:
     HttpRequest &setUserAgent(const std::string &userAgent);
     HttpRequest &setAcceptEncoding(const std::string &encoding);
 
-
     // ─────────────────────────────────────────────────────────────────────────────
     // toFile: Save the request body to a file
     // ─────────────────────────────────────────────────────────────────────────────
 
-    HttpRequest& toFile(const std::string& path);
+    HttpRequest &toFile(const std::string &path);
     std::string getOutputFilePath() const;
     bool wantsToFile() const;
 
@@ -425,7 +419,7 @@ public:
 
 private:
     void parseHeaders(const char *raw);
-    void appendToBody(const char* data, size_t len);
+    void appendToBody(const char *data, size_t len);
 
     Tcp *tcp = nullptr;
 
@@ -442,7 +436,6 @@ private:
     size_t headerEnd = 0;
     bool bodyTruncated = false;
     std::string outputFilePath;
-    
 };
 
 #endif // HTTPREQUEST_H
