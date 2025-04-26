@@ -121,7 +121,7 @@ public:
      * @brief Get all request headers.
      * @return Map of header key-value pairs.
      */
-    std::map<std::string, std::string> getHeaders() const
+    const std::map<std::string, std::string>& getHeaders() const
     {
         return headers;
     }
@@ -158,12 +158,12 @@ public:
     /**
      * @brief Get the Host header value.
      */
-    std::string getHost() const
+    const std::string& getHost() const
     {
         return host;
     }
 
-    std::string getProtocol() const
+    const std::string& getProtocol() const
     {
         return protocol;
     }
@@ -193,7 +193,7 @@ public:
     /**
      * @brief Get the raw Content-Type string.
      */
-    std::string getContentType() const
+    const std::string getContentType() const
     {
         return getHeader("content-type");
     }
@@ -202,7 +202,7 @@ public:
      * @brief Get the boundary string (for multipart/form-data).
      * @return Boundary string or empty string if not present.
      */
-    std::string getBoundary() const
+    const std::string getBoundary() const
     {
         auto contentType = getContentType();
         auto boundaryPos = contentType.find("boundary=");
@@ -229,7 +229,7 @@ public:
     /**
      * @brief Get the request body (copy).
      */
-    std::string getBody() const
+    const std::string& getBody() const
     {
         return body;
     }
@@ -284,7 +284,7 @@ public:
     /**
      * @brief Get the HTTP method.
      */
-    std::string getMethod() const
+    const std::string& getMethod() const
     {
         return method;
     }
@@ -292,7 +292,7 @@ public:
     /**
      * @brief Get the parsed request path (without query string).
      */
-    std::string getPath() const
+    const std::string& getPath() const
     {
         return path;
     }
@@ -300,7 +300,7 @@ public:
     /**
      * @brief Get the original URL from the request line.
      */
-    std::string getUri() const
+    const std::string& getUri() const
     {
         return uri;
     }
@@ -308,7 +308,7 @@ public:
     /**
      * @brief Get the parsed query string from the URL.
      */
-    std::string getQuery() const
+    const std::string& getQuery() const
     {
         return query;
     }
@@ -330,24 +330,24 @@ public:
      * @brief Get all parsed cookies.
      * @return A map of cookie names to values.
      */
-    std::unordered_map<std::string, std::string> getCookies() const;
+    const std::unordered_map<std::string, std::string> getCookies() const;
 
     /**
      * @brief Get a specific cookie value.
      * @param name Cookie name.
      * @return Cookie value or empty string.
      */
-    std::string getCookie(const std::string &name) const;
+    const std::string getCookie(const std::string &name) const;
 
     /**
      * @brief Get parsed query string parameters.
      */
-    std::unordered_map<std::string, std::string> getQueryParams();
+    const std::unordered_map<std::string, std::string> getQueryParams();
 
     /**
      * @brief Get parsed form fields (application/x-www-form-urlencoded).
      */
-    std::unordered_map<std::string, std::string> getFormParams();
+    const std::unordered_map<std::string, std::string> getFormParams();
 
     // ─────────────────────────────────────────────────────────────────────────────
     // Socket-Based Helpers (Static)

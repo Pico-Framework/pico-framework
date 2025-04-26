@@ -307,7 +307,7 @@ int HttpRequest::handle_multipart(HttpResponse &res)
  *
  * @return std::unordered_map<std::string, std::string> Map of cookie name-value pairs.
  */
-std::unordered_map<std::string, std::string> HttpRequest::getCookies() const
+const std::unordered_map<std::string, std::string> HttpRequest::getCookies() const
 {
     std::unordered_map<std::string, std::string> cookies;
     std::string cookieHeader = getHeader("cookie");
@@ -334,7 +334,7 @@ std::unordered_map<std::string, std::string> HttpRequest::getCookies() const
  * @param name Cookie name.
  * @return std::string Value of the cookie or empty string.
  */
-std::string HttpRequest::getCookie(const std::string &name) const
+const std::string HttpRequest::getCookie(const std::string &name) const
 {
     auto cookies = getCookies();
     auto it = cookies.find(name);
@@ -346,7 +346,7 @@ std::string HttpRequest::getCookie(const std::string &name) const
  *
  * @return Map of query parameters.
  */
-std::unordered_map<std::string, std::string> HttpRequest::getQueryParams()
+const std::unordered_map<std::string, std::string> HttpRequest::getQueryParams()
 {
     return parseUrlEncoded(query);
 }
@@ -356,7 +356,7 @@ std::unordered_map<std::string, std::string> HttpRequest::getQueryParams()
  *
  * @return Map of form parameters.
  */
-std::unordered_map<std::string, std::string> HttpRequest::getFormParams()
+const std::unordered_map<std::string, std::string> HttpRequest::getFormParams()
 {
     return parseUrlEncoded(body);
 }
