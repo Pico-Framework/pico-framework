@@ -91,7 +91,7 @@ if(PICO_PLATFORM STREQUAL "rp2040")
     )
 elseif(PICO_PLATFORM STREQUAL "rp2350-arm-s")
     target_include_directories(FreeRTOS+FAT+CLI PUBLIC
-        ${FREERTOS_KERNEL_PATH}/portable/ThirdParty/Community-Supported-Ports/GCC/RP2350_ARM_NTZ/non_secure
+        ${FREERTOS_KERNEL_PATH}/portable/ThirdParty/GCC/RP2350_ARM_NTZ/non_secure
     )
 endif()
 

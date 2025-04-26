@@ -9,7 +9,16 @@ if (DEFINED ENV{WIFI_PASSWORD} AND (NOT WIFI_PASSWORD))
     message("Using WIFI_PASSWORD from environment")
 endif()
 
-set(PICO_BOARD pico_w) 
+set(PICO_BOARD pico2_w) 
+
+# When you change options make sure you do a clean build otherwises parts of the framework may not have integrity
+# Especially if you change the PICO_HTTP_ENABLE_LITTLEFS option CMAKE can't tell the difference if built with FatFs or littlefs
+option(PICO_HTTP_ENABLE_LITTLEFS "Enable LittleFS-based StorageManager" ON)
+option(PICO_HTTP_ENABLE_HTTP_CLIENT "Enable HttpClient" ON)
+option(PICO_HTTP_CLIENT_ENABLE_TLS "Enable TLS support in HttpClient" ON)
+option(PICO_HTTP_ENABLE_JWT "Enable JWT authentication support" ON)
+option(PICO_HTTP_TLS_VERIFY "Enable certificate verification for TLS connections" ON)
+
 
 include(../../cmake/pico_sdk_import.cmake)  # Or path to your SDK import script
 
@@ -32,9 +41,18 @@ pico_sdk_init()
 # Add your main app source files
 add_executable(pico_example_app
     src/main.cpp
-    src/app.cpp
-    src/hw_config.c
+    src/App.cpp
+    src/StorageController.cpp 
+    src/FileStorage.cpp  
 )
+
+if(PICO_HTTP_ENABLE_LITTLEFS)
+    target_link_options(pico_example_app PRIVATE "-T${CMAKE_SOURCE_DIR}/memmap_lfs_fragment.ld")
+else()
+    target_sources(pico_example_app PRIVATE
+        src/hw_config.c
+    )
+endif()
 
 # Include paths for headers (adjust as needed)
 include_directories(
@@ -42,11 +60,17 @@ include_directories(
     ${CMAKE_CURRENT_SOURCE_DIR}/../../framework/include 
     ${CMAKE_CURRENT_SOURCE_DIR}/../../framework/include/port
     ${FREERTOS_KERNEL_PATH}/include
-    ${FREERTOS_KERNEL_PATH}/portable/ThirdParty/GCC/RP2040/include
     ${CMAKE_CURRENT_SOURCE_DIR}/../../framework/lib/FreeRTOS-FAT-CLI-for-RPi-Pico/src/FreeRTOS+FAT+CLI/include
-    ${CMAKE_CURRENT_SOURCE_DIR}/../../framework/lib/FreeRTOS-FAT-CLI-for-RPi-Pico/src/FreeRTOS+FAT+CLI/portable/RP2040
     ${CMAKE_CURRENT_SOURCE_DIR}/../../framework/lib/FreeRTOS-FAT-CLI-for-RPi-Pico/src/Lab-Project-FreeRTOS-FAT/include 
 )
+
+
+# Correct FreeRTOS port depending on the board
+if(${PICO_BOARD} STREQUAL "pico2_w")
+    include_directories(${FREERTOS_KERNEL_PATH}/portable/ThirdParty/GCC/RP2350_ARM_NTZ/non_secure/include)
+else()
+    include_directories(${FREERTOS_KERNEL_PATH}/portable/ThirdParty/GCC/RP2040/include)
+endif()
 
 set(FREERTOS_KERNEL_PATH $ENV{FREERTOS_KERNEL_PATH} CACHE PATH "Path to FreeRTOS kernel")
 

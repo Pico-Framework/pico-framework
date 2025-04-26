@@ -402,39 +402,45 @@ bool LittleFsStorageManager::removeDirectory(const std::string &path)
     return lfs_remove(&lfs, path.c_str()) == 0;
 }
 
-struct FormatContext {
-    LittleFsStorageManager *self;
-    bool *result;
-};
+// struct FormatContext {
+//     LittleFsStorageManager *self;
+//     bool *result;
+// };
 
-void LittleFsStorageManager::formatInner(bool *result) {
-    int err = lfs_format(&lfs, &config);
-    *result = (err == 0);
-}
+// void LittleFsStorageManager::formatInner(bool *result) {
+//     int err = lfs_format(&lfs, &config);
+//     *result = (err == 0);
+// }
 
-static void __not_in_flash_func(format_callback)(void *param) {
-    auto *ctx = static_cast<FormatContext *>(param);
-    ctx->self->formatInner(ctx->result);
-}
+// static void __not_in_flash_func(format_callback)(void *param) {
+//     auto *ctx = static_cast<FormatContext *>(param);
+//     ctx->self->formatInner(ctx->result);
+// }
 
 
 bool LittleFsStorageManager::formatStorage()
 {
     bool result = false;
 
-    #if configNUM_CORES > 1
-    // Use multicore lockout to ensure atomicity
-    // Core-safe execution using flash_safe_execute
-    FormatContext ctx = { this, &result };
+    if(mounted)
+    {
+        printf("[LittleFs] Unmounting before format\n");
+        unmount();
+    }
 
-    flash_safe_execute(format_callback, &ctx, 5000);
-#else
+    // #if configNUM_CORES > 1
+    // // Use multicore lockout to ensure atomicity
+    // // Core-safe execution using flash_safe_execute
+    // FormatContext ctx = { this, &result };
+
+    // flash_safe_execute(format_callback, &ctx, 5000);
+//#else
     // Fallback single-core safe version
-    uint32_t status = save_and_disable_interrupts();
+//    uint32_t status = save_and_disable_interrupts();
     int err = lfs_format(&lfs, &config);
-    restore_interrupts(status);
+//    restore_interrupts(status);
     result = (err == 0);
-#endif
+//#endif
 
     if (result)
     {
