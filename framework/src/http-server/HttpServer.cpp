@@ -48,8 +48,6 @@ TRACE_INIT(HttpServer)
 #warning "⚠️ HTTP_SERVER_USE_TASK_PER_CLIENT is experimental and not yet production-ready. Use with caution."
 #endif
 
-#define BUFFER_SIZE 1024
-
 static constexpr int MAX_CONCURRENT_CLIENTS = 1;
 SemaphoreHandle_t clientSemaphore;
 

@@ -216,7 +216,7 @@ bool FatFsStorageManager::streamFile(const std::string &path, std::function<void
     if (!file)
         return false;
 
-    uint8_t buffer[512];
+    uint8_t buffer[HTTP_BUFFER_SIZE];
     size_t bytes;
     while ((bytes = ff_fread(buffer, 1, sizeof(buffer), file)) > 0)
     {

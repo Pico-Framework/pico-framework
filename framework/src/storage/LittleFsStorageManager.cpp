@@ -9,6 +9,7 @@
 #include <semphr.h>   // for SemaphoreHandle_t, StaticSemaphore_t, xSemaphoreCreateMutexStatic, xSemaphoreTake, xSemaphoreGive
 #include <pico/flash.h> // for flash_safe_execute
 #include "utility/utility.h"    // for runtimeStats
+#include "framework_config.h"
 
 extern "C"
 {
@@ -323,7 +324,7 @@ bool LittleFsStorageManager::streamFile(const std::string &path, std::function<v
     if (lfs_file_open(&lfs, &file, path.c_str(), LFS_O_RDONLY) < 0)
         return false;
 
-    uint8_t buf[64];
+    uint8_t buf[HTTP_BUFFER_SIZE];
     int readBytes;
     bool success = true;
 

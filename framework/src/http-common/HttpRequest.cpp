@@ -39,7 +39,7 @@ TRACE_INIT(HttpRequest)
 #include "http/HttpClient.h"
 #endif // PICO_HTTP_ENABLE_HTTP_CLIENT
 
-#define BUFFER_SIZE 1460 // this is the standard MTU size
+#define BUFFER_SIZE 256 
 
 HttpResponse HttpRequest::get()
 {

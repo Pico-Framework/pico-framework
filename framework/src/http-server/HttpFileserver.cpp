@@ -38,7 +38,6 @@ TRACE_INIT(HttpFileserver)
 #include "framework_config.h"
 #include "http/JsonResponse.h"
 
-
 #define TRACE_ON
 
 // ----------------------------------------------------------------------------
@@ -67,9 +66,9 @@ bool FileHandler::init()
 }
 
 /// @copydoc FileHandler::listDirectory
-bool FileHandler::listDirectory(const std::string& path, std::vector<FileInfo>& out)
+bool FileHandler::listDirectory(const std::string &path, std::vector<FileInfo> &out)
 {
-    auto* storage = AppContext::get<StorageManager>();
+    auto *storage = AppContext::get<StorageManager>();
     return storage->listDirectory(path, out);
 }
 
@@ -117,9 +116,11 @@ bool FileHandler::serveFile(HttpResponse &res, const char *uri)
         // Gzip magic number: 0x1F 0x8B (in little-endian)
         const uint8_t gzip_magic_number[] = {0x1F, 0x8B};
         std::string magic_number;
-        if(storageManager->readFileString(path, 0, 2, magic_number)){
+        if (storageManager->readFileString(path, 0, 2, magic_number))
+        {
             printf("Read magic number in hex: ");
-            for (size_t i = 0; i < magic_number.size(); ++i) {
+            for (size_t i = 0; i < magic_number.size(); ++i)
+            {
                 printf("%02X ", static_cast<unsigned char>(magic_number[i]));
             }
             printf("\n");
@@ -131,14 +132,13 @@ bool FileHandler::serveFile(HttpResponse &res, const char *uri)
             }
         }
     }
-    
+
     res.start(200, fileSize, mimeType.c_str());
 
     storageManager->streamFile(path, [&](const uint8_t *data, size_t len)
-    {
-         res.writeChunk(reinterpret_cast<const char*>(data), len);
-         vTaskDelay(pdMS_TO_TICKS(STREAM_SEND_DELAY_MS)); 
-    }); // allow tcpip thread to get in
+                               {
+        res.writeChunk(reinterpret_cast<const char*>(data), len);
+        vTaskDelay(pdMS_TO_TICKS(STREAM_SEND_DELAY_MS)); }); // allow tcpip thread to get in
 
     res.finish();
     return true;
@@ -159,37 +159,37 @@ void HttpFileserver::handle_list_directory(HttpRequest &req, HttpResponse &res, 
 {
     std::string directory_path = req.getPath();
     int pos = directory_path.find("/api/v1/ls");
-    if (pos != std::string::npos) {
+    if (pos != std::string::npos)
+    {
         directory_path = directory_path.substr(pos + strlen("/api/v1/ls"));
     }
 
-    if (directory_path.empty()) {
+    if (directory_path.empty())
+    {
         directory_path = "/"; // Default to root directory if no path is specified
     }
 
     std::vector<FileInfo> entries;
-    if (!fileHandler.listDirectory(directory_path, entries)) {
+    if (!fileHandler.listDirectory(directory_path, entries))
+    {
         res.sendError(404, "not_found", "Directory not found or inaccessible");
         return;
     }
 
     nlohmann::json fileArray = nlohmann::json::array();
-    for (const auto& entry : entries) {
-        fileArray.push_back({
-            {"name", entry.name},
-            {"size", entry.size},
-            {"type", entry.isDirectory ? "directory" : "file"}
-        });
+    for (const auto &entry : entries)
+    {
+        fileArray.push_back({{"name", entry.name},
+                             {"size", entry.size},
+                             {"type", entry.isDirectory ? "directory" : "file"}});
     }
 
     nlohmann::json result = {
         {"path", directory_path},
-        {"files", fileArray}
-    };
+        {"files", fileArray}};
 
     res.sendSuccess(result, "Directory listed successfully.");
 }
-
 
 // Helper function to check if a string ends with a given suffix
 bool ends_with(const std::string &str, const std::string &suffix)
