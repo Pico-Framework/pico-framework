@@ -21,6 +21,7 @@
 #include <vector>
 #include <nlohmann/json.hpp>
 #include "network/Tcp.h"
+#include "storage/StorageManager.h"
 
 // Forward declaration of HttpRequest class
 class HttpRequest;
@@ -316,9 +317,9 @@ public:
     HttpResponse& sendError(int statusCode, const std::string& code, const std::string& message);
     HttpResponse& sendError(int statusCode, const std::string& message);  // simpler form
 
-    #if defined(PICO_HTTP_ENABLE_STORAGE)
+    //#if defined(PICO_HTTP_ENABLE_STORAGE)
     bool toFile(const std::string& path, StorageManager* storage) const;
-    #endif
+    //#endif
 
 private:
     /**

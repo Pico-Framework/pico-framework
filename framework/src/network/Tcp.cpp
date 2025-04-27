@@ -248,37 +248,53 @@ bool Tcp::connectTls(const ip_addr_t &ip, int port)
 
 int Tcp::send(const char *buffer, size_t size)
 {
-    if (use_tls && tls_pcb)
+    constexpr size_t chunkSize = HTTP_BUFFER_SIZE;  // Match MSS
+    size_t totalSent = 0;
+
+    while (totalSent < size)
     {
-        TRACE("[Tcp] Sending %zu bytes over TLS\n", size);
-        TRACE("Buffer: %s\n", buffer);
-           if(tls_pcb->state == nullptr) {
+        size_t toSend = (size - totalSent > chunkSize) ? chunkSize : (size - totalSent);
+
+        if (use_tls && tls_pcb)
+        {
+            TRACE("[Tcp] Sending %zu bytes over TLS\n", toSend);
+            if (tls_pcb->state == nullptr) {
                 printf("[Tcp] TLS connection is not established\n");
                 return -1;
             }
-            else{
-                TRACE("[Tcp] TLS connection is established\n");
-            }
-        err_t err = altcp_write(tls_pcb, buffer, size, TCP_WRITE_FLAG_COPY);
 
-        if (err == ERR_OK)
+            err_t err = altcp_write(tls_pcb, buffer + totalSent, toSend, TCP_WRITE_FLAG_COPY);
+            if (err != ERR_OK) {
+                printf("[Tcp] altcp_write failed: %d\n", err);
+                return -1;
+            }
+            if (altcp_output(tls_pcb) != ERR_OK) {
+                printf("[Tcp] altcp_output failed\n");
+                return -1;
+            }
+            // TLS handled successfully
+        }
+        else if (sockfd >= 0)
         {
-            printf("[Tcp] altcp_write succeeded\n");
-            return altcp_output(tls_pcb) == ERR_OK ? static_cast<int>(size) : -1;
+            TRACE("[Tcp] Sending %zu bytes over plain TCP\n", toSend);
+            int ret = lwip_send(sockfd, buffer + totalSent, toSend, 0);
+            if (ret <= 0) {
+                printf("[Tcp] lwip_send failed: %d\n", ret);
+                return -1;
+            }
         }
         else
         {
-            printf("[Tcp] altcp_write failed: %d\n", err);
+            printf("[Tcp] No valid socket or TLS connection\n");
+            return -1;
         }
-        return err;
+
+        totalSent += toSend;
     }
-    else if (sockfd >= 0)
-    {
-        TRACE("[Tcp] Sending %zu bytes over plain TCP\n", size);
-        return lwip_send(sockfd, buffer, size, 0);
-    }
-    return -1;
+
+    return static_cast<int>(size);  // Report total original size sent
 }
+
 
 err_t Tcp::tlsRecvCallback(void *arg, struct altcp_pcb *conn, struct pbuf *p, err_t err)
 {

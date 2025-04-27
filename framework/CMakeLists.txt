@@ -48,7 +48,9 @@ add_library(pico_framework)
 
 target_compile_features(pico_framework PUBLIC cxx_std_17)
 
+# Disable allocation overrides for C++ (because we redefine new/delete by the FAT library if enabled) or by the framework itself )
 target_compile_definitions(pico_framework PUBLIC
+PICO_CXX_DISABLE_ALLOCATION_OVERRIDES=1 
     WIFI_SSID=\"${WIFI_SSID}\"
     WIFI_PASSWORD=\"${WIFI_PASSWORD}\"
     CYW43_HOST_NAME="Pico-Framework"
@@ -226,6 +228,7 @@ if (NOT DEFINED FREERTOS_CONFIG_FILE_DIRECTORY)
 else()
     message(STATUS "[framework] Using user-provided FREERTOS_CONFIG_FILE_DIRECTORY: ${FREERTOS_CONFIG_FILE_DIRECTORY}")
 endif()
-
-add_subdirectory(lib)
+if (NOT PICO_HTTP_ENABLE_LITTLEFS)
+    add_subdirectory(lib)
+endif()
 add_library(pico-framework ALIAS pico_framework)

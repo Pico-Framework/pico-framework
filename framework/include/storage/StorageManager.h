@@ -65,6 +65,9 @@ public:
 
     /** @brief Write a memory buffer to a file. */
     virtual bool writeFile(const std::string &path, const std::vector<uint8_t> &data) = 0;
+    /// Write from a raw buffer
+    virtual bool writeFile(const std::string& path, const unsigned char* data, size_t size) = 0;
+
 
     /** @brief Stream a file in chunks via callback. */
     virtual bool streamFile(const std::string &path, std::function<void(const uint8_t *, size_t)> chunkCallback) = 0;

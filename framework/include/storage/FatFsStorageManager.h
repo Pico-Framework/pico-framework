@@ -55,6 +55,7 @@ public:
     bool readFileString(const std::string &path, uint32_t startPosition, uint32_t length, std::string &buffer);
 
     bool writeFile(const std::string &path, const std::vector<uint8_t> &data) override;
+    bool writeFile(const std::string& path, const unsigned char* data, size_t size) override;
 
     bool streamFile(const std::string &path, std::function<void(const uint8_t *, size_t)> chunkCallback) override;
 

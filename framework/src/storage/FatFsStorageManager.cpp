@@ -182,6 +182,24 @@ bool FatFsStorageManager::writeFile(const std::string &path, const std::vector<u
     return true;
 }
 
+bool FatFsStorageManager::writeFile(const std::string& path, const unsigned char* data, size_t size)
+{
+    if (!ensureMounted())
+    {
+        TRACE("SD card not mounted — cannot write to file: %s\n", path.c_str());
+        return false;
+    }
+
+    FF_FILE* file = ff_fopen(resolvePath(path).c_str(), "w");
+    if (!file)
+        return false;
+
+    size_t written = ff_fwrite(data, 1, size, file);
+    ff_fclose(file);
+
+    return (written == size);
+}
+
 /// @copydoc FatFsStorageManager::remove()
 bool FatFsStorageManager::remove(const std::string &path)
 {

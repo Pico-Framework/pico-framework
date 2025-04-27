@@ -95,6 +95,7 @@ public:
      * @return true if successful.
      */
     bool writeFile(const std::string &path, const std::vector<uint8_t> &data) override;
+    bool writeFile(const std::string& path, const unsigned char* data, size_t size) override;
 
     /**
      * @brief Append data to a file.
