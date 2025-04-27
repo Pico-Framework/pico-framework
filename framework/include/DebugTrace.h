@@ -114,6 +114,15 @@ inline std::string getFormattedTimestamp()
     }
 }
 
+/**
+ * @brief Internal trace log function.
+ * @param module Module name (e.g. "Network")
+ * @param level Trace level (TRACE_LVL_INFO, TRACE_LVL_WARN, TRACE_LVL_ERROR)
+ * @param file Source file name
+ * @param line Source line number
+ * @param func Function name
+ * @param format Format string for the message
+ */
 inline void traceLog(const char *module, int level, const char *file, int line, const char *func, const char *format, ...)
 {
     if (level < TRACE_LEVEL_MIN)

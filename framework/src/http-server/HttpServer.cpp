@@ -169,12 +169,10 @@ bool HttpServer::initNetwork()
 
 Tcp* HttpServer::initListener()
 {
-    Tcp* listener = new Tcp();
-    if (!listener->bindAndListen(port)) {
-        delete listener;
+    if (!listener.bindAndListen(port)) {
         return nullptr;
     }
-    return listener;
+    return &listener;
 }
 
 void HttpServer::startHandlingClient(Tcp* conn)

@@ -3,7 +3,7 @@ file(TO_CMAKE_PATH "${PATH_TO_ELF}" PATH_TO_ELF_CMAKE)
 message("Resolved ELF path: ${PATH_TO_ELF_CMAKE}")
 
 if(NOT EXISTS "${PATH_TO_ELF_CMAKE}")
-    message(WARNING "🚨 ELF file does not exist, skipping memory report.")
+    message(WARNING "ELF file does not exist, skipping memory report.")
     return()
 endif()
 
@@ -15,7 +15,7 @@ execute_process(
 )
 
 if (NOT OBJDUMP_RESULT EQUAL 0)
-    message(WARNING "🚨 Failed to run objdump on ELF file.")
+    message(WARNING "Failed to run objdump on ELF file.")
     return()
 endif()
 

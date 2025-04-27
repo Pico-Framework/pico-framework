@@ -8,6 +8,12 @@
 class HttpRequest;
 class HttpResponse;
 
+/**
+ * @brief Represents a match of a route against an incoming HTTP request.
+ * 
+ * This structure holds the ordered parameters and named parameters extracted from the route.
+ * It provides a method to retrieve a parameter by name.
+ */
 struct RouteMatch {
     std::vector<std::string> ordered;
     std::unordered_map<std::string, std::string> named;
@@ -19,9 +25,18 @@ struct RouteMatch {
     }
 };
 
+/**
+ * @brief Type definitions for route handlers and middleware.
+ */
 using RouteHandler = std::function<void(HttpRequest&, HttpResponse&, const RouteMatch&)>;
 using Middleware   = std::function<bool(HttpRequest&, HttpResponse&, const RouteMatch&)>;
 
+/**
+ * @brief Represents a single HTTP route.
+ * 
+ * This structure encapsulates the method, path, handler function, and metadata about the route.
+ * It supports both static and dynamic routes, as well as authentication requirements.
+ */
 struct Route {
     std::string method;
     std::string path;

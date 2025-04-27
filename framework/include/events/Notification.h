@@ -32,10 +32,33 @@ struct Notification {
         uint8_t user_code;
     };
 
+    /**
+     * @brief Default constructor initializes to a system notification of None.
+     * Use the other constructors to specify a system or user notification.
+     */
     Notification() : kind(NotificationKind::System), system(SystemNotification::None) {}
+
+    /**
+     * @brief Construct a Notification with a specific system notification type.
+     *
+     * @param s The system notification type.
+     */
     Notification(SystemNotification s) : kind(NotificationKind::System), system(s) {}
+
+    /**
+     * @brief Construct a Notification with a user-defined code.
+     *
+     * @param userCode The user-defined notification code.
+     */
     Notification(uint8_t userCode) : kind(NotificationKind::User), user_code(userCode) {}
 
+    /**
+     * @brief Get the notification code.
+     * If it's a system notification, returns the system code.
+     * If it's a user notification, returns the user-defined code.
+     *
+     * @return uint8_t The notification code.
+     */
     uint8_t code() const {
         return (kind == NotificationKind::System)
             ? static_cast<uint8_t>(system)
@@ -43,6 +66,14 @@ struct Notification {
     }
 };
 
+/**
+ * @brief Helper function to create an event mask from an enum value.
+ * This is used to generate a bitmask for event handling.
+ *
+ * @tparam Enum The enumeration type.
+ * @param e The enum value to convert to a bitmask.
+ * @return uint32_t The bitmask corresponding to the enum value.
+ */
 template<typename Enum>
 inline constexpr uint32_t eventMask(Enum e) {
     return 1u << static_cast<uint8_t>(e);

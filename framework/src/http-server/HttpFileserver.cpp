@@ -14,11 +14,11 @@
  * @copyright Copyright (c) 2025, Ian Archbell
  */
 
+#include "http/HttpFileserver.h"
+
 #include "framework_config.h" // Must be included before DebugTrace.h to ensure framework_config.h is processed first
 #include "DebugTrace.h"
 TRACE_INIT(HttpFileserver)
-
-#include "http/HttpFileserver.h"
 
 #include <string>
 #include <vector>
@@ -109,7 +109,7 @@ bool FileHandler::serveFile(HttpResponse &res, const char *uri)
     }
 
     std::string mimeType = getMimeType(path);
-    printf("Serving file: %s, size: %zu bytes, MIME type: %s\n", path.c_str(), fileSize, mimeType.c_str());
+    TRACE("Serving file: %s, size: %zu bytes, MIME type: %s\n", path.c_str(), fileSize, mimeType.c_str());
 
     if (mimeType == "text/html" || mimeType == "application/javascript" || mimeType == "text/css")
     {
@@ -118,16 +118,16 @@ bool FileHandler::serveFile(HttpResponse &res, const char *uri)
         std::string magic_number;
         if (storageManager->readFileString(path, 0, 2, magic_number))
         {
-            printf("Read magic number in hex: ");
+            TRACE("Read magic number in hex: ");
             for (size_t i = 0; i < magic_number.size(); ++i)
             {
-                printf("%02X ", static_cast<unsigned char>(magic_number[i]));
+                TRACE("%02X ", static_cast<unsigned char>(magic_number[i]));
             }
-            printf("\n");
+            TRACE("\n");
             if (magic_number[0] == gzip_magic_number[0] && magic_number[1] == gzip_magic_number[1]) // GZIP magic number
             {
-                printf("File is already gzipped: %s\n", path.c_str());
-                printf("Setting Content-Encoding to gzip\n");
+                TRACE("File is already gzipped: %s\n", path.c_str());
+                TRACE("Setting Content-Encoding to gzip\n");
                 res.set("Content-Encoding", "gzip");
             }
         }
@@ -204,7 +204,7 @@ bool ends_with(const std::string &str, const std::string &suffix)
 void HttpFileserver::handle_static_request(HttpRequest &req, HttpResponse &res, const RouteMatch &match)
 {
     const std::string &uri = req.getPath();
-    printf("Serving static request for URI: %s\n", uri.c_str());
+    TRACE("Serving static request for URI: %s\n", uri.c_str());
 
     std::string filePath;
 

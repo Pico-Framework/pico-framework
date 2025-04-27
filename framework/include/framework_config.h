@@ -20,7 +20,16 @@
  */
 #define MULTIPART_UPLOAD_PATH "/uploads"
 
+
+// Note that files of any length can be streamed from the server or uploaded multipart. 
+// This is just the maximum size of the HTTP body that can be processed in one go.
+// However if a regular request is made with a body larger than this, it will be truncated.
+
+#if defined(PICO_RP2350)
 #define MAX_HTTP_BODY_LENGTH 4 * 1024 ///< Maximum HTTP body size in bytes 
+#else
+#define MAX_HTTP_BODY_LENGTH 16 * 1024 ///< Maximum HTTP body size in bytes
+#endif
 
 #define HTTP_BUFFER_SIZE 1460 ///< Size of the HTTP buffer for request/response data
 

@@ -44,22 +44,19 @@ bool Network::wifiConnected = false;
 
 void Network::start_wifi(){
     if (cyw43_arch_init()) {
-        printf("Failed to initialise Wi-Fi\n");
+        printf("[Network] Failed to initialise Wi-Fi\n");
         return;
     }
     cyw43_arch_gpio_put(CYW43_WL_GPIO_LED_PIN, 0); // large stack increase on first put?
-
-    printf("\n\nConnecting to WiFi SSID: %s \n", WIFI_SSID);
 
     cyw43_arch_enable_sta_mode();
     uint32_t pm;
     cyw43_wifi_get_pm(&cyw43_state, &pm);
     cyw43_wifi_pm(&cyw43_state, CYW43_DEFAULT_PM & ~0xf); // disable power management
-    printf("Connecting to WiFi...\n");
 
     // connecting asynchronously - need to check link status if up
     if (cyw43_arch_wifi_connect_async(WIFI_SSID, WIFI_PASSWORD, CYW43_AUTH_WPA2_MIXED_PSK) == 0) {
-        printf("\nReady, preparing to connect to network\n");
+        printf("\n\n[Network] Connecting to WiFi SSID: %s \n", WIFI_SSID);
     }
 
     int status = 0;
@@ -68,7 +65,7 @@ void Network::start_wifi(){
         vTaskDelay(1000 / portTICK_PERIOD_MS);
     } while (status != CYW43_LINK_UP);
     wifiConnected = true;
-    printf("Connected to Wi-Fi network at %s\n", ip4addr_ntoa(netif_ip4_addr(netif_list)));
+    printf("[Network] Connected to Wi-Fi network at %s\n", ip4addr_ntoa(netif_ip4_addr(netif_list)));
     cyw43_wifi_pm(&cyw43_state, pm); // reset power management
 }
 

@@ -148,6 +148,8 @@
 //#define MBEDTLS_DEBUG_C                           // Debug functions
 //#define MBEDTLS_SSL_DEBUG_ALL                     // Debug output
 
+#define MBEDTLS_SSL_TLS1_3_COMPATIBILITY_MODE 1     // Enable TLS 1.3 compatibility mode (optional, may be needed if using older clients or servers that expect TLS 1.2 behavior)
+
 #define MBEDTLS_SSL_MAX_CONTENT_LEN     8192      // Increase maximum content size for SSL
 #define MBEDTLS_SSL_MAX_FRAGMENT_LENGTH 8192      // Increase fragment length (default 16384)
 #define MBEDTLS_MEMORY_DEBUG            1         // Enable memory debugging (optional)

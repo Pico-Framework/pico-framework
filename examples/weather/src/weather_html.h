@@ -16,6 +16,10 @@ const char *weather_html = R"rawliteral(<!DOCTYPE html>
             align-items: center;
         }
         .card {
+            display: grid;
+            grid-row-gap: 10px;
+            grid-template-rows: auto auto 1fr auto;
+            grid-template-columns: 1fr;
             background: #e0e5ec;
             border-radius: 20px;
             box-shadow: 9px 9px 16px #bec3c9, -9px -9px 16px #ffffff;
@@ -25,6 +29,7 @@ const char *weather_html = R"rawliteral(<!DOCTYPE html>
             width: 100%;
             margin-bottom: 20px;
             text-align: center;
+            min-height: 140px;
         }
         .card h2 {
             margin: 0 0 10px;
@@ -61,7 +66,6 @@ const char *weather_html = R"rawliteral(<!DOCTYPE html>
             box-sizing: border-box;
         }
 
-
         .day i {
             font-size: 36px;
         }
@@ -71,7 +75,7 @@ const char *weather_html = R"rawliteral(<!DOCTYPE html>
 
 <div class="card" id="currentWeather">
     <h2 id="location">Loading...</h2>
-    <i id="currentIcon" class="wi"></i>
+    <i id="currentIcon" class="wi" style="font-size: 3.0em"></i>
     <div id="currentTemp"></div>
     <div id="currentDesc"></div>
     <div id="currentDate"></div>
@@ -124,7 +128,6 @@ function fetchWeather() {
         });
 }
 
-
 function renderWeather() {
     if (!weatherData) return;
 
@@ -161,7 +164,7 @@ function renderWeather() {
             const dayDiv = document.createElement('div');
             dayDiv.className = 'day';
             dayDiv.innerHTML = `
-                <div>${new Date(day.date).toLocaleDateString()}</div>
+                <div>${new Date(day.date + "T00:00:00").toLocaleDateString()}</div>
                 <i class="wi ${mapWeatherCodeToIcon(day.description)}"></i>
                 <div>${Math.round(high)}${unit} / ${Math.round(low)}${unit}</div>
                 <div>${day.description}</div>

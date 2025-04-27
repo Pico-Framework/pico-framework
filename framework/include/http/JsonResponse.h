@@ -17,6 +17,7 @@ class HttpResponse;
 
 namespace JsonResponse {
 
+// Send helpers   
 void sendSuccess(HttpResponse& res, const nlohmann::json& data = {}, const std::string& message = "");
 void sendCreated(HttpResponse& res, const nlohmann::json& data = {}, const std::string& message = "");
 void sendMessage(HttpResponse& res, const std::string& message);

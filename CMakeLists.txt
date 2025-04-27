@@ -125,23 +125,30 @@ pico_add_extra_outputs(framework_test)
 # Post-Build Diagnostics (Optional Memory Report)
 # ---------------------------------------------------------------
 
-option(PICO_PRINT_MEM_USAGE "Enable memory usage report after build" ON)
+option(PICO_PRINT_MEM_USAGE "Enable memory usage report after build" OFF)
 
-if (PICO_PRINT_MEM_USAGE)
+find_program(CMAKE_SIZE arm-none-eabi-size)
+if (NOT CMAKE_SIZE)
+    message(FATAL_ERROR "CMAKE_SIZE (arm-none-eabi-size) not found")
+endif()
 
-    find_program(CMAKE_SIZE arm-none-eabi-size)
+add_custom_command(
+        TARGET framework_test
+        POST_BUILD
+        COMMAND ${CMAKE_SIZE} $<TARGET_FILE:framework_test>
+        COMMENT "📊 Printing memory usage for framework_test"
+    )
+
+if(PICO_PRINT_MEM_USAGE STREQUAL "ON")
+    message(STATUS "📊 Memory usage report enabled")
     find_program(CMAKE_OBJDUMP arm-none-eabi-objdump)
-
-    if (NOT CMAKE_SIZE)
-        message(FATAL_ERROR "CMAKE_SIZE (arm-none-eabi-size) not found")
-    endif()
     if (NOT CMAKE_OBJDUMP)
         message(FATAL_ERROR "CMAKE_OBJDUMP (arm-none-eabi-objdump) not found")
     endif()
 
     add_custom_target(report_memory ALL
         DEPENDS framework_test
-        COMMAND ${CMAKE_SIZE} $<TARGET_FILE:framework_test>
+
         COMMAND ${CMAKE_OBJDUMP} -h $<TARGET_FILE:framework_test>
         COMMAND ${CMAKE_COMMAND}
             -DPATH_TO_ELF=$<TARGET_FILE:framework_test>

@@ -10,6 +10,8 @@
 #include <pico/flash.h> // for flash_safe_execute
 #include "utility/utility.h"    // for runtimeStats
 #include "framework_config.h"
+#include "DebugTrace.h"
+TRACE_INIT(LittleFsStorageManager)
 
 extern "C"
 {
@@ -48,7 +50,7 @@ int LittleFsStorageManager::lfs_read_cb(const struct lfs_config *c, lfs_block_t 
 int LittleFsStorageManager::lfs_prog_cb(const struct lfs_config *c, lfs_block_t block, lfs_off_t off,
                                         const void *buffer, lfs_size_t size)
 {
-    //printf("[LFS PROG] lfs_prog_cb\n");
+
 #if (configNUM_CORES > 1)
     return lfs_prog_cb_multicore(c, block, off, buffer, size);
 #else
@@ -64,7 +66,6 @@ int LittleFsStorageManager::lfs_prog_cb_singlecore(const struct lfs_config *c, l
     uint32_t ints = save_and_disable_interrupts();
     flash_range_program(addr - XIP_BASE, reinterpret_cast<const uint8_t *>(buffer), size);
     restore_interrupts(ints);
-    //printf("[LFS PROG] flash_range_program done\n");
     return 0;
 }
 
@@ -94,7 +95,6 @@ static int __not_in_flash_func(lfs_prog_multicore)(const struct lfs_config *c,
         .addr = addr - XIP_BASE,
         .data = static_cast<const uint8_t *>(buffer),
         .size = size};
-    //printf("[LFS PROG] executing flash_safe_execute\n");
     int result = flash_safe_execute(flash_prog_callback, &params, 1000);
     return (result == PICO_OK) ? 0 : -1;
 }
@@ -118,12 +118,10 @@ int LittleFsStorageManager::lfs_erase_cb(const struct lfs_config *c, lfs_block_t
 int LittleFsStorageManager::lfs_erase_cb_singlecore(const struct lfs_config *c, lfs_block_t block)
 {
     auto *self = static_cast<LittleFsStorageManager *>(c->context);
-    // printf("[LFS ERASE] Erasing block %lu at 0x%08lx (size %lu)\n", block, self->flashBase + block * c->block_size, c->block_size);
     uintptr_t addr = self->flashBase + block * c->block_size;
     uint32_t ints = save_and_disable_interrupts();
     flash_range_erase(addr - XIP_BASE, c->block_size);
     restore_interrupts(ints);
-    // printf("[LFS ERASE] flash_range_erase done\n");
     return 0;
 }
 
@@ -204,14 +202,14 @@ bool LittleFsStorageManager::mount()
         printf("[LittleFs] Already mounted\n");
         return true;
     }
-    printf("[LittleFs] Mounting LittleFS...\n");
+    TRACE("[LittleFs] Mounting LittleFS...\n");
     int err = lfs_mount(&lfs, &config);
     if (err < 0)
     {
         printf("[LittleFs] Mount failed with error %d\n", err);
         return false;
     }
-    printf("[LittleFs] Mounted successfully\n");
+    TRACE("[LittleFs] Mounted successfully\n");
     return mounted = true;
 }
 
@@ -403,13 +401,13 @@ bool LittleFsStorageManager::listDirectory(const std::string &path, std::vector<
 
 bool LittleFsStorageManager::createDirectory(const std::string &path)
 {
-    //printf("[LittleFS] Creating directory '%s'\n", path.c_str());
+    TRACE("[LittleFS] Creating directory '%s'\n", path.c_str());
     if (lfs_mkdir(&lfs, path.c_str()) < 0)
     {
         printf("[LittleFS] Failed to create directory '%s'\n", path.c_str());
         return false;
     }
-    //printf("[LittleFS] Directory '%s' created successfully\n", path.c_str());
+    TRACE("[LittleFS] Directory '%s' created successfully\n", path.c_str());
     return true;
 }
 

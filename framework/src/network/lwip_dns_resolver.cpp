@@ -34,13 +34,13 @@ bool resolveHostnameBlocking(const char* hostname, ip_addr_t* result, uint32_t t
     err_t err = dns_gethostbyname(hostname, &resolved_ip, dns_callback, nullptr);
 
     if (err == ERR_OK) {
-        printf("[DNS] Hostname resolved immediately: %s -> %s\n", hostname, ipaddr_ntoa(&resolved_ip));
+        TRACE("[DNS] Hostname resolved immediately: %s -> %s\n", hostname, ipaddr_ntoa(&resolved_ip));
         *result = resolved_ip;
         return true;
     } else if (err == ERR_INPROGRESS) {
         TRACE("[DNS] Lookup in progress for %s, waiting...\n", hostname);
     } else {
-        printf("[DNS] dns_gethostbyname failed with error %d\n", err);
+        TRACE("[DNS] dns_gethostbyname failed with error %d\n", err);
         return false;
     }
 
@@ -51,7 +51,7 @@ bool resolveHostnameBlocking(const char* hostname, ip_addr_t* result, uint32_t t
     }
 
     if (dns_done && !ip_addr_isany(&resolved_ip)) {
-        printf("[DNS] DNS resolved after wait: %s -> %s\n", hostname, ipaddr_ntoa(&resolved_ip));
+        TRACE("[DNS] DNS resolved after wait: %s -> %s\n", hostname, ipaddr_ntoa(&resolved_ip));
         *result = resolved_ip;
         return true;
     } else {

@@ -66,7 +66,7 @@ bool FatFsStorageManager::exists(const std::string &path)
    TRACE("[FatFs] Checking if path exists: %s\n", path.c_str());
     if (!ensureMounted())
     {
-        printf("SD card not mounted — cannot check path exists: %s\n", path.c_str());
+        printf("[FatFs] SD card not mounted — cannot check path exists: %s\n", path.c_str());
         return false;
     }
     TRACE("[FatFs] Checking if exists: %s\n", resolvePath(path).c_str());

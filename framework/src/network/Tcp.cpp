@@ -160,7 +160,7 @@ err_t Tcp::onConnected(void *arg, struct altcp_pcb *conn, err_t err)
 
     if (self->connectingTask)
     {
-        printf("TLS Connection State in onConnect: %d\n", conn->state);
+       TRACE("TLS Connection State in onConnect: %d\n", conn->state);
         xTaskNotifyGiveIndexed(self->connectingTask, NotifyConnect);
     }
 
@@ -499,7 +499,7 @@ bool Tcp::bindAndListenPlain(int port)
         return false;
     }
 
-    printf("[Tcp] Listening on port: %d, (socket: %d)\n", port, sockfd);
+    TRACE("[Tcp] Listening on port: %d, (socket: %d)\n", port, sockfd);
 
     use_tls = false;
     connected = true;

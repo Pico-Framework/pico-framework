@@ -110,6 +110,7 @@ private:
     int port;       ///< Port number to listen on.
     Router &router; ///< Reference to router for dispatching requests.
 
+    Tcp listener; // Listening insance of Tcp class
     static constexpr int BUFFER_SIZE = 1460;
     static constexpr int BOUNDARY_MAX_LEN = 128;
 

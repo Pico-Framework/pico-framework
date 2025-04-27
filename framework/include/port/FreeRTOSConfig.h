@@ -87,7 +87,13 @@
 /* Memory allocation related definitions. */
 #define configSUPPORT_STATIC_ALLOCATION         1
 #define configSUPPORT_DYNAMIC_ALLOCATION        1
-#define configTOTAL_HEAP_SIZE                   (100*1024)
+
+#if defined(PICO_RP2350) 
+#define configTOTAL_HEAP_SIZE                   ( 200 * 1024 )
+#else
+#define configTOTAL_HEAP_SIZE                   ( 100 * 1024 )
+#endif
+
 #define configAPPLICATION_ALLOCATED_HEAP        0
 
 /* Hook function related definitions. */

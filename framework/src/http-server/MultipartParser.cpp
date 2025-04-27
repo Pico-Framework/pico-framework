@@ -327,7 +327,7 @@ bool MultipartParser::processFileData(const std::string &fileData)
 int MultipartParser::file_exists(const std::string& filename)
 {
     StorageManager *storage = AppContext::get<StorageManager>();
-    printf("[MultipartParser] Checking if file exists: %s\n", filename.c_str());
+    TRACE("[MultipartParser] Checking if file exists: %s\n", filename.c_str());
     return storage->exists(filename);
 }
 

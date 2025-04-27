@@ -50,6 +50,7 @@ void printMemsize();
 /// @brief Check whether currently in interrupt context.
 int is_in_interrupt(void);
 
+/// @brief Print in a mode that can be used in an ISR context.
 void debug_print(const char *msg);
 void debug_print(const std::string &msg);
 void debug_print(const char *msg, size_t len);

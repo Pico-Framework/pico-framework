@@ -81,12 +81,6 @@ void EventManager::postEvent(const Event& event)
                 {
                     QueueHandle_t q = sub.controller->getEventQueue();
                     if (q) {
-                        printf("[EventManager] postEvent (ISR): kind=%u, code=%u, size=%zu, data=%p\n",
-                            static_cast<uint8_t>(event.notification.kind),
-                            event.notification.code(),
-                            event.size,
-                            event.data);
-
                         BaseType_t result = xQueueSendToBackFromISR(q, &event, &xHigherPriTaskWoken);
                         if (result != pdPASS) {
                             debug_print("[EventManager] xQueueSendFromISR FAILED — queue full!\n");
