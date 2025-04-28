@@ -4,6 +4,7 @@
 #include <unordered_map>
 #include <optional>
 #include <functional>
+#include <regex>
 
 class HttpRequest;
 class HttpResponse;
@@ -37,18 +38,23 @@ using Middleware   = std::function<bool(HttpRequest&, HttpResponse&, const Route
  * This structure encapsulates the method, path, handler function, and metadata about the route.
  * It supports both static and dynamic routes, as well as authentication requirements.
  */
-struct Route {
+struct Route
+{
     std::string method;
     std::string path;
+    std::regex compiledRegex;
     RouteHandler handler;
     bool isDynamic;
     bool requiresAuth;
     std::vector<std::string> paramNames;
 
-    Route(const std::string& method, const std::string& path,
-          RouteHandler handler, bool isDynamic, bool requiresAuth,
-          std::vector<std::string> paramNames = {})
-        : method(method), path(path), handler(handler),
-          isDynamic(isDynamic), requiresAuth(requiresAuth),
-          paramNames(std::move(paramNames)) {}
+    Route(const std::string& m,
+          const std::string& p,
+          RouteHandler h,
+          bool dynamic = false,
+          bool auth = false,
+          const std::vector<std::string>& params = {})
+        : method(m), path(p), compiledRegex(p), handler(h), isDynamic(dynamic), requiresAuth(auth), paramNames(params)
+    {
+    }
 };

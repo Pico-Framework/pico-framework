@@ -75,9 +75,9 @@ bool TimeManager::syncTimeWithNtp(int timeoutSeconds)
                 printf("[Time Manager] Failed to get system time from AON timer.\n");
                 return false;
             }
-            vTaskDelay(pdMS_TO_TICKS(1000));
-            waited++;
         }
+        vTaskDelay(pdMS_TO_TICKS(1000));
+        waited++;
     }
 
     std::cerr << "[Time Manager] NTP time sync failed after " << timeoutSeconds << " seconds" << std::endl;

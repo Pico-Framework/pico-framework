@@ -49,7 +49,8 @@
   * @param data URL-encoded form data.
   * @return A map of key-value pairs.
   */
- std::unordered_map<std::string, std::string> parseUrlEncoded(const std::string &data);
+ std::unordered_multimap<std::string, std::string> parseUrlEncoded(const std::string& data);
+
  
  /**
   * @brief Get the client IP address from a socket.

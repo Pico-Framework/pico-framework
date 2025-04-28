@@ -27,7 +27,11 @@ extern void sntp_set_system_time(uint32_t sec);
 #define MEM_LIBC_MALLOC 0         // Do not use libc malloc
 #define MEMP_MEM_MALLOC 0         // Use static memory pools rather than malloc for internal allocations
 #define MEM_ALIGNMENT 4           // Align memory to 4-byte boundaries
+#ifdef PICO_RP2350
+#define MEM_SIZE (16 * 1024)         // Total heap size available to lwIP (4 KB); prevents silent issues at lower sizes
+#else
 #define MEM_SIZE (10 * 1024)      // Total heap size available to lwIP (16 KB); prevents silent issues at lower sizes [may be able to lower]
+#endif
 #define MEMP_NUM_NETCONN 32       // Maximum number of simultaneously active netconns (was 32)
 #define MEMP_NUM_TCP_PCB 16       // Maximum number of concurrently active TCP protocol control blocks
 #define MEMP_NUM_TCP_PCB_LISTEN 8 // Maximum number of listening TCP PCBs

@@ -210,3 +210,21 @@ void debug_print(const char *msg, size_t len)
         }
     }
 }
+
+/// @copydoc debug_warning(const std::string &msg)
+void warning(const std::string &msg)
+{
+    printf("\033[31m");
+    printf("WARNING: %s\n", msg.c_str());
+    printf("\033[0m");
+}
+
+/// @copydoc debug_warning(const std::string &msg)
+void warning(const std::string &msg, int32_t code)
+{
+    std::string fullMsg = msg + " (code: " + std::to_string(code) + ")\n";
+    printf("\033[31m");
+    printf("WARNING: %s\n", fullMsg.c_str());
+    printf("\033[0m");
+}
+

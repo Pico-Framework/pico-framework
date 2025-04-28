@@ -3,13 +3,13 @@
 #include "task.h"
 #include "app.h"
 
-int main() {
+ int main() {
 
     int64_t start = to_ms_since_boot(get_absolute_time());
     stdio_init_all();
 
-    static App app(80);  // <-- construct in main(), safe
-     int64_t end = to_ms_since_boot(get_absolute_time());
+    static App app(80);   
+    int64_t end = to_ms_since_boot(get_absolute_time());
     printf("[BootTimer] App constructed in %lld ms\n", end - start);
 
     std::cout << "System Booting..." << std::endl;

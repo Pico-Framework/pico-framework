@@ -1,0 +1,1966 @@
+
+Acquiring IP address .
+Link is up
+[Network] Connected to Wi-Fi network at 192.168.50.213
+[Framework Manager] Framework services initialized.
+[Time Manager] Waiting for NTP time sync...
+[TimeManager] Always-on timer is running.Setting time: 1526595584 seconds, 1745783513 nanoseconds
+[Time Manager] NTP time acquired successfuly
+[TimeManager] System time set to: Sun Apr 27 19:51:53 2025
+
+[Framework Manager] Time synchronized.
+[Framework Manager] Network up. Notifying app task...
+[App] Network ready. Starting services...
+[HttpServer] Starting HTTP Server on port 80
+[TimeManager] Standard timezone: America/Los_Angeles, DST timezone: America/Los_Angeles
+[TimeManager] Timezone set to UTC -7:00 (America/Los_Angeles)
+[HttpServer] Waiting for client connection...
+[App] Running main polling loop...
+[App] Heartbeat user event received
+[HttpServer] Accepted client connection
+[HttpServer] Handling client in task slot 0
+
+===== HTTP CLIENT REQUEST =====
+[HttpServer] Client request received: GET, path: /
+[HttpServer] Client connection handled
+===============================
+
+[HttpServer] Waiting for client connection...
+[HttpServer] Client task slot 0 completed
+[HttpServer] Accepted client connection
+[HttpServer] Handling client in task slot 0
+
+===== HTTP CLIENT REQUEST =====
+[HttpServer] Client request received: GET, path: /
+[HttpServer] Client connection handled
+===============================
+
+[HttpServer] Waiting for client connection...
+[HttpServer] Accepted client connection
+[HttpServer] Client task slot 0 completed
+[HttpServer] Handling client in task slot 0
+[HttpServer] Client connection handled
+===============================
+
+[HttpServer] Waiting for client connection...
+[App] Running main polling loop...
+[App] Heartbeat user event received
+[App] Running main polling loop...
+[App] Heartbeat user event received
+
+===== HTTP CLIENT REQUEST =====
+[HttpServer] Client request received: , path: 
+[Tcp] lwip_send failed: -1
+[Tcp] lwip_send failed: -1
+[HttpServer] Client task slot 0 completed
+[App] Running main polling loop...
+[App] Heartbeat user event received
+[App] Running main polling loop...
+[App] Heartbeat user event received
+[App] Running main polling loop...
+[App] Heartbeat user event received
+[App] Running main polling loop...
+[App] Heartbeat user event received
+[App] Running main polling loop...
+[App] Heartbeat user event received
+[App] Running main polling loop...
+[App] Heartbeat user event received
+[App] Running main polling loop...
+[App] Heartbeat user event received
+[App] Running main polling loop...
+[App] Heartbeat user event received
+[App] Running main polling loop...
+[App] Heartbeat user event received
+[App] Running main polling loop...
+[App] Heartbeat user event received
+[App] Running main polling loop...
+[App] Heartbeat user event received
+[App] Running main polling loop...
+[App] Heartbeat user event received
+[App] Running main polling loop...
+[App] Heartbeat user event received
+[App] Running main polling loop...
+[App] Heartbeat user event received
+[App] Running main polling loop...
+[App] Heartbeat user event received
+[App] Running main polling loop...
+[App] Heartbeat user event received
+[App] Running main polling loop...
+[App] Heartbeat user event received
+[App] Running main polling loop...
+[App] Heartbeat user event received
+[App] Running main polling loop...
+[App] Heartbeat user event received
+[App] Running main polling loop...
+[App] Heartbeat user event received
+[App] Running main polling loop...
+[App] Heartbeat user event received
+[App] Running main polling loop...
+[App] Heartbeat user event received
+[App] Running main polling loop...
+[App] Heartbeat user event received
+[App] Running main polling loop...
+[App] Heartbeat user event received
+[App] Running main polling loop...
+[App] Heartbeat user event received
+[App] Running main polling loop...
+[App] Heartbeat user event received
+[App] Running main polling loop...
+[App] Heartbeat user event received
+[App] Running main polling loop...
+[App] Heartbeat user event received
+[App] Running main polling loop...
+[App] Heartbeat user event received
+[App] Running main polling loop...
+[App] Heartbeat user event received
+[HttpServer] Accepted client connection
+[HttpServer] Handling client in task slot 0
+
+===== HTTP CLIENT REQUEST =====
+[HttpServer] Client request received: GET, path: /
+[HttpServer] Client connection handled
+===============================
+
+[HttpServer] Waiting for client connection...
+[HttpServer] Client task slot 0 completed
+[HttpServer] Accepted client connection
+[HttpServer] Handling client in task slot 0
+
+===== HTTP CLIENT REQUEST =====
+[HttpServer] Client request received: GET, path: /
+[HttpServer] Client connection handled
+===============================
+
+[HttpServer] Waiting for client connection...
+[HttpServer] Client task slot 0 completed
+[App] Running main polling loop...
+[App] Heartbeat user event received
+[App] Running main polling loop...
+[App] Heartbeat user event received
+[App] Running main polling loop...
+[App] Heartbeat user event received
+[App] Running main polling loop...
+[App] Heartbeat user event received
+[App] Running main polling loop...
+[App] Heartbeat user event received
+[App] Running main polling loop...
+[App] Heartbeat user event received
+[App] Running main polling loop...
+[App] Heartbeat user event received
+[App] Running main polling loop...
+[App] Heartbeat user event received
+[App] Running main polling loop...
+[App] Heartbeat user event received
+[App] Running main polling loop...
+[App] Heartbeat user event received
+[BootTimer] App constructed in 1 ms
+System Booting...
+Starting Scheduler...
+[INFO] [Router] Router.cpp:146 (addRoute): Adding route: GET /
+
+[INFO] [Router] Router.cpp:146 (addRoute): Adding route: GET /hello
+
+[INFO] [Router] Router.cpp:146 (addRoute): Adding route: GET /zones/{name}
+
+Initializing framework...
+[LittleFS] Flash base: 0x101e0000, size: 131072 bytes (32 blocks)
+Starting WiFi...
+[App] Initializing application...
+[App] Starting GPIO controller...
+[GpioController] Initializing GPIO routes...
+[App] Waiting for network...
+[DashboardController] Initializing routes...
+[00:00:00 UTC][INFO] [Router] Router.cpp:146 (addRoute): Adding route: GET /api/v1
+
+
+00:00:00 UTC][INFO] [Router] Router.cpp:146 (addRoute): Adding route: GET /api/v1/temperatur
+
+
+00:00:00 UTC][INFO] [Router] Router.cpp:146 (addRoute): Adding route: POST /api/v1/gpio/{pin}
+
+
+00:00:00 UTC][INFO] [Router] Router.cpp:146 (addRoute): Adding route: GET /api/v1/led
+o/{pin}/{value}
+
+
+00:00:00 UTC][INFO] [Router] Router.cpp:146 (addRoute): Adding route: GET /api/v1/led
+
+[00:00:00 UTC][INFO] [Router] Router.cpp:146 (addRoute): Adding route: POST /api/v1/led/{value}
+
+[00:00:00 UTC][INFO] [Router] Router.cpp:146 (addRoute): Adding route: POST /api/v1/upload
+
+[00:00:00 UTC][INFO] [Router] Router.cpp:146 (addRoute): Adding route: DELETE /uploads/{file}
+
+[00:00:00 UTC][INFO] [Router] Router.cpp:146 (addRoute): Adding route: GET /
+
+[00:00:00 UTC][INFO] [Router] Router.cpp:146 (addRoute): Adding route: GET /api/v1/ls(.*)
+
+[00:00:00 UTC][INFO] [Router] Router.cpp:146 (addRoute): Adding route: GET /(.*)
+
+Version: 7.95.49 (2271bb6 CY) CRC: b7a28ef3 Date: Mon 2021-11-29 22:50:27 PST Ucode Ver: 1043.2162 FWID 01-c51d9400
+cyw43 loaded ok, mac 2c:cf:67:c9:96:91
+API: 12.2
+Data: RaspberryPi.PicoW
+Compiler: 1.29.4
+ClmImport: 1.47.1
+Customization: v5 22/06/24
+Creation: 2022-06-24 06:55:08
+
+
+
+[Network] Connecting to WiFi SSID: Archbell 
+
+Joining network ..
+Acquiring IP address .
+Link is up
+[Network] Connected to Wi-Fi network at 192.168.50.213
+[Framework Manager] Framework services initialized.
+[Time Manager] Waiting for NTP time sync...
+[TimeManager] Always-on timer is running.Setting time: 1526595584 seconds, 1745784198 nanoseconds
+[Time Manager] NTP time acquired successfuly
+[TimeManager] System time set to: Sun Apr 27 20:03:18 2025
+
+[Framework Manager] Time synchronized.
+[Framework Manager] Network up. Notifying app task...
+[App] Network ready. Starting services...
+[HttpServer] Starting HTTP Server on port 80
+[TimeManager] Standard timezone: America/Los_Angeles, DST timezone: America/Los_Angeles
+[TimeManager] Timezone set to UTC -7:00 (America/Los_Angeles)
+[HttpServer] Waiting for client connection...
+[App] Running main polling loop...
+[App] Heartbeat user event received
+[HttpServer] Accepted client connection
+[HttpServer] Handling client in task slot 0
+[17:00:16 America/Los_Angeles][INFO] [HttpRequest] HttpRequest.cpp:180 (receive): Receiving request on socket 1
+
+[HttpServer] Client connection handled
+[17:00:16 America/Los_Angeles][INFO] [HttpRequest] HttpRequest.cpp:201 (receive): Buffer received: GET / HTTP/1.1
+Host: 192.168.50.213
+User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.3.1 Safari/605.1.15
+Upgrade-Insecure-Requests: 1
+Accept: text/html,application/xhtml+x
+[17:00:16 America/Los_Angeles][INFO] [HttpRequest] HttpRequest.cpp:213 (receive): Raw headers length: 256
+
+[17:00:16 America/Los_Angeles][INFO] [HttpRequest] HttpRequest.cpp:217 (receive): Raw headers: GET / HTTP/1.1
+Host: 192.168.50.213
+User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.3.1 Safari/605.1.15
+Upgrade-Insecure-Requests: 1
+Accept: text/html,application/xhtml+xml,a
+[17:00:16 America/Los_Angeles][INFO] [HttpRequest] HttpRequest.cpp:223 (receive): Parsed headers:
+
+[17:00:16 America/Los_Angeles][INFO] [HttpRequest] HttpRequest.cpp:226 (receive): accept: text/html,application/xhtml+xml,application/xml
+
+[17:00:16 America/Los_Angeles][INFO] [HttpRequest] HttpRequest.cpp:226 (receive): host: 192.168.50.213
+
+[17:00:16 America/Los_Angeles][INFO] [HttpRequest] HttpRequest.cpp:226 (receive): upgrade-insecure-requests: 1
+
+[17:00:16 America/Los_Angeles][INFO] [HttpRequest] HttpRequest.cpp:226 (receive): user-agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.3.1 Safari/605.1.15
+
+[17:00:16 America/Los_Angeles][INFO] [HttpRequest] HttpRequest.cpp:230 (receive): Content-Length: 0
+
+[17:00:16 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:206 (handleClient): HttpRequest received: GET, /
+
+[17:00:16 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:207 (handleClient): HttpRequest content length: 
+
+[17:00:16 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:208 (handleClient): HttpRequest content type: �f 
+
+[17:00:16 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:209 (handleClient): HttpRequest boundary: �f 
+
+[17:00:16 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:210 (handleClient): HttpRequest is multipart: false
+
+[17:00:16 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:211 (handleClient): HttpRequest header count: 4
+
+[17:00:16 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:212 (handleClient): HttpRequest url: /
+
+[17:00:16 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:213 (handleClient): HttpRequest path: /
+
+[17:00:16 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:214 (handleClient): HttpRequest query: 
+
+[17:00:16 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:237 (handleClient): HttpRequest headers:
+
+[17:00:16 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:240 (handleClient): accept : text/html,application/xhtml+xml,application/xml
+
+[17:00:16 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:240 (handleClient): host : 192.168.50.213
+
+[17:00:16 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:240 (handleClient): upgrade-insecure-requests : 1
+
+[17:00:16 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:240 (handleClient): user-agent : Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.3.1 Safari/605.1.15
+
+[17:00:16 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:243 (handleClient): HttpRequest body: 
+
+
+===== HTTP CLIENT REQUEST =====
+===============================
+
+[HttpServer] Client request received: GET, path: /
+[HttpServer] Waiting for client connection...
+[17:00:16 America/Los_Angeles][INFO] [Router] Router.cpp:239 (handleRequest): Matched route: ^/$
+
+[17:00:16 America/Los_Angeles][INFO] [HttpResponse] HttpResponse.cpp:195 (send): HttpResponse::send()
+
+[17:00:16 America/Los_Angeles][INFO] [HttpResponse] HttpResponse.cpp:225 (send): HttpResponse::send() completed
+
+[17:00:16 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:250 (handleClient): HttpRequest handled: true
+
+[HttpServer] Client task slot 0 completed
+[HttpServer] Accepted client connection
+[HttpServer] Handling client in task slot 0
+[17:00:16 America/Los_Angeles][INFO] [HttpRequest] HttpRequest.cpp:180 (receive): Receiving request on socket 1
+
+[HttpServer] Client connection handled
+[17:00:16 America/Los_Angeles][INFO] [HttpRequest] HttpRequest.cpp:201 (receive): Buffer received: GET /api/v1/gpio/3 HTTP/1.1
+Host: 192.168.50.213
+Referer: http://192.168.50.213/
+Accept: */*
+User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.3.1 Safari/605.1.15
+Accept-L
+[17:00:16 America/Los_Angeles][INFO] [HttpRequest] HttpRequest.cpp:213 (receive): Raw headers length: 256
+
+[17:00:16 America/Los_Angeles][INFO] [HttpRequest] HttpRequest.cpp:217 (receive): Raw headers: GET /api/v1/gpio/3 HTTP/1.1
+Host: 192.168.50.213
+Referer: http://192.168.50.213/
+Accept: */*
+User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.3.1 Safari/605.1.15
+Accept-Langu
+[17:00:16 America/Los_Angeles][INFO] [HttpRequest] HttpRequest.cpp:223 (receive): Parsed headers:
+
+[17:00:16 America/Los_Angeles][INFO] [HttpRequest] HttpRequest.cpp:226 (receive): accept: */*
+
+[17:00:16 America/Los_Angeles][INFO] [HttpRequest] HttpRequest.cpp:226 (receive): accept-language: en-US,en;
+
+[17:00:16 America/Los_Angeles][INFO] [HttpRequest] HttpRequest.cpp:226 (receive): host: 192.168.50.213
+
+[17:00:16 America/Los_Angeles][INFO] [HttpRequest] HttpRequest.cpp:226 (receive): referer: http://192.168.50.213/
+
+[17:00:16 America/Los_Angeles][INFO] [HttpRequest] HttpRequest.cpp:226 (receive): user-agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.3.1 Safari/605.1.15
+
+[17:00:16 America/Los_Angeles][INFO] [HttpRequest] HttpRequest.cpp:230 (receive): Content-Length: 0
+
+[17:00:16 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:206 (handleClient): HttpRequest received: GET, /api/v1/gpio/3
+
+[17:00:16 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:207 (handleClient): HttpRequest content length: 
+
+[17:00:16 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:208 (handleClient): HttpRequest content type: j 
+
+[17:00:16 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:209 (handleClient): HttpRequest boundary: 0j 
+
+[17:00:16 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:210 (handleClient): HttpRequest is multipart: false
+
+[17:00:16 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:211 (handleClient): HttpRequest header count: 5
+
+[17:00:16 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:212 (handleClient): HttpRequest url: /api/v1/gpio/3
+
+[17:00:16 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:213 (handleClient): HttpRequest path: /api/v1/gpio/3
+
+[17:00:16 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:214 (handleClient): HttpRequest query: 
+
+[17:00:16 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:237 (handleClient): HttpRequest headers:
+
+[17:00:16 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:240 (handleClient): accept : */*
+
+[17:00:16 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:240 (handleClient): accept-language : en-US,en;
+
+[17:00:16 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:240 (handleClient): host : 192.168.50.213
+
+[17:00:16 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:240 (handleClient): referer : http://192.168.50.213/
+
+[17:00:17 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:240 (handleClient): user-agent : Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.3.1 Safari/605.1.15
+
+[17:00:17 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:243 (handleClient): HttpRequest body: 
+
+
+===== HTTP CLIENT REQUEST =====
+[HttpServer] Client request received: GET, path: /api/v1/gpio/3
+===============================
+
+[HttpServer] Waiting for client connection...
+[HttpServer] Accepted client connection
+[HttpServer] Handling client in task slot 1
+[17:00:17 America/Los_Angeles][INFO] [HttpRequest] HttpRequest.cpp:180 (receive): Receiving request on socket 2
+
+[HttpServer] Client connection handled
+[17:00:17 America/Los_Angeles][INFO] [Router] Router.cpp:239 (handleRequest): Matched route: ^/api/v1/gpio/([^/]+)$
+4 HTTP/1.1
+Host: 192.168.50.213
+Referer: http://192.168.50.213/
+Accept: */*
+User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.3.1 Safari/605.1.15
+Accept-L
+Accept-L
+t: Mozca/Los_Angeles][INFO] [HttpRequest] HttpRequest.cpp:213 (receive): Raw headers length: 256
+on/18.3.1 
+
+17:00:17 America/Los_Angeles][INFO] [HttpResponse] HttpResponse.cpp:195 (send): HttpResponse::send()
+256
+
+[17:00:17 America/Los_Angeles][INFO] [HttpRequest] HttpRequest.cpp:217 (receive): Raw headers: GET /api/v1/gpio/4 HTTP/1.1
+Host: 192.168.50.213
+Referer: http://192.168.50.213/
+Accept: */*
+User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.3.1 Safari/605.1.15
+Accept-Langu
+Accept-Langu
+ozilla/5.0 (Macintosh;] [HttpRequest] HttpRequest.cpp:223 (receive): Parsed headers:
+o) V
+
+17:00:17 America/Los_Angeles][INFO] [HttpRequest] HttpReesponse.cpp:225 (send): HttpResponse::se
+
+[17:00:17 America/Los_Angeles][INFO] [HttpRequest] HttpRequest.cpp:226 (receive): accept: */*
+
+[17:00:17 America/Los_Angeles][INFO] [HttpRequest] HttpRequest.cpp:226 (receive): accept-language: en-US,en;
+
+[17:00:17 America/Los_Angeles][INFO] [HttpRequest] HttpRequest.cpp:226 (receive): host: 192.168.50.213
+
+[17:00:17 America/Los_Angeles][INFO] [HttpRequest] HttpRequest.cpp:226 (receive): referer: http://192.168.50.213/
+
+[17:00:17 America/Los_Angeles][INFO] [HttpRequest] HttpRequest.cpp:226 (receive): user-agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.3.1 Safari/605.1.15
+
+[17:00:17 America/Los_Angeles][INFO] [HttpRequest] HttpRequest.cpp:230 (receive): Content-Length: 0
+
+[17:00:17 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:206 (handleClient): HttpRequest received: GET, /api/v1/gpio/4
+
+[17:00:17 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:207 (handleClient): HttpRequest content length: 
+
+[17:00:17 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:208 (handleClient): HttpRequest content type: `� 
+
+[17:00:17 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:209 (handleClient): HttpRequest boundary: x� 
+
+[17:00:17 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:210 (handleClient): HttpRequest is multipart: false
+
+[17:00:17 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:211 (handleClient): HttpRequest header count: 5
+
+[17:00:17 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:212 (handleClient): HttpRequest url: /api/v1/gpio/4
+
+[17:00:17 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:213 (handleClient): HttpRequest path: /api/v1/gpio/4
+
+[17:00:17 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:214 (handleClient): HttpRequest query: 
+
+[17:00:17 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:237 (handleClient): HttpRequest headers:
+
+[17:00:17 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:240 (handleClient): accept : */*
+
+[17:00:17 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:240 (handleClient): accept-language : en-US,en;
+
+[17:00:17 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:240 (handleClient): host : 192.168.50.213
+
+[17:00:17 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:240 (handleClient): referer : http://192.168.50.213/
+
+[17:00:17 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:240 (handleClient): user-agent : Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.3.1 Safari/605.1.15
+
+[17:00:17 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:243 (handleClient): HttpRequest body: 
+
+
+===== HTTP CLIENT REQUEST =====
+
+17:00:17 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:243 (handleClient): HttpRequest body: 
+a/5.0 (M
+[17:00:17 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:250 (handleClient): HttpRequest handled: true
+
+[HttpServer] Client request received: GET, path: /api/v1/gpio/4
+===============================
+
+[HttpServer] Client task slot 0 completed
+[HttpServer] Waiting for client connection...
+[HttpServer] Accepted client connection
+[HttpServer] Handling client in task slot 0
+[17:00:17 America/Los_Angeles][INFO] [HttpRequest] HttpRequest.cpp:180 (receive): Receiving request on socket 1
+
+[HttpServer] Client connection handled
+[17:00:17 America/Los_Angeles][INFO] [Router] Router.cpp:239 (handleRequest): Matched route: ^/api/v1/gpio/([^/]+)$
+
+[17:00:17 America/Los_Angeles][INFO] [HttpResponse] HttpResponse.cpp:195 (send): HttpResponse::send()
+gpio/([^/]+)$
+5 HTTP/1.1
+Host: 192.168.50.213
+Referer: http://192.168.50.213/
+Accept: */*
+User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.3.1 Safari/605.1.15
+Accept-L
+[17:00:17 America/Los_Angeles][INFO] [HttpRequest] HttpRequest.cpp:213 (receive): Raw headers length: 256
+
+[17:00:17 America/Los_Angeles][INFO] [HttpRequest] HttpRequest.cpp:217 (receive): Raw headers: GET /api/v1/gpio/5 HTTP/1.1
+Host: 192.168.50.213
+Referer: http://192.168.50.213/
+Accept: */*
+User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.3.1 Safari/605.1.15
+Accept-Langu
+Accept-Langu
+ozilla/5_Angeles][INFO] [HttpRequest] HttpRequest.cpp:223 (receive): Parsed headers:
+o) V
+
+17:00:17 America/Los_Angeles][INFO] [HttpResponse] HttpResponse.cpp:225 (send): HttpResponse::se
+
+[17:00:17 America/Los_Angeles][INFO] [HttpRequest] HttpRequest.cpp:226 (receive): accept: */*
+
+[17:00:17 America/Los_Angeles][INFO] [HttpRequest] HttpRequest.cpp:226 (receive): accept-language: en-US,en;
+
+[17:00:17 America/Los_Angeles][INFO] [HttpRequest] HttpRequest.cpp:226 (receive): host: 192.168.50.213
+
+[17:00:17 America/Los_Angeles][INFO] [HttpRequest] HttpRequest.cpp:226 (receive): referer: http://192.168.50.213/
+
+[17:00:17 America/Los_Angeles][INFO] [HttpRequest] HttpRequest.cpp:226 (receive): user-agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.3.1 Safari/605.1.15
+
+[17:00:17 America/Los_Angeles][INFO] [HttpRequest] HttpRequest.cpp:230 (receive): Content-Length: 0
+
+[17:00:17 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:206 (handleClient): HttpRequest received: GET, /api/v1/gpio/5
+
+[17:00:17 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:207 (handleClient): HttpRequest content length: 
+
+[17:00:17 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:208 (handleClient): HttpRequest content type: �� 
+
+[17:00:17 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:209 (handleClient): HttpRequest boundary: �� 
+
+[17:00:17 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:210 (handleClient): HttpRequest is multipart: false
+
+[17:00:17 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:211 (handleClient): HttpRequest header count: 5
+
+[17:00:17 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:212 (handleClient): HttpRequest url: /api/v1/gpio/5
+
+[17:00:17 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:213 (handleClient): HttpRequest path: /api/v1/gpio/5
+
+[17:00:17 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:214 (handleClient): HttpRequest query: 
+
+[17:00:17 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:237 (handleClient): HttpRequest headers:
+
+[17:00:17 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:240 (handleClient): accept : */*
+
+[17:00:17 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:240 (handleClient): accept-language : en-US,en;
+
+[17:00:17 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:240 (handleClient): host : 192.168.50.213
+
+[17:00:17 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:240 (handleClient): referer : http://192.168.50.213/
+
+[17:00:17 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:240 (handleClient): user-agent : Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.3.1 Safari/605.1.15
+
+[17:00:17 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:243 (handleClient): HttpRequest body: 
+
+
+===== HTTP CLIENT REQUEST =====
+
+17:00:17 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:243 (handleClient): HttpRequest body: 
+a/5.0 (M
+[17:00:17 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:250 (handleClient): HttpRequest handled: true
+
+===============================
+
+[HttpServer] Client request received: GET, path: /api/v1/gpio/5
+[HttpServer] Waiting for client connection...
+[HttpServer] Client task slot 1 completed
+[HttpServer] Accepted client connection
+[HttpServer] Handling client in task slot 1
+[17:00:17 America/Los_Angeles][INFO] [HttpRequest] HttpRequest.cpp:180 (receive): Receiving request on socket 2
+[HttpServer] Client connection handled
+
+===============================
+
+[17:00:17 America/Los_Angeles][INFO] [HttpRr] Router.cpp:239 (handleRequest): Matched route: ^/api/v1/gpio/([^/]+)$
+6 HTTP/1.1
+Host: 192.168.50.213
+Referer: http://192.168.50.213/
+Accept: */*
+User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.3.1 Safari/605.1.15
+Accept-L
+Accept-L
+t: Moica/Los_Angeles][INFO] [HttpRequest] HttpRequest.cpp:213 (receive): Raw headers length: 256
+on/18.3.1 
+
+17:00:17 America/Los_Angeles][INFO] [HttpResponse] HttpResponse.cpp:195 (send): HttpResponse::send()
+256
+
+[17:00:17 America/Los_Angeles][INFO] [HttpRequest] HttpRequest.cpp:217 (receive): Raw headers: GET /api/v1/gpio/6 HTTP/1.1
+Host: 192.168.50.213
+Referer: http://192.168.50.213/
+Accept: */*
+User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.3.1 Safari/605.1.15
+Accept-Langu
+[17:00:17 America/Los_Angeles][INFO] [HttpRequest] HttpRequest.cpp:223 (receive): Parsed headers:
+
+[17:00:17 America/Los_Angeles][INFO] [HttpRequest] HttpRequest.cpp:226 (receive): accept: */*
+
+[17:00:17 America/Los_Angeles][INFO] [HttpRequest] HttpRequest.cpp:226 (receive): accept-language: en-US,en;
+
+[17:00:17 America/Los_Angeles][INFO] [HttpRequest] HttpRequest.cpp:226 (receive): host: 192.168.50.213
+
+[17:00:17 America/Los_Angeles][INFO] [HttpRequest] HttpRequest.cpp:226 (receive): referer: http://192.168.50.213/
+
+[17:00:17 America/Los_Angeles][INFO] [HttpRequest] HttpRequest.cpp:226 (receive): user-agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.3.1 Safari/605.1.15
+
+[17:00:18 America/Los_Angeles][INFO] [HttpRequest] HttpRequest.cpp:230 (receive): Content-Length: 0
+
+[17:00:18 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:206 (handleClient): HttpRequest received: GET, /api/v1/gpio/6
+
+[17:00:18 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:207 (handleClient): HttpRequest content length: 
+
+[17:00:18 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:208 (handleClient): HttpRequest content type: h: 
+
+[17:00:18 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:209 (handleClient): HttpRequest boundary: �: 
+
+[17:00:18 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:210 (handleClient): HttpRequest is multipart: false
+
+[17:00:18 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:211 (handleClient): HttpRequest header count: 5
+
+[17:00:18 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:212 (handleClient): HttpRequest url: /api/v1/gpio/6
+
+[17:00:18 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:213 (handleClient): HttpRequest path: /api/v1/gpio/6
+
+[17:00:18 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:214 (handleClient): HttpRequest query: 
+
+[17:00:18 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:237 (handleClient): HttpRequest headers:
+
+[17:00:18 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:240 (handleClient): accept : */*
+
+[17:00:18 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:240 (handleClient): accept-language : en-US,en;
+
+[17:00:18 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:240 (handleClient): host : 192.168.50.213
+
+[17:00:18 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:240 (handleClient): referer : http://192.168.50.213/
+
+[17:00:18 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:240 (handleClient): user-agent : Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.3.1 Safari/605.1.15
+
+[17:00:18 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:243 (handleClient): HttpRequest body: 
+
+
+===== HTTP CLIENT REQUEST =====
+
+17:00:18 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:243 (handleClient): HttpRequest body:
+[HttpServer] Waiting for client connection...
+[17:00:18 America/Los_Angeles][INFO] [HttpResponse] HttpResponse.cpp:225 (send): HttpResponse::send() completed
+
+[17:00:18 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:250 (handleClient): HttpRequest handled: true
+
+[HttpServer] Client request received: GET, path: /api/v1/gpio/6
+[HttpServer] Accepted client connection
+[HttpServer] Client task slot 0 completed
+[HttpServer] Handling client in task slot 0
+[17:00:18 America/Los_Angeles][INFO] [HttpRequest] HttpRequest.cpp:180 (receive): Receiving request on socket 3
+
+[HttpServer] Client connection handled
+[17:00:18 America/Los_Angeles][INFO] [HttpRequest] HttpRequest.cpp:201 (receive): Buffer received: GET /api/v1/gpio/7 HTTP/1.1
+Host: 192.168.50.213
+Referer: http://192.168.50.213/
+Accept: */*
+User-Agent: Moica/Los_Angeles][INFO] [Router] Router.cpp:239 (handleRequest): Matched route: ^/api/v1/gpio/([^/]+)$
+Safari/605.1.15
+Accept-L
+[17:00:18 America/Los_Angeles][INFO] [HttpRequest] HttpRequest.cpp:213 (receive): Raw headers length: 256
+
+[17:00:18 America/Los_Angeles][INFO] [HttpRequest] HttpRequest.cpp:217 (receive): Raw headers: GET /api/v1/gpio/7 HTTP/1.1
+Host: 192.168.50.213
+Referer: http://192.168.50.213/
+Accept: */*
+User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.3.1 Safari/605.1.15
+Accept-Langu
+[17:00:18 America/Los_Angeles][INFO] [HttpRequest] HttpRequest.cpp:223 (receive): Parsed headers:
+
+[17:00:18 America/Los_Angeles][INFO] [HttpRequest] HttpRequest.cpp:226 (receive): accept: */*
+
+[17:00:18 America/Los_Angeles][INFO] [HttpRequest] HttpRequest.cpp:226 (receive): accept-language: en-US,en;
+
+[17:00:18 America/Los_Angeles][INFO] [HttpRequest] HttpRequest.cpp:226 (receive): host: 192.168.50.213
+
+[17:00:18 America/Los_Angeles][INFO] [HttpRequest] HttpRequest.cpp:226 (receive): referer: http://192.168.50.213/
+
+[17:00:18 America/Los_Angeles][INFO] [HttpRequest] HttpRequest.cpp:226 (receive): user-agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.3.1 Safari/605.1.15
+
+[17:00:18 America/Los_Angeles][INFO] [HttpRequest] HttpRequest.cpp:230 (receive): Content-Length: 0
+
+[17:00:18 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:206 (handleClient): HttpRequest received: GET, /api/v1/gpio/7
+
+[17:00:18 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:207 (handleClient): HttpRequest content length: 
+
+[17:00:18 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:208 (handleClient): HttpRequest content type: �� 
+
+[17:00:18 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:209 (handleClient): HttpRequest boundary: � 
+
+[17:00:18 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:210 (handleClient): HttpRequest is multipart: false
+
+[17:00:18 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:211 (handleClient): HttpRequest header count: 5
+
+[17:00:18 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:212 (handleClient): HttpRequest url: /api/v1/gpio/7
+
+[17:00:18 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:213 (handleClient): HttpRequest path: /api/v1/gpio/7
+
+[17:00:18 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:214 (handleClient): HttpRequest query: 
+
+[17:00:18 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:237 (handleClient): HttpRequest headers:
+
+[17:00:18 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:240 (handleClient): accept : */*
+
+[17:00:18 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:240 (handleClient): accept-language : en-US,en;
+
+[17:00:18 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:240 (handleClient): host : 192.168.50.213
+
+[17:00:18 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:240 (handleClient): referer : http://192.168.50.213/
+
+[17:00:18 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:240 (handleClient): user-agent : Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.3.1 Safari/605.1.15
+
+[17:00:18 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:243 (handleClient): HttpRequest body: 
+
+
+===== HTTP CLIENT REQUEST =====
+
+17:00:18 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:243 (handleClient): HttpRequest body: 
+a/5.0 (Macin
+[HttpServer] Client request received: GET, path: /api/v1/gpio/7
+===============================
+
+[17:00:18 America/Los_Angeles][INFO] [HttpResponse] HttpResponse.cpp:195 (send): HttpResponse::send()
+
+[HttpServer] Waiting for client connection...
+[17:00:18 America/Los_Angeles][INFO] [HttpResponse] HttpResponse.cpp:225 (send): HttpResponse::send() completed
+
+[17:00:18 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:250 (handleClient): HttpRequest handled: true
+
+[HttpServer] Client task slot 1 completed
+[HttpServer] Accepted client connection
+[17:00:18 America/Los_Angeles][INFO] [Router] Router.cpp:239 (handleRequest): Matched route: ^/api/v1/gpio/([^/]+)$
+
+[HttpServer] Handling client in task slot 1
+[HttpServer] Client connection handled
+[17:00:18 America/Los_Angeles][INFO] [HttpRequest] HttpRequest.cpp:180 (receive): Receiving request on socket 1
+
+
+17:00:18 America/Los_Angeles][INFO] [HttpRequest] HttpRequest.cpp:201 (receive): Buffer received: GET
+
+17:00:18 America/Los_Angeles][INFO] [HttpResponse] HttpResponse.cpp:225 (send): HttpResponse::send() completed
+pio/8 HTTP/1.1
+Host: 192.168.50.213
+Referer: http://192.168.50.213/
+Accept: */*
+User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.3.1 Safari/605.1.15
+Accept-L
+Accept-L
+t: Mrica/Los_Angeles][INFO] [HttpRequest] HttpRequest.cpp:213 (receive): Raw headers length: 256
+on/18.
+[17:00:18 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:250 (handleClient): HttpRequest handled: true
+
+
+17:00:18 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:250 (handleClient): HttpRequest handled: 
+[17:00:18 America/Los_Angeles][INFO] [HttpRequest] HttpRequest.cpp:217 (receive): Raw headers: GET /api/v1/gpio/8 HTTP/1.1
+Host: 192.168.50.213
+Referer: http://192.168.50.213/
+Accept: */*
+User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.3.1 Safari/605.1.15
+Accept-Langu
+[HttpServer] Client task slot 0 completed
+===============================
+
+[17:00:18 America/Los_Angeles][INFO] [HttpRequest] HttpRequest.cpp:223 (receive): Parsed headers:
+
+[17:00:18 America/Los_Angeles][INFO] [HttpRequest] HttpRequest.cpp:226 (receive): accept: */*
+
+[17:00:18 America/Los_Angeles][INFO] [HttpRequest] HttpRequest.cpp:226 (receive): accept-language: en-US,en;
+
+[17:00:18 America/Los_Angeles][INFO] [HttpRequest] HttpRequest.cpp:226 (receive): host: 192.168.50.213
+
+[17:00:18 America/Los_Angeles][INFO] [HttpRequest] HttpRequest.cpp:226 (receive): referer: http://192.168.50.213/
+
+[17:00:18 America/Los_Angeles][INFO] [HttpRequest] HttpRequest.cpp:226 (receive): user-agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.3.1 Safari/605.1.15
+
+[17:00:18 America/Los_Angeles][INFO] [HttpRequest] HttpRequest.cpp:230 (receive): Content-Length: 0
+
+[17:00:18 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:206 (handleClient): HttpRequest received: GET, /api/v1/gpio/8
+
+[17:00:18 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:207 (handleClient): HttpRequest content length: 
+
+[17:00:18 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:208 (handleClient): HttpRequest content type: 
+
+[17:00:18 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:209 (handleClient): HttpRequest boundary: � 
+
+[17:00:18 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:210 (handleClient): HttpRequest is multipart: false
+
+[17:00:18 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:211 (handleClient): HttpRequest header count: 5
+
+[17:00:18 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:212 (handleClient): HttpRequest url: /api/v1/gpio/8
+
+[17:00:18 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:213 (handleClient): HttpRequest path: /api/v1/gpio/8
+
+[17:00:18 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:214 (handleClient): HttpRequest query: 
+
+[17:00:18 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:237 (handleClient): HttpRequest headers:
+
+[17:00:18 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:240 (handleClient): accept : */*
+
+[17:00:18 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:240 (handleClient): accept-language : en-US,en;
+
+[17:00:18 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:240 (handleClient): host : 192.168.50.213
+
+[17:00:18 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:240 (handleClient): referer : http://192.168.50.213/
+
+[17:00:18 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:240 (handleClient): user-agent : Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.3.1 Safari/605.1.15
+
+[17:00:19 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:243 (handleClient): HttpRequest body: 
+
+
+===== HTTP CLIENT REQUEST =====
+[HttpServer] Client request received: GET, path: /api/v1/gpio/8
+[HttpServer] Waiting for client connection...
+[HttpServer] Accepted client connection
+[HttpServer] Handling client in task slot 0
+[17:00:19 America/Los_Angeles][INFO] [HttpRequest] HttpRequest.cpp:180 (receive): Receiving request on socket 2
+[HttpServer] Client connection handled
+
+===============================
+
+[17:00:19 America/Los_Angeles][INFO] [HttpRequest] H.cpp:239 (handleRequest): Matched route: ^/api/v1/gpio/([^/]+)$
+16 HTTP/1.1
+Host: 192.168.50.213
+Referer: http://192.168.50.213/
+Accept: */*
+User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.3.1 Safari/605.1.15
+Accept-
+[17:00:19 America/Los_Angeles][INFO] [HttpRequest] HttpRequest.cpp:213 (receive): Raw headers length: 256
+
+[17:00:19 America/Los_Angeles][INFO] [HttpRequest] HttpRequest.cpp:217 (receive): Raw headers: GET /api/v1/gpio/16 HTTP/1.1
+Host: 192.168.50.213
+Referer: http://192.168.50.213/
+Accept: */*
+User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.3.1 Safari/605.1.15
+Accept-Lang
+Accept-Lang
+Mozilla/5.0 (Macintosh;  [HttpRequest] HttpRequest.cpp:223 (receive): Parsed headers:
+o) Version/18.3.1 
+[17:00:19 America/Los_Angeles][INFO] [HttpResponse] HttpResponse.cpp:195 (send): HttpResponse::send()
+
+
+17:00:19 America/Los_Angeles][INFO] [HttpResponse] HttpResponse.cpp:225 (send): HttpResponse::sen
+[17:00:19 America/Los_Angeles][INFO] [HttpRequest] HttpRequest.cpp:226 (receive): accept: */*
+
+[17:00:19 America/Los_Angeles][INFO] [HttpRequest] HttpRequest.cpp:226 (receive): accept-language: en-US,en
+
+[17:00:19 America/Los_Angeles][INFO] [HttpRequest] HttpRequest.cpp:226 (receive): host: 192.168.50.213
+
+[17:00:19 America/Los_Angeles][INFO] [HttpRequest] HttpRequest.cpp:226 (receive): referer: http://192.168.50.213/
+
+[17:00:19 America/Los_Angeles][INFO] [HttpRequest] HttpRequest.cpp:226 (receive): user-agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.3.1 Safari/605.1.15
+
+[17:00:19 America/Los_Angeles][INFO] [HttpRequest] HttpRequest.cpp:230 (receive): Content-Length: 0
+
+[17:00:19 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:206 (handleClient): HttpRequest received: GET, /api/v1/gpio/16
+
+[17:00:19 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:207 (handleClient): HttpRequest content length: 
+
+[17:00:19 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:208 (handleClient): HttpRequest content type: �� 
+
+[17:00:19 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:209 (handleClient): HttpRequest boundary: � 
+
+[17:00:19 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:210 (handleClient): HttpRequest is multipart: false
+
+
+17:00:19 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:211 (handleClient): HttpRequest header count: 5
+[17:00:19 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:250 (handleClient): HttpRequest handled: true
+
+
+17:00:19 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:250 (handleClient): HttpRequest handled: true
+5
+
+[17:00:19 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:212 (handleClient): HttpRequest url: /api/v1/gpio/16
+
+[17:00:19 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:213 (handleClient): HttpRequest path: /api/v1/gpio/16
+
+[17:00:19 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:214 (handleClient): HttpRequest query: 
+
+[17:00:19 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:237 (handleClient): HttpRequest headers:
+
+[17:00:19 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:240 (handleClient): accept : */*
+
+[17:00:19 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:240 (handleClient): accept-language : en-US,en
+
+[17:00:19 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:240 (handleClient): host : 192.168.50.213
+
+[17:00:19 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:240 (handleClient): referer : http://192.168.50.213/
+
+[17:00:19 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:240 (handleClient): user-agent : Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.3.1 Safari/605.1.15
+
+[17:00:19 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:243 (handleClient): HttpRequest body: 
+
+
+===== HTTP CLIENT REQUEST =====
+[HttpServer] Client task slot 1 completed
+[HttpServer] Waiting for client connection...
+[HttpServer] Client request received: GET, path: /api/v1/gpio/16
+[HttpServer] Accepted client connection
+[HttpServer] Handling client in task slot 1
+[17:00:19 America/Los_Angeles][INFO] [HttpRequest] HttpRequest.cpp:180 (receive): Receiving request on socket 1
+[HttpServer] Client connection handled
+
+===============================
+
+[17:00:19 America/Los_Angeles][INFO] [HttpRequest] HttpRequest.cpp:201 (receive): Buffer received: GET /api/v1/gp)$
+18 HTTP/1.1
+Host: 192.168.50.213
+Referer: http://192.168.50.213/
+Accept: */*
+User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.3.1 Safari/605.1.15
+Accept-
+Accept-
+nt: Mozca/Los_Angeles][INFO] [HttpRequest] HttpRequest.cpp:213 (receive): Raw headers length: 256
+on/18.3.1 
+
+17:00:19 America/Los_Angeles][INFO] [HttpResponse] HttpResponse.cpp:195 (send): HttpResponse::send()
+256
+
+[17:00:19 America/Los_Angeles][INFO] [HttpRequest] HttpRequest.cpp:217 (receive): Raw headers: GET /api/v1/gpio/18 HTTP/1.1
+Host: 192.168.50.213
+Referer: http://192.168.50.213/
+Accept: */*
+User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.3.1 Safari/605.1.15
+Accept-Lang
+Accept-Lang
+Mozilla/5.0 (Macintosh;] [HttpRequest] HttpRequest.cpp:223 (receive): Parsed headers:
+o) V
+
+17:00:19 America/Los_Angeles][INFO] [HttpRequest] HttpRResponse.cpp:225 (send): HttpResponse::se
+
+[17:00:19 America/Los_Angeles][INFO] [HttpRequest] HttpRequest.cpp:226 (receive): accept: */*
+
+[17:00:19 America/Los_Angeles][INFO] [HttpRequest] HttpRequest.cpp:226 (receive): accept-language: en-US,en
+
+[17:00:19 America/Los_Angeles][INFO] [HttpRequest] HttpRequest.cpp:226 (receive): host: 192.168.50.213
+
+[17:00:19 America/Los_Angeles][INFO] [HttpRequest] HttpRequest.cpp:226 (receive): referer: http://192.168.50.213/
+
+[17:00:19 America/Los_Angeles][INFO] [HttpRequest] HttpRequest.cpp:226 (receive): user-agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.3.1 Safari/605.1.15
+
+[17:00:19 America/Los_Angeles][INFO] [HttpRequest] HttpRequest.cpp:230 (receive): Content-Length: 0
+
+[17:00:19 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:206 (handleClient): HttpRequest received: GET, /api/v1/gpio/18
+
+[17:00:19 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:207 (handleClient): HttpRequest content length: 
+
+[17:00:19 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:208 (handleClient): HttpRequest content type: 
+
+[17:00:19 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:209 (handleClient): HttpRequest boundary: � 
+
+[17:00:19 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:210 (handleClient): HttpRequest is multipart: false
+
+[17:00:19 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:211 (handleClient): HttpRequest header count: 5
+
+[17:00:19 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:212 (handleClient): HttpRequest url: /api/v1/gpio/18
+
+[17:00:19 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:213 (handleClient): HttpRequest path: /api/v1/gpio/18
+
+[17:00:19 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:214 (handleClient): HttpRequest query: 
+
+[17:00:19 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:237 (handleClient): HttpRequest headers:
+
+[17:00:19 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:240 (handleClient): accept : */*
+
+[17:00:19 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:240 (handleClient): accept-language : en-US,en
+
+[17:00:19 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:240 (handleClient): host : 192.168.50.213
+
+[17:00:19 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:240 (handleClient): referer : http://192.168.50.213/
+
+[17:00:19 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:240 (handleClient): user-agent : Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.3.1 Safari/605.1.15
+
+[17:00:19 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:243 (handleClient): HttpRequest body: 
+
+
+===== HTTP CLIENT REQUEST =====
+
+17:00:19 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:243 (handleClient): HttpRequest body: 
+a/5.0 (M
+[17:00:19 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:250 (handleClient): HttpRequest handled: true
+
+[HttpServer] Waiting for client connection...
+[HttpServer] Client task slot 0 completed
+[HttpServer] Client request received: GET, path: /api/v1/gpio/18
+[HttpServer] Accepted client connection
+[HttpServer] Handling client in task slot 0
+[17:00:19 America/Los_Angeles][INFO] [HttpRequest] HttpRequest.cpp:180 (receive): Receiving request on socket 2
+[HttpServer] Client connection handled
+
+===============================
+
+[17:00:19 America/Los_Angeles][INFO] [HttpRequest] HttpRequest.cpp:201 (receive): Buffer received: GET /api/v1/le)$
+TTP/1.1
+Host: 192.168.50.213
+Host: 192.16p://192.168.50.213/
+FO] [Router] Router.cpp:239 (handleRequest): Matched route: ^/api/v1/gpio/([^/]+)$
+
+[17:00:19 America/Los_Angeles][INFO] [HttpResponse] HttpResponse.cpp:195 (send): HttpResponse::send()
+
+
+17:00:19 America/Los_Angeles][INAccept: */*
+User-Agent: Mozilla/5.0 (Maci][INFO] [HttpResponse] HttpResponse.cpp:225 (send): HttpResponse::send() completed
+3.1 Safari/605.1.15
+Accept-Lang
+[17:00:19 America/Los_Angeles][INFO] [HttpRequest] HttpRequest.cpp:213 (receive): Raw headers length: 256
+
+[17:00:19 America/Los_Angeles][INFO] [HttpRequest] HttpRequest.cpp:217 (receive): Raw headers: GET /api/v1/led HTTP/1.1
+Host: 192.168.50.213
+Referer: http://192.168.50.213/
+Accept: */*
+User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.3.1 Safari/605.1.15
+Accept-Language
+[17:00:19 America/Los_Angeles][INFO] [HttpRequest] HttpRequest.cpp:223 (receive): Parsed headers:
+
+[17:00:19 America/Los_Angeles][INFO] [HttpRequest] HttpRequest.cpp:226 (receive): accept: */*
+
+[17:00:19 America/Los_Angeles][INFO] [HttpRequest] HttpRequest.cpp:226 (receive): accept-language: en-US,en;q=0
+
+[17:00:19 America/Los_Angeles][INFO] [HttpRequest] HttpRequest.cpp:226 (receive): host: 192.168.50.213
+
+[17:00:19 America/Los_Angeles][INFO] [HttpRequest] HttpRequest.cpp:226 (receive): referer: http://192.168.50.213/
+
+[17:00:19 America/Los_Angeles][INFO] [HttpRequest] HttpRequest.cpp:226 (receive): user-agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.3.1 Safari/605.1.15
+
+[17:00:19 America/Los_Angeles][INFO] [HttpRequest] HttpRequest.cpp:230 (receive): Content-Length: 0
+
+[17:00:20 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:206 (handleClient): HttpRequest received: GET, /api/v1/led
+
+[17:00:20 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:207 (handleClient): HttpRequest content length: 
+
+[17:00:20 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:208 (handleClient): HttpRequest content type: (� 
+
+[17:00:20 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:209 (handleClient): HttpRequest boundary: @� 
+
+[17:00:20 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:210 (handleClient): HttpRequest is multipart: false
+
+[17:00:20 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:211 (handleClient): HttpRequest header count: 5
+
+[17:00:20 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:212 (handleClient): HttpRequest url: /api/v1/led
+
+[17:00:20 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:213 (handleClient): HttpRequest path: /api/v1/led
+
+[17:00:20 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:214 (handleClient): HttpRequest query: 
+
+[17:00:20 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:237 (handleClient): HttpRequest headers:
+
+[17:00:20 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:240 (handleClient): accept : */*
+
+[17:00:20 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:240 (handleClient): accept-language : en-US,en;q=0
+
+[17:00:20 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:240 (handleClient): host : 192.168.50.213
+
+[17:00:20 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:240 (handleClient): referer : http://192.168.50.213/
+
+[17:00:20 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:240 (handleClient): user-agent : Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.3.1 Safari/605.1.15
+
+[17:00:20 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:243 (handleClient): HttpRequest body: 
+
+
+===== HTTP CLIENT REQUEST =====
+
+17:00:20 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:243 (handleClient): HttpRequest body: 
+a/5.0 (M
+[17:00:20 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:250 (handleClient): HttpRequest handled: true
+
+[HttpServer] Waiting for client connection...
+[HttpServer] Client task slot 1 completed
+[HttpServer] Client request received: GET, path: /api/v1/led
+[HttpServer] Accepted client connection
+[HttpServer] Handling client in task slot 1
+[17:00:20 America/Los_Angeles][INFO] [HttpRequest] HttpRequest.cpp:180 (receive): Receiving request on socket 1
+[HttpServer] Client connection handled
+
+===============================
+
+[17:00:20 America/Los_Angeles][INFO] [HttpRequest] HttpRequest.cpp:201 (receive): Buffer received: GET /api/v1/temperature HTTP/1.1
+[17:00:20 America/L3
+Angeles][INFO] [Router] Router.cpp:239 (handleRequest): Matched route: ^/api/v1/led$
+
+
+ost: 192.168.50.213
+Referer: http://192.168.50.213/
+Accept: */*
+[17:00:20 AmMozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) 
+
+
+ser-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15Response.cpp:225 (send): HttpResponse::send() completed
+3.1 Safari/605.1.15
+Acc
+[17:00:20 America/Los_Angeles][INFO] [HttpRequest] HttpRequest.cpp:213 (receive): Raw headers length: 256
+
+[17:00:20 America/Los_Angeles][INFO] [HttpRequest] HttpRequest.cpp:217 (receive): Raw headers: GET /api/v1/temperature HTTP/1.1
+Host: 192.168.50.213
+Referer: http://192.168.50.213/
+Accept: */*
+User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.3.1 Safari/605.1.15
+Accept-
+Accept-
+nt: Mozilla/5.Angeles][INFO] [HttpRequest] HttpRequest.cpp:223 (receive): Parsed headers:
+o) Version/18.
+[17:00:20 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:250 (handleClient): HttpRequest handled: true
+
+
+17:00:20 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:250 (handleClient): HttpRequest h
+[17:00:20 America/Los_Angeles][INFO] [HttpRequest] HttpRequest.cpp:226 (receive): accept: */*
+
+[17:00:20 America/Los_Angeles][INFO] [HttpRequest] HttpRequest.cpp:226 (receive): accept-language: en-U
+
+[17:00:20 America/Los_Angeles][INFO] [HttpRequest] HttpRequest.cpp:226 (receive): host: 192.168.50.213
+
+[17:00:20 America/Los_Angeles][INFO] [HttpRequest] HttpRequest.cpp:226 (receive): referer: http://192.168.50.213/
+
+[17:00:20 America/Los_Angeles][INFO] [HttpRequest] HttpRequest.cpp:226 (receive): user-agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.3.1 Safari/605.1.15
+
+[17:00:20 America/Los_Angeles][INFO] [HttpRequest] HttpRequest.cpp:230 (receive): Content-Length: 0
+
+[17:00:20 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:206 (handleClient): HttpRequest received: GET, /api/v1/temperature
+
+[17:00:20 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:207 (handleClient): HttpRequest content length: 
+
+[17:00:20 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:208 (handleClient): HttpRequest content type: 0� 
+
+[17:00:20 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:209 (handleClient): HttpRequest boundary: H� 
+
+[17:00:20 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:210 (handleClient): HttpRequest is multipart: false
+
+[17:00:20 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:211 (handleClient): HttpRequest header count: 5
+
+[17:00:20 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:212 (handleClient): HttpRequest url: /api/v1/temperature
+
+[17:00:20 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:213 (handleClient): HttpRequest path: /api/v1/temperature
+
+[17:00:20 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:214 (handleClient): HttpRequest query: 
+
+[17:00:20 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:237 (handleClient): HttpRequest headers:
+
+[17:00:20 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:240 (handleClient): accept : */*
+
+[17:00:20 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:240 (handleClient): accept-language : en-U
+
+[17:00:20 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:240 (handleClient): host : 192.168.50.213
+
+[17:00:20 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:240 (handleClient): referer : http://192.168.50.213/
+
+[17:00:20 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:240 (handleClient): user-agent : Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.3.1 Safari/605.1.15
+
+[17:00:20 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:243 (handleClient): HttpRequest body: 
+
+
+===== HTTP CLIENT REQUEST =====
+[HttpServer] Client task slot 0 completed
+[HttpServer] Client request received: GET, path: /api/v1/temperature
+[HttpServer] Waiting for client connection...
+[HttpServer] Accepted client connection
+[HttpServer] Handling client in task slot 0
+[17:00:20 America/Los_Angeles][INFO] [HttpRequest] HttpRequest.cpp:180 (receive): Receiving request on socket 2
+[HttpServer] Client connection handled
+
+===============================
+
+[17:00:20 America/Los_Angeles][INFO] [Router] Router.cpp:239 (handleRequest): Matched route: ^/api/v1/temperature$
+/9 HTTP/1.1
+Host: 192.168.50.213
+Host: 192.16p://192.168.50.213/
+FO] [Router] Router.cpp:239 (handleRequest): Matched route: ^/api/v1/temperature$
+
+[17:00:20 America/Los_Angeles][INFO] [HttpResponse] HttpResponse.cpp:195 (send): HttpResponse::send()
+
+
+17:00:20 America/Los_Angeles][INAccept: */*
+User-Ag20 America/Los_Angeles][INFO] [HttpResponse] HttpResponse.cpp:225 (send): HttpResponse::send() completed
+3.1 Safari/605.1.15
+Accept-L
+[17:00:20 America/Los_Angeles][INFO] [HttpRequest] HttpRequest.cpp:213 (receive): Raw headers length: 256
+
+[17:00:20 America/Los_Angeles][INFO] [HttpRequest] HttpRequest.cpp:217 (receive): Raw headers: GET /api/v1/gpio/9 HTTP/1.1
+Host: 192.168.50.213
+Referer: http://192.168.50.213/
+FO] [HttpRequest] HttpRequest.cpp:217 (receive): Raw headers: GET /api/v1/gpio/
+[17:00:20 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:250 (handleClient): HttpRequest handled: true
+
+
+17:00:20 America/Los_Angeles][INAccept: */*
+User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.3.1 Safari/605.1.15
+Accept-Langu
+[HttpServer] Client task slot 1 completed
+[HttpServer] Waiting for client connection...
+[17:00:20 America/Los_Angeles][INFO] [HttpRequest] HttpRequest.cpp:223 (receive): Parsed headers:
+
+[17:00:20 America/Los_Angeles][INFO] [HttpRequest] HttpRequest.cpp:226 (receive): accept: */*
+
+[17:00:20 America/Los_Angeles][INFO] [HttpRequest] HttpRequest.cpp:226 (receive): accept-language: en-US,en;
+
+[17:00:20 America/Los_Angeles][INFO] [HttpRequest] HttpRequest.cpp:226 (receive): host: 192.168.50.213
+
+[17:00:20 America/Los_Angeles][INFO] [HttpRequest] HttpRequest.cpp:226 (receive): referer: http://192.168.50.213/
+
+[17:00:20 America/Los_Angeles][INFO] [HttpRequest] HttpRequest.cpp:226 (receive): user-agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.3.1 Safari/605.1.15
+
+[17:00:20 America/Los_Angeles][INFO] [HttpRequest] HttpRequest.cpp:230 (receive): Content-Length: 0
+
+[17:00:20 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:206 (handleClient): HttpRequest received: GET, /api/v1/gpio/9
+
+[17:00:20 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:207 (handleClient): HttpRequest content length: 
+
+[17:00:20 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:208 (handleClient): HttpRequest content type: 
+
+[17:00:20 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:209 (handleClient): HttpRequest boundary: r 
+
+[17:00:20 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:210 (handleClient): HttpRequest is multipart: false
+
+[17:00:20 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:211 (handleClient): HttpRequest header count: 5
+
+[17:00:20 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:212 (handleClient): HttpRequest url: /api/v1/gpio/9
+
+[17:00:20 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:213 (handleClient): HttpRequest path: /api/v1/gpio/9
+
+[17:00:20 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:214 (handleClient): HttpRequest query: 
+
+[17:00:20 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:237 (handleClient): HttpRequest headers:
+
+[17:00:20 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:240 (handleClient): accept : */*
+
+[17:00:20 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:240 (handleClient): accept-language : en-US,en;
+
+[17:00:20 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:240 (handleClient): host : 192.168.50.213
+
+[17:00:20 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:240 (handleClient): referer : http://192.168.50.213/
+
+[17:00:20 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:240 (handleClient): user-agent : Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.3.1 Safari/605.1.15
+
+[17:00:20 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:243 (handleClient): HttpRequest body: 
+
+
+===== HTTP CLIENT REQUEST =====
+[HttpServer] Client request received: GET, path: /api/v1/gpio/9
+[HttpServer] Accepted client connection
+[HttpServer] Handling client in task slot 1
+[17:00:21 America/Los_Angeles][INFO] [HttpRequest] HttpRequest.cpp:180 (receive): Receiving request on socket 1
+[HttpServer] Client connection handled
+
+===============================
+
+[17:00:21 America/Los_Angeles][INFO] [HttpRequest] HttpRequest.cpp:201 (receive): Buffer received: GET /api/v1/gpi$
+19 HTTP/1.1
+Host: 192.168.50.213
+Referer: http://192.168.50.213/
+Accept: */*
+User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.3.1 Safari/605.1.15
+Accept-
+Accept-
+nt: Mozia/Los_Angeles][INFO] [HttpRequest] HttpRequest.cpp:213 (receive): Raw headers length: 256
+on/18.3.1 
+
+17:00:21 America/Los_Angeles][INFO] [HttpResponse] HttpResponse.cpp:195 (send): HttpResponse::send()
+256
+
+[17:00:21 America/Los_Angeles][INFO] [HttpRequest] HttpRequest.cpp:217 (receive): Raw headers: GET /api/v1/gpio/19 HTTP/1.1
+Host: 192.168.50.213
+Referer: http://192.168.50.213/
+Accept: */*
+User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.3.1 Safari/605.1.15
+Accept-Lang
+Accept-Lang
+Mozilla/5.0 (Macintosh;] [HttpRequest] HttpRequest.cpp:223 (receive): Parsed headers:
+o) V
+
+17:00:21 America/Los_Angeles][INFO] [HttpRequonse] HttpResponse.cpp:225 (send): HttpResponse::se
+
+[17:00:21 America/Los_Angeles][INFO] [HttpRequest] HttpRequest.cpp:226 (receive): accept: */*
+
+[17:00:21 America/Los_Angeles][INFO] [HttpRequest] HttpRequest.cpp:226 (receive): accept-language: en-US,en
+
+[17:00:21 America/Los_Angeles][INFO] [HttpRequest] HttpRequest.cpp:226 (receive): host: 192.168.50.213
+
+[17:00:21 America/Los_Angeles][INFO] [HttpRequest] HttpRequest.cpp:226 (receive): referer: http://192.168.50.213/
+
+[17:00:21 America/Los_Angeles][INFO] [HttpRequest] HttpRequest.cpp:226 (receive): user-agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.3.1 Safari/605.1.15
+
+[17:00:21 America/Los_Angeles][INFO] [HttpRequest] HttpRequest.cpp:230 (receive): Content-Length: 0
+
+[17:00:21 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:206 (handleClient): HttpRequest received: GET, /api/v1/gpio/19
+
+[17:00:21 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:207 (handleClient): HttpRequest content length: 
+
+[17:00:21 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:208 (handleClient): HttpRequest content type: �� 
+
+[17:00:21 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:209 (handleClient): HttpRequest boundary: �� 
+
+[17:00:21 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:210 (handleClient): HttpRequest is multipart: false
+
+[17:00:21 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:211 (handleClient): HttpRequest header count: 5
+
+[17:00:21 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:212 (handleClient): HttpRequest url: /api/v1/gpio/19
+
+[17:00:21 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:213 (handleClient): HttpRequest path: /api/v1/gpio/19
+
+[17:00:21 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:214 (handleClient): HttpRequest query: 
+
+[17:00:21 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:237 (handleClient): HttpRequest headers:
+
+[17:00:21 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:240 (handleClient): accept : */*
+
+[17:00:21 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:240 (handleClient): accept-language : en-US,en
+
+[17:00:21 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:240 (handleClient): host : 192.168.50.213
+
+[17:00:21 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:240 (handleClient): referer : http://192.168.50.213/
+
+[17:00:21 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:240 (handleClient): user-agent : Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.3.1 Safari/605.1.15
+
+[17:00:21 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:243 (handleClient): HttpRequest body: 
+
+
+===== HTTP CLIENT REQUEST =====
+
+17:00:21 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:243 (handleClient): HttpRequest body: 
+a/5.0 (M
+[17:00:21 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:250 (handleClient): HttpRequest handled: true
+
+[HttpServer] Client request received: GET, path: /api/v1/gpio/19
+[HttpServer] Waiting for client connection...
+[HttpServer] Client task slot 0 completed
+[HttpServer] Accepted client connection
+[HttpServer] Handling client in task slot 0
+[17:00:21 America/Los_Angeles][INFO] [HttpRequest] HttpRequest.cpp:180 (receive): Receiving request on socket 2
+[HttpServer] Client connection handled
+
+===============================
+
+[17:00:21 America/Los_Angeles][INFO] [HttpRequest] HttpRequest.cpp:201 (receive): Buffer received: GET /api/v1/gpio
+
+
+17:00:21 America/Los_Angeles][INFO] [HttpResponse] HttpResponse.cpp:195 (send): HttpResponse::send()
+ /api/v1/gpio/17 HTTP/1.1
+Host: 192.168.50.213
+Referer: http://192.168.50.213/
+Accept: */*
+User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.3.1 Safari/605.1.15
+Accept-
+[17:00:21 America/Los_Angeles][INFO] [HttpRequest] HttpRequest.cpp:213 (receive): Raw headers length: 256
+
+[17:00:21 America/Los_Angeles][INFO] [HttpRequest] HttpRequest.cpp:217 (receive): Raw headers: GET /api/v1/gpio/17 HTTP/1.1
+Host: 192.168.50.213
+Referer: http://192.168.50.213/
+Accept: */*
+User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.3.1 Safari/605.1.15
+Accept-Lang
+Accept-Lang
+Mozilla/s_Angeles][INFO] [HttpRequest] HttpRequest.cpp:223 (receive): Parsed headers:
+o) V
+
+17:00:21 America/Los_Angeles][INFO] [HttpResponse] HttpResponse.cpp:225 (send): HttpResponse::se
+
+[17:00:21 America/Los_Angeles][INFO] [HttpRequest] HttpRequest.cpp:226 (receive): accept: */*
+
+[17:00:21 America/Los_Angeles][INFO] [HttpRequest] HttpRequest.cpp:226 (receive): accept-language: en-US,en
+
+[17:00:21 America/Los_Angeles][INFO] [HttpRequest] HttpRequest.cpp:226 (receive): host: 192.168.50.213
+
+[17:00:21 America/Los_Angeles][INFO] [HttpRequest] HttpRequest.cpp:226 (receive): referer: http://192.168.50.213/
+
+[17:00:21 America/Los_Angeles][INFO] [HttpRequest] HttpRequest.cpp:226 (receive): user-agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.3.1 Safari/605.1.15
+
+[17:00:21 America/Los_Angeles][INFO] [HttpRequest] HttpRequest.cpp:230 (receive): Content-Length: 0
+
+[17:00:21 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:206 (handleClient): HttpRequest received: GET, /api/v1/gpio/17
+
+[17:00:21 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:207 (handleClient): HttpRequest content length: 
+
+[17:00:21 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:208 (handleClient): HttpRequest content type: �� 
+
+[17:00:21 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:209 (handleClient): HttpRequest boundary: �� 
+
+[17:00:21 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:210 (handleClient): HttpRequest is multipart: false
+
+[17:00:21 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:211 (handleClient): HttpRequest header count: 5
+
+[17:00:21 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:212 (handleClient): HttpRequest url: /api/v1/gpio/17
+
+[17:00:21 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:213 (handleClient): HttpRequest path: /api/v1/gpio/17
+
+[17:00:21 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:214 (handleClient): HttpRequest query: 
+
+[17:00:21 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:237 (handleClient): HttpRequest headers:
+
+[17:00:21 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:240 (handleClient): accept : */*
+
+[17:00:21 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:240 (handleClient): accept-language : en-US,en
+
+[17:00:21 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:240 (handleClient): host : 192.168.50.213
+
+[17:00:21 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:240 (handleClient): referer : http://192.168.50.213/
+
+[17:00:21 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:240 (handleClient): user-agent : Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.3.1 Safari/605.1.15
+
+[17:00:21 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:243 (handleClient): HttpRequest body: 
+
+
+===== HTTP CLIENT REQUEST =====
+
+17:00:21 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:243 (handleClient): HttpRequest body: 
+a/5.0 (M
+[17:00:21 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:250 (handleClient): HttpRequest handled: true
+
+[HttpServer] Waiting for client connection...
+[HttpServer] Client request received: GET, path: /api/v1/gpio/17
+[HttpServer] Client task slot 1 completed
+[17:00:21 America/Los_Angeles][INFO] [Router] Router.cpp:239 (handleRequest): Matched route: ^/api/v1/gpio/([^/]+)$
+
+[17:00:21 America/Los_Angeles][INFO] [HttpResponse] HttpResponse.cpp:195 (send): HttpResponse::send()
+
+[17:00:21 America/Los_Angeles][INFO] [HttpResponse] HttpResponse.cpp:225 (send): HttpResponse::send() completed
+
+[17:00:21 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:250 (handleClient): HttpRequest handled: true
+
+[HttpServer] Client task slot 0 completed
+[HttpServer] Accepted client connection
+[HttpServer] Handling client in task slot 0
+[17:00:26 America/Los_Angeles][INFO] [HttpRequest] HttpRequest.cpp:180 (receive): Receiving request on socket 1
+
+[HttpServer] Client connection handled
+[17:00:26 America/Los_Angeles][INFO] [HttpRequest] HttpRequest.cpp:201 (receive): Buffer received: GET /api/v1/temperature HTTP/1.1
+Host: 192.168.50.213
+Referer: http://192.168.50.213/
+Accept: */*
+User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.3.1 Safari/605.1.15
+Acc
+[17:00:26 America/Los_Angeles][INFO] [HttpRequest] HttpRequest.cpp:213 (receive): Raw headers length: 256
+
+[17:00:26 America/Los_Angeles][INFO] [HttpRequest] HttpRequest.cpp:217 (receive): Raw headers: GET /api/v1/temperature HTTP/1.1
+Host: 192.168.50.213
+Referer: http://192.168.50.213/
+Accept: */*
+User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.3.1 Safari/605.1.15
+Accept-
+[17:00:26 America/Los_Angeles][INFO] [HttpRequest] HttpRequest.cpp:223 (receive): Parsed headers:
+
+[17:00:26 America/Los_Angeles][INFO] [HttpRequest] HttpRequest.cpp:226 (receive): accept: */*
+
+[17:00:26 America/Los_Angeles][INFO] [HttpRequest] HttpRequest.cpp:226 (receive): accept-language: en-U
+
+[17:00:26 America/Los_Angeles][INFO] [HttpRequest] HttpRequest.cpp:226 (receive): host: 192.168.50.213
+
+[17:00:26 America/Los_Angeles][INFO] [HttpRequest] HttpRequest.cpp:226 (receive): referer: http://192.168.50.213/
+
+[17:00:26 America/Los_Angeles][INFO] [HttpRequest] HttpRequest.cpp:226 (receive): user-agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.3.1 Safari/605.1.15
+
+[17:00:26 America/Los_Angeles][INFO] [HttpRequest] HttpRequest.cpp:230 (receive): Content-Length: 0
+
+[17:00:26 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:206 (handleClient): HttpRequest received: GET, /api/v1/temperature
+
+[17:00:26 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:207 (handleClient): HttpRequest content length: 
+
+[17:00:26 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:208 (handleClient): HttpRequest content type: �f 
+
+[17:00:26 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:209 (handleClient): HttpRequest boundary: �f 
+
+[17:00:26 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:210 (handleClient): HttpRequest is multipart: false
+
+[17:00:26 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:211 (handleClient): HttpRequest header count: 5
+
+[17:00:26 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:212 (handleClient): HttpRequest url: /api/v1/temperature
+
+[17:00:26 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:213 (handleClient): HttpRequest path: /api/v1/temperature
+
+[17:00:26 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:214 (handleClient): HttpRequest query: 
+
+[17:00:26 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:237 (handleClient): HttpRequest headers:
+
+[17:00:27 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:240 (handleClient): accept : */*
+
+[17:00:27 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:240 (handleClient): accept-language : en-U
+
+[17:00:27 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:240 (handleClient): host : 192.168.50.213
+
+[17:00:27 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:240 (handleClient): referer : http://192.168.50.213/
+
+[17:00:27 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:240 (handleClient): user-agent : Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.3.1 Safari/605.1.15
+
+[17:00:27 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:243 (handleClient): HttpRequest body: 
+
+
+===== HTTP CLIENT REQUEST =====
+===============================
+
+[HttpServer] Client request received: GET, path: /api/v1/temperature
+[HttpServer] Waiting for client connection...
+[17:00:27 America/Los_Angeles][INFO] [Router] Router.cpp:239 (handleRequest): Matched route: ^/api/v1/temperature$
+
+[17:00:27 America/Los_Angeles][INFO] [HttpResponse] HttpResponse.cpp:195 (send): HttpResponse::send()
+
+[17:00:27 America/Los_Angeles][INFO] [HttpResponse] HttpResponse.cpp:225 (send): HttpResponse::send() completed
+
+[17:00:27 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:250 (handleClient): HttpRequest handled: true
+
+[HttpServer] Client task slot 0 completed
+[HttpServer] Accepted client connection
+[HttpServer] Handling client in task slot 0
+[17:00:28 America/Los_Angeles][INFO] [HttpRequest] HttpRequest.cpp:180 (receive): Receiving request on socket 1
+
+[HttpServer] Client connection handled
+[17:00:28 America/Los_Angeles][INFO] [HttpRequest] HttpRequest.cpp:201 (receive): Buffer received: POST /api/v1/gpio/19/1 HTTP/1.1
+Host: 192.168.50.213
+User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.3.1 Safari/605.1.15
+Accept: */*
+Content-Length: 0
+Referer: http://19
+[17:00:28 America/Los_Angeles][INFO] [HttpRequest] HttpRequest.cpp:213 (receive): Raw headers length: 256
+
+[17:00:28 America/Los_Angeles][INFO] [HttpRequest] HttpRequest.cpp:217 (receive): Raw headers: POST /api/v1/gpio/19/1 HTTP/1.1
+Host: 192.168.50.213
+User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.3.1 Safari/605.1.15
+Accept: */*
+Content-Length: 0
+Referer: http://192.16
+[17:00:28 America/Los_Angeles][INFO] [HttpRequest] HttpRequest.cpp:223 (receive): Parsed headers:
+
+[17:00:28 America/Los_Angeles][INFO] [HttpRequest] HttpRequest.cpp:226 (receive): accept: */*
+
+[17:00:28 America/Los_Angeles][INFO] [HttpRequest] HttpRequest.cpp:226 (receive): content-length: 0
+
+[17:00:28 America/Los_Angeles][INFO] [HttpRequest] HttpRequest.cpp:226 (receive): host: 192.168.50.213
+
+[17:00:28 America/Los_Angeles][INFO] [HttpRequest] HttpRequest.cpp:226 (receive): referer: http://192.168.50.213/
+
+[17:00:28 America/Los_Angeles][INFO] [HttpRequest] HttpRequest.cpp:226 (receive): user-agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.3.1 Safari/605.1.15
+
+[17:00:28 America/Los_Angeles][INFO] [HttpRequest] HttpRequest.cpp:230 (receive): Content-Length: 0
+
+[17:00:28 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:206 (handleClient): HttpRequest received: POST, /api/v1/gpio/19/1
+
+[17:00:28 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:207 (handleClient): HttpRequest content length: 
+
+[17:00:28 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:208 (handleClient): HttpRequest content type: �f 
+
+[17:00:28 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:209 (handleClient): HttpRequest boundary: �f 
+
+[17:00:28 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:210 (handleClient): HttpRequest is multipart: false
+
+[17:00:28 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:211 (handleClient): HttpRequest header count: 5
+
+[17:00:28 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:212 (handleClient): HttpRequest url: /api/v1/gpio/19/1
+
+[17:00:28 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:213 (handleClient): HttpRequest path: /api/v1/gpio/19/1
+
+[17:00:28 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:214 (handleClient): HttpRequest query: 
+
+[17:00:28 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:237 (handleClient): HttpRequest headers:
+
+[17:00:28 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:240 (handleClient): accept : */*
+
+[17:00:28 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:240 (handleClient): content-length : 0
+
+[17:00:28 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:240 (handleClient): host : 192.168.50.213
+
+[17:00:28 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:240 (handleClient): referer : http://192.168.50.213/
+
+[17:00:28 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:240 (handleClient): user-agent : Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.3.1 Safari/605.1.15
+
+[17:00:28 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:243 (handleClient): HttpRequest body: 
+
+
+===== HTTP CLIENT REQUEST =====
+===============================
+
+[HttpServer] Client request received: POST, path: /api/v1/gpio/19/1
+[HttpServer] Waiting for client connection...
+[17:00:28 America/Los_Angeles][INFO] [Router] Router.cpp:239 (handleRequest): Matched route: ^/api/v1/gpio/([^/]+)/([^/]+)$
+
+[17:00:28 America/Los_Angeles][INFO] [HttpResponse] HttpResponse.cpp:195 (send): HttpResponse::send()
+
+[17:00:28 America/Los_Angeles][INFO] [HttpResponse] HttpResponse.cpp:225 (send): HttpResponse::send() completed
+
+[17:00:28 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:250 (handleClient): HttpRequest handled: true
+
+[HttpServer] Client task slot 0 completed
+[App] Running main polling loop...
+[App] Heartbeat user event received
+[HttpServer] Accepted client connection
+[HttpServer] Handling client in task slot 0
+[17:00:31 America/Los_Angeles][INFO] [HttpRequest] HttpRequest.cpp:180 (receive): Receiving request on socket 1
+
+[HttpServer] Client connection handled
+[17:00:31 America/Los_Angeles][INFO] [HttpRequest] HttpRequest.cpp:201 (receive): Buffer received: POST /api/v1/gpio/19/0 HTTP/1.1
+Host: 192.168.50.213
+User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.3.1 Safari/605.1.15
+Accept: */*
+Content-Length: 0
+Referer: http://19
+[17:00:31 America/Los_Angeles][INFO] [HttpRequest] HttpRequest.cpp:213 (receive): Raw headers length: 256
+
+[17:00:31 America/Los_Angeles][INFO] [HttpRequest] HttpRequest.cpp:217 (receive): Raw headers: POST /api/v1/gpio/19/0 HTTP/1.1
+Host: 192.168.50.213
+User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.3.1 Safari/605.1.15
+Accept: */*
+Content-Length: 0
+Referer: http://192.16
+[17:00:31 America/Los_Angeles][INFO] [HttpRequest] HttpRequest.cpp:223 (receive): Parsed headers:
+
+[17:00:31 America/Los_Angeles][INFO] [HttpRequest] HttpRequest.cpp:226 (receive): accept: */*
+
+[17:00:31 America/Los_Angeles][INFO] [HttpRequest] HttpRequest.cpp:226 (receive): content-length: 0
+
+[17:00:31 America/Los_Angeles][INFO] [HttpRequest] HttpRequest.cpp:226 (receive): host: 192.168.50.213
+
+[17:00:31 America/Los_Angeles][INFO] [HttpRequest] HttpRequest.cpp:226 (receive): referer: http://192.168.50.213/
+
+[17:00:31 America/Los_Angeles][INFO] [HttpRequest] HttpRequest.cpp:226 (receive): user-agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.3.1 Safari/605.1.15
+
+[17:00:31 America/Los_Angeles][INFO] [HttpRequest] HttpRequest.cpp:230 (receive): Content-Length: 0
+
+[17:00:31 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:206 (handleClient): HttpRequest received: POST, /api/v1/gpio/19/0
+
+[17:00:31 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:207 (handleClient): HttpRequest content length: 
+
+[17:00:31 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:208 (handleClient): HttpRequest content type: �f 
+
+[17:00:31 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:209 (handleClient): HttpRequest boundary: �f 
+
+[17:00:31 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:210 (handleClient): HttpRequest is multipart: false
+
+[17:00:31 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:211 (handleClient): HttpRequest header count: 5
+
+[17:00:31 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:212 (handleClient): HttpRequest url: /api/v1/gpio/19/0
+
+[17:00:31 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:213 (handleClient): HttpRequest path: /api/v1/gpio/19/0
+
+[17:00:31 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:214 (handleClient): HttpRequest query: 
+
+[17:00:31 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:237 (handleClient): HttpRequest headers:
+
+[17:00:31 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:240 (handleClient): accept : */*
+
+[17:00:31 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:240 (handleClient): content-length : 0
+
+[17:00:31 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:240 (handleClient): host : 192.168.50.213
+
+[17:00:31 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:240 (handleClient): referer : http://192.168.50.213/
+
+[17:00:31 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:240 (handleClient): user-agent : Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.3.1 Safari/605.1.15
+
+[17:00:31 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:243 (handleClient): HttpRequest body: 
+
+
+===== HTTP CLIENT REQUEST =====
+[HttpServer] Client request received: POST, path: /api/v1/gpio/19/0
+===============================
+
+[HttpServer] Waiting for client connection...
+[17:00:31 America/Los_Angeles][INFO] [Router] Router.cpp:239 (handleRequest): Matched route: ^/api/v1/gpio/([^/]+)/([^/]+)$
+
+[17:00:31 America/Los_Angeles][INFO] [HttpResponse] HttpResponse.cpp:195 (send): HttpResponse::send()
+
+[17:00:31 America/Los_Angeles][INFO] [HttpResponse] HttpResponse.cpp:225 (send): HttpResponse::send() completed
+
+[17:00:31 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:250 (handleClient): HttpRequest handled: true
+
+[HttpServer] Client task slot 0 completed
+[HttpServer] Accepted client connection
+[HttpServer] Handling client in task slot 0
+[17:00:32 America/Los_Angeles][INFO] [HttpRequest] HttpRequest.cpp:180 (receive): Receiving request on socket 1
+
+[HttpServer] Client connection handled
+[17:00:32 America/Los_Angeles][INFO] [HttpRequest] HttpRequest.cpp:201 (receive): Buffer received: POST /api/v1/gpio/19/1 HTTP/1.1
+Host: 192.168.50.213
+User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.3.1 Safari/605.1.15
+Accept: */*
+Content-Length: 0
+Referer: http://19
+[17:00:32 America/Los_Angeles][INFO] [HttpRequest] HttpRequest.cpp:213 (receive): Raw headers length: 256
+
+[17:00:32 America/Los_Angeles][INFO] [HttpRequest] HttpRequest.cpp:217 (receive): Raw headers: POST /api/v1/gpio/19/1 HTTP/1.1
+Host: 192.168.50.213
+User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.3.1 Safari/605.1.15
+Accept: */*
+Content-Length: 0
+Referer: http://192.16
+[17:00:32 America/Los_Angeles][INFO] [HttpRequest] HttpRequest.cpp:223 (receive): Parsed headers:
+
+[17:00:32 America/Los_Angeles][INFO] [HttpRequest] HttpRequest.cpp:226 (receive): accept: */*
+
+[17:00:32 America/Los_Angeles][INFO] [HttpRequest] HttpRequest.cpp:226 (receive): content-length: 0
+
+[17:00:32 America/Los_Angeles][INFO] [HttpRequest] HttpRequest.cpp:226 (receive): host: 192.168.50.213
+
+[17:00:33 America/Los_Angeles][INFO] [HttpRequest] HttpRequest.cpp:226 (receive): referer: http://192.168.50.213/
+
+[17:00:33 America/Los_Angeles][INFO] [HttpRequest] HttpRequest.cpp:226 (receive): user-agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.3.1 Safari/605.1.15
+
+[17:00:33 America/Los_Angeles][INFO] [HttpRequest] HttpRequest.cpp:230 (receive): Content-Length: 0
+
+[17:00:33 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:206 (handleClient): HttpRequest received: POST, /api/v1/gpio/19/1
+
+[17:00:33 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:207 (handleClient): HttpRequest content length: 
+
+[17:00:33 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:208 (handleClient): HttpRequest content type: �f 
+
+[17:00:33 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:209 (handleClient): HttpRequest boundary: �f 
+
+[17:00:33 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:210 (handleClient): HttpRequest is multipart: false
+
+[17:00:33 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:211 (handleClient): HttpRequest header count: 5
+
+[17:00:33 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:212 (handleClient): HttpRequest url: /api/v1/gpio/19/1
+
+[17:00:33 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:213 (handleClient): HttpRequest path: /api/v1/gpio/19/1
+
+[17:00:33 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:214 (handleClient): HttpRequest query: 
+
+[17:00:33 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:237 (handleClient): HttpRequest headers:
+
+[17:00:33 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:240 (handleClient): accept : */*
+
+[17:00:33 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:240 (handleClient): content-length : 0
+
+[17:00:33 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:240 (handleClient): host : 192.168.50.213
+
+[17:00:33 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:240 (handleClient): referer : http://192.168.50.213/
+
+[17:00:33 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:240 (handleClient): user-agent : Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.3.1 Safari/605.1.15
+
+[17:00:33 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:243 (handleClient): HttpRequest body: 
+
+
+===== HTTP CLIENT REQUEST =====
+===============================
+
+[HttpServer] Client request received: POST, path: /api/v1/gpio/19/1
+[HttpServer] Waiting for client connection...
+[17:00:33 America/Los_Angeles][INFO] [Router] Router.cpp:239 (handleRequest): Matched route: ^/api/v1/gpio/([^/]+)/([^/]+)$
+
+[17:00:33 America/Los_Angeles][INFO] [HttpResponse] HttpResponse.cpp:195 (send): HttpResponse::send()
+
+[17:00:33 America/Los_Angeles][INFO] [HttpResponse] HttpResponse.cpp:225 (send): HttpResponse::send() completed
+
+[17:00:33 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:250 (handleClient): HttpRequest handled: true
+
+[HttpServer] Client task slot 0 completed
+[HttpServer] Accepted client connection
+[HttpServer] Handling client in task slot 0
+[17:00:36 America/Los_Angeles][INFO] [HttpRequest] HttpRequest.cpp:180 (receive): Receiving request on socket 1
+
+[HttpServer] Client connection handled
+[17:00:36 America/Los_Angeles][INFO] [HttpRequest] HttpRequest.cpp:201 (receive): Buffer received: GET /api/v1/temperature HTTP/1.1
+Host: 192.168.50.213
+Referer: http://192.168.50.213/
+Accept: */*
+User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.3.1 Safari/605.1.15
+Acc
+[17:00:36 America/Los_Angeles][INFO] [HttpRequest] HttpRequest.cpp:213 (receive): Raw headers length: 256
+
+[17:00:36 America/Los_Angeles][INFO] [HttpRequest] HttpRequest.cpp:217 (receive): Raw headers: GET /api/v1/temperature HTTP/1.1
+Host: 192.168.50.213
+Referer: http://192.168.50.213/
+Accept: */*
+User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.3.1 Safari/605.1.15
+Accept-
+[17:00:36 America/Los_Angeles][INFO] [HttpRequest] HttpRequest.cpp:223 (receive): Parsed headers:
+
+[17:00:36 America/Los_Angeles][INFO] [HttpRequest] HttpRequest.cpp:226 (receive): accept: */*
+
+[17:00:36 America/Los_Angeles][INFO] [HttpRequest] HttpRequest.cpp:226 (receive): accept-language: en-U
+
+[17:00:36 America/Los_Angeles][INFO] [HttpRequest] HttpRequest.cpp:226 (receive): host: 192.168.50.213
+
+[17:00:36 America/Los_Angeles][INFO] [HttpRequest] HttpRequest.cpp:226 (receive): referer: http://192.168.50.213/
+
+[17:00:36 America/Los_Angeles][INFO] [HttpRequest] HttpRequest.cpp:226 (receive): user-agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.3.1 Safari/605.1.15
+
+[17:00:36 America/Los_Angeles][INFO] [HttpRequest] HttpRequest.cpp:230 (receive): Content-Length: 0
+
+[17:00:36 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:206 (handleClient): HttpRequest received: GET, /api/v1/temperature
+
+[17:00:36 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:207 (handleClient): HttpRequest content length: 
+
+[17:00:36 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:208 (handleClient): HttpRequest content type: �f 
+
+[17:00:36 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:209 (handleClient): HttpRequest boundary: �f 
+
+[17:00:36 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:210 (handleClient): HttpRequest is multipart: false
+
+[17:00:36 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:211 (handleClient): HttpRequest header count: 5
+
+[17:00:36 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:212 (handleClient): HttpRequest url: /api/v1/temperature
+
+[17:00:37 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:213 (handleClient): HttpRequest path: /api/v1/temperature
+
+[17:00:37 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:214 (handleClient): HttpRequest query: 
+
+[17:00:37 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:237 (handleClient): HttpRequest headers:
+
+[17:00:37 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:240 (handleClient): accept : */*
+
+[17:00:37 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:240 (handleClient): accept-language : en-U
+
+[17:00:37 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:240 (handleClient): host : 192.168.50.213
+
+[17:00:37 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:240 (handleClient): referer : http://192.168.50.213/
+
+[17:00:37 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:240 (handleClient): user-agent : Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.3.1 Safari/605.1.15
+
+[17:00:37 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:243 (handleClient): HttpRequest body: 
+
+
+===== HTTP CLIENT REQUEST =====
+===============================
+
+[HttpServer] Client request received: GET, path: /api/v1/temperature
+[HttpServer] Waiting for client connection...
+[17:00:37 America/Los_Angeles][INFO] [Router] Router.cpp:239 (handleRequest): Matched route: ^/api/v1/temperature$
+
+[17:00:37 America/Los_Angeles][INFO] [HttpResponse] HttpResponse.cpp:195 (send): HttpResponse::send()
+
+[17:00:37 America/Los_Angeles][INFO] [HttpResponse] HttpResponse.cpp:225 (send): HttpResponse::send() completed
+
+[17:00:37 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:250 (handleClient): HttpRequest handled: true
+
+[HttpServer] Client task slot 0 completed
+[App] Running main polling loop...
+[App] Heartbeat user event received
+[HttpServer] Accepted client connection
+[HttpServer] Handling client in task slot 0
+[17:00:46 America/Los_Angeles][INFO] [HttpRequest] HttpRequest.cpp:180 (receive): Receiving request on socket 1
+
+[HttpServer] Client connection handled
+[17:00:46 America/Los_Angeles][INFO] [HttpRequest] HttpRequest.cpp:201 (receive): Buffer received: GET /api/v1/temperature HTTP/1.1
+Host: 192.168.50.213
+Referer: http://192.168.50.213/
+Accept: */*
+User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.3.1 Safari/605.1.15
+Acc
+[17:00:46 America/Los_Angeles][INFO] [HttpRequest] HttpRequest.cpp:213 (receive): Raw headers length: 256
+
+[17:00:46 America/Los_Angeles][INFO] [HttpRequest] HttpRequest.cpp:217 (receive): Raw headers: GET /api/v1/temperature HTTP/1.1
+Host: 192.168.50.213
+Referer: http://192.168.50.213/
+Accept: */*
+User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.3.1 Safari/605.1.15
+Accept-
+[17:00:46 America/Los_Angeles][INFO] [HttpRequest] HttpRequest.cpp:223 (receive): Parsed headers:
+
+[17:00:47 America/Los_Angeles][INFO] [HttpRequest] HttpRequest.cpp:226 (receive): accept: */*
+
+[17:00:47 America/Los_Angeles][INFO] [HttpRequest] HttpRequest.cpp:226 (receive): accept-language: en-U
+
+[17:00:47 America/Los_Angeles][INFO] [HttpRequest] HttpRequest.cpp:226 (receive): host: 192.168.50.213
+
+[17:00:47 America/Los_Angeles][INFO] [HttpRequest] HttpRequest.cpp:226 (receive): referer: http://192.168.50.213/
+
+[17:00:47 America/Los_Angeles][INFO] [HttpRequest] HttpRequest.cpp:226 (receive): user-agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.3.1 Safari/605.1.15
+
+[17:00:47 America/Los_Angeles][INFO] [HttpRequest] HttpRequest.cpp:230 (receive): Content-Length: 0
+
+[17:00:47 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:206 (handleClient): HttpRequest received: GET, /api/v1/temperature
+
+[17:00:47 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:207 (handleClient): HttpRequest content length: 
+
+[17:00:47 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:208 (handleClient): HttpRequest content type: �f 
+
+[17:00:47 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:209 (handleClient): HttpRequest boundary: �f 
+
+[17:00:47 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:210 (handleClient): HttpRequest is multipart: false
+
+[17:00:47 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:211 (handleClient): HttpRequest header count: 5
+
+[17:00:47 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:212 (handleClient): HttpRequest url: /api/v1/temperature
+
+[17:00:47 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:213 (handleClient): HttpRequest path: /api/v1/temperature
+
+[17:00:47 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:214 (handleClient): HttpRequest query: 
+
+[17:00:47 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:237 (handleClient): HttpRequest headers:
+
+[17:00:47 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:240 (handleClient): accept : */*
+
+[17:00:47 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:240 (handleClient): accept-language : en-U
+
+[17:00:47 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:240 (handleClient): host : 192.168.50.213
+
+[17:00:47 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:240 (handleClient): referer : http://192.168.50.213/
+
+[17:00:47 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:240 (handleClient): user-agent : Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.3.1 Safari/605.1.15
+
+[17:00:47 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:243 (handleClient): HttpRequest body: 
+
+
+===== HTTP CLIENT REQUEST =====
+[HttpServer] Client request received: GET, path: /api/v1/temperature
+===============================
+
+[HttpServer] Waiting for client connection...
+[17:00:47 America/Los_Angeles][INFO] [Router] Router.cpp:239 (handleRequest): Matched route: ^/api/v1/temperature$
+
+[17:00:47 America/Los_Angeles][INFO] [HttpResponse] HttpResponse.cpp:195 (send): HttpResponse::send()
+
+[17:00:47 America/Los_Angeles][INFO] [HttpResponse] HttpResponse.cpp:225 (send): HttpResponse::send() completed
+
+[17:00:47 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:250 (handleClient): HttpRequest handled: true
+
+[HttpServer] Client task slot 0 completed
+[HttpServer] Accepted client connection
+[HttpServer] Handling client in task slot 0
+[17:00:56 America/Los_Angeles][INFO] [HttpRequest] HttpRequest.cpp:180 (receive): Receiving request on socket 1
+
+[HttpServer] Client connection handled
+[17:00:56 America/Los_Angeles][INFO] [HttpRequest] HttpRequest.cpp:201 (receive): Buffer received: GET /api/v1/temperature HTTP/1.1
+Host: 192.168.50.213
+Referer: http://192.168.50.213/
+Accept: */*
+User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.3.1 Safari/605.1.15
+Acc
+[17:00:56 America/Los_Angeles][INFO] [HttpRequest] HttpRequest.cpp:213 (receive): Raw headers length: 256
+
+[17:00:56 America/Los_Angeles][INFO] [HttpRequest] HttpRequest.cpp:217 (receive): Raw headers: GET /api/v1/temperature HTTP/1.1
+Host: 192.168.50.213
+Referer: http://192.168.50.213/
+Accept: */*
+User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.3.1 Safari/605.1.15
+Accept-
+[17:00:56 America/Los_Angeles][INFO] [HttpRequest] HttpRequest.cpp:223 (receive): Parsed headers:
+
+[17:00:56 America/Los_Angeles][INFO] [HttpRequest] HttpRequest.cpp:226 (receive): accept: */*
+
+[17:00:56 America/Los_Angeles][INFO] [HttpRequest] HttpRequest.cpp:226 (receive): accept-language: en-U
+
+[17:00:56 America/Los_Angeles][INFO] [HttpRequest] HttpRequest.cpp:226 (receive): host: 192.168.50.213
+
+[17:00:56 America/Los_Angeles][INFO] [HttpRequest] HttpRequest.cpp:226 (receive): referer: http://192.168.50.213/
+
+[17:00:56 America/Los_Angeles][INFO] [HttpRequest] HttpRequest.cpp:226 (receive): user-agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.3.1 Safari/605.1.15
+
+[17:00:56 America/Los_Angeles][INFO] [HttpRequest] HttpRequest.cpp:230 (receive): Content-Length: 0
+
+[17:00:56 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:206 (handleClient): HttpRequest received: GET, /api/v1/temperature
+
+[17:00:56 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:207 (handleClient): HttpRequest content length: 
+
+[17:00:56 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:208 (handleClient): HttpRequest content type: �f 
+
+[17:00:56 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:209 (handleClient): HttpRequest boundary: �f 
+
+[17:00:56 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:210 (handleClient): HttpRequest is multipart: false
+
+[17:00:56 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:211 (handleClient): HttpRequest header count: 5
+
+[17:00:56 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:212 (handleClient): HttpRequest url: /api/v1/temperature
+
+[17:00:56 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:213 (handleClient): HttpRequest path: /api/v1/temperature
+
+[17:00:56 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:214 (handleClient): HttpRequest query: 
+
+[17:00:56 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:237 (handleClient): HttpRequest headers:
+
+[17:00:57 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:240 (handleClient): accept : */*
+
+[17:00:57 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:240 (handleClient): accept-language : en-U
+
+[17:00:57 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:240 (handleClient): host : 192.168.50.213
+
+[17:00:57 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:240 (handleClient): referer : http://192.168.50.213/
+
+[17:00:57 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:240 (handleClient): user-agent : Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.3.1 Safari/605.1.15
+
+[17:00:57 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:243 (handleClient): HttpRequest body: 
+
+
+===== HTTP CLIENT REQUEST =====
+[HttpServer] Client request received: GET, path: /api/v1/temperature
+===============================
+
+[HttpServer] Waiting for client connection...
+[17:00:57 America/Los_Angeles][INFO] [Router] Router.cpp:239 (handleRequest): Matched route: ^/api/v1/temperature$
+
+[17:00:57 America/Los_Angeles][INFO] [HttpResponse] HttpResponse.cpp:195 (send): HttpResponse::send()
+
+[17:00:57 America/Los_Angeles][INFO] [HttpResponse] HttpResponse.cpp:225 (send): HttpResponse::send() completed
+
+[17:00:57 America/Los_Angeles][INFO] [HttpServer] HttpServer.cpp:250 (handleClient): HttpRequest handled: true
+
+[HttpServer] Client task slot 0 completed
+---- Closed the serial port /dev/tty.usbmodem31302 ----

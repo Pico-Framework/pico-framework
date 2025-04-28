@@ -29,4 +29,5 @@ public:
 private:
     void getState(HttpRequest& req, HttpResponse& res, const std::vector<std::string>& params);
     void setState(HttpRequest& req, HttpResponse& res, const std::vector<std::string>& params);
+    void handleGetMultipleGpios(HttpRequest& req, HttpResponse& res);
 };

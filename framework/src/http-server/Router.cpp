@@ -198,6 +198,7 @@ void Router::addRoute(const std::string &method,
 
 bool Router::handleRequest(HttpRequest &req, HttpResponse &res)
 {
+   TRACE("Router::handleRequest: %s %s\n", req.getMethod().c_str(), req.getPath().c_str());
     bool matched = false;
     const Route *matchedRoute = nullptr;
     std::vector<std::string> params;
@@ -207,24 +208,28 @@ bool Router::handleRequest(HttpRequest &req, HttpResponse &res)
         auto it = r.find(req.getMethod());
         if (it == r.end()) return;
 
-        for (const auto &route : it->second)
+        for (const auto& route : it->second)
         {
-            std::regex route_regex(route.path);
+            TRACE("Checking route: %s\n", route.path.c_str());
+        
             std::smatch match;
-            const std::string& uri = req.getUri();
-            if (std::regex_match(uri, match, route_regex))
+            const std::string& path = req.getPath();
+            if (std::regex_match(path, match, route.compiledRegex)) // <--- USE precompiled
             {
                 for (size_t i = 1; i < match.size(); ++i)
                 {
+                    TRACE("Matched param %zu: %s\n", i, match[i].str().c_str());
                     params.push_back(urlDecode(match[i].str()));
                 }
                 matchedRoute = &route;
                 matched = true;
+                TRACE("Matched route: %s\n", route.path.c_str());
                 return;
             }
         }
-    });
 
+    });
+    TRACE("Matched: %s\n", matched ? "true" : "false");
     if (matched && matchedRoute)
     {
         RouteMatch match;

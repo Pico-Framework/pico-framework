@@ -10,6 +10,8 @@
 #include <cstdio>
 #include <FreeRTOS.h>
 #include <task.h>
+#include <pico/stdlib.h>
+#include "utility/utility.h"
 
 #include "network/lwip_dns_resolver.h"
 
@@ -248,8 +250,17 @@ bool Tcp::connectTls(const ip_addr_t &ip, int port)
 
 int Tcp::send(const char *buffer, size_t size)
 {
-    constexpr size_t chunkSize = HTTP_BUFFER_SIZE;  // Match MSS
+    TRACE("[Tcp] Sending %zu bytes\n", size);
+    if (!buffer || size == 0 || !connected || (use_tls && !tls_pcb))
+    {
+        printf("[Tcp] Invalid buffer, size, or connection\n");
+        return -1;
+    }
+
+    constexpr size_t chunkSize = HTTP_BUFFER_SIZE;
     size_t totalSent = 0;
+
+    //absolute_time_t startTime = get_absolute_time(); // <-- your timing starts here
 
     while (totalSent < size)
     {
@@ -257,7 +268,6 @@ int Tcp::send(const char *buffer, size_t size)
 
         if (use_tls && tls_pcb)
         {
-            TRACE("[Tcp] Sending %zu bytes over TLS\n", toSend);
             if (tls_pcb->state == nullptr) {
                 printf("[Tcp] TLS connection is not established\n");
                 return -1;
@@ -272,14 +282,12 @@ int Tcp::send(const char *buffer, size_t size)
                 printf("[Tcp] altcp_output failed\n");
                 return -1;
             }
-            // TLS handled successfully
         }
         else if (sockfd >= 0)
         {
-            TRACE("[Tcp] Sending %zu bytes over plain TCP\n", toSend);
             int ret = lwip_send(sockfd, buffer + totalSent, toSend, 0);
             if (ret <= 0) {
-                printf("[Tcp] lwip_send failed: %d\n", ret);
+                warning("[Tcp] lwip_send failed: ", ret);
                 return -1;
             }
         }
@@ -289,10 +297,19 @@ int Tcp::send(const char *buffer, size_t size)
             return -1;
         }
 
+        vTaskDelay(pdMS_TO_TICKS(STREAM_SEND_DELAY_MS)); // Throttle per chunk
         totalSent += toSend;
     }
 
-    return static_cast<int>(size);  // Report total original size sent
+    // After sending ALL chunks: yield and delay for TCP flush
+    taskYIELD();
+    vTaskDelay(pdMS_TO_TICKS(20)); // Give lwIP time to transmit
+
+    //absolute_time_t endTime = get_absolute_time(); // 
+    //int64_t elapsedMs = to_ms_since_boot(endTime - startTime);
+    //printf("[Tcp] Sent %zu bytes in %lld ms\n", totalSent, elapsedMs);
+
+    return static_cast<int>(size); // Report success
 }
 
 
@@ -423,12 +440,9 @@ Tcp* Tcp::accept()
 {
     if (use_tls)
     {
-        // TLS-enabled accept: wait for notification
         pending_client = nullptr;
         waiting_task = xTaskGetCurrentTaskHandle();
-
-        ulTaskNotifyTakeIndexed(NotifyAccept, pdTRUE, portMAX_DELAY); // Wait for accept
-
+        ulTaskNotifyTakeIndexed(NotifyAccept, pdTRUE, portMAX_DELAY);
         waiting_task = nullptr;
 
         if (pending_client)
@@ -440,25 +454,28 @@ Tcp* Tcp::accept()
             pending_client = nullptr;
             return client;
         }
-
-        // No client was accepted — return invalid
         return nullptr;
     }
-
-    // Plain TCP accept
+    // For plain TCP, we use lwIP accept directly
     struct sockaddr_in client_addr{};
     socklen_t addr_len = sizeof(client_addr);
-    TRACE("[Tcp] Accepting client connection...\n");
+
     int client_fd = lwip_accept(sockfd, reinterpret_cast<struct sockaddr *>(&client_addr), &addr_len);
-    TRACE("[Tcp] Accepted client connection (fd = %d)\n", client_fd);  
-    if (client_fd < 0)
+    TRACE("[Tcp] Accept returned new socket: %d\n", client_fd);
+    if (client_fd >= 0)
     {
-        printf("[Tcp] lwip_accept failed\n");
-        return nullptr; // Invalid
+        // Set SO_LINGER immediately on the accepted client
+        struct linger so_linger;
+        so_linger.l_onoff = 1;
+        so_linger.l_linger = 5; // wait up to 5 seconds to flush data
+        lwip_setsockopt(client_fd, SOL_SOCKET, SO_LINGER, &so_linger, sizeof(so_linger));
+        Tcp* client = new Tcp(client_fd);
+        return client;
     }
-    Tcp* client = new Tcp(client_fd);
-    TRACE("[Tcp] Created new Tcp client connection (fd = %d)\n", client_fd);
-    return client;
+
+    // Timed out — no client
+    printf("[Tcp] Accept timeout, no client.\n");
+    return nullptr;
 }
 
 bool Tcp::bindAndListen(int port)
@@ -466,6 +483,7 @@ bool Tcp::bindAndListen(int port)
     return server_tls_config ? bindAndListenTls(port) : bindAndListenPlain(port);
 }
 
+#include <fcntl.h>  // needed for O_NONBLOCK
 bool Tcp::bindAndListenPlain(int port)
 {
     sockfd = lwip_socket(AF_INET, SOCK_STREAM, 0);
@@ -476,7 +494,8 @@ bool Tcp::bindAndListenPlain(int port)
     }
 
     int opt = 1;
-    lwip_setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt));
+    int flags = fcntl(sockfd, F_GETFL, 0);
+    fcntl(sockfd, F_SETFL, flags | O_NONBLOCK);
 
     struct sockaddr_in addr = {};
     addr.sin_family = AF_INET;
@@ -491,7 +510,7 @@ bool Tcp::bindAndListenPlain(int port)
         return false;
     }
 
-    if (lwip_listen(sockfd, 5) < 0)
+    if (lwip_listen(sockfd, 10) < 0)
     {
         printf("[Tcp] Failed to listen on socket\n");
         lwip_close(sockfd);

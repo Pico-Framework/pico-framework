@@ -55,4 +55,7 @@ void debug_print(const char *msg);
 void debug_print(const std::string &msg);
 void debug_print(const char *msg, size_t len);
 
+void warning(const std::string &msg);
+void warning(const std::string &msg, int32_t code);
+
 #endif // UTILITY_H

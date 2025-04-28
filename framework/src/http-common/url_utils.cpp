@@ -64,9 +64,10 @@ std::string urlDecode(const std::string &src)
 }
 
 /// @copydoc parseUrlEncoded
-std::unordered_map<std::string, std::string> parseUrlEncoded(const std::string &data)
+std::unordered_multimap<std::string, std::string> parseUrlEncoded(const std::string& data)
 {
-    std::unordered_map<std::string, std::string> params;
+    std::unordered_multimap<std::string, std::string> params;
+
     std::istringstream stream(data);
     std::string pair;
     while (std::getline(stream, pair, '&'))
@@ -77,7 +78,7 @@ std::unordered_map<std::string, std::string> parseUrlEncoded(const std::string &
             std::string key = pair.substr(0, pos);
             std::string value = pair.substr(pos + 1);
             // Decode both key and value
-            params[urlDecode(key)] = urlDecode(value);
+            params.emplace(urlDecode(key), urlDecode(value));
         }
     }
     return params;

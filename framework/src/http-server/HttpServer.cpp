@@ -36,6 +36,8 @@ TRACE_INIT(HttpServer)
 #include <task.h>
 #include <semphr.h>
 
+#include "pico/stdlib.h"
+
 #include "utility/utility.h"
 #include "http/url_utils.h"
 #include "framework/AppContext.h"
@@ -100,7 +102,7 @@ void HttpServer::startServerTask(void *pvParameters)
 void HttpServer::run()
 {
 
-    QUIET_PRINTF("[HttpServer] Starting HTTP Server on port %d\n", port);
+    printf("[HttpServer] Starting HTTP Server on port %d\n", port);
 
     if (!initNetwork())
     {
@@ -119,13 +121,21 @@ void HttpServer::run()
     // Optional: store listener as a class member if needed later
     while (true)
     {
-        QUIET_PRINTF("[HttpServer] Waiting for client connection...\n");
+        TRACE("[HttpServer] Waiting for client connection...\n");
+        //int64_t start = to_ms_since_boot(get_absolute_time());
         Tcp* conn = listener->accept();
         if (conn)
         {
+            //int64_t accept_end = to_ms_since_boot(get_absolute_time());
+            //printf("[HttpServer] Accept waited %lld ms\n", accept_end - start);
             QUIET_PRINTF("[HttpServer] Accepted client connection\n");
+            //int64_t start = to_ms_since_boot(get_absolute_time());
             startHandlingClient(conn);
-            vTaskDelay(pdMS_TO_TICKS(100));
+            //int64_t end = to_ms_since_boot(get_absolute_time());
+            //printf("[HttpServer] Client handled in %lld ms\n", end - start);
+            vTaskDelay(pdMS_TO_TICKS(10));
+            
+
             QUIET_PRINTF("[HttpServer] Client connection handled\n");
             QUIET_PRINTF("===============================\n\n");
             #if !defined(HTTP_SERVER_USE_TASK_PER_CLIENT)
@@ -134,9 +144,10 @@ void HttpServer::run()
         }
         else
         {
-            QUIET_PRINTF("[HttpServer] Failed to accept client connection\n");
-            vTaskDelay(pdMS_TO_TICKS(100)); // Wait before retrying 
+            warning("[HttpServer] Failed to accept client connection\n");
+            vTaskDelay(pdMS_TO_TICKS(10)); // Wait before retrying 
         }
+
     }
 
     // Note: we never reach here in this model
@@ -158,7 +169,7 @@ bool HttpServer::initNetwork()
         {
             break;
         }
-        vTaskDelay(pdMS_TO_TICKS(100));
+        vTaskDelay(pdMS_TO_TICKS(10));
     }
 
     //TRACE("Assigned IP Address: %s\n", ip4addr_ntoa(&netif->ip_addr));
@@ -209,32 +220,40 @@ void HttpServer::startHandlingClient(Tcp* conn)
 /// @copydoc HttpServer::handleClient
 void HttpServer::handleClient(Tcp* conn)
 {
+    int64_t start = to_ms_since_boot(get_absolute_time());
+    int64_t lastActivity = start;
+    const int64_t idleTimeoutMs = 5000; // 5 seconds idle timeout
+
 
     HttpRequest req = HttpRequest::receive(conn);
-
-    TRACE("HttpRequest received: %s, %s\n",req.getMethod().c_str(), req.getPath().c_str());
+    if (req.getMethod().empty())
+    {
+        warning("[HttpServer] Empty HTTP method — client likely closed connection\n");
+        return;
+    }
+    TRACE("HttpRequest received: %s, %s\n", req.getMethod().c_str(), req.getPath().c_str());
     TRACE("HttpRequest content length: %s\n", req.getContentLength());
     TRACE("HttpRequest content type: %s\n", req.getContentType());
     TRACE("HttpRequest boundary: %s\n", req.getBoundary());
     TRACE("HttpRequest is multipart: %s\n", (req.isMultipart() ? "true" : "false"));
-    TRACE("HttpRequest header count: %d\n", req.getHeaders().size());;
+    TRACE("HttpRequest header count: %d\n", req.getHeaders().size());
     TRACE("HttpRequest url: %s\n", req.getUri().c_str());
     TRACE("HttpRequest path: %s\n", req.getPath().c_str());
     TRACE("HttpRequest query: %s\n", req.getQuery().c_str());
 
-    for (const auto &param : req.getQueryParams())
+    for (const auto& param : req.getQueryParams())
     {
-        TRACE("HttpRequest query parameter %s : %s\n", param.first.c_str(), param.second.c_str()); 
+        TRACE("HttpRequest query parameter %s : %s\n", param.first.c_str(), param.second.c_str());
     }
 
-    for (const auto &param : req.getFormParams())
+    for (const auto& param : req.getFormParams())
     {
-        TRACE("HttpRequest form parameter %s : %s\n", param.first.c_str(), param.second.c_str()); 
+        TRACE("HttpRequest form parameter %s : %s\n", param.first.c_str(), param.second.c_str());
     }
 
-    for (const auto &cookie : req.getCookies())
+    for (const auto& cookie : req.getCookies())
     {
-        TRACE("HttpRequest cookie %s : %s\n", cookie.first.c_str(), cookie.second.c_str()); 
+        TRACE("HttpRequest cookie %s : %s\n", cookie.first.c_str(), cookie.second.c_str());
     }
 
     if (req.getContentLength() > 0)
@@ -242,19 +261,21 @@ void HttpServer::handleClient(Tcp* conn)
         TRACE("HttpRequest body length: %d\n", req.getBody().length());
         TRACE("HttpRequest start of body index: %d\n", req.getHeaderEnd());
     }
-    
+
     TRACE("HttpRequest headers:\n");
-    for (const auto &headr : req.getHeaders())    
+    for (const auto& headr : req.getHeaders())
     {
         TRACE("%s : %s\n", headr.first.c_str(), headr.second.c_str());
     }
 
-    TRACE("HttpRequest body: %s\n", req.getBody().c_str()); 
+    TRACE("HttpRequest body: %s\n", req.getBody().c_str());
 
     QUIET_PRINTF("\n===== HTTP CLIENT REQUEST =====\n");
     QUIET_PRINTF("[HttpServer] Client request received: %s, path: %s\n", req.getMethod().c_str(), req.getPath().c_str());
 
     HttpResponse res(conn);
+    res.setHeader("Connection", "keep-alive"); // Add keep-alive header
+
     bool ok = router.handleRequest(req, res);
     TRACE("HttpRequest handled: %s\n", ok ? "true" : "false");
 
@@ -263,7 +284,27 @@ void HttpServer::handleClient(Tcp* conn)
         JsonResponse::sendError(res, 404, "NOT_FOUND", "route: " + std::string(req.getUri()));
     }
 
+    lastActivity = to_ms_since_boot(get_absolute_time());
+
+    if (req.getHeader("Connection") == "close")
+    {
+        printf("[HttpServer] Client requested Connection: close, closing connection\n");
+        return;
+    }
+
+    if (to_ms_since_boot(get_absolute_time()) - lastActivity > idleTimeoutMs)
+    {
+        printf("[HttpServer] Idle timeout reached, closing connection\n");
+        return;
+    }
+
+    conn->close();
+    int64_t end = to_ms_since_boot(get_absolute_time());
+    TRACE("[HttpServer] Client handled in %lld ms\n", end - start);
+    QUIET_PRINTF("[HttpServer] Client connection handled\n");
+    QUIET_PRINTF("===============================\n\n");
 }
+
 
 #ifdef HTTP_SERVER_USE_TASK_PER_CLIENT
 void HttpServer::handleClientTask(void *pvParameters)

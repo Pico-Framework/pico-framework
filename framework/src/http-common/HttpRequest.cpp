@@ -217,6 +217,19 @@ HttpRequest HttpRequest::receive(Tcp *tcp)
     TRACE("Raw headers: %s\n", rawHeaders.c_str());
     HttpRequest request(tcp, rawHeaders, std::string(method), std::string(path));
 
+    // NOW split path and query
+    std::string cleanPath = path;
+    std::string queryString = "";
+
+    size_t qpos = cleanPath.find('?');
+    if (qpos != std::string::npos)
+    {
+        queryString = cleanPath.substr(qpos + 1);
+        cleanPath = cleanPath.substr(0, qpos);
+    }
+    request.setPath(cleanPath); // Set the cleaned path as the URI
+    request.setQueryString(queryString); // Set the query string
+
     // Get headers from the HttpRequest object
     headers = request.getHeaders();
 
@@ -346,7 +359,7 @@ const std::string HttpRequest::getCookie(const std::string &name) const
  *
  * @return Map of query parameters.
  */
-const std::unordered_map<std::string, std::string> HttpRequest::getQueryParams()
+const std::unordered_multimap<std::string, std::string> HttpRequest::getQueryParams()
 {
     return parseUrlEncoded(query);
 }
@@ -356,7 +369,7 @@ const std::unordered_map<std::string, std::string> HttpRequest::getQueryParams()
  *
  * @return Map of form parameters.
  */
-const std::unordered_map<std::string, std::string> HttpRequest::getFormParams()
+const std::unordered_multimap<std::string, std::string> HttpRequest::getFormParams()
 {
     return parseUrlEncoded(body);
 }

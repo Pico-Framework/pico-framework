@@ -215,18 +215,32 @@ const char* dashboard_html = R"!(
         }
       
         function syncAllGpios() {
-          Object.entries(gpioButtons).forEach(([pin, btn]) => {
-            fetch(`/api/v1/gpio/${pin}`)
-              .then(res => res.json())
-              .then(data => {
-                const isOn = data.state === 1;
+        const pins = Object.keys(gpioButtons);
+
+        if (pins.length === 0) {
+            console.warn("No GPIO pins to sync");
+            return;
+        }
+
+        const params = new URLSearchParams();
+        pins.forEach(pin => params.append("pin", pin));
+
+        fetch(`/api/v1/gpios?${params.toString()}`)
+            .then(res => res.json())
+            .then(data => {
+            data.forEach(pinData => {
+                const pin = pinData.pin;
+                const isOn = pinData.state === 1;
+                const btn = gpioButtons[pin];
+                if (btn) {
                 btn.classList.toggle("active", isOn);
                 btn.textContent = isOn ? "ON" : "OFF";
-              })
-              .catch(err => console.warn(`GPIO ${pin} sync failed`, err));
-          });
+                }
+            });
+            })
+            .catch(err => console.warn("Failed to sync GPIOs", err));
         }
-      
+     
         function setupLedButton(ledBtn) {
           function applyLedState(isOn) {
             ledBtn.classList.toggle("active", isOn);

@@ -20,7 +20,6 @@
  */
 #define MULTIPART_UPLOAD_PATH "/uploads"
 
-
 // Note that files of any length can be streamed from the server or uploaded multipart. 
 // This is just the maximum size of the HTTP body that can be processed in one go.
 // However if a regular request is made with a body larger than this, it will be truncated.
@@ -52,7 +51,7 @@
 
 // === Debug Trace Configuration ===
 
-//#define QUIET_MODE ///< Set to disable all normal behavior print output, don't define to print
+#define QUIET_MODE ///< Set to disable all normal behavior print output, don't define to print
 
 #ifdef QUIET_MODE
   #define QUIET_PRINTF(...) do {} while (0)
@@ -78,7 +77,7 @@
 #define TRACE_JwtAuthenticator    0
 #define TRACE_Router              0
 #define TRACE_FatFsStorageManager 0
-#define TRACE_LittleFsStorageManager 1
+#define TRACE_LittleFsStorageManager 0
 #define TRACE_JsonService         0
 #define TRACE_Middleware          0
 #define TRACE_Network             0

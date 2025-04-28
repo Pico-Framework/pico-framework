@@ -342,12 +342,12 @@ public:
     /**
      * @brief Get parsed query string parameters.
      */
-    const std::unordered_map<std::string, std::string> getQueryParams();
+    const std::unordered_multimap<std::string, std::string> getQueryParams();
 
     /**
      * @brief Get parsed form fields (application/x-www-form-urlencoded).
      */
-    const std::unordered_map<std::string, std::string> getFormParams();
+    const std::unordered_multimap<std::string, std::string> getFormParams();
 
     // ─────────────────────────────────────────────────────────────────────────────
     // Socket-Based Helpers (Static)
@@ -420,6 +420,11 @@ public:
 private:
     void parseHeaders(const char *raw);
     void appendToBody(const char *data, size_t len);
+
+    void setQueryString(const std::string &query)
+    {
+        this->query = query;
+    }
 
     Tcp *tcp = nullptr;
 
