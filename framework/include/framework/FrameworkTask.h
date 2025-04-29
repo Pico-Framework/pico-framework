@@ -131,6 +131,15 @@ public:
      */
     bool waitFor(Notification n, TickType_t timeout = portMAX_DELAY);
 
+    /**
+     * @brief waits for any notification matching the given mask.
+     * This is useful for waiting on multiple notification types.
+     * @param index Notification index to wait for.
+     * 
+     */
+    Notification waitForAny(uint8_t index, uint32_t mask, TickType_t timeout = portMAX_DELAY);
+
+
 protected:
     /**
      * @brief Main task loop. Must be implemented by subclasses.

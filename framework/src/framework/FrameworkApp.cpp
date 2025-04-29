@@ -20,9 +20,9 @@
 
 /// @copydoc FrameworkApp::FrameworkApp
 FrameworkApp::FrameworkApp(int port, const char* name, uint16_t stackSize, UBaseType_t priority)
-    : FrameworkController(name, routerInstance, stackSize, priority),
-      routerInstance(),
-      server(port, routerInstance),
+    : FrameworkController(name, router, stackSize, priority),
+      router(),
+      server(port, router),
       manager(this) {}
 
 /// @copydoc FrameworkApp::start

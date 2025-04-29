@@ -9,6 +9,8 @@
 #include <lwip/apps/sntp.h>
 #include <FreeRTOS.h>
 #include <task.h>
+#include "events/EventManager.h"
+#include "events/Notification.h"
 
 #include "framework/AppContext.h"
 #include "http/HttpRequest.h"
@@ -80,7 +82,16 @@ bool TimeManager::syncTimeWithNtp(int timeoutSeconds)
         waited++;
     }
 
-    std::cerr << "[Time Manager] NTP time sync failed after " << timeoutSeconds << " seconds" << std::endl;
+    // Timeout occurred
+    if (!isTimeValid()) {
+        printf("[Time Manager] NTP sync failed and no valid time source available.\n");
+        Event event;
+        event.notification = SystemNotification::TimeInvalid;
+        AppContext::get<EventManager>()->postEvent(event);
+    }
+    else {
+        printf("[Time Manager] NTP sync failed, but AON timer is running — time still valid.\n");
+    }
     return false;
 }
 
@@ -92,6 +103,9 @@ void TimeManager::setTimeFromEpoch(uint32_t epoch)
         .tv_nsec = 0};
     setTime(&ts);
     timeSynced = true;
+    Event event;
+    event.notification = SystemNotification::TimeSync;
+    AppContext::get<EventManager>()->postEvent(event);
     printf("[TimeManager] System time set to: %s\n", ctime(&ts.tv_sec));
 }
 
@@ -256,4 +270,10 @@ std::string TimeManager::formatTimeWithZone(time_t utcTime) const
 std::string TimeManager::currentTimeForTrace() const
 {
     return formatTimeWithZone(time(nullptr));
+}
+
+void TimeManager::checkAndPostTimeValid() {
+    if (isTimeValid()) {
+        AppContext::get<EventManager>()->postEvent({SystemNotification::TimeValid});
+    }
 }

@@ -109,6 +109,34 @@ uint32_t FrameworkTask::waitFor(TickType_t timeout)
     return value;
 }
 
+/// @copydoc FrameworkTask::wait
+Notification FrameworkTask::waitForAny(uint8_t index, uint32_t mask, TickType_t timeout)
+{
+    uint32_t value = 0;
+    if (xTaskNotifyWaitIndexed(index, 0, mask, &value, timeout) == pdTRUE && (value & mask))
+    {
+        Notification n;
+        n.kind = NotificationKind::System;
+
+        // Find the *first* matching bit set — basic scan
+        for (uint8_t i = 0; i < 32; ++i)
+        {
+            if (value & (1u << i))
+            {
+                n.system = static_cast<SystemNotification>(i);
+                break;
+            }
+        }
+
+        return n;
+    }
+
+    Notification n;
+    n.kind = NotificationKind::System;
+    n.system = SystemNotification::WaitForTimeout;
+    return n;
+}
+
 /// @copydoc FrameworkTask::createQueue
 bool FrameworkTask::createQueue(size_t itemSize, size_t length)
 {

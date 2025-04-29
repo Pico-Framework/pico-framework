@@ -14,6 +14,16 @@
 #pragma once
 
 /**
+ * @brief This setting defines the retry timeout 
+ * The default SNTP retry time is 15 seconds, we set it to 5 in lwipopts.h
+ * 
+ * This setting defines how long we wait for SNTP sync
+ * This is used by the TimeManager class
+ *
+ */
+#define NTP_TIMEOUT_SECONDS 15
+
+/**
  * @brief This setting defines where uploads go
  * The default is "/uploads"
  * This is used by the MultipartParser class

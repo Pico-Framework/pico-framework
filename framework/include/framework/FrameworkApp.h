@@ -113,7 +113,7 @@ public:
 
 protected:
     virtual void initRoutes() {} // Default no-op
-    Router routerInstance;       ///< Router instance for handling HTTP routes
+    Router router;       ///< Router instance for handling HTTP routes
     HttpServer server;           ///< Embedded HTTP server instance
     FrameworkManager manager;    ///< Responsible for launching system services and networking
 };

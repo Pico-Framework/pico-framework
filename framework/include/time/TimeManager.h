@@ -4,6 +4,7 @@
 #include <string>
 #include <ctime>
 #include <time.h>
+#include "pico/aon_timer.h"
 
 class TimeManager {
 public:
@@ -16,7 +17,7 @@ public:
      * @return true if initialization was successful, false otherwise.
      * 
      */
-    bool syncTimeWithNtp(int timeoutSeconds = 10);
+    bool syncTimeWithNtp(int timeoutSeconds = 20); // sync retry window is 15 seconds
 
     /// @brief Set the system time from an epoch timestamp (e.g. from SNTP)
     void setTimeFromEpoch(uint32_t epochSeconds);
@@ -78,6 +79,12 @@ public:
      * @return A timespec structure containing the current time.
      */
     bool isTimeSynced() const { return timeSynced; }
+
+    bool isTimeValid() {
+        return aon_timer_is_running(); // Direct real system call, no private bool
+    }
+
+    void checkAndPostTimeValid();
 
 private:
     bool timeSynced = false;
