@@ -21,8 +21,12 @@ enum class SystemNotification : uint8_t {
     TimeInvalid,
     WaitForTimeout,
     HttpServerStarted,
-    GpioChange
+    GpioChange,
+    Count
 };
+
+static_assert(static_cast<int>(SystemNotification::Count) <= configTASK_NOTIFICATION_ARRAY_ENTRIES,
+              "Too many NotificationKind values for FreeRTOS notification slots.");
 
 /**
  * @brief A tagged union representing either a system or user-defined notification.

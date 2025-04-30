@@ -20,14 +20,10 @@ class PicoModel : public FrameworkModel
         bool getGpioState(int pin);
         void setGpioState(int pin, bool state);
 
-        // We can use the base class methods for JSON operations
-        bool load(); // we will use the load model from the base class
-        bool save(); // we will use the save model from the base class
+        void restoreState();
         
     private:
+        std::vector<int> activePins = { 2, 3, 4, 5, 6, 7, 8, 9, 16, 17, 18, 19 };  // Pins in use - staying away from sd card pins
 
-        // There are no "shadowing variables" for state in this class, so no need
-        // to define any private variables here.
-        
 };
 

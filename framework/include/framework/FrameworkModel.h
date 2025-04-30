@@ -22,8 +22,8 @@ using json = nlohmann::json;
 #include <string>
 #include <vector>
 #include <optional>
-#include <nlohmann/json.hpp>
 #include "storage/JsonService.h"
+#include "storage/StorageManager.h"
 
 /**
  * @brief Provides a basic JSON-backed record model.
@@ -41,7 +41,7 @@ public:
      * @param storage Pointer to a StorageManager (e.g. SD, flash).
      * @param path Path to the backing JSON file.
      */
-    FrameworkModel(StorageManager *storage, const std::string &path);
+    FrameworkModel(const std::string &path);
 
     /**
      * @brief Loads the JSON collection from storage.
@@ -100,10 +100,12 @@ public:
     {
         return nlohmann::json(collection);
     }
+
     /// @brief Finds a single item by ID and returns it as JSON or null
     nlohmann::json findAsJson(const std::string &id) const;
 
-    bool save(const std::string &id, const json &data); // Save a single record
+    /// @brief Saves a single item by ID and JSON object
+    bool save(const std::string &id, const json &data);
 
     bool createFromJson(const nlohmann::json &obj);
 
@@ -112,6 +114,40 @@ public:
     nlohmann::json deleteAsJson(const std::string &id);
 
     bool saveAll();
+
+    /**
+     * @brief Reads a single top-level key from the model file.
+     * This is separate from array-style records and useful for persistent app state.
+     *
+     * @tparam T Expected return type
+     * @param key JSON key name
+     * @param defaultValue Returned if key is not present
+     * @return Value from JSON or default
+     */
+    template <typename T>
+    T getValue(const std::string &key, const T &defaultValue = T()) const
+    {
+        const auto &data = jsonService.data();
+        if (data.contains(key))
+        {
+            return data[key].get<T>();
+        }
+        return defaultValue;
+    }
+
+    /**
+     * @brief Sets a single top-level key in the model file.
+     * This does not affect the array-style record collection.
+     *
+     * @tparam T Type of value to store
+     * @param key JSON key
+     * @param value Value to assign
+     */
+    template <typename T>
+    void setValue(const std::string &key, const T &value)
+    {
+        jsonService.data()[key] = value;
+    }
 
 protected:
     /**

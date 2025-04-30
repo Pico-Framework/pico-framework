@@ -1,5 +1,5 @@
 /**
- * @file FrameworkModel.h
+ * @file FrameworkModel.cpp
  * @author Ian Archbell
  * @brief Base model class for persistent JSON collections.
  *
@@ -16,10 +16,12 @@
  */
 
 #include "framework/FrameworkModel.h"
+#include "framework/AppContext.h"
+#include "storage/StorageManager.h"
 
 /// @copydoc FrameworkModel::FrameworkModel
-FrameworkModel::FrameworkModel(StorageManager *storage, const std::string &path)
-    : jsonService(storage), storagePath(path) {}
+FrameworkModel::FrameworkModel(const std::string& path)
+    : jsonService(AppContext::get<StorageManager>()), storagePath(path) {}
 
 /// @copydoc FrameworkModel::load
 bool FrameworkModel::load()
@@ -105,15 +107,34 @@ bool FrameworkModel::remove(const std::string &id)
     return false;
 }
 
-/// @brief Finds a single item by ID and returns it as JSON or null
+/// @copydoc FrameworkModel::findAsJson
 nlohmann::json FrameworkModel::findAsJson(const std::string &id) const
 {
     auto result = find(id);
     return result ? *result : nlohmann::json(nullptr);
 }
-bool save(const std::string &id, const json &data); // Save a single record
 
-bool  FrameworkModel::createFromJson(const nlohmann::json &obj)
+/// @copydoc FrameworkModel::save (single record)
+bool FrameworkModel::save(const std::string &id, const nlohmann::json &data)
+{
+    std::string idField = getIdField();
+
+    for (auto &item : collection)
+    {
+        if (item.contains(idField) && item[idField] == id)
+        {
+            item = data;
+            return save();
+        }
+    }
+
+    // If not found, append
+    collection.push_back(data);
+    return save();
+}
+
+/// @copydoc FrameworkModel::createFromJson
+bool FrameworkModel::createFromJson(const nlohmann::json &obj)
 {
     std::string idField = getIdField();
     if (!obj.contains(idField))
@@ -121,7 +142,8 @@ bool  FrameworkModel::createFromJson(const nlohmann::json &obj)
     return save(obj[idField], obj);
 }
 
-bool  FrameworkModel::updateFromJson(const std::string &id, const nlohmann::json &updates)
+/// @copydoc FrameworkModel::updateFromJson
+bool FrameworkModel::updateFromJson(const std::string &id, const nlohmann::json &updates)
 {
     std::string idField = getIdField();
     for (auto &item : collection)
@@ -138,7 +160,8 @@ bool  FrameworkModel::updateFromJson(const std::string &id, const nlohmann::json
     return false;
 }
 
-nlohmann::json  FrameworkModel::deleteAsJson(const std::string &id)
+/// @copydoc FrameworkModel::deleteAsJson
+nlohmann::json FrameworkModel::deleteAsJson(const std::string &id)
 {
     std::string idField = getIdField();
     for (auto it = collection.begin(); it != collection.end(); ++it)
@@ -153,24 +176,9 @@ nlohmann::json  FrameworkModel::deleteAsJson(const std::string &id)
     return nullptr;
 }
 
-bool FrameworkModel::save(const std::string &id, const nlohmann::json &data) {
-    std::string idField = getIdField();
-
-    for (auto &item : collection) {
-        if (item.contains(idField) && item[idField] == id) {
-            item = data;
-            return save();
-        }
-    }
-
-    // If not found, append
-    collection.push_back(data);
-    return save();
-}
-
-bool  FrameworkModel::saveAll()
+/// @copydoc FrameworkModel::saveAll
+bool FrameworkModel::saveAll()
 {
-
-    jsonService.data() = collection;
+    jsonService.data()["items"] = collection;
     return jsonService.save(storagePath);
 }

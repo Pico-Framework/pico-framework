@@ -53,7 +53,7 @@
 #define TaskPrio_Idle  0
 #define TaskPrio_Interrupt  15
 
-#define configTASK_NOTIFICATION_ARRAY_ENTRIES   8
+#define configTASK_NOTIFICATION_ARRAY_ENTRIES   16
 
 /* Scheduler Related */
 #define configUSE_PREEMPTION                    1

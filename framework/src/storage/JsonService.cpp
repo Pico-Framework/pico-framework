@@ -52,6 +52,14 @@ JsonService::JsonService(StorageManager *storage)
 bool JsonService::load(const std::string &path)
 {
     std::vector<uint8_t> buffer;
+    if (!storage)
+    return false;
+
+    if(!storage->isMounted())
+    {
+       storage->mount();
+    }
+    
     if (!storage->readFile(path, buffer))
     {
         TRACE("Failed to read JSON file: %s\n", path.c_str());
@@ -74,14 +82,18 @@ bool JsonService::load(const std::string &path)
 /// @copydoc JsonService::save
 bool JsonService::save(const std::string &path) const
 {
+    printf("Saving JSON file to: %s\n", path.c_str());
     if (!storage)
         return false;
-
+    if(!storage->isMounted())
+    {
+        storage->mount();
+    }
     std::string content = data_.dump(2); // Pretty print
     std::vector<uint8_t> buffer(content.begin(), content.end());
 
     bool ok = storage->writeFile(path, buffer);
-    TRACE("Saving JSON file to %s: %s\n", path.c_str(), ok ? "ok" : "failed");
+    printf("Saved JSON file to %s: %s\n", path.c_str(), ok ? "ok" : "failed");
     return ok;
 }
 

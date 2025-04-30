@@ -85,6 +85,8 @@ public:
      *
      * @param eventMask Bitmask of `(1 << event.notification.code())`.
      * @param controller Pointer to the FrameworkController to notify.
+     * 
+     * @note All EventManager::subscribe() for thread safety, calls must complete before interrupts are enabled."
      */
     void subscribe(uint32_t eventMask, FrameworkController *controller);
 
@@ -118,6 +120,13 @@ private:
     std::vector<Subscriber> subscribers_;
     
     void withSubscribers(const std::function<void(std::vector<Subscriber>&)>& fn);
+    /**
+     * @brief Provides read-only access to subscribers from ISR context (no locking).
+     *
+     * WARNING: Call only from ISR context. Must not modify the list.
+     */
+    void withSubscribersFromISR(const std::function<void(std::vector<Subscriber>&)>& fn);
+
 };
 
 #endif // EVENT_MANAGER_H

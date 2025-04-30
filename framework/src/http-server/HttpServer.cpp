@@ -84,7 +84,7 @@ HttpServer::HttpServer(int port, Router &router)
 bool HttpServer::start()
 {
     clientSemaphore = xSemaphoreCreateCounting(MAX_CONCURRENT_CLIENTS, MAX_CONCURRENT_CLIENTS);
-    return xTaskCreateStatic(startServerTask, "HttpServer", HTTP_STACK_SIZE, this, TaskPrio_Mid, xStack, &xTaskBuffer);
+    return xTaskCreateStatic(startServerTask, "HttpServer", HTTP_STACK_SIZE, this, 5, xStack, &xTaskBuffer);
 }
 
 /// @copydoc HttpServer::startServerTask
@@ -194,7 +194,7 @@ void HttpServer::startHandlingClient(Tcp* conn)
     {
         TaskParams *params = new TaskParams{this, conn};
 
-        if (xTaskCreate(handleClientTask, "HttpClient", 4096, params, tskIDLE_PRIORITY + 1, NULL) == pdPASS)
+        if (xTaskCreate(handleClientTask, "HttpClient", 4096, params, 4, NULL) == pdPASS)
         {
             TRACE("Client task created successfully");
         }

@@ -68,6 +68,14 @@ void EventManager::withSubscribers(const std::function<void(std::vector<Subscrib
     xSemaphoreGive(lock);
 }
 
+/// @copydoc EventManager::withSubscribersFromISR
+void EventManager::withSubscribersFromISR(const std::function<void(std::vector<Subscriber>&)>& fn)
+{
+    xSemaphoreTake(lock, portMAX_DELAY);
+    fn(subscribers_);
+    xSemaphoreGive(lock);
+}
+
 /// @copydoc EventManager::postEvent
 void EventManager::postEvent(const Event& event)
 {
@@ -76,7 +84,7 @@ void EventManager::postEvent(const Event& event)
     if (is_in_interrupt()) {
         BaseType_t xHigherPriTaskWoken = pdFALSE;
 
-        withSubscribers([&](auto& subs) {
+        withSubscribersFromISR([&](auto& subs) {
             for (auto& sub : subs) {
                 if ((sub.eventMask & (1u << code)) &&
                     (event.target == nullptr || sub.controller == event.target))
