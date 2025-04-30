@@ -20,6 +20,7 @@ enum class SystemNotification : uint8_t {
     TimeSync,
     TimeInvalid,
     WaitForTimeout,
+    HttpServerStarted,
     GpioChange
 };
 

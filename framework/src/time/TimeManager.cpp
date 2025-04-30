@@ -49,8 +49,7 @@ void TimeManager::initNtpClient()
 }
 
 bool TimeManager::syncTimeWithNtp(int timeoutSeconds)
-{
-    initNtpClient();
+{   
     printf("[Time Manager] Waiting for NTP time sync...\n");
 
     // Wait up to timeoutSeconds for time to be set
@@ -272,8 +271,22 @@ std::string TimeManager::currentTimeForTrace() const
     return formatTimeWithZone(time(nullptr));
 }
 
-void TimeManager::checkAndPostTimeValid() {
+void TimeManager::start() {
     if (isTimeValid()) {
         AppContext::get<EventManager>()->postEvent({SystemNotification::TimeValid});
     }
+}
+
+void TimeManager::onNetworkReady()
+{
+    initNtpClient(); // Initialize SNTP client - this will automatically cause a timesync event when that happens
+    if (!isTimeValid())
+    {
+        syncTimeWithNtp(NTP_TIMEOUT_SECONDS);
+    }
+
+}
+
+void TimeManager::onHttpServerStarted(){
+    detectAndApplyTimezone(); // Ensure timezone is set when HTTP server starts
 }

@@ -94,7 +94,7 @@ int Network::getLinkStatus(int lastStatus) {
     int status = cyw43_tcpip_link_status( &cyw43_state,  CYW43_ITF_STA);  
     switch(status){
         case CYW43_LINK_UP:
-            printf("\nLink is up\n");                    
+            printf("\n[Network] Link is up\n");                    
             break;
 
         case CYW43_LINK_NOIP:
@@ -102,7 +102,7 @@ int Network::getLinkStatus(int lastStatus) {
                 printf(".");
             } 
             else{
-                printf("\nAcquiring IP address ");
+                printf("\n[Network] Acquiring IP address ");
             }
             break;
 
@@ -111,12 +111,12 @@ int Network::getLinkStatus(int lastStatus) {
                 printf(".");
             } 
             else{
-                printf("\nJoining network ");
+                printf("\n[Network] Joining network ");
             }
             break;
             
         case CYW43_LINK_DOWN:
-            printf("\nLink is down\n");
+            printf("\n[Network] Link is down\n");
             break;
     }
     return status;

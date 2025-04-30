@@ -23,7 +23,7 @@ FrameworkApp::FrameworkApp(int port, const char* name, uint16_t stackSize, UBase
     : FrameworkController(name, router, stackSize, priority),
       router(),
       server(port, router),
-      manager(this) {}
+      manager(this, router) {}
 
 /// @copydoc FrameworkApp::start
 void FrameworkApp::start()

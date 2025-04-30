@@ -5,6 +5,7 @@
 #include <ctime>
 #include <time.h>
 #include "pico/aon_timer.h"
+#include "events/Event.h"
 
 class TimeManager {
 public:
@@ -84,7 +85,18 @@ public:
         return aon_timer_is_running(); // Direct real system call, no private bool
     }
 
-    void checkAndPostTimeValid();
+    /**
+     * @brief Start the time manager. It will check if time is valid and post event if it is
+     */
+    void start();
+
+    /**
+     * @brief hanles network ready event.
+     * This is called when the network is ready and the time manager can start syncing time.
+     */
+    void onNetworkReady();
+
+    void onHttpServerStarted();
 
 private:
     bool timeSynced = false;

@@ -23,7 +23,7 @@
 
 // #include <iostream>
 
-App::App(int port) : FrameworkApp(port, "AppTask", 1024, 1)
+App::App(int port) : FrameworkApp(port, "AppTask", 1024, 3)
 {
 }
 
@@ -51,16 +51,13 @@ void App::initRoutes()
 
 void App::onStart()
 {
-    // Call the base class to ensure application state is initialized
-    FrameworkApp::onStart();
-
     // These are two controllers derived from FrameworkController that add event support to the FrameworkTask base class.
     // They are started here to ensure they are ready to handle events and HTTP requests.
     std::cout << "[App] Initializing application..." << std::endl;
-    static GpioController gpioController(routerInstance);
+    static GpioController gpioController(router);
     printf("[App] Starting GPIO controller...\n");
     gpioController.start();
-    static DashboardController dashboardController(routerInstance);
+    static DashboardController dashboardController(router);
     dashboardController.start();
 
     // Here we are setting up event handlers - we get the EventManager and GpioEventManager from the AppContext.
@@ -85,12 +82,24 @@ void App::onStart()
     // You could use a non-blocking wait if you want to do other work in the meantime
     // waitfor is provided by the FrameworkTask base class and has a timeout parameter, unused here
     // The underlying imlementation uses FreeRTOS notifications
-    waitFor(SystemNotification::NetworkReady);
+    //waitFor(SystemNotification::NetworkReady);
 
-    std::cout << "[App] Network ready. Starting services..." << std::endl;
+    //std::cout << "[App] Network ready. Starting services..." << std::endl;
     // Now that the network is ready, we can start services that depend on it
     // For example, you might want to start an HTTP server or other network services here
-    server.start();
+    //server.start();
+    eventManager->subscribe(
+        eventMask(
+            SystemNotification::NetworkReady,
+            SystemNotification::TimeValid,
+            SystemNotification::TimeSync,
+            SystemNotification::TimeInvalid
+        ),
+        this);
+
+    // Call the base class to ensure the framework starts correctly.
+    FrameworkApp::onStart();  
+
 }
 
 void App::onEvent(const Event &e)
@@ -104,16 +113,45 @@ void App::onEvent(const Event &e)
     // publish-subscribe system, so you can post events from anywhere in the application
     // and they will be delivered to ALL subscribers that have registered for that event type.
 
-    if (e.notification.kind == NotificationKind::System &&
-        e.notification.system == SystemNotification::GpioChange)
+    if (e.notification.kind == NotificationKind::System)
     {
-        printf("[App] GpioChange received\n");
-        printf("[App] Pin = %u, Edge = 0x%X\n", e.gpioEvent.pin, e.gpioEvent.edge);
+        switch (e.notification.system)
+        {
+            case SystemNotification::GpioChange:
+            {
+                printf("[App] GpioChange received\n");
+                printf("[App] Pin = %u, Edge = 0x%X\n", e.gpioEvent.pin, e.gpioEvent.edge);
 
-        const GpioEvent &data = e.gpioEvent;
-        printf("[App] GPIO changed - pin %u: %s\n",
-               data.pin,
-               (data.edge & GPIO_IRQ_EDGE_RISE) ? "rising" : (data.edge & GPIO_IRQ_EDGE_FALL) ? "falling" : "unknown");
+                const GpioEvent &data = e.gpioEvent;
+                printf("[App] GPIO changed - pin %u: %s\n",
+                       data.pin,
+                       (data.edge & GPIO_IRQ_EDGE_RISE) ? "rising" : (data.edge & GPIO_IRQ_EDGE_FALL) ? "falling" : "unknown");
+                break;
+            }
+
+            case SystemNotification::NetworkReady:
+                std::cout << "[App] Network ready. Starting services..." << std::endl;
+                server.start();
+                break;
+
+            case SystemNotification::TimeValid:
+                std::cout << "[App] Time is valid. Scheduler can be initialized here." << std::endl;
+                // scheduler.start();  // <- placeholder for future logic
+                break;
+            
+                case SystemNotification::TimeSync:
+                std::cout << "[App] SNTP Time Sync event." << std::endl;
+                // no need to do anything here, the time is valid - these occur every hour
+                break;
+
+            case SystemNotification::TimeInvalid:
+                std::cout << "[App] Time is invalid. Running in degraded mode." << std::endl;
+                // handle degraded state if needed
+                break;
+
+            default:
+                break;
+        }
     }
 
     if (e.notification.kind == NotificationKind::User &&
@@ -122,6 +160,7 @@ void App::onEvent(const Event &e)
         printf("[App] Heartbeat user event received\n");
     }
 }
+
 
 void App::poll()
 {

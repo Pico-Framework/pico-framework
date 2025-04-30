@@ -44,6 +44,7 @@ TRACE_INIT(HttpServer)
 #include "time/TimeManager.h"
 #include "network/Tcp.h"
 #include "http/JsonResponse.h"
+#include "events/EventManager.h"
 
 // #define HTTP_SERVER_USE_TASK_PER_CLIENT  // ⚠️ NOT READY FOR PRODUCTION – Known instability with task-per-client mode
 #ifdef HTTP_SERVER_USE_TASK_PER_CLIENT
@@ -109,14 +110,14 @@ void HttpServer::run()
         return;
     }
 
-    AppContext::get<TimeManager>()->detectAndApplyTimezone();
-
     Tcp* listener = initListener();
     if (!listener)
     {
         printf("[HttpServer] Failed to initialize listener\n");
         return;
     }
+
+    AppContext::get<EventManager>()->postEvent({SystemNotification::HttpServerStarted});
 
     // Optional: store listener as a class member if needed later
     while (true)
