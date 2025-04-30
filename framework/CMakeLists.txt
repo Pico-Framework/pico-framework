@@ -174,6 +174,7 @@ target_include_directories(pico_framework PUBLIC
 )
 
 target_link_libraries(pico_framework PUBLIC
+    cmsis_core
     pico_async_context_freertos
     FreeRTOS-Kernel-Heap4
     pico_stdlib

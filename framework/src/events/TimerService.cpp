@@ -34,28 +34,26 @@
  * - Automatic recovery of missed events after reboot
  */
 
-/**
- * @note Memory & Timer Lifetime (v0.1):
- *
- * - One-shot timers (`scheduleAt`, `scheduleDailyAt`, `scheduleDuration`) dynamically allocate an `Event` using `new`
- *   and clean it up automatically after posting (inside the timer callback).
- *
- * - Repeating timers (`scheduleEvery`) also allocate an `Event`, which is reused on each invocation.
- *   It is not deleted automatically and is assumed to remain valid for the lifetime of the timer.
- *
- *  It is now possible to cancel scheduled jobs using a job ID which will delete the timer and free the associated event.
- *
- * @todo Planned for v0.2+:
- * - Persistent job tracking (scheduled jobs stored and reloaded)
- * - Named job handles for cancellation or status checks
- * - Automatic recovery of missed events after reboot
- */
 
-#include "time/TimerService.h"
+
+#include "events/TimerService.h"
 #include <cstdio>
 #include "time/PicoTime.h"
 #include "events/EventManager.h"
 #include "framework/AppContext.h"
+
+StaticSemaphore_t TimerService::lockBuffer_;
+
+TimerService::TimerService() {
+    lock_ = xSemaphoreCreateMutexStatic(&lockBuffer_);
+    configASSERT(lock_);
+}
+
+void TimerService::withLock(const std::function<void()>& fn) {
+    xSemaphoreTake(lock_, portMAX_DELAY);
+    fn();
+    xSemaphoreGive(lock_);
+}
 
 TimeOfDay TimeOfDay::fromString(const char *hhmm)
 {
@@ -130,7 +128,9 @@ void TimerService::scheduleAt(time_t unixTime, const Event &event, const std::st
 
     if (handle)
     {
-        scheduledJobs[jobId] = handle;
+        withLock([&]() {
+            scheduledJobs[jobId] = handle;
+        });
         xTimerStart(handle, 0);
     }
 }
@@ -156,7 +156,9 @@ void TimerService::scheduleEvery(uint32_t intervalMs, const Event &event, const 
 
     if (handle)
     {
-        scheduledJobs[jobId] = handle;
+        withLock([&]() {
+            scheduledJobs[jobId] = handle;
+        });        
         xTimerStart(handle, 0);
     }
 }
@@ -187,7 +189,9 @@ void TimerService::scheduleDailyAt(TimeOfDay time, DaysOfWeek days, const Event 
 
     if (handle)
     {
-        scheduledJobs[jobId] = handle;
+        withLock([&]() {
+            scheduledJobs[jobId] = handle;
+        });        
         xTimerStart(handle, 0);
         TimerJob job{time, days, 0, event, {}, true};
         rescheduleDailyJob(job);
@@ -225,7 +229,9 @@ void TimerService::scheduleDuration(TimeOfDay start, DaysOfWeek days, uint32_t d
 
     if (startHandle)
     {
-        scheduledJobs[startId] = startHandle;
+        withLock([&]() {
+            scheduledJobs[startId] = startHandle;
+        });        
         xTimerStart(startHandle, 0);
     }
 
@@ -245,7 +251,9 @@ void TimerService::scheduleDuration(TimeOfDay start, DaysOfWeek days, uint32_t d
 
     if (stopHandle)
     {
-        scheduledJobs[stopId] = stopHandle;
+        withLock([&]() {
+            scheduledJobs[stopId] = stopHandle;
+        });   
         xTimerStart(stopHandle, 0);
     }
 
@@ -254,17 +262,18 @@ void TimerService::scheduleDuration(TimeOfDay start, DaysOfWeek days, uint32_t d
 }
 
 /// @copydoc TimerService::cancel
-bool TimerService::cancel(const std::string &jobId)
-{
-    auto it = scheduledJobs.find(jobId);
-    if (it != scheduledJobs.end())
-    {
-        xTimerStop(it->second, 0);
-        xTimerDelete(it->second, 0);
-        scheduledJobs.erase(it);
-        return true;
-    }
-    return false;
+bool TimerService::cancel(const std::string &jobId) {
+    bool success = false;
+    withLock([&]() {
+        auto it = scheduledJobs.find(jobId);
+        if (it != scheduledJobs.end()) {
+            xTimerStop(it->second, 0);
+            xTimerDelete(it->second, 0);
+            scheduledJobs.erase(it);
+            success = true;
+        }
+    });
+    return success;
 }
 
 /// @copydoc TimerService::checkMissedEvents

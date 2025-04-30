@@ -39,10 +39,14 @@
 #include <cstdint>
 #include <ctime>
 #include <string>
-#include "events/Event.h"
-#include <FreeRTOS.h>
-#include <timers.h>
 #include <unordered_map>
+#include <functional>
+#include <FreeRTOS.h>
+#include <semphr.h>
+#include <timers.h>
+
+#include "events/Event.h"
+
 
 /**
  * @brief Enum for days of the week as bitmask flags.
@@ -97,6 +101,14 @@ struct TimerJob
 class TimerService
 {
 public:
+
+
+    TimerService();
+    ~TimerService() = default;
+
+    void withLock(const std::function<void()>& fn);
+
+
     /**
      * @brief Access the singleton instance.
      */
@@ -154,7 +166,9 @@ public:
     bool cancel(const std::string &jobId);
 
 private:
-    TimerService() = default;
+
+    SemaphoreHandle_t lock_;
+    static StaticSemaphore_t lockBuffer_;
 
     std::unordered_map<std::string, TimerHandle_t> scheduledJobs; ///< Map of job IDs to TimerHandles
     // Note: TimerHandles are created and managed by FreeRTOS.

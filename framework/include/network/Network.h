@@ -26,11 +26,42 @@
     class Network
     {
     public:
+
         /**
-         * @brief Initialize Wi-Fi in station mode and connect to the SSID specified by WIFI_SSID and WIFI_PASSWORD.
-         * Blocks until link is up and IP address is acquired.
+         * @brief Start Wi-Fi with resilience, retrying connection if it fails.
+         * Uses a static method to handle retries and connection status.
+         *
+         * @return true if Wi-Fi started successfully, false otherwise.
          */
-        static void start_wifi();
+        static bool startWifiWithResilience();
+
+        /**
+         * @brief Attempt to connect to Wi-Fi with retries.
+         * This method will try to connect to the Wi-Fi network defined by WIFI_SSID and WIFI_PASSWORD.
+         * It will retry up to a maximum number of attempts defined by WIFI_MAX_RETRIES.
+         *
+         * @param attempts Number of connection attempts to make.
+         * @return true if connected, false otherwise.
+         */
+        static bool checkAndReconnect();
+
+        /**
+         * @brief Try to connect to Wi-Fi network.
+         * This method will attempt to connect to the Wi-Fi network defined by WIFI_SSID and WIFI_PASSWORD.
+         * It will retry up to a maximum number of attempts defined by WIFI_MAX_RETRIES.
+         *
+         * @param attempts Number of connection attempts to make.
+         * @return true if connected, false otherwise.
+         */
+        static bool tryConnect(int attempts);
+
+        /**
+         * @brief Restart the Wi-Fi interface.
+         * This method will deinitialize and reinitialize the Wi-Fi stack.
+         *
+         * @return true if Wi-Fi restarted successfully, false otherwise.
+         */
+        static bool restart_wifi();
 
         /**
          * @brief Deinitialize the CYW43 Wi-Fi stack.

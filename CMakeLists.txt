@@ -63,6 +63,7 @@ add_executable(framework_test
     framework/src/test-app/app.cpp
     framework/src/test-app/DashboardController.cpp
     framework/src/test-app/GpioController.cpp
+    framework/src/test-app/PicoModel.cpp
 )
 
 # Memory map fragment if LittleFS is enabled

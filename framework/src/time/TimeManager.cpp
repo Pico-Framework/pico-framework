@@ -124,10 +124,9 @@ void TimeManager::setTime(timespec *ts)
         printf("[TimeManager] Invalid timespec provided.\n");
         return;
     }
-    // If the always-on timer is already running, don't set the time again
+    // If the always-on timer is already running, we do not reset it.
     if (aon_timer_is_running()){
         aon_timer_start(ts);
-        printf("[TimeManager] Always-on timer is running.Setting time: %ld seconds, %ld nanoseconds\n", ts->tv_sec, ts->tv_nsec);
     }
     // Initialize the RTC if necessary
 #if HAS_RP2040_RTC

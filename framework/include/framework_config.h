@@ -23,6 +23,34 @@
  */
 #define NTP_TIMEOUT_SECONDS 15
 
+
+/**
+ * @brief This setting defines the retry timeout for WiFi connection
+ * The default is 10000 ms (10 seconds)
+ */ 
+#define WIFI_RETRY_TIMEOUT_MS     10000
+
+/**
+ * @brief This setting defines the maximum number of retries for WiFi connection
+ */ 
+#define WIFI_MAX_RETRIES          5
+
+/**
+ * @brief This setting defines whether to reboot the device on WiFi connection failure
+ * The default is false, meaning the device will not reboot on failure
+ * If set to true, the device will reboot after the maximum number of retries
+ * This is used by the FrameworkManager class
+ */
+#define WIFI_REBOOT_ON_FAILURE    false
+/**
+ * @brief This setting defines the interval for checking WiFi connection status
+ * The default is 30000 ms (30 seconds)
+ * This is used by the Network class to monitor WiFi connection status
+ */
+#define WIFI_MONITOR_INTERVAL_MS 30000  // Default: check every 30s
+
+
+
 /**
  * @brief This setting defines where uploads go
  * The default is "/uploads"

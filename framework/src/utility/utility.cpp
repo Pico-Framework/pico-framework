@@ -228,3 +228,14 @@ void warning(const std::string &msg, int32_t code)
     printf("\033[0m");
 }
 
+#if PICO_RP2350
+#include "RP2350.h"
+#else
+#include "RP2040.h"
+#endif
+
+void rebootSystem() {
+    NVIC_SystemReset();
+}
+
+

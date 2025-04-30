@@ -12,6 +12,8 @@
 #include "DebugTrace.h"
 TRACE_INIT(AppContext);
 
+SemaphoreHandle_t AppContext::mutex = xSemaphoreCreateMutex();
+
 AppContext& AppContext::getInstance() {
     static AppContext instance;
     return instance;

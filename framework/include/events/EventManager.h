@@ -112,7 +112,9 @@ private:
         FrameworkController *controller; ///< Target controller to notify
     };
 
-    SemaphoreHandle_t lock = nullptr;
+    SemaphoreHandle_t lock;
+    static StaticSemaphore_t lockBuffer_;
+
     std::vector<Subscriber> subscribers_;
     
     void withSubscribers(const std::function<void(std::vector<Subscriber>&)>& fn);

@@ -58,4 +58,14 @@ void debug_print(const char *msg, size_t len);
 void warning(const std::string &msg);
 void warning(const std::string &msg, int32_t code);
 
+/**
+ * @brief Reboot the device immediately.
+ * 
+ * This function performs a clean system reboot using the appropriate method
+ * for the platform (RP2040 or RP2350). Intended for controlled resets,
+ * such as after persistent failures or user-initiated reboots.
+ */
+void rebootSystem();
+
+
 #endif // UTILITY_H

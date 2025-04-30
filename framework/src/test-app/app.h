@@ -17,6 +17,7 @@
 #define APP_H
 
 #include "framework/FrameworkApp.h"
+#include "PicoModel.h"
 
 class App : public FrameworkApp
 {
@@ -29,20 +30,13 @@ public:
     void poll() override;                  // called by the framework to poll the app
     void onEvent(const Event &e) override; // called by the framework when an event occurs
 
-    // test functions
-    void ledOn(HttpRequest &req, HttpResponse &res, const std::vector<std::string> &params);
-    void ledOff(HttpRequest &req, HttpResponse &res, const std::vector<std::string> &params);
-    void getTemperature(HttpRequest &req, HttpResponse &res, const std::vector<std::string> &params);
-    void deleteFile(HttpRequest &req, HttpResponse &res, const std::vector<std::string> &params);
-    void getState(HttpRequest &req, HttpResponse &res, const std::vector<std::string> params);
-    void setState(HttpRequest &req, HttpResponse &res, const std::vector<std::string> params);
-    void getLedState(HttpRequest& req, HttpResponse& res, const std::vector<std::string>& /*params*/);
-
     enum class UserNotification : uint8_t { // user-defined notifications
         Heartbeat = 0
     };
 
 private:
+    PicoModel pico;
+
 };
 
 #endif

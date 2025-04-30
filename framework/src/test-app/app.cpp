@@ -54,10 +54,10 @@ void App::onStart()
     // These are two controllers derived from FrameworkController that add event support to the FrameworkTask base class.
     // They are started here to ensure they are ready to handle events and HTTP requests.
     std::cout << "[App] Initializing application..." << std::endl;
-    static GpioController gpioController(router);
+    static GpioController gpioController(router, pico);
     printf("[App] Starting GPIO controller...\n");
     gpioController.start();
-    static DashboardController dashboardController(router);
+    static DashboardController dashboardController(router, pico);
     dashboardController.start();
 
     // Here we are setting up event handlers - we get the EventManager and GpioEventManager from the AppContext.
@@ -164,6 +164,11 @@ void App::onEvent(const Event &e)
 
 void App::poll()
 {
+    static int count = 0;
+    if (count == 0) {
+        printf("[App] Starting main polling loop...\n");
+    }
+    count++;
     vTaskDelay(pdMS_TO_TICKS(100)); // Yield to other tasks
     // This function is called continuously (non-blocking) from the App task.
     // Use RUN_EVERY to do periodic background work:

@@ -44,10 +44,12 @@
 #include "utility/utility.h" // for is_in_interrupt()
 #include "framework/FrameworkController.h"
 
+StaticSemaphore_t EventManager::lockBuffer_;
+
 /// @copydoc EventManager::EventManager
 EventManager::EventManager(size_t queueSize)
 {
-    lock = xSemaphoreCreateMutex();
+    lock = xSemaphoreCreateMutexStatic(&lockBuffer_);
     configASSERT(lock);
 }
 

@@ -154,8 +154,9 @@ private:
     std::unordered_map<std::string, std::vector<Route>> routes;
     std::string cached_token; ///< Cached Bearer token
     std::vector<Middleware> globalMiddleware;
-
-    SemaphoreHandle_t lock_ = nullptr;
+    
+    static StaticSemaphore_t lockBuffer_;
+    SemaphoreHandle_t lock_ = xSemaphoreCreateMutexStatic(&lockBuffer_);
 
     void withRoutes(const std::function<void(std::unordered_map<std::string, std::vector<Route>> &)> &fn);
 };

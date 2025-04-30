@@ -3,6 +3,8 @@
 #include <cstdint>
 #include <type_traits>
 #include <string_view>
+#include <FreeRTOS.h>
+#include <semphr.h>
 
 class AppContext {
 public:
@@ -23,7 +25,9 @@ public:
      */
     template<typename T>
     void registerService(T* service) {
+        xSemaphoreTake(mutex, portMAX_DELAY);
         services[getTypeKey<T>()] = reinterpret_cast<void*>(service);
+        xSemaphoreGive(mutex);
     }
 
     /**
@@ -39,7 +43,9 @@ public:
      */
     template<typename T>
     T* getService() const {
+        xSemaphoreTake(mutex, portMAX_DELAY);
         auto it = services.find(getTypeKey<T>());
+        xSemaphoreGive(mutex);
         if (it != services.end()) {
             return reinterpret_cast<T*>(it->second);
         }
@@ -73,6 +79,8 @@ public:
 private:
     AppContext() = default;
     std::unordered_map<std::uintptr_t, void*> services;
+
+    static SemaphoreHandle_t mutex;
 
     template<typename T>
     static constexpr std::uintptr_t getTypeKey() {

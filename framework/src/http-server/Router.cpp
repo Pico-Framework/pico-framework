@@ -41,6 +41,9 @@ TRACE_INIT(Router)
 #include "http/JsonResponse.h"
 #include "framework/AppContext.h"
 
+SemaphoreHandle_t lock_;
+StaticSemaphore_t Router::lockBuffer_;
+
 // -----------------------------------------------------------------------------
 // Helper function to extract a bearer token from an Authorization header.
 static std::string extractBearerToken(const std::string &auth_header)
@@ -251,24 +254,24 @@ bool Router::handleRequest(HttpRequest &req, HttpResponse &res)
     return false;
 }
 
-
-
 // Prints all registered routes (for debugging).
 /// @copydoc Router::iprintRoutes
 void Router::printRoutes()
 {
     TRACE("Routes:\n");
-    for (const auto &method_pair : routes)
-    {
-        TRACE("Method: %s\n", method_pair.first.c_str());
-        for (const auto &route : method_pair.second)
+    withRoutes([&](auto &r) {
+        for (const auto &method_pair : routes)
         {
-            TRACE("  Route: %s, Dynamic: %s, Requires Auth: %s\n",
-                route.path.c_str(),
-                route.isDynamic ? "true" : "false",
-                route.requiresAuth ? "true" : "false");
+            TRACE("Method: %s\n", method_pair.first.c_str());
+            for (const auto &route : method_pair.second)
+            {
+                TRACE("  Route: %s, Dynamic: %s, Requires Auth: %s\n",
+                    route.path.c_str(),
+                    route.isDynamic ? "true" : "false",
+                    route.requiresAuth ? "true" : "false");
+            }
         }
-    }
+    });
 }
 
 // Serve static files using the HttpFileserver instance.

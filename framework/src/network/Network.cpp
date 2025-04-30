@@ -42,31 +42,73 @@ bool Network::wifiConnected = false;
 //  in your build environment. For security, it is best defined in your evironment and 
 //  not hardcoded in the source code.
 
-void Network::start_wifi(){
+bool Network::startWifiWithResilience() {
     if (cyw43_arch_init()) {
         printf("[Network] Failed to initialise Wi-Fi\n");
-        return;
+        return false;
     }
-    cyw43_arch_gpio_put(CYW43_WL_GPIO_LED_PIN, 0); // large stack increase on first put?
 
+    cyw43_arch_gpio_put(CYW43_WL_GPIO_LED_PIN, 0); // LED on during startup
     cyw43_arch_enable_sta_mode();
+
+    bool success = tryConnect(WIFI_MAX_RETRIES);
+
+    if (!success) {
+        cyw43_arch_deinit(); // Only on total failure
+    }
+
+    return success;
+}
+
+bool Network::checkAndReconnect() {
+    if (isConnected() && getLinkStatus(CYW43_LINK_UP) == CYW43_LINK_UP) {
+        return true; // Already connected
+    }
+
+    printf("[Network] Connection lost. Attempting reconnect...\n");
+
+    cyw43_arch_enable_sta_mode(); // do not re-init or deinit
+    return tryConnect(1); // One-shot reconnect attempt
+}
+
+
+bool Network::tryConnect(int attempts) {
+    cyw43_arch_gpio_put(CYW43_WL_GPIO_LED_PIN, 0); // LED during all connect attempts
+
     uint32_t pm;
     cyw43_wifi_get_pm(&cyw43_state, &pm);
-    cyw43_wifi_pm(&cyw43_state, CYW43_DEFAULT_PM & ~0xf); // disable power management
+    cyw43_wifi_pm(&cyw43_state, CYW43_DEFAULT_PM & ~0xf); // disable power mgmt during connect
 
-    // connecting asynchronously - need to check link status if up
-    if (cyw43_arch_wifi_connect_async(WIFI_SSID, WIFI_PASSWORD, CYW43_AUTH_WPA2_MIXED_PSK) == 0) {
-        printf("\n\n[Network] Connecting to WiFi SSID: %s \n", WIFI_SSID);
+    for (int i = 0; i < attempts; ++i) {
+        printf("\n\n[Network] Connecting to WiFi SSID: %s (attempt %d)\n", WIFI_SSID, i + 1);
+
+        if (cyw43_arch_wifi_connect_async(WIFI_SSID, WIFI_PASSWORD, CYW43_AUTH_WPA2_MIXED_PSK) != 0) {
+            printf("[Network] Failed to initiate connection.\n");
+            vTaskDelay(pdMS_TO_TICKS(WIFI_RETRY_TIMEOUT_MS));
+            continue;
+        }
+
+        int status = 0;
+        int waitMs = 0;
+        do {
+            status = Network::getLinkStatus(status);
+            vTaskDelay(pdMS_TO_TICKS(1000));
+            waitMs += 1000;
+        } while (status != CYW43_LINK_UP && waitMs < WIFI_RETRY_TIMEOUT_MS);
+
+        if (status == CYW43_LINK_UP) {
+            wifiConnected = true;
+            printf("[Network] Connected to Wi-Fi network at %s\n", ip4addr_ntoa(netif_ip4_addr(netif_list)));
+            cyw43_wifi_pm(&cyw43_state, pm);
+            return true;
+        }
+
+        printf("[Network] Attempt %d failed.\n", i + 1);
     }
 
-    int status = 0;
-    do {
-        status = getLinkStatus(status);
-        vTaskDelay(1000 / portTICK_PERIOD_MS);
-    } while (status != CYW43_LINK_UP);
-    wifiConnected = true;
-    printf("[Network] Connected to Wi-Fi network at %s\n", ip4addr_ntoa(netif_ip4_addr(netif_list)));
-    cyw43_wifi_pm(&cyw43_state, pm); // reset power management
+    wifiConnected = false;
+    cyw43_wifi_pm(&cyw43_state, pm);
+    return false;
 }
 
 /// @copydoc Network::isConnected
@@ -75,6 +117,16 @@ void Network::start_wifi(){
 bool Network::isConnected() {
     return wifiConnected;
 }
+
+bool Network::restart_wifi() {
+    printf("[Network] Forcing Wi-Fi restart...\n");
+
+    cyw43_arch_deinit();
+    wifiConnected = false;
+
+    return startWifiWithResilience();
+}
+
 
 /// @copydoc Network::wifi_deinit
 void Network::wifi_deinit(){

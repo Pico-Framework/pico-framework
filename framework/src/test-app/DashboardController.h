@@ -21,10 +21,11 @@
 #include "http/HttpRequest.h"
 #include "http/HttpResponse.h"
 #include "http/RouteTypes.h"
+#include "PicoModel.h"
 
 class DashboardController : public FrameworkController {
 public:
-    DashboardController(Router& r);
+    DashboardController(Router& r, PicoModel &pico);
     void initRoutes() override;
 
 private:
@@ -33,4 +34,6 @@ private:
     void setLedState(HttpRequest& req, HttpResponse& res, const RouteMatch & match);
     void uploadHandler(HttpRequest& req, HttpResponse& res, const RouteMatch & match);
     void deleteFile(HttpRequest& req, HttpResponse& res, const RouteMatch & match);
+    
+    PicoModel &pico; // Reference to the PicoModel for dashboard state management
 };

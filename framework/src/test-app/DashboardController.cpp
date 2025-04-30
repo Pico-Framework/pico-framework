@@ -7,9 +7,10 @@
 
 #include "framework/AppContext.h"
 #include "storage/StorageManager.h"
+#include "PicoModel.h"
 
-DashboardController::DashboardController(Router &r)
-    : FrameworkController("DashboardController", r, 1024, 1) {}
+DashboardController::DashboardController(Router &r, PicoModel &pico)
+    : FrameworkController("DashboardController", r, 1024, 1), pico(pico) {}
 
 void DashboardController::initRoutes()
 {
@@ -66,25 +67,21 @@ void DashboardController::initRoutes()
 }
 
 void DashboardController::getTemperature(HttpRequest &req, HttpResponse &res, const RouteMatch &)
-{
-    adc_init();
-    adc_set_temp_sensor_enabled(true);
-    adc_select_input(4);
-    float voltage = adc_read() * (3.3f / (1 << 12));
-    float tempC = 27.0f - (voltage - 0.706f) / 0.001721f;
+{   
+    float tempC = pico.getTemperature(); // Get temperature from pico model
     res.json({{"temperature", tempC}});
 }
 
 void DashboardController::getLedState(HttpRequest &req, HttpResponse &res, const RouteMatch &)
 {
-    bool isOn = cyw43_arch_gpio_get(0);
+    bool isOn = pico.getLedState(); // Get LED state from pico model
     res.json({{"state", isOn ? 1 : 0}});
 }
 
 void DashboardController::setLedState(HttpRequest &req, HttpResponse &res, const RouteMatch &match)
 {
     int value = std::stoi(match.getParam("value").value_or("0"));
-    cyw43_arch_gpio_put(0, value ? 1 : 0);
+    pico.setLedState(value != 0); // Convert to boolean
     res.json({{"state", value}});
 }
 

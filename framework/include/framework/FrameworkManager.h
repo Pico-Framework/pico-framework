@@ -82,6 +82,20 @@ private:
      */
     void onStart();
 
+    /**
+     * @brief Polling function for the FrameworkManager.
+     * 
+     * This function checks the Wi-Fi connection status at regular intervals
+     * and attempts to reconnect if the connection is lost.
+     * 
+     */
+    void poll();
+
+    /**
+     * @brief Handles events posted to the FrameworkManager.
+     * This function is called by the EventManager
+     * when an event is posted to the FrameworkManager's event queue.
+     */
     void onEvent(const Event& event);
 };
 

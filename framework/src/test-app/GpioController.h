@@ -19,15 +19,16 @@
 
 #include "http/HttpRequest.h"
 #include "http/HttpResponse.h"
-
+#include "PicoModel.h"
 
 class GpioController : public FrameworkController {
 public:
-    GpioController(Router& r);
+    GpioController(Router& r, PicoModel &pico);
     void initRoutes() override;
 
 private:
     void getState(HttpRequest& req, HttpResponse& res, const std::vector<std::string>& params);
     void setState(HttpRequest& req, HttpResponse& res, const std::vector<std::string>& params);
     void handleGetMultipleGpios(HttpRequest& req, HttpResponse& res);
+    PicoModel &pico; // Reference to the PicoModel for GPIO state management
 };
