@@ -64,6 +64,7 @@ add_executable(framework_test
     framework/src/test-app/DashboardController.cpp
     framework/src/test-app/GpioController.cpp
     framework/src/test-app/PicoModel.cpp
+    framework/src/test-app/DashboardView.cpp
 )
 
 # Memory map fragment if LittleFS is enabled
@@ -80,6 +81,7 @@ endif()
 # ---------------------------------------------------------------
 
 target_include_directories(framework_test PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}/framework/src/test-app/include
     ${CMAKE_CURRENT_SOURCE_DIR}/framework/include
     ${CMAKE_CURRENT_SOURCE_DIR}/framework/include/port
 )

@@ -22,6 +22,7 @@
 #include <nlohmann/json.hpp>
 #include "network/Tcp.h"
 #include "storage/StorageManager.h"
+#include "framework/FrameworkView.h"
 
 // Forward declaration of HttpRequest class
 class HttpRequest;
@@ -138,9 +139,16 @@ public:
      */
     void send(const std::string &body);
 
-    void renderView(const std::string &filename, const std::map<std::string, std::string> &context);
+    void send(const FrameworkView& view) {
+        send(view, {});  // delegate to the existing two-arg version with empty context
+    }
 
     void send(const std::string &body, const std::string &contentType);
+
+    #include "framework/FrameworkView.h"
+
+    void send(const FrameworkView& view,
+                        const std::map<std::string, std::string>& context);
 
     /**
      * @brief Send only the headers (for chunked/streaming responses).

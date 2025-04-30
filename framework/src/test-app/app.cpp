@@ -19,7 +19,7 @@
 
 #include "GpioController.h"
 #include "DashboardController.h"
-#include "dashboard.h"
+#include "DashboardView.h"
 
 // #include <iostream>
 
@@ -36,7 +36,7 @@ void App::initRoutes()
     // See the GpioController and DashboardController classes for examples.
     // Add a simple route for testing
     router.addRoute("GET", "/", [](HttpRequest &req, HttpResponse &res, const auto &)
-                    { res.send(dashboard_html); });
+                    { res.send(DashboardView()); });
     router.addRoute("GET", "/hello", [](HttpRequest &req, HttpResponse &res, const auto &)
                     { res.send("Welcome to PicoFramework!"); });
     router.addRoute("GET", "/zones/{name}", [](HttpRequest& req, HttpResponse& res, const RouteMatch& match) {

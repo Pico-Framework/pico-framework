@@ -408,16 +408,22 @@ std::string HttpResponse::renderTemplate(const std::string &tpl, const std::map<
 // ─────                 View related                                 ─────
 // ------------------------------------------------------------------------
 
-void HttpResponse::renderView(const std::string& filename, const std::map<std::string, std::string>& context) {
-    std::string fullPath = "/www/" + filename;
-    std::string html = FrameworkView::render(fullPath, context);
-    send(html, "text/html");  
-}
 
 void HttpResponse::send(const std::string& body, const std::string& contentType) {
     setHeader("Content-Type", contentType);
     send(body);
 }
+
+#include "framework/FrameworkView.h"
+
+void HttpResponse::send(const FrameworkView& view,
+                        const std::map<std::string, std::string>& context) {
+    view.applyHeaders(*this);
+    setContentType(view.getContentType());
+    std::string body = view.render(context);
+    send(body);
+}
+
 
 
 HttpResponse& HttpResponse::setBody(const std::string& body) {

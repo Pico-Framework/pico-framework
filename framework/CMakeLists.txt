@@ -72,8 +72,12 @@ target_sources(pico_framework PRIVATE
     src/framework/FrameworkController.cpp
     src/framework/FrameworkManager.cpp
     src/framework/FrameworkTask.cpp
-    src/framework/FrameworkView.cpp
     src/framework/FrameworkModel.cpp
+
+    #Views
+    src/framework/HtmlTemplateView.cpp
+    src/framework/JsonView.cpp
+    src/framework/FileView.cpp
 
     # HTTP Server
     src/http-server/HttpServer.cpp

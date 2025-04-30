@@ -7,7 +7,7 @@ App myApp(80);
 
 int main() {
     stdio_init_all();
-    std::cout << "System Booting..." << std::endl;
+    std::cout << "[main] System Booting..." << std::endl;
 
     myApp.start();  // Creates the app task and starts framework manager
 

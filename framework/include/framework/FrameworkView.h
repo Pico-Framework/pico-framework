@@ -1,67 +1,47 @@
 /**
  * @file FrameworkView.h
- * @author Ian Archbell
- * @brief Lightweight HTML templating utility for embedded applications.
+ * @brief Abstract base class for all views in the PicoFramework.
  *
- * Part of the PicoFramework application framework.
- * FrameworkView provides a static method to render HTML files with simple
- * {{key}} placeholders, replaced using a key-value context map.
+ * Supports dynamic rendering and MIME type negotiation. View subclasses
+ * can define their own rendering logic, content type, and headers.
  *
- * Designed for use in microcontroller-based HTTP servers.
- *
- * @version 0.1
- * @date 2025-03-31
+ * @version 0.3
+ * @date 2025-04-30
  * @license MIT License
- * @copyright Copyright (c) 2025, Ian Archbell
  */
 
-#pragma once
-#include <string>
-#include <map>
-#include <nlohmann/json.hpp>
-using json = nlohmann::json;
-
-/**
- * @brief Utility class for rendering static HTML views with variable substitution.
- *
- * Replaces `{{key}}` placeholders in an HTML template file using the provided context map.
- *
- * Example:
- * @code
- * std::map<std::string, std::string> ctx = { {"name", "Alice"} };
- * std::string html = FrameworkView::render("/www/index.html", ctx);
- * @endcode
- */
-class FrameworkView
-{
-public:
-    /**
-     * @brief Render a template by replacing `{{key}}` with corresponding values.
-     *
-     * Loads the file from `templatePath`, then replaces all placeholders
-     * matching keys in the context map.
-     *
-     * @param templatePath Path to the HTML or text template file.
-     * @param context Key-value pairs for substitution.
-     * @return Rendered output as a string.
-     */
-    static std::string render(const std::string &templatePath, const std::map<std::string, std::string> &context);
-    /**
-    *   nlohmann::json data = {
-    *       {"title", "Dashboard"},
-    *       {"user", "admin"},
-    *       {"count", 3}
-    *   };
-    *
-    *   res.send(FrameworkView::render("/index.html", data));
-    *
-    *   gives
-    *
-    *   <h1>{{title}}</h1> → <h1>Dashboard</h1>
-    *   <p>{{count}}</p> → <p>3</p>
-    *   <p>{{user}}</p> → <p>admin</p>
-    */
-    std::string render(const std::string &path, const nlohmann::json &jsonContext);
-
-    std::string renderJson(const nlohmann::json &json);
-};
+ #pragma once
+ #include <string>
+ #include <map>
+ #include <nlohmann/json.hpp>
+ 
+ // Forward declaration
+ class HttpResponse;
+ 
+ class FrameworkView {
+ public:
+     virtual ~FrameworkView() = default;
+ 
+     /**
+      * @brief Render the view body. Optional context (used by templates).
+      */
+     virtual std::string render(const std::map<std::string, std::string>& context = {}) const = 0;
+ 
+     /**
+      * @brief Return the MIME content type for this view.
+      */
+     virtual std::string getContentType() const = 0;
+ 
+     /**
+      * @brief Optional hook to set response headers (e.g., Content-Disposition).
+      */
+     virtual void applyHeaders(HttpResponse& response) const {}
+ 
+     /**
+      * @brief Optional JSON context hook (used by JsonView or convenience).
+      */
+     virtual std::string render(const nlohmann::json& context) const {
+         return render();  // fallback ignores json
+     }
+ };
+ 

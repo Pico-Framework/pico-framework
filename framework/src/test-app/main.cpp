@@ -20,7 +20,7 @@
     // This ensures that the framework is initialized before the users controller(s).
     // The FrameworkManager will start the network task, which will notify the app when the network is ready.
     
-    std::cout << "Starting Scheduler..." << std::endl;
+    std::cout << "[App] Starting Scheduler..." << std::endl;
     vTaskStartScheduler();
 
     std::cerr << "ERROR: Scheduler did not start!" << std::endl;
