@@ -24,6 +24,8 @@
 #define NTP_TIMEOUT_SECONDS 15
 
 
+#define EVENT_QUEUE_LENGTH 8 // Default max bufferred events in the queues
+
 /**
  * @brief This setting defines the retry timeout for WiFi connection
  * The default is 10000 ms (10 seconds)
@@ -105,29 +107,38 @@
 //#define LFS_TRACE_YES // set to enable LittleFS trace output, comment out to disable
 
 // === Module-specific trace enables ===
+#define TRACE_AppContext          0
+#define TRACE_ChunkedDecoder      0
+#define TRACE_FatFsStorageManager 0
+#define TRACE_FrameworkApp        1
+#define TRACE_FrameworkController 1
+#define TRACE_FrameworkTask       1
 #define TRACE_FrameworkManager    0
-#define TRACE_HttpServer          0
+#define TRACE_HttpClient          0
+#define TRACE_HttpFileserver      0
+#define TRACE_HttpParser          0
 #define TRACE_HttpRequest         0
 #define TRACE_HttpResponse        0
-#define TRACE_HttpFileserver      0
-#define TRACE_MultipartParser     0
-#define TRACE_JsonRequestHelper   0
-#define TRACE_JwtAuthenticator    0
-#define TRACE_Router              0
-#define TRACE_FatFsStorageManager 0
-#define TRACE_LittleFsStorageManager 0
-#define TRACE_JsonService         0
+#define TRACE_HttpServer          0
 #define TRACE_Middleware          0
-#define TRACE_Network             0
-#define TRACE_NtpClient           0
-#define TRACE_utility             0  
-#define TRACE_AppContext          0 
-#define TRACE_Tcp                 0
-#define TRACE_ChunkedDecoder      0
 #define TRACE_JsonParser          0
-#define TRACE_HttpClient          0
+#define TRACE_JsonRequestHelper   0
+#define TRACE_JsonService         0
+#define TRACE_JwtAuthenticator    0
+#define TRACE_LittleFsStorageManager 0
 #define TRACE_LwipDnsResolver     0
-#define TRACE_HttpParser          0
+#define TRACE_MultipartParser     0
+#define TRACE_Network             0
+#define TRACE_Router              0
+#define TRACE_Tcp                 0
+#define TRACE_utility             0  
+ 
+
+
+
+
+
+
 #define TRACE_TimeManager         0
 // etc.
 

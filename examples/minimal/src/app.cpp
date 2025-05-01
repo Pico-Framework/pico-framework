@@ -21,8 +21,6 @@ void App::run() {
 
     std::cout << "[App] Network ready. Building routing table..." << std::endl;
 
-    initRoutes();
-
     if (server.start()) {
         std::cout << "[App] HTTP server started!" << std::endl;
     } else {
