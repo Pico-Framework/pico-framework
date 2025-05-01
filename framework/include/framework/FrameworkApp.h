@@ -113,9 +113,11 @@ public:
 
 protected:
     virtual void initRoutes() {} // Default no-op
-    Router router;       ///< Router instance for handling HTTP routes
-    HttpServer server;           ///< Embedded HTTP server instance
-    FrameworkManager manager;    ///< Responsible for launching system services and networking
+    // ⚠️ Construction order is critical:
+    // router → server → manager — do not reorder these declarations for correct construction.
+    Router router;              ///< Router instance for handling HTTP routes
+    HttpServer server;          ///< Embedded HTTP server instance
+    FrameworkManager manager;   ///< Responsible for launching system services and networking
 };
 
 #endif // FRAMEWORK_APP_H

@@ -64,6 +64,11 @@ public:
         return getInstance().getService<T>();
     }
 
+    template<typename T>
+    static bool has() {
+        return get<T>(false) != nullptr;
+    }
+
     /**
      * @brief Initialize the framework services.
      * This method sets up all the core services required by the framework.

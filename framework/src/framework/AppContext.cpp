@@ -3,9 +3,12 @@
 #include "http/JwtAuthenticator.h"
 #include "events/EventManager.h"
 #include "events/GpioEventManager.h"
+// Right now its mandatory to have one StorageManager interface 
 #if PICO_HTTP_ENABLE_LITTLEFS
     #include "storage/LittleFsStorageManager.h"
-#else   
+    #include "storage/JsonService.h"
+#else  
+    #include "storage/JsonService.h" 
     #include "storage/FatFsStorageManager.h"
 #endif
 #include "framework_config.h"
@@ -23,10 +26,14 @@ void AppContext::initFrameworkServices() {
     #if PICO_HTTP_ENABLE_LITTLEFS
         static LittleFsStorageManager littlefs;
         registerService<StorageManager>(&littlefs);
+        static JsonService jsonService(&littlefs);
+        registerService<JsonService>(&jsonService);
         TRACE("[AppContext] Registered LittleFsStorageManager.\n");
     #else
         static FatFsStorageManager fatfs;
         registerService<StorageManager>(&fatfs);
+        static JsonService jsonService(&fatfs);
+        registerService<JsonService>(&jsonService);
         TRACE("[AppContext] Registered FatFsStorageManager.\n");
     #endif
         // Time manager (always present)

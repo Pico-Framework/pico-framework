@@ -127,7 +127,7 @@ public:
     template <typename T>
     T getValue(const std::string &key, const T &defaultValue = T()) const
     {
-        const auto &data = jsonService.data();
+        const auto &data = jsonService->data();
         if (data.contains(key))
         {
             return data[key].get<T>();
@@ -146,7 +146,7 @@ public:
     template <typename T>
     void setValue(const std::string &key, const T &value)
     {
-        jsonService.data()[key] = value;
+        jsonService->data()[key] = value;
     }
 
 protected:
@@ -160,6 +160,6 @@ protected:
     nlohmann::json collection = nlohmann::json::array(); ///< In-memory array of records
 
 private:
-    JsonService jsonService; ///< Underlying JSON persistence layer
+    JsonService* jsonService; ///< Underlying JSON persistence layer
     std::string storagePath; ///< File path for this model
 };

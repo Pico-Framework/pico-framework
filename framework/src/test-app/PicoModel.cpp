@@ -3,6 +3,7 @@
 
 #include "network/Network.h"
 #include "PicoModel.h"
+#include "utility/WithFlag.h"
 
 // Define your model properties and methods here
 // For example, you might have properties for temperature, LED state, etc.
@@ -82,6 +83,7 @@ void PicoModel::onNetworkReady()
     // This method is called when the network is ready
     // Initialize the LED state based on the stored value
     bool ledState = getValue("led", false);
+    WithFlag _(suppressSave); // Suppress saving during initialization
     setLedState(ledState);
     printf("[PicoModel] Network ready, LED state initialized to %s\n", ledState ? "ON" : "OFF");
 }

@@ -21,22 +21,22 @@
 
 /// @copydoc FrameworkModel::FrameworkModel
 FrameworkModel::FrameworkModel(const std::string& path)
-    : jsonService(AppContext::get<StorageManager>()), storagePath(path) {}
+    : jsonService(AppContext::get<JsonService>()), storagePath(path) {}
 
 /// @copydoc FrameworkModel::load
 bool FrameworkModel::load()
 {
-    if (!jsonService.load(storagePath))
+    if (!jsonService->load(storagePath))
         return false;
-    collection = jsonService.data().value("items", nlohmann::json::array());
+    collection = jsonService->data().value("items", nlohmann::json::array());
     return true;
 }
 
 /// @copydoc FrameworkModel::save
 bool FrameworkModel::save()
 {
-    jsonService.data()["items"] = collection;
-    return jsonService.save(storagePath);
+    jsonService->data()["items"] = collection;
+    return jsonService->save(storagePath);
 }
 
 /// @copydoc FrameworkModel::all
@@ -179,6 +179,6 @@ nlohmann::json FrameworkModel::deleteAsJson(const std::string &id)
 /// @copydoc FrameworkModel::saveAll
 bool FrameworkModel::saveAll()
 {
-    jsonService.data()["items"] = collection;
-    return jsonService.save(storagePath);
+    jsonService->data()["items"] = collection;
+    return jsonService->save(storagePath);
 }
