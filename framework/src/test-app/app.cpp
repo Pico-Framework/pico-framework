@@ -56,6 +56,7 @@ void App::onStart()
     // These are two controllers derived from FrameworkController that add event support to the FrameworkTask base class.
     // They are started here to ensure they are ready to handle events and HTTP requests.
     std::cout << "[App] Initializing application..." << std::endl;
+
     static GpioController gpioController(router, pico);
     printf("[App] Starting GPIO controller...\n");
     gpioController.start();
@@ -133,6 +134,7 @@ void App::onEvent(const Event &e)
 
             case SystemNotification::NetworkReady:
                 std::cout << "[App] Network ready. Starting services..." << std::endl;
+                pico.onStart(); // Initialize the PicoModel, which handles GPIO and other hardware interactions
                 server.start();
                 break;
 

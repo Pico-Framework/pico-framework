@@ -28,9 +28,9 @@
 
 /**
  * @brief This setting defines the retry timeout for WiFi connection
- * The default is 10000 ms (10 seconds)
+ * The default is 15000 ms (15 seconds)
  */ 
-#define WIFI_RETRY_TIMEOUT_MS     10000
+#define WIFI_RETRY_TIMEOUT_MS     15000
 
 /**
  * @brief This setting defines the maximum number of retries for WiFi connection

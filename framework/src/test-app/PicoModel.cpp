@@ -11,8 +11,12 @@
     PicoModel::PicoModel()
         : FrameworkModel("pico_model.json") // Initialize with a storage manager and path
     {
-        // Restore state
-        //restoreState();
+
+    }
+
+    void PicoModel::onStart() {
+        // Initialize GPIO for LED
+        restoreState(); // Restore the state of the model
     }
    
     float PicoModel::getTemperature() {
@@ -27,7 +31,9 @@
     void PicoModel::setLedState(bool state){
         cyw43_arch_gpio_put(0, state ? 1 : 0); // Set GPIO 0 for LED state
         setValue("led", getLedState());
-        save();
+        if (!suppressSave) {
+            saveState(); // Only save if not restoring
+        }
     }
     bool PicoModel::getLedState(){
         return cyw43_arch_gpio_get(0); // Get GPIO 0 state for LED
@@ -42,20 +48,31 @@
         gpio_init(pin);
         gpio_set_dir(pin, GPIO_OUT);
         gpio_put(pin, state); 
+        if (!suppressSave) {
+            saveState(); // Only save if not restoring
+        }
+    }
+
+    void PicoModel::saveState(){
         // Update the model with the new state
-        std::vector<int> activePins = {0, 1, 2, 3}; // or a member variable
+        // Save the LED state
+        setValue("led", getLedState());
+        // Save the state of all active GPIO pins
         json gpios;
         for (int pin : activePins) {
             gpios[std::to_string(pin)] = getGpioState(pin);
         }    
         setValue("gpio_states", gpios);
+        printf("[PicoModel] Saving state to storage...\n");
         save();
+
     }
 
     void PicoModel::restoreState() {
         if (!load()) return;
-    
+        printf("[PicoModel] Restoring state from storage...\n");
         // Restore LED state
+        suppressSave = true; // Suppress saving during restore
         bool ledState = getValue("led", false);
         setLedState(ledState);
     
@@ -66,5 +83,6 @@
             bool state = stateJson.get<bool>();
             setGpioState(pin, state);
         }
+        suppressSave = false; // Re-enable saving after restore
     }
     
