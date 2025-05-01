@@ -53,6 +53,11 @@ void App::initRoutes()
 
 void App::onStart()
 {
+    // Call the base class to ensure the framework starts correctly.
+    FrameworkApp::onStart();  
+    
+    pico.onStart(); // Initialize the PicoModel, which handles GPIO and other hardware interactions
+
     // These are two controllers derived from FrameworkController that add event support to the FrameworkTask base class.
     // They are started here to ensure they are ready to handle events and HTTP requests.
     std::cout << "[App] Initializing application..." << std::endl;
@@ -100,8 +105,6 @@ void App::onStart()
         ),
         this);
 
-    // Call the base class to ensure the framework starts correctly.
-    FrameworkApp::onStart();  
 
 }
 
@@ -134,7 +137,7 @@ void App::onEvent(const Event &e)
 
             case SystemNotification::NetworkReady:
                 std::cout << "[App] Network ready. Starting services..." << std::endl;
-                pico.onStart(); // Initialize the PicoModel, which handles GPIO and other hardware interactions
+                pico.onNetworkReady(); // Notify the PicoModel that the network is ready
                 server.start();
                 break;
 

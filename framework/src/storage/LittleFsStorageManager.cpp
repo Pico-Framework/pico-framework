@@ -191,7 +191,7 @@ void LittleFsStorageManager::configure()
     config.lock = lfs_lock;
     config.unlock = lfs_unlock;
 #endif
-    printf("[LittleFS] Flash base: 0x%08x, size: %zu bytes (%zu blocks)\n",
+    printf("[LittleFS] Configured, flash base: 0x%08x, size: %zu bytes (%zu blocks)\n",
            static_cast<unsigned>(flashBase), flashSize, config.block_count);
 }
 
@@ -199,7 +199,7 @@ bool LittleFsStorageManager::mount()
 {
     if( mounted)
     {
-        printf("[LittleFs] Already mounted\n");
+        TRACE("[LittleFs] Already mounted\n");
         return true;
     }
     TRACE("[LittleFs] Mounting LittleFS...\n");
@@ -416,45 +416,22 @@ bool LittleFsStorageManager::removeDirectory(const std::string &path)
     return lfs_remove(&lfs, path.c_str()) == 0;
 }
 
-// struct FormatContext {
-//     LittleFsStorageManager *self;
-//     bool *result;
-// };
-
-// void LittleFsStorageManager::formatInner(bool *result) {
-//     int err = lfs_format(&lfs, &config);
-//     *result = (err == 0);
-// }
-
-// static void __not_in_flash_func(format_callback)(void *param) {
-//     auto *ctx = static_cast<FormatContext *>(param);
-//     ctx->self->formatInner(ctx->result);
-// }
-
-
 bool LittleFsStorageManager::formatStorage()
 {
+    // Note that this function will unmount the filesystem before formatting
+    // and remount it afterwards if successful.
+
+
+    
     bool result = false;
 
     if(mounted)
     {
-        printf("[LittleFs] Unmounting before format\n");
+        TRACE("[LittleFs] Unmounting before format\n");
         unmount();
     }
-
-    // #if configNUM_CORES > 1
-    // // Use multicore lockout to ensure atomicity
-    // // Core-safe execution using flash_safe_execute
-    // FormatContext ctx = { this, &result };
-
-    // flash_safe_execute(format_callback, &ctx, 5000);
-//#else
-    // Fallback single-core safe version
-//    uint32_t status = save_and_disable_interrupts();
     int err = lfs_format(&lfs, &config);
-//    restore_interrupts(status);
     result = (err == 0);
-//#endif
 
     if (result)
     {

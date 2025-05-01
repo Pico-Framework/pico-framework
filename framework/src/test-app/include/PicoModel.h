@@ -24,6 +24,8 @@ class PicoModel : public FrameworkModel
 
         void saveState();
         void restoreState();
+
+        void onNetworkReady();
         
     private:
         std::vector<int> activePins = { 2, 3, 4, 5, 6, 7, 8, 9, 16, 17, 18, 19 };  // Pins in use - staying away from sd card pins

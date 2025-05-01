@@ -52,6 +52,9 @@ FrameworkManager::FrameworkManager(FrameworkApp *app, Router &router)
       app(app),
       networkTaskHandle(nullptr)
 {
+    // This is imporatant to ensure that the AppContext is initialized
+    // before we start using it in the Framework.
+    // For example EventManager and other application service must be available for the user in onStart();
     AppContext::getInstance().initFrameworkServices();
 }
 
@@ -127,6 +130,7 @@ void FrameworkManager::onEvent(const Event &event)
 void FrameworkManager::poll()
 {
 #if WIFI_MONITOR_INTERVAL_MS > 0
+    printf("[FrameworkManager] Polling for Wi-Fi status...\n");
     static uint32_t lastCheck = 0;
     static int networkFailures = 0; // Track consecutive failures
     uint32_t now = xTaskGetTickCount() * portTICK_PERIOD_MS;

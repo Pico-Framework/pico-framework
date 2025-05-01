@@ -289,7 +289,7 @@ void HttpServer::handleClient(Tcp* conn)
 
     if (req.getHeader("Connection") == "close")
     {
-        printf("[HttpServer] Client requested Connection: close, closing connection\n");
+        TRACE("[HttpServer] Client requested Connection: close, closing connection\n");
         return;
     }
 

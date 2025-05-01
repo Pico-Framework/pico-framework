@@ -67,8 +67,8 @@ bool JsonService::load(const std::string &path)
     }
 
     std::string str(buffer.begin(), buffer.end());
-    printf("Loaded JSON file from %s: %zu bytes\n", path.c_str(), str.size());
-    printf("Content: %s\n", str.c_str());
+    TRACE("Loaded JSON file from %s: %zu bytes\n", path.c_str(), str.size());
+    TRACE("Content: %s\n", str.c_str());
 
     // Treat empty file as valid empty object
     if (str.empty())
@@ -92,11 +92,11 @@ bool JsonService::save(const std::string &path) const
     }
     std::string content = data_.dump(2); // Pretty print
     std::vector<uint8_t> buffer(content.begin(), content.end());
-    printf("Buffer size: %zu bytes\n", buffer.size());
-    printf("Buffer content: %s\n", content.c_str());
+    TRACE("Buffer size: %zu bytes\n", buffer.size());
+    TRACE("Buffer content: %s\n", content.c_str());
 
     bool ok = storage->writeFile(path, buffer);
-    printf("Saved JSON file to %s: %s\n", path.c_str(), ok ? "ok" : "failed");
+    TRACE("Saved JSON file to %s: %s\n", path.c_str(), ok ? "ok" : "failed");
     return ok;
 }
 

@@ -91,10 +91,10 @@ bool FatFsStorageManager::listDirectory(const std::string &path, std::vector<Fil
         TRACE("SD card not mounted — cannot list directory: %s\n", path.c_str());
         return false;
     }
-    printf("[FatFs] Listing directory: %s\n", path.c_str());
+    TRACE("[FatFs] Listing directory: %s\n", path.c_str());
     FF_FindData_t xFindStruct{};
     std::string searchPath = resolvePath(path.empty() ? "/" : path);
-    printf("[FatFs] Search path: %s\n", searchPath.c_str());
+    TRACE("[FatFs] Search path: %s\n", searchPath.c_str());
     int result = ff_findfirst(searchPath.c_str(), &xFindStruct);
 
     if (result != FF_ERR_NONE) {
@@ -123,7 +123,7 @@ bool FatFsStorageManager::createDirectory(const std::string &path)
         TRACE("SD card not mounted — cannot create directory: %s\n", path.c_str());
         return false;
     }
-    printf("[FatFs] Creating directory: %s\n", path.c_str());
+    TRACE("[FatFs] Creating directory: %s\n", path.c_str());
     return ff_mkdir(resolvePath(path).c_str()) == FF_ERR_NONE;
 }
 
