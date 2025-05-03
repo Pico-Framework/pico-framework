@@ -10,6 +10,7 @@ OUTPUT_LANGUAGE        = English
 INPUT                  = src include
 FILE_PATTERNS          = *.cpp *.h
 RECURSIVE              = YES
+DISABLE_INDEX          = YES
 
 #---------------------------------------------------------------------------
 # Build configuration
@@ -36,8 +37,6 @@ STRIP_FROM_PATH        = src include
 
 GENERATE_HTML          = YES
 HTML_OUTPUT            = html
-HTML_HEADER            = header.html
-HTML_FOOTER            = footer.html
 HTML_EXTRA_STYLESHEET  = customdoxygen.css
 HTML_DYNAMIC_SECTIONS  = YES
 GENERATE_LATEX         = NO
