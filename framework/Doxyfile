@@ -2,8 +2,8 @@
 # Project information
 #---------------------------------------------------------------------------
 
-PROJECT_NAME           = "Pico Framework"
-PROJECT_BRIEF          = "An embedded HTTP and application framework for Raspberry Pi Pico"
+PROJECT_NAME           = "Pico-Framework"
+PROJECT_BRIEF          = "A web-first embedded framework for C++"
 PROJECT_NUMBER         = 0.1.0
 OUTPUT_DIRECTORY       = docs
 OUTPUT_LANGUAGE        = English
@@ -36,6 +36,10 @@ STRIP_FROM_PATH        = src include
 
 GENERATE_HTML          = YES
 HTML_OUTPUT            = html
+HTML_HEADER            = header.html
+HTML_FOOTER            = footer.html
+HTML_EXTRA_STYLESHEET  = customdoxygen.css
+HTML_DYNAMIC_SECTIONS  = YES
 GENERATE_LATEX         = NO
 GENERATE_MAN           = NO
 GENERATE_XML           = NO
@@ -75,3 +79,14 @@ WARN_IF_UNDOCUMENTED   = YES
 WARN_IF_DOC_ERROR      = YES
 QUIET                  = NO
 WARN_NO_PARAMDOC       = YES
+
+#---------------------------------------------------------------------------
+# Additional configurations
+#---------------------------------------------------------------------------
+HAVE_DOT = YES
+CALL_GRAPH = YES
+CALLER_GRAPH = YES
+UML_LOOK = YES
+DOT_IMAGE_FORMAT = svg
+INTERACTIVE_SVG = YES
+DOT_MULTI_TARGETS = YES
