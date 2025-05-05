@@ -2769,6 +2769,10 @@ h2.groupheader>a {
     vertical-align: baseline;
 } 
 
-.mdlogo {
+.custom_anchor {
+    text-decoration: none !important;
+}
+
+.custom_anchor:hover {
     text-decoration: none !important;
 }
