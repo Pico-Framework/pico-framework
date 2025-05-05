@@ -1,5 +1,7 @@
 /* The standard CSS for doxygen 1.13.2*/
 
+@import url('https://fonts.googleapis.com/css2?family=Raleway:wght@400;600&family=Roboto+Mono&display=swap');
+
 html {
     /* page base colors */
     --page-background-color: white;
@@ -355,16 +357,6 @@ html {
         --fold-plus-image: url('plusd.svg');
         --fold-minus-image-relpath: url('../../minusd.svg');
         --fold-plus-image-relpath: url('../../plusd.svg');
-
-        /** font-family */
-        --font-family-normal: Roboto, sans-serif;
-        --font-family-monospace: 'JetBrains Mono', Consolas, Monaco, 'Andale Mono', 'Ubuntu Mono', monospace, fixed;
-        --font-family-nav: 'Lucida Grande', Geneva, Helvetica, Arial, sans-serif;
-        --font-family-title: Tahoma, Arial, sans-serif;
-        --font-family-toc: Verdana, 'DejaVu Sans', Geneva, sans-serif;
-        --font-family-search: Arial, Verdana, sans-serif;
-        --font-family-icon: Arial, Helvetica;
-        --font-family-tooltip: Roboto, sans-serif;
 
         /** special sections */
         --warning-color-bg: #2e1917;
@@ -2486,7 +2478,7 @@ body {
 /* Define font variables */
 :root {
     --font-family-normal: 'Raleway', sans-serif;
-    --font-family-monospace: 'JetBrains Mono', SFMono-Regular, Consolas, 'Ubuntu Mono', Menlo, monospace;
+    --font-family-monospace: 'Roboto Mono', SFMono-Regular, Consolas, 'Ubuntu Mono', Menlo, monospace;
 }
 
 /* Apply fonts */
@@ -2745,4 +2737,35 @@ h2.groupheader>a {
     filter: brightness(0) invert(1);
     /* Makes icon white */
 }
+
+
+ #titlearea {
+    display: flex;
+    align-items: center;
+    height: 48px !important;
+    padding: 0 1em;
+    background-color: #000;
+    color: white;
+    gap: 0.5em;
+    box-sizing: border-box;
+}
+
+
+#projectname {
+    display: inline-block;
+    font-size: 2em;
+    font-size: 3.em;
+    margin: 0;
+    margin-right: 1em;
+    line-height: 1;
+}
+
+#projectbrief {
+    color: white;
+    margin: 0;
+    line-height: 1;
+    display: inline-block;
+    font-size: 1.5em;
+    vertical-align: baseline;
+} 
 
