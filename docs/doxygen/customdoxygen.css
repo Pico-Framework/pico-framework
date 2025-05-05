@@ -2769,10 +2769,15 @@ h2.groupheader>a {
     vertical-align: baseline;
 } 
 
-.custom_anchor {
+a.custom_anchor {
     text-decoration: none !important;
 }
-
-.custom_anchor:hover {
+a.custom_anchor:visited {
+    text-decoration: none !important;
+}
+a.custom_anchor:active {
+    text-decoration: none !important;
+}
+a.custom_anchor:hover {
     text-decoration: none !important;
 }
