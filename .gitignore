@@ -44,6 +44,7 @@ settings.json
 node_modules/
 package-lock.json
 yarn.lock
+
 # === Doxgen generated documentation ===
 framework/docs/html/
 

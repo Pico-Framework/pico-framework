@@ -29,7 +29,8 @@ REFERENCES_RELATION    = YES
 HIDE_UNDOC_MEMBERS     = NO
 JAVADOC_AUTOBRIEF      = YES
 FULL_PATH_NAMES        = NO
-STRIP_FROM_PATH        = src include
+STRIP_FROM_PATH        = ../../framework/src ../../framework/include
+OUTPUT_DIRECTORY = ../api
 
 #---------------------------------------------------------------------------
 # Output formats
