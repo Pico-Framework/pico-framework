@@ -2769,3 +2769,6 @@ h2.groupheader>a {
     vertical-align: baseline;
 } 
 
+.mdlogo {
+    text-decoration: none !important;
+}
