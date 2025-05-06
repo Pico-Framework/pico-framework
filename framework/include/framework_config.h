@@ -117,9 +117,9 @@
 #define TRACE_HttpClient          0
 #define TRACE_HttpFileserver      0
 #define TRACE_HttpParser          0
-#define TRACE_HttpRequest         0
+#define TRACE_HttpRequest         1
 #define TRACE_HttpResponse        0
-#define TRACE_HttpServer          0
+#define TRACE_HttpServer          1
 #define TRACE_Middleware          0
 #define TRACE_JsonParser          0
 #define TRACE_JsonRequestHelper   0

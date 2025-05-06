@@ -121,7 +121,7 @@ public:
      * @brief Get all request headers.
      * @return Map of header key-value pairs.
      */
-    const std::map<std::string, std::string>& getHeaders() const
+    const std::map<std::string, std::string> &getHeaders() const
     {
         return headers;
     }
@@ -158,12 +158,12 @@ public:
     /**
      * @brief Get the Host header value.
      */
-    const std::string& getHost() const
+    const std::string &getHost() const
     {
         return host;
     }
 
-    const std::string& getProtocol() const
+    const std::string &getProtocol() const
     {
         return protocol;
     }
@@ -229,7 +229,7 @@ public:
     /**
      * @brief Get the request body (copy).
      */
-    const std::string& getBody() const
+    const std::string &getBody() const
     {
         return body;
     }
@@ -259,6 +259,19 @@ public:
         return contentLength;
     }
 
+    /**
+     * @brief Safely parse the request body as JSON (non-throwing).
+     *
+     * Returns an empty object if parsing fails.
+     *
+     * @return nlohmann::json Parsed JSON object or empty on failure.
+     */
+    inline nlohmann::json json() const
+    {
+        auto parsed = nlohmann::json::parse(getBody(), nullptr, false);
+        return parsed.is_discarded() ? nlohmann::json::object() : parsed;
+    }
+
     // ─────────────────────────────────────────────────────────────────────────────
     // Method / URL / Path Accessors
     // ─────────────────────────────────────────────────────────────────────────────
@@ -284,7 +297,7 @@ public:
     /**
      * @brief Get the HTTP method.
      */
-    const std::string& getMethod() const
+    const std::string &getMethod() const
     {
         return method;
     }
@@ -292,7 +305,7 @@ public:
     /**
      * @brief Get the parsed request path (without query string).
      */
-    const std::string& getPath() const
+    const std::string &getPath() const
     {
         return path;
     }
@@ -300,7 +313,7 @@ public:
     /**
      * @brief Get the original URL from the request line.
      */
-    const std::string& getUri() const
+    const std::string &getUri() const
     {
         return uri;
     }
@@ -308,7 +321,7 @@ public:
     /**
      * @brief Get the parsed query string from the URL.
      */
-    const std::string& getQuery() const
+    const std::string &getQuery() const
     {
         return query;
     }
@@ -360,6 +373,15 @@ public:
      */
     static HttpRequest receive(Tcp *tcp);
 
+    
+    
+    static std::optional<std::pair<std::string, std::string>> receiveUntilHeadersComplete(Tcp* conn);
+    bool appendRemainingBody(int expectedLength);
+
+
+
+
+
     /**
      * @brief Parse the HTTP method and path from the first request line.
      * @param buffer Raw request buffer.
@@ -367,7 +389,7 @@ public:
      * @param path Output buffer for path.
      * @return True on success.
      */
-    static bool getMethodAndPath(char *buffer, char *method, char *path);
+    static bool getMethodAndPath(const std::string& data, std::string& method, std::string& path);
 
     // ─────────────────────────────────────────────────────────────────────────────
     // Multipart Upload Handling

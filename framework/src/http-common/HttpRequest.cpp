@@ -155,16 +155,88 @@ void HttpRequest::parseHeaders(const char *raw)
  * @param path Output buffer for path.
  * @return true on success, false on failure.
  */
-bool HttpRequest::getMethodAndPath(char *buffer, char *method, char *path)
+bool HttpRequest::getMethodAndPath(const std::string& rawHeaders, std::string& method, std::string& path)
 {
-    // Extract the HTTP method and path
-    if (sscanf(buffer, "%s %s", method, path) != 2)
-    {
+    printf("Parsing request data: %s\n", rawHeaders.c_str());
+    std::istringstream stream(rawHeaders);
+    std::string requestLine;
+    if (!std::getline(stream, requestLine)) {
+        printf("Failed to read request line\n");
+        return false;
+    }
+    
+    std::istringstream lineStream(requestLine);
+    if (!(lineStream >> method >> path)) {
         printf("Error parsing HTTP request method and path\n");
         return false;
     }
     return true;
 }
+
+constexpr size_t MAX_HEADER_BYTES = 4096; // limit to prevent runaway headers if malformed
+
+std::optional<std::pair<std::string, std::string>> HttpRequest::receiveUntilHeadersComplete(Tcp* conn) {
+    std::string requestText;
+    char buffer[HTTP_BUFFER_SIZE];
+
+    while (true) {
+        int received = conn->recv(buffer, sizeof(buffer));
+        if (received <= 0) {
+            printf("[HttpRequest] Failed to receive header bytes\n");
+            return std::nullopt;
+        }
+
+        requestText.append(buffer, received);
+
+        size_t headerEnd = requestText.find("\r\n\r\n");
+        if (headerEnd != std::string::npos) {
+            size_t bodyStart = headerEnd + 4;
+            std::string headers = requestText.substr(0, headerEnd);
+            std::string leftover = (bodyStart < requestText.size())
+                ? requestText.substr(bodyStart)
+                : "";
+            return std::make_pair(std::move(headers), std::move(leftover));
+        }
+
+        if (requestText.size() > MAX_HEADER_BYTES) {
+            printf("[HttpRequest] Headers exceeded %zu bytes, rejecting\n", MAX_HEADER_BYTES);
+            return std::nullopt;
+        }
+    }
+}
+
+bool HttpRequest::appendRemainingBody(int expectedLength) {
+    size_t remaining = expectedLength - body.size();
+    char buffer[HTTP_BUFFER_SIZE];
+
+    while (remaining > 0) {
+        size_t toRead = std::min(remaining, sizeof(buffer));
+        int received = tcp->recv(buffer, toRead);
+        if (received <= 0) {
+            printf("Error receiving body chunk\n");
+            return false;
+        }
+        size_t currentSize = body.size();
+        if (currentSize >= MAX_HTTP_BODY_LENGTH) {
+            TRACE("Body exceeds max length. Truncating.\n");
+            markBodyTruncated();
+            break;
+        }
+        size_t allowed = MAX_HTTP_BODY_LENGTH - currentSize;
+        size_t toAppend = std::min(static_cast<size_t>(received), allowed);
+        body.append(buffer, toAppend);
+
+        if (toAppend < static_cast<size_t>(received)) {
+            TRACE("Body chunk truncated due to size limit.\n");
+            markBodyTruncated();
+            break;
+        }
+        remaining -= received;
+    }
+    return true;
+}
+
+
 
 /**
  * @brief Receive raw bytes from the client socket into a buffer.
@@ -182,40 +254,25 @@ HttpRequest HttpRequest::receive(Tcp *tcp)
     char buffer[BUFFER_SIZE];                   // Declare buffer size
     std::string body = "";                      // Initialize empty body
     std::map<std::string, std::string> headers; // Initialize empty headers
-    char method[16] = {0};                      // Initialize method buffer
-    char path[BUFFER_SIZE] = {0};               // Initialize path buffer
+    std::string method = {0};                      // Initialize method buffer
+    std::string path = {0};               // Initialize path buffer
 
-    int bytesReceived = tcp->recv(buffer, sizeof(buffer));
-    if (bytesReceived <= 0)
-    {
-        return HttpRequest("", "", ""); // Return empty HttpRequest on error
+    auto result = receiveUntilHeadersComplete(tcp);
+    if (!result) {
+        return HttpRequest("", "", "");
     }
-    buffer[bytesReceived] = '\0'; // Ensure null-termination for strstr() and strtok()
+    
+    const auto& [rawHeaders, initialBody] = *result;
 
-    if (!getMethodAndPath(buffer, method, path))
-    {
-        return HttpRequest("", "", ""); // Return empty HttpRequest on error
+    if (!getMethodAndPath(rawHeaders, method, path)) {
+        return HttpRequest("", "", "");
     }
-
-    // Identify the raw headers - look for the end of the headers (a double CRLF "\r\n\r\n")
-    TRACE("Buffer received: %.*s\n", bytesReceived, buffer);
-    size_t headerEnd = 0;
-    while (headerEnd < static_cast<size_t>(bytesReceived))
-    {
-        if (buffer[headerEnd] == '\r' && buffer[headerEnd + 1] == '\n' &&
-            buffer[headerEnd + 2] == '\r' && buffer[headerEnd + 3] == '\n')
-        {
-            headerEnd += 4; // Move past the double CRLF that indicates the end of the headers
-            break;
-        }
-        headerEnd++;
-    }
-    TRACE("Raw headers length: %zu\n", headerEnd);
 
     // Create the request which will parse the headers
-    std::string rawHeaders(buffer, headerEnd);
     TRACE("Raw headers: %s\n", rawHeaders.c_str());
+
     HttpRequest request(tcp, rawHeaders, std::string(method), std::string(path));
+    request.setBody(initialBody); // Set the initial body if any
 
     // NOW split path and query
     std::string cleanPath = path;
@@ -244,58 +301,16 @@ HttpRequest HttpRequest::receive(Tcp *tcp)
 
     if (contentLength > 0)
     {
-        size_t bodyReceived = bytesReceived - headerEnd;
-        if (bodyReceived > 0)
-        {
-            body.append(buffer + headerEnd, bodyReceived);
-        }
-        request.setBody(body);
-
+        TRACE("Content-Length is greater than 0\n");
         if (request.isMultipart())
         {
             TRACE("Multipart request detected\n");
-            // HttpResponse response;
-            // request.handle_multipart(response);  // tcp is already stored in request
-            TRACE("Multipart request created\n");
             return request;
         }
 
         TRACE("Non-multipart request detected\n");
 
-        size_t bodyRemaining = contentLength - body.length();
-        TRACE("Body remaining: %zu\n", bodyRemaining);
-        while (bodyRemaining > 0)
-        {
-            size_t bytesToReceive = std::min(bodyRemaining, sizeof(buffer) - 1);
-            int chunkReceived = tcp->recv(buffer, bytesToReceive);
-            if (chunkReceived <= 0)
-            {
-                printf("Error receiving body data, bytes received: %d\n", chunkReceived);
-                return HttpRequest("", "", "");
-            }
-
-            // Enforce maximum body length
-            size_t currentSize = body.size();
-            if (currentSize >= MAX_HTTP_BODY_LENGTH)
-            {
-                TRACE("Body length exceeds max allowed (%d bytes). Truncating.\n", MAX_HTTP_BODY_LENGTH);
-                break;
-            }
-
-            size_t allowed = MAX_HTTP_BODY_LENGTH - currentSize;
-            size_t toAppend = std::min(static_cast<size_t>(chunkReceived), allowed);
-            body.append(buffer, toAppend);
-
-            if (toAppend < static_cast<size_t>(chunkReceived))
-            {
-                TRACE("Chunk truncated due to body size limit.\n");
-                request.markBodyTruncated();
-                break;
-            }
-
-            bodyRemaining -= chunkReceived;
-        }
-        request.setBody(body);
+        request.appendRemainingBody(contentLength);
         TRACE("Final body length: %zu\n", body.length());
         TRACE("HttpRequest object constructed\n");
     }

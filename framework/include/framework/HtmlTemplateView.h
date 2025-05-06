@@ -14,6 +14,8 @@
  #pragma once
  #include "framework/FrameworkView.h"
  #include <string>
+ #include "http/HttpRequest.h"
+ #include "http/HttpResponse.h"
  
  enum class TemplateSource {
      Inline,
@@ -25,6 +27,12 @@
      HtmlTemplateView(const std::string& source, TemplateSource mode = TemplateSource::Inline);
  
      std::string render(const std::map<std::string, std::string>& context = {}) const override;
+
+     void render(HttpRequest& req, HttpResponse& res) {
+        res.setContentType("text/html");
+        res.send(render());
+    }
+    
      std::string getContentType() const override;
  
  private:
