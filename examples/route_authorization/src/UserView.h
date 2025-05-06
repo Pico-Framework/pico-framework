@@ -121,7 +121,7 @@ private:
             <input id="username" type="text" placeholder="Username" />
             <input id="password" type="password" placeholder="Password" />
             <label><input type="checkbox" id="remember" /> Remember me</label>
-            <button onclick="submit()">Login</button>
+            <button id="authButton" onclick="submit()">Login</button>
             <div class="toggle-link" onclick="toggleMode()">Don't have an account? Sign up</div>
             <hr />
             <button onclick="testAuth()">Test Protected Route</button>
@@ -170,22 +170,23 @@ private:
     
                 const data = await response.json();
                 getStorage().setItem("authToken", data.token);
+                updateAuthButtonLabel();
                 result.textContent = "✅ Success. Token saved.";
             }
     
             async function testAuth() {
                 const token = localStorage.getItem("authToken") || sessionStorage.getItem("authToken");
                 const response = await fetch("/api/v1/protected-data", {
-                    headers: { Authorization: "Bearer " + localStorage.getItem("jwt") }
+                    headers: { Authorization: "Bearer " + token }
                 });
-    
+
                 const resultEl = document.getElementById("result");
                 if (!response.ok) {
                     resultEl.textContent = `❌ Unauthorized (${response.status})`;
                 } else {
                     const data = await response.json();
                     resultEl.textContent = "✅ " + data.message;
-                }t 
+                }
             }
     
             function hash(text) {
@@ -193,10 +194,24 @@ private:
             }
 
             function signOut() {
-                localStorage.removeItem("jwt");
+                localStorage.removeItem("authToken");
+                sessionStorage.removeItem("authToken");
+                updateAuthButtonLabel();
                 window.location.href = "/login";
             }
 
+            function updateAuthButtonLabel() {
+                const button = document.getElementById("authButton");
+                const token = getStorage().getItem("authToken");
+                const title = document.getElementById("formTitle");
+                if (token) {
+                    title.textContent = "Logged In";
+                    button.disabled = true; // optional: prevent redundant submits
+                } else {
+                    title.textContent = "Login";
+                    button.disabled = false;
+                }
+            }
         </script>
     </body>
     </html>
