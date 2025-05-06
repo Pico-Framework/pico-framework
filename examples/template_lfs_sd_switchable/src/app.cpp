@@ -14,7 +14,7 @@ App::App(int port) : FrameworkApp(port, "AppTask", 1024, 3)
 
 void App::initRoutes()
 {
-    // This method is called by the base class to initialize HTTP routes.
+    // This function is called by the base class to initialize HTTP routes.
     // You can add your application's routes here.
     // All FrameWorkController instances will have their initRoutes called
     // when the application starts, so you can add routes in your controllers.
@@ -31,8 +31,6 @@ void App::onStart()
 
     std::cout << "[App] Initializing application..." << std::endl;
 
-    std::cout << "[App] Waiting for network..." << std::endl;
-
     EventManager *eventManager = AppContext::get<EventManager>();
     eventManager->subscribe(
         eventMask(
@@ -45,11 +43,11 @@ void App::onStart()
 
 void App::onEvent(const Event &e)
 {
-    // This method is called when an event is posted to the App's event queue.
+    // This function is called when an event is posted to the App's event queue.
     // It is called by the FrameworkController base class when an event is received.
     // You can handle different types of events here based on the notification kind.
     // For example, you can handle system, GPIO change events or user-defined events.
-    // You subscribe for events in the onStart() method (for example), so this will be called
+    // You subscribe for events in the onStart() function (for example), so this will be called
     // when an event is posted to the App's event queue. The Eventmanager operates as a true
     // publish-subscribe system, so you can post events from anywhere in the application
     // and they will be delivered to ALL subscribers that have registered for that event type.

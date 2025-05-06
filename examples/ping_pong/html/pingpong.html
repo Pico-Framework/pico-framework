@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Ping-Pong Dashboard</title>
+  <style>
+    body {
+      font-family: Raleway, sans-serif;
+      display: flex;
+      gap: 2em;
+      padding: 1em;
+    }
+    .panel {
+      flex: 1;
+      border: 1px solid #ccc;
+      padding: 1em;
+    }
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    pre {
+      background: #f4f4f4;
+      padding: 1em;
+      height: 300px;
+      overflow-y: auto;
+      white-space: pre-wrap;
+      border: 1px solid #ccc;
+    }
+    input, button {
+      margin-top: 0.5em;
+      padding: 0.4em;
+      font-size: 0.9em;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="panel" id="a-panel">
+    <div class="header">
+      <h3>Device A (<code>ping-a</code>)</h3>
+      <button onclick="fetchLog('a')">Refresh</button>
+    </div>
+    <pre id="log-a">Log A loading...</pre>
+    <label>Interval (ms): <input id="interval-a" type="number" /></label>
+    <button onclick="updateInterval('a')">Set Interval</button>
+  </div>
+
+  <div class="panel" id="b-panel">
+    <div class="header">
+      <h3>Device B (<code>ping-b</code>)</h3>
+      <button onclick="fetchLog('b')">Refresh</button>
+    </div>
+    <pre id="log-b">Log B loading...</pre>
+    <label>Interval (ms): <input id="interval-b" type="number" /></label>
+    <button onclick="updateInterval('b')">Set Interval</button>
+  </div>
+
+  <script>
+    const hosts = {
+      a: 'http://ping-a',
+      b: 'http://ping-b'
+    };
+
+    function fetchLog(device) {
+      fetch(`${hosts[device]}/log`)
+        .then(res => res.ok ? res.text() : Promise.reject("Error"))
+        .then(text => {
+          const lines = text.trim().split('\n');
+          const maxLines = 20;
+          const recent = lines.slice(-maxLines).join('\n');
+          const logEl = document.getElementById(`log-${device}`);
+          logEl.textContent = recent;
+          logEl.scrollTop = logEl.scrollHeight;
+        })
+        .catch(err => {
+          document.getElementById(`log-${device}`).textContent = `Error: ${err}`;
+        });
+    }
+
+    function updateInterval(device) {
+      const val = document.getElementById(`interval-${device}`).value;
+      const ms = parseInt(val);
+      if (isNaN(ms)) return alert("Invalid interval");
+      fetch(`${hosts[device]}/config`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ interval: ms })
+      })
+      .then(res => res.json())
+      .then(json => alert(`Device ${device.toUpperCase()} interval set to ${json.interval}ms`))
+      .catch(err => alert("Failed: " + err));
+    }
+
+    // Optional polling (every 2 seconds)
+    function poll() {
+      fetchLog('a');
+      fetchLog('b');
+    }
+    setInterval(poll, 2000);
+    window.onload = poll;
+  </script>
+
+</body>
+</html>

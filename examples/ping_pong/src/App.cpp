@@ -2,7 +2,7 @@
  * @file App.cpp
  */
 
-#include "app.h"
+#include "App.h"
 #include "framework/FrameworkApp.h"
 #include "events/EventManager.h"
 #include "events/Event.h"
@@ -28,6 +28,17 @@ void App::onStart()
 {
     // Call the base class to ensure the framework starts correctly.
     FrameworkApp::onStart();
+
+    // device-a
+    netif_set_hostname(netif_default, "ping-a");
+    static PingPongController pingPongController("ping-b", "/ping");
+    
+
+    // device-b
+    // netif_set_hostname(netif_default, "ping-b");
+    // static PingPongController pingPongController("ping-a", "/pong");
+
+    pingPongController.start();
 
     std::cout << "[App] Initializing application..." << std::endl;
 
