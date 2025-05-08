@@ -84,11 +84,7 @@ public:
      * and is ready to run. It calls the base class onStart() method to ensure
      * that routes are initialized before the server starts accepting requests.
      */
-    void onStart() override
-    {
-        FrameworkController::onStart(); // Call base class start logic (including any route initialization)
-        manager.start();                // Start network + other core services
-    }
+    void onStart() override;
 
     /**
      * @brief Define the application's HTTP routes.

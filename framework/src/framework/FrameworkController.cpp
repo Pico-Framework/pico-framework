@@ -43,8 +43,9 @@ FrameworkController::FrameworkController(const char *name, Router &sharedRouter,
 /// @copydoc FrameworkController::run
 void FrameworkController::run()
 {
-    enableEventQueue(); // ← MUST be here to initialize queue before use
-    onStart();
+    enableEventQueue();  // MUST be here to initialize queue before use
+    initRoutes();        // Call initRoutes() to set up routes
+    onStart();           // Call onStart() to initialize controller state
     while (true)
     {
         waitAndDispatch(100); // Wait for notifications or timeout
@@ -55,7 +56,8 @@ void FrameworkController::run()
 /// @copydoc FrameworkController::onStart
 void FrameworkController::onStart()
 {
-    initRoutes(); // Call base class start logic (including any route initialization)
+    // can safely be overridden in derived classes
+    // Default implementation does nothing
 }
 
 /// @bcopydoc FrameworkController::initRoutes

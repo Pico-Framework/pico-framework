@@ -4,6 +4,16 @@ cmake_minimum_required(VERSION 3.13)
 # User Configurable Section
 # ---------------------------------------------------------------
 
+# Check if PICO_FRAMEWORK_PATH is set via environment
+if(DEFINED ENV{PICO_FRAMEWORK_PATH})
+    set(PICO_FRAMEWORK_PATH $ENV{PICO_FRAMEWORK_PATH})
+    message(STATUS "Using PICO_FRAMEWORK_PATH from environment: ${PICO_FRAMEWORK_PATH}")
+else()
+    # Default fallback path (relative to this app)
+    get_filename_component(PICO_FRAMEWORK_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../../" ABSOLUTE)
+    message(STATUS "Using default PICO_FRAMEWORK_PATH: ${PICO_FRAMEWORK_PATH}")
+endif()
+
 # Board selection (allow override via environment)
 if(DEFINED ENV{PICO_BOARD})
     set(PICO_BOARD $ENV{PICO_BOARD})
@@ -65,40 +75,42 @@ project(pico_example_app C CXX ASM)
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_CXX_STANDARD 17)
 
-# ---------------------------------------------------------------
-# Add  html files to a littlefs image and convert to object file
-# ---------------------------------------------------------------
+# -------------------------------------------------------------------
+# Resolve PICO_FRAMEWORK_PATH from environment or default
+# -------------------------------------------------------------------
+if(DEFINED ENV{PICO_FRAMEWORK_PATH})
+    set(PICO_FRAMEWORK_PATH $ENV{PICO_FRAMEWORK_PATH})
+    message(STATUS "Using PICO_FRAMEWORK_PATH from environment: ${PICO_FRAMEWORK_PATH}")
+else()
+    get_filename_component(PICO_FRAMEWORK_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../../" ABSOLUTE)
+    message(STATUS "Using default PICO_FRAMEWORK_PATH: ${PICO_FRAMEWORK_PATH}")
+endif()
 
-# Build mkfs.lfs from the submodule
-add_custom_command(
-    OUTPUT ${CMAKE_BINARY_DIR}/mkfs.lfs
-    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/tools/littlefs-fuse
-    COMMAND make mkfs.lfs
-    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_SOURCE_DIR}/tools/littlefs-fuse/mkfs.lfs ${CMAKE_BINARY_DIR}/mkfs.lfs
-    COMMENT "Building mkfs.lfs from submodule"
+# -------------------------------------------------------------------
+# Build and flash LittleFS image to reserved flash region (0x1E0000)
+# -------------------------------------------------------------------
+
+set(MKLITTLEFS_TOOL "${PICO_FRAMEWORK_PATH}/tools/mklittlefs/mklittlefs")
+set(LFS_IMAGE "${CMAKE_BINARY_DIR}/littlefs.img")
+set(LFS_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/html")
+set(LFS_TEMP_DIR "${CMAKE_BINARY_DIR}/html_out")
+set(PICO_OPENOCD_EXECUTABLE "/Users/ianarchbell/.pico-sdk/openocd/0.12.0+dev/openocd")
+set(PICO_OPENOCD_SCRIPTS "/Users/ianarchbell/.pico-sdk/openocd/0.12.0+dev/scripts")
+
+# Use the existing environment's interface and board cfgs
+add_custom_target(flash_fs
+    COMMAND ${CMAKE_COMMAND} -E echo "Flashing LittleFS image to 0x1E0000..."
+    COMMAND ${MKLITTLEFS_TOOL}
+            -c ${LFS_SOURCE_DIR}
+            -b 4096 -p 256 -s 131072
+            ${LFS_IMAGE}
+    COMMAND ${PICO_OPENOCD_EXECUTABLE}
+            -f ${PICO_OPENOCD_SCRIPTS}/interface/cmsis-dap.cfg
+            -f ${PICO_OPENOCD_SCRIPTS}/target/rp2350.cfg
+            -c "adapter speed 5000"
+            -c "rp2350.dap.core1 cortex_m reset_config sysresetreq" 
+            -c "program ${LFS_IMAGE} 0x101E0000 verify reset exit"
 )
-
-
-# Create LittleFS image
-add_custom_command(
-    OUTPUT ${CMAKE_BINARY_DIR}/littlefs.img
-    COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_BINARY_DIR}/html_out
-    COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/html ${CMAKE_BINARY_DIR}/html_out
-    COMMAND lfs -c ${CMAKE_BINARY_DIR}/html_out -o ${CMAKE_BINARY_DIR}/littlefs.img -s 4096 -b 256
-    DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/html/pingpong.html
-    COMMENT "Generating LittleFS image"
-)
-
-# Convert image to object file
-add_custom_command(
-    OUTPUT littlefs_data.o
-    COMMAND ${CMAKE_OBJCOPY} -I binary -O elf32-littlearm -B arm littlefs.img littlefs_data.o
-    DEPENDS ${CMAKE_BINARY_DIR}/littlefs.img
-    COMMENT "Embedding LittleFS image into firmware"
-)
-
-add_library(littlefs_data STATIC littlefs_data.o)
-set_target_properties(littlefs_data PROPERTIES LINKER_LANGUAGE C)
 
 # ---------------------------------------------------------------
 # Application Target Setup
@@ -140,7 +152,6 @@ endif()
 target_link_libraries(pico_example_app
     pico_stdlib
     pico_framework
-    littlefs_data
 )
 
 target_compile_definitions(pico_example_app PUBLIC

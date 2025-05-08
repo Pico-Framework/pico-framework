@@ -1,82 +1,94 @@
 #include "PingPongController.h"
 #include "framework/AppContext.h"
-#include "storage/FileResponse.h"
-#include "lwip/netif.h"
+#include "http/HttpRequest.h"
+#include "http/HttpResponse.h"
+#include "events/TimerService.h"
+#include "utility/Logger.h"
+#include "time/PicoTime.h"
 
-PingPongController::PingPongController(const std::string &peerHostname, const std::string &startPath)
-    : peerHost("http://" + peerHostname), nextPath(startPath), logger("log.txt")
-{
-    logger.enableFileLogging("log.txt");
+PingPongController::PingPongController(const char* name, Router& router, const std::string& peerHostname, const std::string& startPath)
+    : FrameworkController(name, router, 2048, tskIDLE_PRIORITY + 1),
+      peerHost("http://" + peerHostname),
+      nextPath(startPath) {}
+
+void PingPongController::onStart() {
+    configASSERT(AppContext::has<StorageManager>());
+    AppContext::get<StorageManager>()->mount();
+    scheduleNext();
 }
 
-void PingPongController::initRoutes()
-{
-    addRoute(HttpMethod::GET, "/ping", [this](auto &req, auto &res) { handlePing(req, res); });
-    addRoute(HttpMethod::GET, "/pong", [this](auto &req, auto &res) { handlePong(req, res); });
-    addRoute(HttpMethod::POST, "/config", [this](auto &req, auto &res) { handleConfig(req, res); });
-    addRoute(HttpMethod::GET, "/log", [this](auto &req, auto &res) { handleLog(req, res); });
+void PingPongController::initRoutes() {
+    printf("[PingPongController] Initializing routes...\n");
+    router.addRoute("GET", "/ping", [this](HttpRequest& req, HttpResponse& res, const RouteMatch& match) {
+        handlePing(req, res);
+    });
 
-    scheduleNext(); // kick off the first ping or pong
+    router.addRoute("GET", "/pong", [this](HttpRequest& req, HttpResponse& res, const RouteMatch& match) {
+        handlePong(req, res);
+    });
+
+    router.addRoute("GET", "/log", [this](HttpRequest& req, HttpResponse& res, const RouteMatch& match){
+        handleLog(req, res);
+    });
+
+    router.addRoute("GET", "/config", [this](HttpRequest& req, HttpResponse& res, const RouteMatch& match) {
+        handleConfig(req, res);
+    });
+
+    router.addRoute("GET", "/", [](HttpRequest &req, HttpResponse &res, const auto &) {
+        res.sendFile("/pingpong.html");
+    });
 }
 
-void PingPongController::handlePing(HttpRequest &req, HttpResponse &res)
-{
-    printf("Received ping\n");
-    logger.info("Received ping");
+void PingPongController::handlePing(HttpRequest& req, HttpResponse& res) {
+    AppContext::get<Logger>()->info("Received /ping from peer");
     nextPath = "/pong";
     scheduleNext();
-    res.text("pong");
+    res.send("OK");
 }
 
-void PingPongController::handlePong(HttpRequest &req, HttpResponse &res)
-{
-    printf("Received pong\n");
-    logger.info("Received pong");
+void PingPongController::handlePong(HttpRequest& req, HttpResponse& res) {
+    AppContext::get<Logger>()->info("Received /pong from peer");
     nextPath = "/ping";
     scheduleNext();
-    res.text("ping");
+    res.send("OK");
 }
 
-void PingPongController::handleConfig(HttpRequest &req, HttpResponse &res)
-{
-    auto json = req.json();
-    if (json.contains("interval")) {
-        intervalMs = json["interval"];
-        logger.info("Interval updated via config");
-        res.json({{"status", "ok"}, {"interval", intervalMs}});
-    } else {
-        res.status(400).json({{"error", "Missing interval"}});
-    }
+void PingPongController::handleLog(HttpRequest& req, HttpResponse& res) {
+    res.sendFile("log.txt");
 }
 
-void PingPongController::handleLog(HttpRequest &req, HttpResponse &res)
-{
-    auto *storage = AppContext::get<StorageManager>();
-    if (storage && storage->exists("log.txt")) {
-        res.send(FileResponse("log.txt", "text/plain"));
-    } else {
-        res.status(404).text("Log file not found");
-    }
-}
-
-void PingPongController::sendMessage()
-{
-    HttpRequest req(HttpMethod::GET, peerHost + nextPath);
-    auto &client = AppContext::get<HttpClient>();
-
-    client.send(req, [this](HttpResponse &res) {
-        if (res.statusCode() == 200) {
-            std::out << "Sent " << nextPath <<  " to " peerHost << std::endl;
-            logger.info(("Sent " + nextPath + " to " + peerHost).c_str());
-        } else {
-            logger.warn(("Failed to send " + nextPath + ": " + std::to_string(res.statusCode())).c_str());
-        }
+void PingPongController::handleConfig(HttpRequest& req, HttpResponse& res) {
+    res.json({
+        {"peerHost", peerHost},
+        {"nextPath", nextPath}
     });
 }
 
-void PingPongController::scheduleNext()
-{
-    timer.scheduleOnce(intervalMs, [this]() {
+void PingPongController::sendMessage() {
+    HttpResponse res = 
+        HttpRequest().setMethod("GET")
+        .setUri(peerHost + nextPath)
+        .send();
+    if (res.ok()) {
+        AppContext::get<Logger>()->info(("Sent " + nextPath + " to " + peerHost).c_str());
+    } else {
+        AppContext::get<Logger>()->warn(("Failed to send " + nextPath + ": HTTP " + std::to_string(res.getStatusCode())).c_str());
+    }
+}
+
+void PingPongController::scheduleNext() {
+    Event event;
+    event.notification.kind = NotificationKind::User;
+    event.notification.user_code = static_cast<uintptr_t>(UserNotification::SendNext);  // Define your enum
+    configASSERT(AppContext::has<TimerService>());
+    AppContext::get<TimerService>()->scheduleAt(PicoTime::now() + this->intervalMs, event);
+}
+
+void PingPongController::onEvent(const Event& evt) {
+    if (evt.notification.kind == NotificationKind::User &&
+        evt.notification.user_code == static_cast<uintptr_t>(UserNotification::SendNext)) {
         sendMessage();
-    });
+    }
 }
+

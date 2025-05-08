@@ -52,22 +52,27 @@ FrameworkManager::FrameworkManager(FrameworkApp *app, Router &router)
       app(app),
       networkTaskHandle(nullptr)
 {
-    // This is imporatant to ensure that the AppContext is initialized
-    // before we start using it in the Framework.
-    // For example EventManager and other application service must be available for the user in onStart();
-    AppContext::getInstance().initFrameworkServices();
+
 }
 
-/// @copydoc FrameworkManager::onStart()
+/// @copydoc FrameworkManager::run()
 void FrameworkManager::onStart()
 {
-
     setupTraceFromConfig();
     std::cout << "[Framework Manager] Initializing framework..." << std::endl;
 
+    // It is important to ensure that the AppContext is initialized
+    // before we start using it in the Framework.
+    // For example EventManager and other application service must be available for the user in onStart();
+    AppContext::getInstance().initFrameworkServices();
+    
+   
     TimeManager *timeMgr = AppContext::get<TimeManager>();
     configASSERT(timeMgr); // Will hard fault early if registration failed
     timeMgr->start();      // If AON timer is running it will post a TimerValid event
+
+    // needs to be started after scheduler running to ensure full use of FreeRTOS
+    app->start(); // Starts the app task 
 
     printf("[Framework Manager] Starting WiFi...\n");
     if (!network.startWifiWithResilience())

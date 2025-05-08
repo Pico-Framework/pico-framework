@@ -24,7 +24,7 @@ public:
     App(int port); // Constructor to initialize the application with a port number
 
     // standard functions
-    void initRoutes() override;            // called by onStart() to initialize routes
+    void initRoutes() override;            // called by the framework to initialize routes
     void onStart() override;               // called by the framework when the app is started
     void poll() override;                  // called by the framework to poll the app
     void onEvent(const Event &e) override; // called by the framework when an event occurs

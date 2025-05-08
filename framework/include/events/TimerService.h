@@ -165,6 +165,12 @@ public:
 
     bool cancel(const std::string &jobId);
 
+    /// @brief Schedule a one-shot callback at a given absolute time.
+    /// @param unixTime The absolute time to invoke the callback (in seconds).
+    /// @param callback The callback to execute.
+    void scheduleCallbackAt(time_t unixTime, std::function<void()> callback);
+
+
 private:
 
     SemaphoreHandle_t lock_;

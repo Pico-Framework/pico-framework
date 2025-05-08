@@ -287,3 +287,10 @@ void TimerService::rescheduleDailyJob(const TimerJob &)
 {
     // Not implemented in v0.2
 }
+
+void TimerService::scheduleCallbackAt(time_t when, std::function<void()> callback) {
+    auto* cb = new std::function<void()>(std::move(callback));
+    Event evt(0 /* userCode 0 for internal use */, cb, sizeof(cb), this);
+    scheduleAt(when, evt);
+}
+

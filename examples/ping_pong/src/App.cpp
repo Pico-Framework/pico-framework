@@ -7,6 +7,7 @@
 #include "events/EventManager.h"
 #include "events/Event.h"
 #include "events/Notification.h"
+#include "PingPongController.h"
 
 App::App(int port) : FrameworkApp(port, "AppTask", 1024, 3)
 {
@@ -30,13 +31,12 @@ void App::onStart()
     FrameworkApp::onStart();
 
     // device-a
-    netif_set_hostname(netif_default, "ping-a");
-    static PingPongController pingPongController("ping-b", "/ping");
+    static PingPongController pingPongController("ping-a", router, "ping-b", "/ping");
     
 
     // device-b
     // netif_set_hostname(netif_default, "ping-b");
-    // static PingPongController pingPongController("ping-a", "/pong");
+    // static PingPongController pingPongController("ping-b", router, "ping-a", "/ping");
 
     pingPongController.start();
 
@@ -70,6 +70,7 @@ void App::onEvent(const Event &e)
 
         case SystemNotification::NetworkReady:
             std::cout << "[App] Network ready. Starting services..." << std::endl;
+            netif_set_hostname(netif_default, "ping-a"); // So they can find each other
             server.start();
             break;
 

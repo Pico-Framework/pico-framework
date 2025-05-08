@@ -19,14 +19,22 @@
 #include "framework/FrameworkManager.h" // <-- This is important for wiring up system services, right now that means starting WiFi and setting the system time from a network time server
 
 /// @copydoc FrameworkApp::FrameworkApp
-FrameworkApp::FrameworkApp(int port, const char* name, uint16_t stackSize, UBaseType_t priority)
+FrameworkApp::FrameworkApp(int port, const char *name, uint16_t stackSize, UBaseType_t priority)
     : FrameworkController(name, router, stackSize, priority),
       router(),
       server(port, router),
-      manager(this, router) {}
+      manager(this, router)
+{
+    manager.start(); 
+}
 
 /// @copydoc FrameworkApp::start
 void FrameworkApp::start()
 {
     FrameworkController::start(); // Start this app's task and calls run(), you are safely in the FreeRTOS task context in run())
+}
+
+void FrameworkApp::onStart()
+{
+    FrameworkController::onStart(); // Call base class start logic (including any route initialization)
 }

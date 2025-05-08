@@ -6,33 +6,40 @@
  * @license MIT License
  */
 
- #pragma once
+#pragma once
 
- #include "framework/FrameworkController.h"
- #include "http/HttpClient.h"
- #include "utility/Logger.h"
- #include "time/TimerService.h"
- 
- class PingPongController : public FrameworkController
- {
- public:
-     explicit PingPongController(const std::string &peerHostname, const std::string &startPath);
-     void initRoutes() override;
- 
- private:
-     void handlePing(HttpRequest &req, HttpResponse &res);
-     void handlePong(HttpRequest &req, HttpResponse &res);
-     void handleConfig(HttpRequest &req, HttpResponse &res);
-     void handleLog(HttpRequest &req, HttpResponse &res);
- 
-     void sendMessage();  // Sends either "ping" or "pong"
-     void scheduleNext();
- 
-     std::string peerHost;        // e.g. "http://ping-b"
-     std::string nextPath;        // "/ping" or "/pong"
-     uint32_t intervalMs = 5000;  // default interval
- 
-     Logger logger;
-     TimerService timer;
- };
- 
+#include "framework/FrameworkController.h"
+#include "http/HttpClient.h"
+#include "utility/Logger.h"
+#include "events/TimerService.h"
+
+#pragma once
+#include "framework/FrameworkController.h"
+#include <string>
+
+enum class UserNotification : uintptr_t {
+    SendNext = 1
+};
+class PingPongController : public FrameworkController
+{
+public:
+    PingPongController(const char *name, Router &router, const std::string &peerHostname, const std::string &startPath);
+
+    void onStart() override;
+    void initRoutes() override;
+    void onEvent(const Event &evt);
+
+private:
+    std::string peerHost;
+    std::string nextPath;
+
+    void handlePing(HttpRequest & req, HttpResponse & res);
+    void handlePong(HttpRequest & req, HttpResponse & res);
+    void handleLog(HttpRequest & req, HttpResponse & res);
+    void handleConfig(HttpRequest & req, HttpResponse & res);
+
+    void sendMessage();
+    void scheduleNext();
+
+    uint32_t intervalMs = 10000; // 10 seconds between messages
+};

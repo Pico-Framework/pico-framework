@@ -63,10 +63,10 @@ public:
     static T* get() {
         return getInstance().getService<T>();
     }
-
+    
     template<typename T>
     static bool has() {
-        return get<T>(false) != nullptr;
+        return get<T>() != nullptr;
     }
 
     /**
