@@ -2,13 +2,12 @@
 
 #include "App.h"
 
-App app(80);  
-
 int main() {
     stdio_init_all();
-    std::cout << "System Booting..." << std::endl;
 
-    app.start();  // Creates the app task and starts framework manager
+    static App app(80);
+
+    std::cout << "System Booting..." << std::endl;
 
     vTaskStartScheduler();
 

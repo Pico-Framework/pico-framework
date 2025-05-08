@@ -93,12 +93,12 @@
       .catch(err => alert("Failed: " + err));
     }
 
-    // Optional polling (every 2 seconds)
+    // Optional polling (every 10 seconds)
     function poll() {
       fetchLog('a');
       fetchLog('b');
     }
-    setInterval(poll, 2000);
+    setInterval(poll, 10000);
     window.onload = poll;
   </script>
 

@@ -90,6 +90,27 @@ public:
      */
     void subscribe(uint32_t eventMask, FrameworkController *controller);
 
+
+    /**
+     * @brief Post a notification to the queue and notify matching subscribers.
+     *
+     * Safe to call from task or ISR context.
+     *
+     * @param n The notification to post.
+     * @param target Optional specific controller to notify (nullptr for all).
+     */
+    void postEvent(const Event& e);
+
+    /**
+     * @brief Post a notification to the queue and notify matching subscribers.
+     *
+     * Safe to call from task or ISR context.
+     *
+     * @param n The notification to post.
+     * @param target Optional specific controller to notify (nullptr for all).
+     */
+    void postNotification(const Notification& n, FrameworkTask* target);
+
     /**
      * @brief Post an event to the queue and notify matching subscribers.
      *
@@ -97,7 +118,7 @@ public:
      *
      * @param event The event to post.
      */
-    void postEvent(const Event &event);
+    void enqueue(const Event &event);
 
     /**
      * @brief Returns true if there are any pending events for a given controller.

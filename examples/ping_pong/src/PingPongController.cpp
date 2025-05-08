@@ -61,7 +61,8 @@ void PingPongController::handleLog(HttpRequest& req, HttpResponse& res) {
 void PingPongController::handleConfig(HttpRequest& req, HttpResponse& res) {
     res.json({
         {"peerHost", peerHost},
-        {"nextPath", nextPath}
+        {"nextPath", nextPath},
+        {"intervalMs", intervalMs}
     });
 }
 
@@ -82,7 +83,9 @@ void PingPongController::scheduleNext() {
     event.notification.kind = NotificationKind::User;
     event.notification.user_code = static_cast<uintptr_t>(UserNotification::SendNext);  // Define your enum
     configASSERT(AppContext::has<TimerService>());
-    AppContext::get<TimerService>()->scheduleAt(PicoTime::now() + this->intervalMs, event);
+    printf("PicoTime::now() %d\n", PicoTime::now());
+    printf("PicoTime::now() + %d: %d\n", intervalMs, PicoTime::now() + intervalMs);
+    AppContext::get<TimerService>()->scheduleAt(PicoTime::now() + intervalMs, event);
 }
 
 void PingPongController::onEvent(const Event& evt) {

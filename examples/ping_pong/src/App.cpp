@@ -28,6 +28,13 @@ void App::initRoutes()
     // Add a simple route for testing
     router.addRoute("GET", "/hello", [](HttpRequest &req, HttpResponse &res, const auto &)
                     { res.send("Welcome to PicoFramework!"); });
+    
+    router.addRoute("GET", "/ls", [](HttpRequest &req, HttpResponse &res, const auto &) {
+                        std::vector<FileInfo> files;
+                        AppContext::get<StorageManager>()->listDirectory("/", files);
+                        res.json(files);
+    });
+                    
 }
 
 void App::onStart()

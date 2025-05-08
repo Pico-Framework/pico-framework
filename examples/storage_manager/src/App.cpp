@@ -4,6 +4,7 @@
 #include "framework/AppContext.h"
 #include "http/HttpServer.h"
 #include "StorageController.h"
+#include "events/EventManager.h"
 
 App::App(int port) : FrameworkApp(port, "AppTask", 1024, 1) {
     
@@ -16,12 +17,14 @@ void App::onStart() {
     printf("[MyApp] Starting Storage App...\n");
 
     // Set up storage controller
-    static StorageController storageController(routerInstance);
+    static StorageController storageController(router);
     storageController.start();
     printf("[MyApp] StorageController started.\n");
 
     // Wait for network
     printf("[MyApp] Waiting for network...\n");
+    EventManager *eventManager = AppContext::get<EventManager>();
+    eventManager->subscribe(eventMask(SystemNotification::NetworkReady), this);
     waitFor(SystemNotification::NetworkReady);
 
     // Start server once network is ready

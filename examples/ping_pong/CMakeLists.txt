@@ -38,7 +38,7 @@ else()
 endif()
 
 # Pico Framework Feature Options
-option(PICO_HTTP_ENABLE_LITTLEFS "Enable LittleFS-based StorageManager" OFF)
+option(PICO_HTTP_ENABLE_LITTLEFS "Enable LittleFS-based StorageManager" ON)
 option(PICO_HTTP_ENABLE_HTTP_CLIENT "Enable HttpClient" ON)
 option(PICO_HTTP_CLIENT_ENABLE_TLS "Enable TLS support in HttpClient" ON)
 option(PICO_HTTP_ENABLE_JWT "Enable JWT authentication support" ON)
@@ -97,19 +97,36 @@ set(LFS_TEMP_DIR "${CMAKE_BINARY_DIR}/html_out")
 set(PICO_OPENOCD_EXECUTABLE "/Users/ianarchbell/.pico-sdk/openocd/0.12.0+dev/openocd")
 set(PICO_OPENOCD_SCRIPTS "/Users/ianarchbell/.pico-sdk/openocd/0.12.0+dev/scripts")
 
+file(GLOB_RECURSE HTML_FILES ${LFS_SOURCE_DIR}/*)
+
 # Use the existing environment's interface and board cfgs
-add_custom_target(flash_fs
-    COMMAND ${CMAKE_COMMAND} -E echo "Flashing LittleFS image to 0x1E0000..."
+file(GLOB_RECURSE HTML_FILES ${LFS_SOURCE_DIR}/*)
+
+add_custom_command(
+    OUTPUT ${LFS_IMAGE}
+    COMMAND ${CMAKE_COMMAND} -E echo "Building LittleFS image..."
     COMMAND ${MKLITTLEFS_TOOL}
             -c ${LFS_SOURCE_DIR}
             -b 4096 -p 256 -s 131072
             ${LFS_IMAGE}
+    DEPENDS ${HTML_FILES}
+    COMMENT "Generating ${LFS_IMAGE} from ${LFS_SOURCE_DIR}"
+)
+
+add_custom_target(flash_fs
+    COMMAND ${CMAKE_COMMAND} -E echo "Flashing LittleFS image to 0x101E0000..."
     COMMAND ${PICO_OPENOCD_EXECUTABLE}
+            -d2
             -f ${PICO_OPENOCD_SCRIPTS}/interface/cmsis-dap.cfg
             -f ${PICO_OPENOCD_SCRIPTS}/target/rp2350.cfg
             -c "adapter speed 5000"
-            -c "rp2350.dap.core1 cortex_m reset_config sysresetreq" 
-            -c "program ${LFS_IMAGE} 0x101E0000 verify reset exit"
+            -c "rp2350.dap.core1 cortex_m reset_config sysresetreq"
+            -c "init"
+            -c "reset init"
+            -c "load_image ${LFS_IMAGE} 0x101E0000 bin"
+            -c "resume"
+            -c "exit"
+    DEPENDS ${LFS_IMAGE}
 )
 
 # ---------------------------------------------------------------
@@ -179,3 +196,13 @@ target_compile_options(pico_example_app PRIVATE
 pico_enable_stdio_usb(pico_example_app 0)
 pico_enable_stdio_uart(pico_example_app 1)
 pico_add_extra_outputs(pico_example_app)
+
+
+# ---------------------------------------------------------------
+# clean flash image target
+# ---------------------------------------------------------------
+
+add_custom_target(clean_fs
+    COMMAND ${CMAKE_COMMAND} -E remove -f ${LFS_IMAGE}
+    COMMENT "Cleaning LittleFS image"
+)

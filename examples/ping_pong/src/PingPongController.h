@@ -41,5 +41,5 @@ private:
     void sendMessage();
     void scheduleNext();
 
-    uint32_t intervalMs = 10000; // 10 seconds between messages
+    uint32_t intervalMs = 30000; // 30 seconds between messages
 };

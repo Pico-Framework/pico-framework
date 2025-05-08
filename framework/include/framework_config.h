@@ -91,7 +91,7 @@
 
 // === Debug Trace Configuration ===
 
-#define QUIET_MODE ///< Set to disable all normal behavior print output, don't define to print
+//#define QUIET_MODE ///< Set to disable all normal behavior print output, don't define to print
 
 #ifdef QUIET_MODE
   #define QUIET_PRINTF(...) do {} while (0)
@@ -110,16 +110,16 @@
 #define TRACE_AppContext          0
 #define TRACE_ChunkedDecoder      0
 #define TRACE_FatFsStorageManager 0
-#define TRACE_FrameworkApp        1
-#define TRACE_FrameworkController 1
-#define TRACE_FrameworkTask       1
+#define TRACE_FrameworkApp        0
+#define TRACE_FrameworkController 0
+#define TRACE_FrameworkTask       0
 #define TRACE_FrameworkManager    0
 #define TRACE_HttpClient          0
 #define TRACE_HttpFileserver      0
 #define TRACE_HttpParser          0
-#define TRACE_HttpRequest         1
+#define TRACE_HttpRequest         0
 #define TRACE_HttpResponse        0
-#define TRACE_HttpServer          1
+#define TRACE_HttpServer          0
 #define TRACE_Middleware          0
 #define TRACE_JsonParser          0
 #define TRACE_JsonRequestHelper   0
@@ -132,13 +132,6 @@
 #define TRACE_Router              0
 #define TRACE_Tcp                 0
 #define TRACE_utility             0  
- 
-
-
-
-
-
-
 #define TRACE_TimeManager         0
 // etc.
 

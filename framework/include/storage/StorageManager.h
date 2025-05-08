@@ -19,6 +19,7 @@
 #include <vector>
 #include <functional>
 #include <cstdint>
+#include <nlohmann/json.hpp>
 
 /**
  * @brief Structure representing metadata for a file or directory.
@@ -30,6 +31,14 @@ struct FileInfo
     bool isReadOnly;  ///< True if item is read-only
     size_t size;      ///< Size in bytes
 };
+
+inline void to_json(nlohmann::json &j, const FileInfo &f) {
+    j = nlohmann::json{
+        {"name", f.name},
+        {"size", f.size},
+        {"isDir", f.isDirectory}
+    };
+}
 
 /**
  * @brief Abstract base class for storage access and file operations.

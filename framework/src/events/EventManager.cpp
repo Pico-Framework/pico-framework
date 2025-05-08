@@ -76,8 +76,39 @@ void EventManager::withSubscribersFromISR(const std::function<void(std::vector<S
     xSemaphoreGive(lock);
 }
 
-/// @copydoc EventManager::postEvent
-void EventManager::postEvent(const Event& event)
+/// @copydoc EventManager::postNotification
+void EventManager::postNotification(const Notification& n, FrameworkTask* target)
+{
+    const uint8_t index = n.code();
+
+    if (is_in_interrupt()) {
+        BaseType_t xHigherPriTaskWoken = pdFALSE;
+
+        withSubscribersFromISR([&](auto& subs) {
+            for (auto& sub : subs) {
+                if ((sub.eventMask & (1u << index)) &&
+                    (target == nullptr || sub.controller == target)) {
+                    sub.controller->notifyFromISR(index, 1, &xHigherPriTaskWoken);
+                }
+            }
+        });
+
+        portYIELD_FROM_ISR(xHigherPriTaskWoken);
+    } else {
+        withSubscribers([&](auto& subs) {
+            for (auto& sub : subs) {
+                if ((sub.eventMask & (1u << index)) &&
+                    (target == nullptr || sub.controller == target)) {
+                    sub.controller->notify(index, 1);
+                }
+            }
+        });
+    }
+}
+
+
+/// @copydoc EventManager::enqueue
+void EventManager::enqueue(const Event& event)
 {
     const uint8_t code = event.notification.code();
 
@@ -94,8 +125,6 @@ void EventManager::postEvent(const Event& event)
                         BaseType_t result = xQueueSendToBackFromISR(q, &event, &xHigherPriTaskWoken);
                         if (result != pdPASS) {
                             debug_print("[EventManager] xQueueSendFromISR FAILED — queue full!\n");
-                        } else {
-                            sub.controller->notifyFromISR(code, 1, &xHigherPriTaskWoken);
                         }
                     }
                 }
@@ -119,4 +148,10 @@ void EventManager::postEvent(const Event& event)
             }
         });
     }
+}
+
+void EventManager::postEvent(const Event& e)
+{
+    enqueue(e);
+    postNotification(e.notification, e.target);
 }
