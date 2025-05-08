@@ -9,6 +9,11 @@
 #include "events/Notification.h"
 #include "PingPongController.h"
 
+// Two picos ping-ponging will find each other using their hostname
+// swap these host names for your other pico
+#define THISHOST "ping-a"
+#define THATHOST "ping-b"
+
 App::App(int port) : FrameworkApp(port, "AppTask", 1024, 3)
 {
 }
@@ -30,13 +35,15 @@ void App::onStart()
     // Call the base class to ensure the framework starts correctly.
     FrameworkApp::onStart();
 
-    // device-a
-    static PingPongController pingPongController("ping-a", router, "ping-b", "/ping");
-    
+    // The network is initialized but not started yet.
+    // This means it's possible to use the network stack.
+    // In this case we are setting the host name.
+    // This can't be done after the network is started unless you deinit and restart the network.
+    struct netif *netif = &cyw43_state.netif[CYW43_ITF_STA];
+    netif_set_hostname(netif, THISHOST);
+    netif_set_up(netif); // netif_set_hostname has no effect if not setup
 
-    // device-b
-    // netif_set_hostname(netif_default, "ping-b");
-    // static PingPongController pingPongController("ping-b", router, "ping-a", "/ping");
+    static PingPongController pingPongController(THISHOST, router, THATHOST, "/ping");
 
     pingPongController.start();
 
@@ -70,7 +77,6 @@ void App::onEvent(const Event &e)
 
         case SystemNotification::NetworkReady:
             std::cout << "[App] Network ready. Starting services..." << std::endl;
-            netif_set_hostname(netif_default, "ping-a"); // So they can find each other
             server.start();
             break;
 

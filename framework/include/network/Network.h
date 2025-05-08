@@ -33,6 +33,14 @@
          *
          * @return true if Wi-Fi started successfully, false otherwise.
          */
+        static bool initialize();
+
+        /**
+         * @brief Start Wi-Fi with resilience, retrying connection if it fails.
+         * Uses a static method to handle retries and connection status.
+         *
+         * @return true if Wi-Fi started successfully, false otherwise.
+         */
         static bool startWifiWithResilience();
 
         /**
@@ -94,6 +102,7 @@
 
     private:
         static bool wifiConnected;
+        static bool wifiInitialized;
     };
 
 #endif /* NETWORK_H */

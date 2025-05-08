@@ -71,6 +71,11 @@ void FrameworkManager::onStart()
     configASSERT(timeMgr); // Will hard fault early if registration failed
     timeMgr->start();      // If AON timer is running it will post a TimerValid event
 
+    if(!Network::initialize())
+    {
+        printf("[Framework Manager] Failed to initialize network stack.\n");
+    }
+
     // needs to be started after scheduler running to ensure full use of FreeRTOS
     app->start(); // Starts the app task 
 
