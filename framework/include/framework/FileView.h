@@ -1,16 +1,53 @@
-#pragma once
-#include "framework/FrameworkView.h"
+/**
+ * @file FileView.h
+ * @brief View that streams a file from storage using StorageManager
+ * @author Ian Archbell
+ * @version 0.1
+ * @date 2025-05-09
+ * @copyright Copyright (c) 2025, Ian Archbell
+ * 
+ * Header only implmentation of FileView.
+ * 
+ */
 
-class FileView : public FrameworkView {
-public:
-    FileView(const std::string& path, const std::string& contentType = "application/octet-stream", bool asDownload = false);
-
-    std::string render(const std::map<std::string, std::string>& context = {}) const override;
-    std::string getContentType() const override;
-    void applyHeaders(HttpResponse& response) const override;
-
-private:
-    std::string path_;
-    std::string contentType_;
-    bool download_;
-};
+ #pragma once
+ #include "View.h"
+ #include "AppContext.h"
+ #include "StorageManager.h"
+ #include "HttpResponse.h"
+ #include "FileHandle.h"
+ 
+ class FileView : public View {
+ public:
+     FileView(const char* path, const char* contentType = "text/html", bool asDownload = false)
+         : filePath(path), mimeType(contentType), download(asDownload) {}
+ 
+     void render(HttpRequest& req, HttpResponse& res) override {
+         StorageManager* storage = AppContext::get<StorageManager>();
+         if (!storage) {
+             res.status(500).text("Storage unavailable");
+             return;
+         }
+ 
+         FileHandle file;
+         if (!storage->open(filePath, FileOpenMode::Read, file)) {
+             res.status(404).text("File not found");
+             return;
+         }
+ 
+         res.setContentType(mimeType);
+         if (download) {
+             const char* filename = strrchr(filePath, '/');
+             filename = filename ? filename + 1 : filePath;
+             res.setHeader("Content-Disposition", std::string("attachment; filename=\"") + filename + "\"");
+         }
+ 
+         res.sendFile(file);
+     }
+ 
+ private:
+     const char* filePath;
+     const char* mimeType;
+     bool download;
+ };
+ 
