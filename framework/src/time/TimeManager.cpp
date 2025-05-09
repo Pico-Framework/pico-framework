@@ -11,12 +11,13 @@
 #include <task.h>
 #include "events/EventManager.h"
 #include "events/Notification.h"
-
+#include "time/PicoTime.h"
 #include "framework/AppContext.h"
 #include "http/HttpRequest.h"
 #include "http/HttpResponse.h"
 #include "framework_config.h"
 #include "DebugTrace.h"
+
 
 #if defined(PICO_RP2040)
 #include "hardware/rtc.h"
@@ -124,17 +125,32 @@ void TimeManager::setTime(timespec *ts)
         printf("[TimeManager] Invalid timespec provided.\n");
         return;
     }
-    // If the always-on timer is already running, we do not reset it.
-    if (aon_timer_is_running()){
+
+    // Initialize the RTC if necessary
+
+    // Set the system time using the provided timespec
+    printf("[TimeManager] Setting time: %ld seconds, %ld nanoseconds\n", ts->tv_sec, ts->tv_nsec);
+        // if the AON timer is not running, start it
+    if (!aon_timer_is_running()){
+        printf("[TimeManager] AON timer is not running, starting it...\n");
         aon_timer_start(ts);
     }
-    // Initialize the RTC if necessary
-#if HAS_RP2040_RTC
-    rtc_init();
-#endif
-    // Set the system time using the provided timespec
-    TRACE("[TimeManager] Setting time: %ld seconds, %ld nanoseconds\n", ts->tv_sec, ts->tv_nsec);
-    aon_timer_start(ts);
+    else{
+        // if the AON timer is running, set the time
+        printf("[TimeManager] AON timer is running, syncing time...\n");
+        aon_timer_set_time(ts);
+    }
+    if(!aon_timer_get_time(ts))
+    {
+        printf("[TimeManager] Failed to get system time from AON timer.\n");
+        return;
+    }
+    else{
+        printf("[TimeManager] System time set to: %ld seconds, %ld nanoseconds\n", ts->tv_sec, ts->tv_nsec);
+        time_t secs = PicoTime::now();
+        printf("[TimeManager] Current time: %s\n", ctime(&secs));
+        AppContext::get<EventManager>()->postEvent({SystemNotification::TimeValid});
+    }
 }
 
 void TimeManager::applyFixedTimezoneOffset(int offsetSeconds, const char *stdName, const char *dstName)

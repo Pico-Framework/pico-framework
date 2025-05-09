@@ -4,6 +4,7 @@
 #include "events/EventManager.h"
 #include "events/TimerService.h"
 #include "events/GpioEventManager.h"
+#include "utility/logger.h"
 // Right now its mandatory to have one StorageManager interface 
 #if PICO_HTTP_ENABLE_LITTLEFS
     #include "storage/LittleFsStorageManager.h"
@@ -52,6 +53,9 @@ void AppContext::initFrameworkServices() {
         static TimerService timerService;
         registerService<TimerService>(&timerService);
         TRACE("[AppContext] Registered TimerService.\n");
+        static Logger logger;
+        registerService<Logger>(&logger);
+        TRACE("[AppContext] Registered Logger.\n");
     #if defined(ENABLE_GPIO_EVENTS)
         static GpioEventManager gpioEventManager = GpioEventManager::getInstance();
         AppContext::registerService<GpioEventManager>(&gpioEventManager);

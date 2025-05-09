@@ -32,6 +32,7 @@ public:
 private:
     std::string peerHost;
     std::string nextPath;
+    std::string host;
 
     void handlePing(HttpRequest & req, HttpResponse & res);
     void handlePong(HttpRequest & req, HttpResponse & res);
@@ -40,6 +41,10 @@ private:
 
     void sendMessage();
     void scheduleNext();
+
+    bool nextScheduled = false;
+
+    static bool corsMiddleware(HttpRequest& req, HttpResponse& res, const RouteMatch&);
 
     uint32_t intervalMs = 30000; // 30 seconds between messages
 };

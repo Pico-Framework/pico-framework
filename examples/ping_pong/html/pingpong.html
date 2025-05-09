@@ -1,37 +1,82 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>Ping-Pong Dashboard</title>
   <style>
     body {
       font-family: Raleway, sans-serif;
+      background: #e0e5ec;
       display: flex;
+      justify-content: center;
       gap: 2em;
-      padding: 1em;
+      padding: 3em;
     }
+
     .panel {
+      background: #e0e5ec;
+      border-radius: 20px;
+      box-shadow: 10px 10px 30px #b8bcc2, -10px -10px 30px #ffffff;
+      padding: 2em;
       flex: 1;
-      border: 1px solid #ccc;
-      padding: 1em;
+      max-width: 600px; /* ⬅️ increased from 400px */
+      display: flex;
+      flex-direction: column;
+      gap: 1em;
     }
+
+
     .header {
       display: flex;
       justify-content: space-between;
       align-items: center;
     }
+
+    h3 {
+      margin: 0;
+    }
+
+    button {
+      border: none;
+      background: #e0e5ec;
+      border-radius: 10px;
+      box-shadow: 4px 4px 10px #b8bcc2, -4px -4px 10px #ffffff;
+      padding: 0.5em 1em;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    button:hover {
+      box-shadow: inset 2px 2px 6px #b8bcc2, inset -2px -2px 6px #ffffff;
+    }
+
+    input {
+      padding: 0.4em;
+      border-radius: 8px;
+      border: none;
+      box-shadow: inset 2px 2px 5px #b8bcc2, inset -2px -2px 5px #ffffff;
+      font-size: 1em;
+    }
+
     pre {
-      background: #f4f4f4;
+      background: #f4f6f9;
+      border-radius: 10px;
       padding: 1em;
       height: 300px;
       overflow-y: auto;
-      white-space: pre-wrap;
-      border: 1px solid #ccc;
+      box-shadow: inset 3px 3px 8px #b8bcc2, inset -3px -3px 8px #ffffff;
+      font-family: 'Courier New', monospace;
     }
-    input, button {
-      margin-top: 0.5em;
-      padding: 0.4em;
+
+    label {
       font-size: 0.9em;
+      font-weight: 500;
+    }
+
+    code {
+      background: #d6dbe2;
+      border-radius: 5px;
+      padding: 2px 6px;
     }
   </style>
 </head>
@@ -39,7 +84,7 @@
 
   <div class="panel" id="a-panel">
     <div class="header">
-      <h3>Device A (<code>ping-a</code>)</h3>
+      <h3>Device A <code>ping-a</code></h3>
       <button onclick="fetchLog('a')">Refresh</button>
     </div>
     <pre id="log-a">Log A loading...</pre>
@@ -49,7 +94,7 @@
 
   <div class="panel" id="b-panel">
     <div class="header">
-      <h3>Device B (<code>ping-b</code>)</h3>
+      <h3>Device B <code>ping-b</code></h3>
       <button onclick="fetchLog('b')">Refresh</button>
     </div>
     <pre id="log-b">Log B loading...</pre>
@@ -93,11 +138,11 @@
       .catch(err => alert("Failed: " + err));
     }
 
-    // Optional polling (every 10 seconds)
     function poll() {
       fetchLog('a');
       fetchLog('b');
     }
+
     setInterval(poll, 10000);
     window.onload = poll;
   </script>

@@ -84,12 +84,15 @@ void App::onEvent(const Event &e)
 
         case SystemNotification::NetworkReady:
             std::cout << "[App] Network ready. Starting services..." << std::endl;
-            server.start();
             break;
 
         case SystemNotification::TimeValid:
             std::cout << "[App] Time is valid. Scheduler can be initialized here." << std::endl;
-            // scheduler.start();  // <- placeholder for future logic
+            // we can start the HTTP server in NetworkReady
+            // or TimeValid, but not before the network is up
+            // We may use calendar time so we start the server here
+            server.start();
+            cyw43_arch_gpio_put(0,1);
             break;
 
         case SystemNotification::TimeSync:

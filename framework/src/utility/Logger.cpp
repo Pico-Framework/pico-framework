@@ -15,6 +15,7 @@
 #include "utility/Logger.h"
 #include <cstring>
 #include "framework/AppContext.h"
+#include "time/PicoTime.h"
 
 LogLevel Logger::minLevel = LOG_INFO;
 
@@ -77,7 +78,7 @@ void Logger::log(LogLevel level, const char *msg)
 /// @copydoc Logger::getTimeString
 void Logger::getTimeString(char *buffer, size_t len)
 {
-    time_t now = time(nullptr);
+    time_t now = PicoTime::now();
     struct tm *t = localtime(&now);
     strftime(buffer, len, "%Y-%m-%d %H:%M:%S", t);
 }
