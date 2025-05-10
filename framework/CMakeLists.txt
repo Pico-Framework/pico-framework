@@ -77,7 +77,6 @@ target_sources(pico_framework PRIVATE
     #Views
     src/framework/HtmlTemplateView.cpp
     src/framework/JsonView.cpp
-    src/framework/FileView.cpp
 
     # HTTP Server
     src/http-server/HttpServer.cpp

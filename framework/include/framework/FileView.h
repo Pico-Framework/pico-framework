@@ -1,53 +1,35 @@
 /**
  * @file FileView.h
- * @brief View that streams a file from storage using StorageManager
- * @author Ian Archbell
- * @version 0.1
- * @date 2025-05-09
- * @copyright Copyright (c) 2025, Ian Archbell
- * 
- * Header only implmentation of FileView.
- * 
+ * @brief View that loads static HTML/text content from storage
  */
 
- #pragma once
- #include "View.h"
- #include "AppContext.h"
- #include "StorageManager.h"
- #include "HttpResponse.h"
- #include "FileHandle.h"
- 
- class FileView : public View {
- public:
-     FileView(const char* path, const char* contentType = "text/html", bool asDownload = false)
-         : filePath(path), mimeType(contentType), download(asDownload) {}
- 
-     void render(HttpRequest& req, HttpResponse& res) override {
-         StorageManager* storage = AppContext::get<StorageManager>();
-         if (!storage) {
-             res.status(500).text("Storage unavailable");
-             return;
-         }
- 
-         FileHandle file;
-         if (!storage->open(filePath, FileOpenMode::Read, file)) {
-             res.status(404).text("File not found");
-             return;
-         }
- 
-         res.setContentType(mimeType);
-         if (download) {
-             const char* filename = strrchr(filePath, '/');
-             filename = filename ? filename + 1 : filePath;
-             res.setHeader("Content-Disposition", std::string("attachment; filename=\"") + filename + "\"");
-         }
- 
-         res.sendFile(file);
-     }
- 
- private:
-     const char* filePath;
-     const char* mimeType;
-     bool download;
- };
- 
+#pragma once
+#include "framework/FrameworkView.h"
+#include "framework/AppContext.h"
+#include "storage/StorageManager.h"
+#include <string>
+
+class FileView : public FrameworkView {
+public:
+    explicit FileView(const std::string& path, const std::string& contentType = "text/html")
+        : filePath(path), mimeType(contentType) {}
+
+    std::string render(const std::map<std::string, std::string>& context = {}) const override {
+        auto* sm = AppContext::get<StorageManager>();
+        if (!sm) return "<h1>Storage unavailable</h1>";
+
+        std::string result;
+        if (!sm->readFileString(filePath, 0, UINT32_MAX, result)) {
+            return "<h1>File not found: " + filePath + "</h1>";
+        }
+        return result;
+    }
+
+    std::string getContentType() const override {
+        return mimeType;
+    }
+
+private:
+    std::string filePath;
+    std::string mimeType;
+};

@@ -82,6 +82,19 @@ public:
                   RouteHandler handler,
                   std::vector<Middleware> middleware = {});
 
+
+    
+    // Optional 2-argument route handler overload for convenience
+    inline void addRoute(Router& router,
+            const std::string& method,
+            const std::string& path,
+            std::function<void(HttpRequest&, HttpResponse&)> simpleHandler) {
+            router.addRoute(method, path,
+            [=](HttpRequest& req, HttpResponse& res, const RouteMatch&) {
+            simpleHandler(req, res);
+        });
+    }              
+
     /**
      * @brief Handle an incoming HTTP request.
      * @param req Fully parsed HttpRequest object

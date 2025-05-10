@@ -46,41 +46,9 @@
 #include <timers.h>
 
 #include "events/Event.h"
+#include "time/TimeOfDay.h"
+#include "time/DaysOfWeek.h"
 
-
-/**
- * @brief Enum for days of the week as bitmask flags.
- */
-enum class Day : uint8_t
-{
-    Sunday = 1 << 0,
-    Monday = 1 << 1,
-    Tuesday = 1 << 2,
-    Wednesday = 1 << 3,
-    Thursday = 1 << 4,
-    Friday = 1 << 5,
-    Saturday = 1 << 6,
-};
-
-using DaysOfWeek = uint8_t; ///< Bitmask combining Day flags
-
-/**
- * @brief Represents a time-of-day without a specific date.
- */
-struct TimeOfDay
-{
-    uint8_t hour;
-    uint8_t minute;
-    uint8_t second;
-
-    /**
-     * @brief Parse from a string like "06:30" or "06:30:00".
-     *
-     * @param hhmm Time string.
-     * @return Parsed TimeOfDay.
-     */
-    static TimeOfDay fromString(const char *hhmm);
-};
 
 /**
  * @brief Represents a job scheduled by the TimerService.

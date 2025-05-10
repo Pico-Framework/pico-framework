@@ -20,6 +20,9 @@
 #include <string>
 #include "pico/stdlib.h"
 
+#include "time/TimeOfDay.h"
+#include "time/DaysOfWeek.h"
+
 #if PICO_RP2040
 #include "hardware/rtc.h"
 #endif
@@ -102,4 +105,23 @@ public:
 
     static void print(const datetime_t *dt);
     #endif
+    
+    static TimeOfDay toTimeOfDay(uint32_t timestamp) {
+        time_t t = static_cast<time_t>(timestamp);
+        struct tm tm;
+        localtime_r(&t, &tm);
+        return TimeOfDay{ static_cast<uint8_t>(tm.tm_hour), static_cast<uint8_t>(tm.tm_min) };
+    }
+    
+    static DaysOfWeek dayOfWeekBitmask(uint32_t timestamp) {
+        uint32_t days = timestamp / 86400;
+        uint8_t weekday = (days + 4) % 7;  // Sunday = 0
+        return static_cast<DaysOfWeek>(1u << weekday);
+    }  
+    
+    static Day dayOfWeek(uint32_t timestamp) {
+        uint32_t days = timestamp / 86400;
+        uint8_t weekday = (days + 4) % 7;  // Sunday = 0
+        return static_cast<Day>(1u << weekday);
+    }
 };

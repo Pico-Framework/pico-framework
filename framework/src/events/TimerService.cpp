@@ -55,17 +55,6 @@ void TimerService::withLock(const std::function<void()>& fn) {
     xSemaphoreGive(lock_);
 }
 
-TimeOfDay TimeOfDay::fromString(const char *hhmm)
-{
-    TimeOfDay tod{0, 0, 0};
-    int parsed = sscanf(hhmm, "%2hhu:%2hhu:%2hhu", &tod.hour, &tod.minute, &tod.second);
-    if (parsed < 2)
-    {
-        tod = {0, 0, 0};
-    }
-    return tod;
-}
-
 // --- Helpers ---
 
 static uint32_t toSeconds(const TimeOfDay &tod)
