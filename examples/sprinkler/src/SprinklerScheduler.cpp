@@ -16,45 +16,90 @@
 
 void SprinklerScheduler::initRoutes()
 {
-    router.addRoute("GET", "/api/v1/programs", [this](HttpRequest &req, HttpResponse &res, const RouteMatch &)
-                    { res.json(programModel->toJson()); });
-
-    router.addRoute("GET", "/api/v1/programs/:name", [this](HttpRequest &req, HttpResponse &res, const RouteMatch &match)
-                    {
-                 auto name = match.getParam("name");
-                 if (name.has_value()) {
-                     if (auto* program = programModel->get(name.value())) {
-                         res.json(program->toJson());
-                     } else {
-                         res.status(404).text("Program not found");
-                     }
-                 } else {
-                     res.status(400).text("Missing program name");
-                 } });
-
-    router.addRoute("PUT", "/api/v1/programs/:name", [this](HttpRequest &req, HttpResponse &res, const RouteMatch &match)
-                    {
-                    auto name = match.getParam("name");
-                    auto json = req.json();
-                    if (name.has_value() && programModel->save(name.value(), json)) {
-     
-                        res.text("Program updated");
-                    } else {
-                        res.status(400).text("Invalid program format");
-                     } });
-
-    router.addRoute("DELETE", "/api/v1/programs/:name", [this](HttpRequest &req, HttpResponse &res, const RouteMatch &match)
-                    {
-                     auto name = match.getParam("name");
-                     if (name.has_value())
-                     {
-                         programModel->remove(name.value());
-                         res.text("Program deleted");
-                     }
-                     else
-                     {
-                         res.status(400).text("Missing program name");
-                     } });
+    router.addRoute("GET", "/api/v1/programs", [this](HttpRequest &req, HttpResponse &res, const RouteMatch &) {
+        json arr = json::array();
+        for (const auto& prog : programModel->getPrograms()) {
+            arr.push_back(prog.toJson());
+        }
+        res.json(arr);
+    });
+    
+    router.addRoute("GET", "/api/v1/programs/{name}", [this](HttpRequest &req, HttpResponse &res, const RouteMatch &match) {
+        auto name = match.getParam("name");
+        if (name.has_value()) {
+            const SprinklerProgram* prog = programModel->get(name.value());
+            if (prog) {
+                res.json(prog->toJson());
+                return;
+            }
+        }
+        res.status(404).text("Program not found");
+    });
+    
+    router.addRoute("POST", "/api/v1/programs", [this](HttpRequest &req, HttpResponse &res, const RouteMatch &) {
+        auto json = req.json();
+    
+        if (!json.contains("name") || !json.contains("start") || !json.contains("days") || !json.contains("zones")) {
+            res.status(400).text("Missing required fields");
+            return;
+        }
+    
+        SprinklerProgram prog;
+        prog.name = json["name"];
+        prog.start = TimeOfDay::fromString(json["start"].get<std::string>().c_str());
+        prog.days = json["days"].get<DaysOfWeek>();
+    
+        for (const auto &z : json["zones"]) {
+            if (!z.contains("zone") || !z.contains("duration"))
+                continue;
+            prog.zones.push_back({ z["zone"], z["duration"] });
+        }
+    
+        programModel->saveOrUpdate(prog);
+        res.text("Program saved");
+    });
+    
+    router.addRoute("PUT", "/api/v1/programs/{name}", [this](HttpRequest &req, HttpResponse &res, const RouteMatch &match) {
+        auto name = match.getParam("name");
+        auto json = req.json();
+    
+        if (!name.has_value()) {
+            res.status(400).text("Missing program name");
+            return;
+        }
+    
+        if (!json.contains("start") || !json.contains("days") || !json.contains("zones")) {
+            res.status(400).text("Missing required fields");
+            return;
+        }
+    
+        SprinklerProgram prog;
+        prog.name = name.value();  // enforce URL name
+        prog.start = TimeOfDay::fromString(json["start"].get<std::string>().c_str());
+        prog.days = json["days"].get<DaysOfWeek>();
+    
+        for (const auto &z : json["zones"]) {
+            if (!z.contains("zone") || !z.contains("duration"))
+                continue;
+            prog.zones.push_back({ z["zone"], z["duration"] });
+        }
+    
+        programModel->saveOrUpdate(prog);
+        res.text("Program updated");
+    });
+    
+    
+    router.addRoute("DELETE", "/api/v1/programs/{name}", [this](HttpRequest &req, HttpResponse &res, const RouteMatch &match) {
+        auto name = match.getParam("name");
+        if (name.has_value()) {
+            programModel->remove(name.value());
+            res.text("Program deleted");
+        } else {
+            res.status(400).text("Missing program name");
+        }
+    });
+    
+    
 }
 
 void SprinklerScheduler::onStart()

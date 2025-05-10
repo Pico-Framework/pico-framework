@@ -27,7 +27,11 @@ void App::initRoutes()
     router.addRoute("GET", "/ls", [](HttpRequest &req, HttpResponse &res, const auto &) {
                         std::vector<FileInfo> files;
                         AppContext::get<StorageManager>()->listDirectory("/", files);
-                        res.json(files);
+                        res.json(files);                  
+    });
+
+    router.addRoute("GET", "/(.*)", [this](HttpRequest &req, HttpResponse &res, const RouteMatch &match) {
+        this->router.serveStatic(req, res, match);
     });
                     
 }
