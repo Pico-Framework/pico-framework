@@ -34,6 +34,7 @@ void AppContext::initFrameworkServices() {
         static JsonService jsonService(&littlefs);
         registerService<JsonService>(&jsonService);
         TRACE("[AppContext] Registered JsonService.\n");
+        
     #else
         static FatFsStorageManager fatfs;
         registerService<StorageManager>(&fatfs);

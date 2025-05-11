@@ -39,17 +39,6 @@ if(${FLASH_METHOD} STREQUAL "usb")
     message(WARNING "USB flashing requires BOOTSEL mode. Hold BOOTSEL while plugging in.")
 endif()
 
-# Host identity for ping-pong demo
-set(THISHOST "ping-a" CACHE STRING "Name of this device (ping-a or ping-b)")
-if(${THISHOST} STREQUAL "ping-a")
-    set(THATHOST "ping-b")
-elseif(${THISHOST} STREQUAL "ping-b")
-    set(THATHOST "ping-a")
-else()
-    message(FATAL_ERROR "THISHOST must be either 'ping-a' or 'ping-b'")
-endif()
-message(STATUS "Building as ${THISHOST}, targeting ${THATHOST}")
-
 # Wi-Fi credentials (optional from environment)
 if(DEFINED ENV{WIFI_SSID})
     set(WIFI_SSID $ENV{WIFI_SSID})
@@ -130,7 +119,7 @@ add_executable(pico_example_app
     src/ProgramModel.cpp
     src/ZoneModel.cpp
     src/SprinklerController.cpp
-    src/SprinklerSCheduler.cpp
+    src/SprinklerScheduler.cpp
 )
 
 if(PICO_HTTP_ENABLE_LITTLEFS)
@@ -165,8 +154,6 @@ target_compile_definitions(pico_example_app PUBLIC
     CYW43_HOST_NAME="Pico-Framework"
     ALTCP_MBEDTLS_AUTHMODE=MBEDTLS_SSL_VERIFY_REQUIRED
     NO_SYS=0
-    THISHOST=\"${THISHOST}\"
-    THATHOST=\"${THATHOST}\"
 )
 
 

@@ -56,7 +56,7 @@ void App::onStart()
     // Post initial scheduling event
     Event startupEvent;
     startupEvent.notification.kind = NotificationKind::User;
-    startupEvent.notification.user_code = static_cast<uintptr_t>(UserNotification::SchedulerCheck); // Define your enum
+    startupEvent.notification.user_code = static_cast<uintptr_t>(UserNotification::SchedulerCheck); 
     AppContext::get<EventManager>()->postEvent(startupEvent);
 
 
@@ -88,6 +88,8 @@ void App::onEvent(const Event &e)
 
         case SystemNotification::NetworkReady:
             std::cout << "[App] Network ready. Starting services..." << std::endl;
+            server.start();
+            cyw43_arch_gpio_put(0,1); // indicate that the network is up
             break;
 
         case SystemNotification::TimeValid:
@@ -95,8 +97,6 @@ void App::onEvent(const Event &e)
             // we can start the HTTP server in NetworkReady
             // or TimeValid, but not before the network is up
             // We may use calendar time so we start the server here
-            server.start();
-            cyw43_arch_gpio_put(0,1); // indicate that the network is up
             break;
 
         case SystemNotification::TimeSync:

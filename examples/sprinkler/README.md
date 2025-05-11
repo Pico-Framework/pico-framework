@@ -1,30 +1,16 @@
-# Ping-Pong Demo
+# Sprinkler Demo
 
-This example demonstrates a pair of Pico devices communicating over HTTP using the PicoFramework. Each device ("ping-a" and "ping-b") alternately sends `/ping` requests to the other, and responds with `/pong`. The interaction is visible through the web interface and logs, illustrating real-time communication between two nodes.
 
 ---
 
 ## What You'll See
 
-- A browser-based UI hosted from each device (served via LittleFS)
-- A pair of controllers sending and responding to pings
-- Clear log messages showing `/ping` and `/pong` HTTP exchanges
-- A simple, event-driven design using FreeRTOS and PicoFramework
 
 ---
 
 ## What It Demonstrates
 
-This example showcases:
 
-- Bidirectional HTTP communication between embedded devices
-- Use of `HttpClient` and `HttpServer` within the same application
-- Serving static HTML from flash via LittleFS
-- Pre-loading a littlefs image based on the /html directory
-- Compile-time configuration using `THISHOST`/`THATHOST` macros
-- Simple controller logic built with `FrameworkController`
-- Fully FreeRTOS-based concurrency
-- Switching between USB and Picoprobe flashing
 
 ---
 
@@ -39,32 +25,22 @@ This example showcases:
 
 ## Usage
 
-### 1. Choose your host identity (ping-a or ping-b)
-
-You must define which device this is at build time:
-
-```bash
-# Choose ping-a or ping-b
-cmake -B build -DTHISHOST=ping-a .
-```
-
-This will automatically set `THATHOST` to the opposite role.
 
 ---
 
-### 2. Build and Flash
+### 1. Build and Flash
 
 Choose one of the following flashing methods:
 
-#### 🔌 USB (BOOTSEL mode — requires holding BOOTSEL when plugging in):
+#### USB (BOOTSEL mode — requires holding BOOTSEL when plugging in):
 ```bash
-cmake -B build -DFLASH_METHOD=usb -DTHISHOST=ping-a .
+cmake -B build -DFLASH_METHOD=usb  .
 cmake --build build --target flash_all
 ```
 
-#### 🧪 PicoProbe (OpenOCD, default):
+#### PicoProbe (OpenOCD, default):
 ```bash
-cmake -B build -DFLASH_METHOD=picoprobe -DTHISHOST=ping-a .
+cmake -B build -DFLASH_METHOD=picoprobe .
 cmake --build build --target flash_all
 ```
 

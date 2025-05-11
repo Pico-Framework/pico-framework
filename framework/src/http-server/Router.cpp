@@ -195,43 +195,55 @@ void Router::addRoute(const std::string &method,
     };
 
     withRoutes([&](auto &r)
-               { r[method].emplace_back(method, regex_pattern, finalHandler, is_dynamic, !middleware.empty(), paramNames);
-               });
+               {
+                    Route newRoute(method, regex_pattern, finalHandler, is_dynamic, !middleware.empty(), paramNames);
+
+                    auto &routeVec = r[method];
+                    if (path == "/(.*)" || path == "/{*}") {
+                        routeVec.push_back(newRoute); // Catch-all always last
+                    } else {
+                        // Insert before existing catch-all (if any)
+                        auto it = std::find_if(routeVec.begin(), routeVec.end(), [](const Route &route) {
+                            return route.path == "/(.*)" || route.path == "/{*}";
+                        });
+                        routeVec.insert(it, newRoute);
+                } 
+            });
 }
 
 bool Router::handleRequest(HttpRequest &req, HttpResponse &res)
 {
-   TRACE("Router::handleRequest: %s %s\n", req.getMethod().c_str(), req.getPath().c_str());
+    TRACE("Router::handleRequest: %s %s\n", req.getMethod().c_str(), req.getPath().c_str());
     bool matched = false;
     const Route *matchedRoute = nullptr;
     std::vector<std::string> params;
 
     withRoutes([&](auto &r)
-    {
-        auto it = r.find(req.getMethod());
-        if (it == r.end()) return;
+               {
+                   auto it = r.find(req.getMethod());
+                   if (it == r.end())
+                       return;
 
-        for (const auto& route : it->second)
-        {
-            TRACE("Checking route: %s\n", route.path.c_str());
-        
-            std::smatch match;
-            const std::string& path = req.getPath();
-            if (std::regex_match(path, match, route.compiledRegex)) // <--- USE precompiled
-            {
-                for (size_t i = 1; i < match.size(); ++i)
-                {
-                    TRACE("Matched param %zu: %s\n", i, match[i].str().c_str());
-                    params.push_back(urlDecode(match[i].str()));
-                }
-                matchedRoute = &route;
-                matched = true;
-                TRACE("Matched route: %s\n", route.path.c_str());
-                return;
-            }
-        }
+                   for (const auto &route : it->second)
+                   {
+                       TRACE("Checking route: %s\n", route.path.c_str());
 
-    });
+                       std::smatch match;
+                       const std::string &path = req.getPath();
+                       if (std::regex_match(path, match, route.compiledRegex)) // <--- USE precompiled
+                       {
+                           for (size_t i = 1; i < match.size(); ++i)
+                           {
+                               TRACE("Matched param %zu: %s\n", i, match[i].str().c_str());
+                               params.push_back(urlDecode(match[i].str()));
+                           }
+                           matchedRoute = &route;
+                           matched = true;
+                           TRACE("Matched route: %s\n", route.path.c_str());
+                           return;
+                       }
+                   }
+               });
     TRACE("Matched: %s\n", matched ? "true" : "false");
     if (matched && matchedRoute)
     {
@@ -259,7 +271,8 @@ bool Router::handleRequest(HttpRequest &req, HttpResponse &res)
 void Router::printRoutes()
 {
     TRACE("Routes:\n");
-    withRoutes([&](auto &r) {
+    withRoutes([&](auto &r)
+               {
         for (const auto &method_pair : routes)
         {
             TRACE("Method: %s\n", method_pair.first.c_str());
@@ -270,8 +283,7 @@ void Router::printRoutes()
                     route.isDynamic ? "true" : "false",
                     route.requiresAuth ? "true" : "false");
             }
-        }
-    });
+        } });
 }
 
 // Serve static files using the HttpFileserver instance.
@@ -285,8 +297,9 @@ void Router::serveStatic(HttpRequest &req, HttpResponse &res, const RouteMatch &
 /// @copydoc Router::listDirectory
 void Router::listDirectory(HttpRequest &req, HttpResponse &res, const RouteMatch &match)
 {
- 
-    fileServer.handle_list_directory(req, res, match); ;
+
+    fileServer.handle_list_directory(req, res, match);
+    ;
 }
 
 void Router::withRoutes(const std::function<void(std::unordered_map<std::string, std::vector<Route>> &)> &fn)
@@ -295,6 +308,3 @@ void Router::withRoutes(const std::function<void(std::unordered_map<std::string,
     fn(routes);
     xSemaphoreGive(lock_);
 }
-
-
-

@@ -1,0 +1,18 @@
+[
+    {
+      "name": "Front Lawn",
+      "gpioPin": 2,
+      "active": false
+    },
+    {
+      "name": "Back Garden",
+      "gpioPin": 3,
+      "active": false
+    },
+    {
+      "name": "Flower Bed",
+      "gpioPin": 4,
+      "active": false
+    }
+  ]
+  

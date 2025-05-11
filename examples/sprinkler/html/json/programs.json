@@ -1,0 +1,20 @@
+[
+    {
+      "name": "Morning Watering",
+      "start": "06:30",
+      "days": 62,
+      "zones": [
+        { "zone": "Front Lawn", "duration": 300 },
+        { "zone": "Back Garden", "duration": 180 }
+      ]
+    },
+    {
+      "name": "Evening Watering",
+      "start": "19:00",
+      "days": 65,
+      "zones": [
+        { "zone": "Flower Bed", "duration": 240 }
+      ]
+    }
+  ]
+  
