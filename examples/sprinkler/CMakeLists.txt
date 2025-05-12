@@ -23,10 +23,10 @@ endif()
 # Chip-specific memory map and flash offset for LittleFS
 
 if(${PICO_BOARD} STREQUAL "pico2_w")
-    set(LFS_FLASH_OFFSET 0x101E0000)
+    set(LFS_FLASH_OFFSET 0x101C0000)
     set(MEMMAP_FRAGMENT ${CMAKE_SOURCE_DIR}/memmap_lfs_fragment_rp2350.ld)
 else()
-    set(LFS_FLASH_OFFSET 0x1E0000)
+    set(LFS_FLASH_OFFSET 0x1C0000)
     set(MEMMAP_FRAGMENT ${CMAKE_SOURCE_DIR}/memmap_lfs_fragment_rp2040.ld)
 endif()
 message(STATUS "Using LittleFS offset: ${LFS_FLASH_OFFSET}")
@@ -103,7 +103,7 @@ add_custom_command(
     COMMAND ${CMAKE_COMMAND} -E echo "Building LittleFS image..."
     COMMAND ${MKLITTLEFS_TOOL}
             -c ${LFS_SOURCE_DIR}
-            -b 4096 -p 256 -s 131072
+            -b 4096 -p 256 -s 262144
             ${LFS_IMAGE}
     DEPENDS ${HTML_FILES}
     COMMENT "Generating ${LFS_IMAGE} from ${LFS_SOURCE_DIR}"
@@ -180,7 +180,7 @@ if(${FLASH_METHOD} STREQUAL "usb")
         COMMAND ${CMAKE_COMMAND} -E sleep 2
         COMMAND ${CMAKE_COMMAND} -E echo "Flashing firmware via USB..."
         COMMAND picotool load ${CMAKE_BINARY_DIR}/pico_example_app.uf2
-        COMMAND ${CMAKE_COMMAND} -E echo "Flashing LittleFS image to 0x1E0000 via USB..."
+        COMMAND ${CMAKE_COMMAND} -E echo "Flashing LittleFS image via USB..."
         COMMAND ${CMAKE_COMMAND} -E copy ${LFS_IMAGE} ${CMAKE_BINARY_DIR}/littlefs.bin
         COMMAND picotool load ${CMAKE_BINARY_DIR}/littlefs.bin --offset ${LFS_FLASH_OFFSET} 
     )

@@ -204,18 +204,16 @@ bool ends_with(const std::string &str, const std::string &suffix)
 void HttpFileserver::handle_static_request(HttpRequest &req, HttpResponse &res, const RouteMatch &match)
 {
     const std::string &uri = req.getPath();
-    TRACE("Serving static request for URI: %s\n", uri.c_str());
+    printf("Serving static request for URI: %s\n", uri.c_str());
 
-    std::string filePath;
+    std::string filePath = urlDecode(uri);
+    printf("Decoded URI: %s\n", filePath.c_str());
 
     if (uri.empty() || uri == "/")
     {
         filePath = "/index.html";
     }
-    else
-    {
-        filePath = uri;
-    }
+
 
     fileHandler.serveFile(res, filePath.c_str());
 }

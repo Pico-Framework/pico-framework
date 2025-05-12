@@ -14,17 +14,25 @@ const routes = {
 let lastRoute = null;
 
 function loadRoute() {
-  const currentRoute = location.hash || '#/';
-  updateActiveNav(currentRoute);
-  if (currentRoute === lastRoute) {
-    return; // Prevent reloading the same route
-  }
-  lastRoute = currentRoute;
+  const fullHash = location.hash || '#/';
+  const [hashPath] = fullHash.split('?');  // Strip query string
+  updateActiveNav(hashPath);
 
-  const route = routes[currentRoute] || 'dashboard';
+  if (hashPath === lastRoute) return;
+  lastRoute = hashPath;
+
+  const route = routes[hashPath] || 'sprinkler-dashboard';
+
+  if (!customElements.get(route)) {
+    console.warn(`Unknown route component: ${route}`);
+    return;
+  }
+
   const main = document.getElementById('app');
   main.innerHTML = `<${route}></${route}>`;
 }
+
+
 
 window.addEventListener('hashchange', loadRoute);
 window.addEventListener('DOMContentLoaded', loadRoute);

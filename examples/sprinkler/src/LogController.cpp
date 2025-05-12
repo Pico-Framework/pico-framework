@@ -1,4 +1,8 @@
 #include "LogController.h"
+
+#include <nlohmann/json.hpp>
+using json = nlohmann::json;
+
 #include "framework/AppContext.h"
 #include "framework/FrameworkController.h"
 #include "events/EventManager.h"
@@ -63,8 +67,8 @@ void LogController::onEvent(const Event& event) {
 
 void LogController::handleSummary(HttpRequest& req, HttpResponse& res) {
     auto* storage = AppContext::get<StorageManager>();
-    auto file = storage->open("/log/system.log", FileOpenMode::Read);
-    if (!file || !file->isOpen()) {
+    auto reader = storage->openReader("log.txt");
+    if (!reader) {
         res.status(500).json({{"error", "Unable to open log file"}});
         return;
     }
@@ -73,8 +77,7 @@ void LogController::handleSummary(HttpRequest& req, HttpResponse& res) {
     std::map<std::string, std::string> zoneTimes;
 
     char line[128];
-    while (file->readLine(line, sizeof(line))) {
-        // Timestamp format: [YYYY-MM-DD HH:MM:SS]
+    while (reader->readLine(line, sizeof(line))) {
         const char* timeStart = strchr(line, '[');
         const char* timeEnd = strchr(line, ']');
         if (!timeStart || !timeEnd || timeEnd <= timeStart + 1) continue;
@@ -97,14 +100,11 @@ void LogController::handleSummary(HttpRequest& req, HttpResponse& res) {
         }
     }
 
-    file->close();
+    reader->close();
 
-    JsonObject obj;
-    auto programs = obj.createNestedObject("programs");
-    for (const auto& [k, v] : programTimes) programs[k] = v;
-
-    auto zones = obj.createNestedObject("zones");
-    for (const auto& [k, v] : zoneTimes) zones[k] = v;
+    json obj;
+    for (const auto& [k, v] : programTimes) obj["programs"][k] = v;
+    for (const auto& [k, v] : zoneTimes) obj["zones"][k] = v;
 
     res.json(obj);
 }

@@ -66,7 +66,11 @@ class Dashboard extends HTMLElement {
   }
   
 } 
-document.getElementById('next-program').textContent = 'Morning Watering';
-document.getElementById('next-start-time').textContent = '06:00';
+const programEl = document.getElementById('next-program');
+if (programEl) programEl.textContent = 'Morning Watering';
+
+const timeEl = document.getElementById('next-start-time');
+if (timeEl) timeEl.textContent = '06:00';
+
 
 customElements.define('sprinkler-dashboard', Dashboard);
