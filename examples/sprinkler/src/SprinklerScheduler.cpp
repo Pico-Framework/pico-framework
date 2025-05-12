@@ -13,9 +13,11 @@
 #include "events/EventManager.h"
 #include "UserNotification.h"
 
-
 void SprinklerScheduler::initRoutes()
 {
+    printf("Router address: %p\n", &router);
+    // This method is called by the base class to initialize HTTP routes.
+    printf("Initializing routes for SprinklerScheduler\n");
     router.addRoute("GET", "/api/v1/programs", [this](HttpRequest &req, HttpResponse &res, const RouteMatch &) {
         json arr = json::array();
         for (const auto& prog : programModel->getPrograms()) {
@@ -23,6 +25,7 @@ void SprinklerScheduler::initRoutes()
         }
         res.json(arr);
     });
+    printf("Added GET /api/v1/programs route\n");
     
     router.addRoute("GET", "/api/v1/programs/{name}", [this](HttpRequest &req, HttpResponse &res, const RouteMatch &match) {
         auto name = match.getParam("name");
@@ -35,6 +38,7 @@ void SprinklerScheduler::initRoutes()
         }
         res.status(404).text("Program not found");
     });
+    printf("Added GET /api/v1/programs/{name} route\n");
     
     router.addRoute("POST", "/api/v1/programs", [this](HttpRequest &req, HttpResponse &res, const RouteMatch &) {
         auto json = req.json();
@@ -58,6 +62,7 @@ void SprinklerScheduler::initRoutes()
         programModel->saveOrUpdate(prog);
         res.text("Program saved");
     });
+    printf("Added POST /api/v1/programs route\n");
     
     router.addRoute("PUT", "/api/v1/programs/{name}", [this](HttpRequest &req, HttpResponse &res, const RouteMatch &match) {
         auto name = match.getParam("name");
@@ -87,6 +92,7 @@ void SprinklerScheduler::initRoutes()
         programModel->saveOrUpdate(prog);
         res.text("Program updated");
     });
+    printf("Added PUT /api/v1/programs/{name} route\n");
     
     
     router.addRoute("DELETE", "/api/v1/programs/{name}", [this](HttpRequest &req, HttpResponse &res, const RouteMatch &match) {
@@ -98,17 +104,15 @@ void SprinklerScheduler::initRoutes()
             res.status(400).text("Missing program name");
         }
     });
-    
-    
-}
+    printf("Added DELETE /api/v1/programs/{name} route\n");
 
-void SprinklerScheduler::onStart()
-{
-    while (true)
-    {
-        checkPrograms();
-        vTaskDelay(pdMS_TO_TICKS(60000));
-    }
+    router.addRoute("GET", "/(.*)", [this](HttpRequest &req, HttpResponse &res, const RouteMatch &match) {
+        this->router.serveStatic(req, res, match);
+    });
+    printf("Added GET /(.*) route\n");
+
+    router.printRoutes();
+    
 }
 
 void SprinklerScheduler::checkPrograms()
@@ -233,4 +237,15 @@ void SprinklerScheduler::checkSchedule()
             AppContext::get<EventManager>()->postEvent(e);
         }
     }
+}
+
+void SprinklerScheduler::onStart()
+{
+    printf("SprinklerScheduler started\n");
+}
+
+void SprinklerScheduler::poll()
+{
+    // Polling logic here
+    vTaskDelay(pdMS_TO_TICKS(10));
 }

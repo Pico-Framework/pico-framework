@@ -351,11 +351,18 @@ err_t Tcp::tlsRecvCallback(void *arg, struct altcp_pcb *conn, struct pbuf *p, er
     return ERR_OK;
 }
 
-int Tcp::recv(char *buffer, size_t size)
+int Tcp::recv(char *buffer, size_t size, uint32_t timeout_ms)
 {
     if (!use_tls)
     {
-        return lwip_recv(sockfd, buffer, size, 0);
+        TRACE("Plain recv: %zu bytes\n", size);
+        int received = lwip_recv(sockfd, buffer, size, 0);
+        if(received < 0)
+        {
+            TRACE("Plain recv error: %d, %s\n", errno, strerror(errno));
+            return received;
+        }
+        return received;
     }
 
     if (!tls_pcb || !buffer || size == 0)
@@ -367,7 +374,9 @@ int Tcp::recv(char *buffer, size_t size)
     if (!recv_buffer)
     {
         waiting_task = xTaskGetCurrentTaskHandle();
-        ulTaskNotifyTakeIndexed(NotifyRecv, pdTRUE, portMAX_DELAY); // Wait for data
+        BaseType_t result = ulTaskNotifyTakeIndexed(NotifyRecv, pdTRUE, pdMS_TO_TICKS(timeout_ms));
+        if (result == 0 || !recv_buffer)
+            return 0;  // timeout or nothing delivered
     }
 
     if (!recv_buffer)
@@ -456,24 +465,28 @@ Tcp* Tcp::accept()
         }
         return nullptr;
     }
-    // For plain TCP, we use lwIP accept directly
+
+    // For plain TCP, use lwIP accept directly
     struct sockaddr_in client_addr{};
     socklen_t addr_len = sizeof(client_addr);
 
     int client_fd = lwip_accept(sockfd, reinterpret_cast<struct sockaddr *>(&client_addr), &addr_len);
     TRACE("[Tcp] Accept returned new socket: %d\n", client_fd);
+
     if (client_fd >= 0)
     {
-        // Set SO_LINGER immediately on the accepted client
-        struct linger so_linger;
-        so_linger.l_onoff = 1;
-        so_linger.l_linger = 5; // wait up to 5 seconds to flush data
+        // Set receive timeout
+        struct timeval recv_timeout = { .tv_sec = 0, .tv_usec = 100000 };
+        lwip_setsockopt(client_fd, SOL_SOCKET, SO_RCVTIMEO, &recv_timeout, sizeof(recv_timeout));
+
+        // Optional: Force-close on disconnect (RST on close)
+        struct linger so_linger = { .l_onoff = 1, .l_linger = 0 };
         lwip_setsockopt(client_fd, SOL_SOCKET, SO_LINGER, &so_linger, sizeof(so_linger));
+
         Tcp* client = new Tcp(client_fd);
         return client;
     }
 
-    // Timed out — no client
     printf("[Tcp] Accept timeout, no client.\n");
     return nullptr;
 }

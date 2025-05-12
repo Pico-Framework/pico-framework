@@ -27,9 +27,25 @@ FrameworkModel::FrameworkModel(const std::string& path)
 bool FrameworkModel::load()
 {
     auto jsonService = AppContext::get<JsonService>();
+    if(!jsonService)
+    {
+        printf("Failed to get JsonService\n");
+        return false;
+    }
     if (!jsonService->load(storagePath))
         return false;
+    printf("Loaded %s\n", storagePath.c_str());
+    printf("JSON data: %s\n", jsonService->data().dump(4).c_str());
     collection = jsonService->data().value("items", nlohmann::json::array());
+    printf("Loaded %zu items\n", collection.size());
+    if (collection.empty())
+    {
+        printf("No items found in %s\n", storagePath.c_str());
+        return false;
+    }
+    else{
+        printf("collection: %s\n", collection.dump(4).c_str());
+    }
     return true;
 }
 
@@ -44,9 +60,20 @@ bool FrameworkModel::save()
 /// @copydoc FrameworkModel::all
 std::vector<nlohmann::json> FrameworkModel::all() const
 {
+    printf("FrameworkModel::all() called\n");
+    if (collection.empty())
+    {
+        printf("No items found in %s\n", storagePath.c_str());
+        return {};
+    }
+    else
+    {
+        printf("collection: %s\n", collection.dump(4).c_str());
+    }
     std::vector<nlohmann::json> items;
     for (const auto &item : collection)
     {
+        printf("[FrameworkModel::all] Item: %s\n", item.dump(4).c_str());
         items.push_back(item);
     }
     return items;

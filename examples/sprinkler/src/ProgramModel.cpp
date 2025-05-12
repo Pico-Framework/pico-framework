@@ -118,9 +118,40 @@ bool ProgramModel::load() {
         return false;
 
     programs.clear();
-    for (const auto& entry : all()) {
-        if (entry.contains("name") && entry.contains("start") && entry.contains("days") && entry.contains("zones")) {
-            programs.push_back(entry.get<SprinklerProgram>());
+
+    for (const auto& entry : FrameworkModel::all()) {
+        if (!entry.is_object()) {
+            printf("ProgramModel: Skipping non-object entry\n");
+            continue;
+        }
+
+        if (entry.contains("name") &&
+            entry.contains("start") &&
+            entry.contains("days") &&
+            entry.contains("zones")) {
+
+            SprinklerProgram p;
+            p.name = entry.value("name", "");
+            p.start = entry.at("start").get<TimeOfDay>();  // uses yfrom_json() to parse "HH:MM" into a TimeOfDay.
+            p.days = entry.value("days", 0);
+
+            const auto& zoneArray = entry["zones"];
+            if (!zoneArray.is_array()) {
+                printf("ProgramModel: Skipping entry with invalid zones array\n");
+                continue;
+            }
+
+            for (const auto& z : zoneArray) {
+                if (z.contains("zone") && z.contains("duration")) {
+                    RunZone rz;
+                    rz.zone = z.value("zone", "");
+                    rz.duration = z.value("duration", 0);
+                    p.zones.push_back(rz);
+                }
+            }
+
+            programs.push_back(p);
+            collection.push_back(p);
         } else {
             printf("Invalid program entry in collection\n");
         }
@@ -132,8 +163,11 @@ bool ProgramModel::load() {
 }
 
 bool ProgramModel::save() {
-    collection = programs;
-    return save();
+    collection.clear();
+    for (const auto& program : programs) {
+        collection.push_back(program);  // relies on to_json for SprinklerProgram
+    }
+    return FrameworkModel::save();
 }
 
 bool ProgramModel::save(const std::string& id, const json& data) {

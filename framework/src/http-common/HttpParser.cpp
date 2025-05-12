@@ -115,7 +115,7 @@ std::pair<std::string, std::string> HttpParser::receiveHeaderAndLeftover(Tcp &so
 
     while (true)
     {
-        int n = socket.recv(temp, sizeof(temp));
+        int n = socket.recv(temp, sizeof(temp), HTTP_RECEIVE_TIMEOUT);
         if (n <= 0)
         {
             return {"", ""}; // signal error (empty header)
@@ -185,7 +185,7 @@ bool HttpParser::receiveChunkedBodyToString(Tcp& socket, const std::string& left
 
     char temp[1460];
     while (!decoder.isComplete()) {
-        int n = socket.recv(temp, sizeof(temp));
+        int n = socket.recv(temp, sizeof(temp), HTTP_RECEIVE_TIMEOUT);
         if (n <= 0) {
             printf("Chunked: recv() failed or EOF");
             return false;
@@ -218,7 +218,7 @@ bool HttpParser::receiveFixedLengthBodyToString(Tcp& socket, const std::map<std:
     while ((int)outBody.size() < contentLength && attempts++ < 2000) {
         char buffer[1460];
         int toRead = std::min<int>(sizeof(buffer), contentLength - (int)outBody.size());
-        int n = socket.recv(buffer, toRead);
+        int n = socket.recv(buffer, toRead, HTTP_RECEIVE_TIMEOUT);
 
         if (n <= 0) {
             idleCycles++;
@@ -245,7 +245,7 @@ bool HttpParser::receiveUnknownLengthBodyToString(Tcp& socket, const std::string
     outBody = leftover;
     char buffer[1460];
     while (true) {
-        int n = socket.recv(buffer, sizeof(buffer));
+        int n = socket.recv(buffer, sizeof(buffer), HTTP_RECEIVE_TIMEOUT);
         if (n <= 0) break;
 
         if (outBody.size() + n > maxLength) {
@@ -273,7 +273,7 @@ bool HttpParser::receiveChunkedBodyToFile(
 
     char buffer[1460];
     while (!decoder.isComplete()) {
-        int n = socket.recv(buffer, sizeof(buffer));
+        int n = socket.recv(buffer, sizeof(buffer), HTTP_RECEIVE_TIMEOUT);
         if (n <= 0) {
             printf("Chunked: recv() failed or EOF\n");
             return false;
@@ -327,7 +327,7 @@ bool HttpParser::receiveFixedLengthBodyToFile(
     while (totalWritten < (size_t)contentLength) {
         size_t remaining = contentLength - totalWritten;
         int toRead = std::min((int)sizeof(buffer), (int)remaining);
-        int n = socket.recv(buffer, toRead);
+        int n = socket.recv(buffer, toRead, HTTP_RECEIVE_TIMEOUT);
 
         if (n <= 0) {
             vTaskDelay(pdMS_TO_TICKS(10));

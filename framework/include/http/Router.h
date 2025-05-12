@@ -63,6 +63,8 @@ public:
      * @brief Construct the router instance.
      */
     Router();
+    Router(const Router&) = delete;
+    Router& operator=(const Router&) = delete;
 
     /**
      * @brief Register a global middleware function.
@@ -169,7 +171,7 @@ private:
     std::vector<Middleware> globalMiddleware;
     
     static StaticSemaphore_t lockBuffer_;
-    SemaphoreHandle_t lock_ = xSemaphoreCreateMutexStatic(&lockBuffer_);
+    SemaphoreHandle_t lock_ = xSemaphoreCreateRecursiveMutexStatic(&lockBuffer_);
 
     void withRoutes(const std::function<void(std::unordered_map<std::string, std::vector<Route>> &)> &fn);
 };

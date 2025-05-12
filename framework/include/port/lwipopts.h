@@ -70,8 +70,8 @@ extern void sntp_set_system_time(uint32_t sec);
 
 // TCP Keepalive settings:
 #define LWIP_TCP_KEEPALIVE 1       // Enable TCP keepalive functionality
-#define TCP_KEEPIDLE_DEFAULT 30000 // Time (ms) before sending keepalive probes (was 10000)
-#define TCP_KEEPINTVL_DEFAULT 5000 // Interval (ms) between individual keepalive probes (was 2000)
+#define TCP_KEEPIDLE_DEFAULT 10000 // Time (ms) before sending keepalive probes 
+#define TCP_KEEPINTVL_DEFAULT 1000 // Interval (ms) between individual keepalive probes (was 2000)
 #define TCP_KEEPCNT_DEFAULT 3      // Maximum number of keepalive probes before closing the connection (was 5)
 
 // TCP additional features:
@@ -111,7 +111,7 @@ extern void sntp_set_system_time(uint32_t sec);
 // Protocols and Raw API
 // -----------------------------------------------------------------------------
 #define LWIP_RAW 1            // Enable the RAW API for low-level protocol access
-#define LWIP_NETCONN 0        // Not used
+#define LWIP_NETCONN 1        // Used by sockets and netconn API
 #define LWIP_SOCKET 1         // Enable socket API support
 #define LWIP_COMPAT_SOCKETS 0 // Use POSIX-like sockets instead of native lwIP sockets
 
@@ -120,11 +120,11 @@ extern void sntp_set_system_time(uint32_t sec);
 // -----------------------------------------------------------------------------
 #define LWIP_NETCONN_SEM_PER_THREAD 0    // Each thread gets its own netconn semaphore - only if using a single socket from multiple threads
 #define LWIP_SO_RCVTIMEO 1               // Enable support for socket receive timeouts
-#define LWIP_TCPIP_CORE_LOCKING 1        // Disable core locking (not needed with FreeRTOS)
-#define LWIP_TCPIP_CORE_LOCKING_INPUT 1  // Disable core locking input (not needed with FreeRTOS)
+#define LWIP_TCPIP_CORE_LOCKING 1        // Enable core locking for thread safety
+#define LWIP_TCPIP_CORE_LOCKING_INPUT 1  // Enable core locking for input processing
 #define TCPIP_THREAD_NAME "tcpip_thread" // Name assigned to the TCP/IP thread
 #define TCPIP_THREAD_STACKSIZE 2048      // Stack size (in bytes) for the TCP/IP thread
-#define TCPIP_THREAD_PRIO 3              // Priority for the TCP/IP thread
+#define TCPIP_THREAD_PRIO 8              // Priority for the TCP/IP thread
 #define TCPIP_MBOX_SIZE 8                // Mailbox size for the TCP/IP thread message queue
 #define DEFAULT_THREAD_STACKSIZE 2048    // Default stack size for lwIP-related threads
 #define DEFAULT_UDP_RECVMBOX_SIZE 8      // Default mailbox size for UDP receive (old value)

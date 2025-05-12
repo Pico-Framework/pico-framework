@@ -223,7 +223,7 @@ void HttpServer::handleClient(Tcp* conn)
 {
     int64_t start = to_ms_since_boot(get_absolute_time());
     int64_t lastActivity = start;
-    const int64_t idleTimeoutMs = 5000; // 5 seconds idle timeout
+    const int64_t idleTimeoutMs = HTTP_IDLE_TIMEOUT; //  idle timeout - kill connection if no data received
 
 
     HttpRequest req = HttpRequest::receive(conn);
@@ -275,7 +275,7 @@ void HttpServer::handleClient(Tcp* conn)
     QUIET_PRINTF("[HttpServer] Client request received: %s, path: %s\n", req.getMethod().c_str(), req.getPath().c_str());
 
     HttpResponse res(conn);
-    res.setHeader("Connection", "keep-alive"); // Add keep-alive header
+    res.setHeader("Connection", "close"); // Close the connection 
 
     bool ok = router.handleRequest(req, res);
     TRACE("HttpRequest handled: %s\n", ok ? "true" : "false");

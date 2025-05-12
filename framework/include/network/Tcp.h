@@ -80,7 +80,7 @@ public:
     /**
      * @brief Receive data from the connection.
      */
-    int recv(char* buffer, size_t size);
+    int recv(char *buffer, size_t size, uint32_t timeout_ms);
 
     /**
      * @brief Close the connection and free resources.

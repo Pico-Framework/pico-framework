@@ -34,8 +34,8 @@ public:
     void onEvent(const Event &e) override; // called by the framework when an event occurs
 
 private:
-    ZoneModel zoneModel;
-    ProgramModel  programModel = ProgramModel("/programs.json");
+    ZoneModel zoneModel = ZoneModel("/json/zones.json"); // Model for managing zones
+    ProgramModel  programModel = ProgramModel("/json/programs.json");
     SprinklerScheduler scheduler = SprinklerScheduler(router, programModel);
     SprinklerController controller = SprinklerController(router, zoneModel);
 };

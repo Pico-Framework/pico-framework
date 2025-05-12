@@ -1,15 +1,20 @@
 import { apiGet, apiPut } from '../utils/api.js';
 
 class ZoneEditor extends HTMLElement {
-  async connectedCallback() {
-    this.innerHTML = `<section><h2>Zone Editor</h2><p>Loading zones...</p></section>`;
-    try {
-      const zones = await apiGet('/api/v1/zones');
-      this.renderZones(zones);
-    } catch (err) {
-      this.innerHTML = `<section><h2>Zone Editor</h2><p>Error loading zones.</p></section>`;
-    }
+  connectedCallback() {
+    this.innerHTML = `<section><h2>Zones</h2><p>Loading...</p></section>`;
+  
+    setTimeout(async () => {
+      try {
+        const zones = await apiGet('/api/v1/zones');
+        this.renderZones(zones);
+      } catch (err) {
+        console.error('Fetch failed:', err);
+        this.innerHTML = `<section><h2>Zones</h2><p>Error loading zones.</p></section>`;
+      }
+    }, 100);
   }
+  
 
   renderZones(zones) {
     const html = zones.map(zone => `

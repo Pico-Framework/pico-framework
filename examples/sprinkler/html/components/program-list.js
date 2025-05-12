@@ -1,14 +1,18 @@
 import { apiGet, apiDelete } from '../utils/api.js';
 
 class ProgramList extends HTMLElement {
-  async connectedCallback() {
-    this.innerHTML = `<section><h2>Program List</h2><p>Loading programs...</p></section>`;
-    try {
-      const programs = await apiGet('/api/v1/programs');
-      this.render(programs);
-    } catch (err) {
-      this.innerHTML = `<section><h2>Program List</h2><p>Error loading programs.</p></section>`;
-    }
+  connectedCallback() {
+    this.innerHTML = `<section><h2>Programs</h2><p>Loading...</p></section>`;
+  
+    setTimeout(async () => {
+      try {
+        const programs = await apiGet('/api/v1/programs');
+        this.render(programs);
+      } catch (err) {
+        console.error('Fetch failed:', err);
+        this.innerHTML = `<section><h2>Programs</h2><p>Error loading programs.</p></section>`;
+      }
+    }, 100);
   }
 
   render(programs) {

@@ -1,19 +1,23 @@
 import { apiGet, apiPut } from '../utils/api.js';
 
 class ProgramEditor extends HTMLElement {
-  async connectedCallback() {
+  connectedCallback() {
     const params = new URLSearchParams(location.hash.split('?')[1] || '');
     this.programName = params.get('name');
     this.innerHTML = `<section><h2>Edit Program</h2><p>Loading...</p></section>`;
-
-    try {
-      const program = await apiGet(`/api/v1/programs/${encodeURIComponent(this.programName)}`);
-      this.render(program);
-    } catch (err) {
-      this.innerHTML = `<section><h2>Edit Program</h2><p>Error loading program.</p></section>`;
-    }
+  
+    setTimeout(async () => {
+      try {
+        const program = await apiGet(`/api/v1/programs/${encodeURIComponent(this.programName)}`);
+        this.render(program);
+      } catch (err) {
+        console.error('Fetch failed:', err);
+        this.innerHTML = `<section><h2>Edit Program</h2><p>Error loading program.</p></section>`;
+      }
+    }, 100);
   }
-
+  
+  
   render(program) {
     const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 

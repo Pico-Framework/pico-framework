@@ -60,7 +60,7 @@ static std::string extractBearerToken(const std::string &auth_header)
 /// @copydoc Router::Router
 Router::Router()
 {
-    lock_ = xSemaphoreCreateMutex();
+    lock_ = xSemaphoreCreateRecursiveMutex();
     configASSERT(lock_);
 }
 
@@ -146,7 +146,7 @@ void Router::addRoute(const std::string &method,
                       RouteHandler handler,
                       std::vector<Middleware> middleware)
 {
-    TRACE("Adding route: %s %s\n", method.c_str(), path.c_str());
+    printf("Adding route: %s %s\n", method.c_str(), path.c_str());
 
     std::string regex_pattern = "^" + path;
     bool is_dynamic = false;
@@ -195,20 +195,9 @@ void Router::addRoute(const std::string &method,
     };
 
     withRoutes([&](auto &r)
-               {
-                    Route newRoute(method, regex_pattern, finalHandler, is_dynamic, !middleware.empty(), paramNames);
-
-                    auto &routeVec = r[method];
-                    if (path == "/(.*)" || path == "/{*}") {
-                        routeVec.push_back(newRoute); // Catch-all always last
-                    } else {
-                        // Insert before existing catch-all (if any)
-                        auto it = std::find_if(routeVec.begin(), routeVec.end(), [](const Route &route) {
-                            return route.path == "/(.*)" || route.path == "/{*}";
-                        });
-                        routeVec.insert(it, newRoute);
-                } 
-            });
+    { 
+        r[method].emplace_back(method, regex_pattern, finalHandler, is_dynamic, !middleware.empty(), paramNames);
+    });
 }
 
 bool Router::handleRequest(HttpRequest &req, HttpResponse &res)
@@ -270,15 +259,15 @@ bool Router::handleRequest(HttpRequest &req, HttpResponse &res)
 /// @copydoc Router::iprintRoutes
 void Router::printRoutes()
 {
-    TRACE("Routes:\n");
+    printf("Routes:\n");
     withRoutes([&](auto &r)
                {
         for (const auto &method_pair : routes)
         {
-            TRACE("Method: %s\n", method_pair.first.c_str());
+            printf("Method: %s\n", method_pair.first.c_str());
             for (const auto &route : method_pair.second)
             {
-                TRACE("  Route: %s, Dynamic: %s, Requires Auth: %s\n",
+                printf("  Route: %s, Dynamic: %s, Requires Auth: %s\n",
                     route.path.c_str(),
                     route.isDynamic ? "true" : "false",
                     route.requiresAuth ? "true" : "false");
@@ -304,7 +293,20 @@ void Router::listDirectory(HttpRequest &req, HttpResponse &res, const RouteMatch
 
 void Router::withRoutes(const std::function<void(std::unordered_map<std::string, std::vector<Route>> &)> &fn)
 {
-    xSemaphoreTake(lock_, portMAX_DELAY);
-    fn(routes);
-    xSemaphoreGive(lock_);
+    const char* taskName = pcTaskGetName(nullptr);
+    printf("Router: [%s] waiting for lock\n", taskName);
+
+    if (xSemaphoreTakeRecursive(lock_, pdMS_TO_TICKS(5000)) != pdTRUE)
+    {
+        printf("Router: [%s] ERROR - failed to acquire lock within timeout\n", taskName);
+        return;
+    }
+
+    printf("Router: [%s] acquired lock\n", taskName);
+
+    fn(routes);  
+
+    printf("Router: [%s] releasing lock\n", taskName);
+    xSemaphoreGiveRecursive(lock_);
+    vTaskDelay(pdMS_TO_TICKS(1));  // Give any pending route-registration task a chance to run
 }

@@ -7,7 +7,8 @@
 #include "framework/FrameworkModel.h"
 #include "UserNotification.h"
 
-ZoneModel::ZoneModel() : FrameworkModel("/zones.json") {}
+ZoneModel::ZoneModel(const std::string &path)
+    : FrameworkModel(path) {}
 
 bool ZoneModel::startZone(const std::string& name) {
     auto it = nameIndex.find(name);
@@ -92,16 +93,32 @@ bool ZoneModel::isZoneRunning(const std::string& name) const {
 }
 
 bool ZoneModel::load() {
+    printf("Loading zones\n");
+
     if (!FrameworkModel::load())
         return false;
 
     zones.clear();
-    for (const auto& entry : all()) {
-        if (entry.contains("name") && entry.contains("gpioPin")) {
-            zones.push_back(entry.get<Zone>());
-        } else {
-            printf("Invalid zone entry in collection\n");
+
+    for (const auto& entry : FrameworkModel::all()) {
+        if (!entry.is_object()) {
+            printf("ZoneModel: Skipping non-object entry\n");
+            continue;
         }
+
+        Zone z;
+        z.name = entry.value("name", "Unnamed");
+
+        int pin = entry.value("gpioPin", -1);
+        if (pin < 0 || pin > 255) {
+            printf("ZoneModel: Skipping zone with invalid gpioPin: %d\n", pin);
+            continue;
+        }
+        z.gpioPin = static_cast<uint8_t>(pin);
+
+        z.active = entry.value("active", false);
+        zones.push_back(z);
+        collection.push_back(z);  // keep collection in sync
     }
 
     rebuildNameIndex();
@@ -109,9 +126,11 @@ bool ZoneModel::load() {
     return true;
 }
 
-
 bool ZoneModel::save() {
-    collection = zones;  // Implicit json conversion
+    collection.clear();
+    for (const auto& zone : zones) {
+        collection.push_back(zone);  // uses to_json from NLOHMANN_DEFINE_TYPE_INTRUSIVE
+    }
     return FrameworkModel::save();
 }
 

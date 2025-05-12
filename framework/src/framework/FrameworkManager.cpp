@@ -55,7 +55,7 @@ FrameworkManager::FrameworkManager(FrameworkApp *app, Router &router)
 
 }
 
-/// @copydoc FrameworkManager::run()
+/// @copydoc FrameworkManager::onStart()
 void FrameworkManager::onStart()
 {
     setupTraceFromConfig();

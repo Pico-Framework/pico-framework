@@ -11,8 +11,16 @@ const routes = {
   '#/programs/edit': 'program-editor'
 };
 
+let lastRoute = null;
+
 function loadRoute() {
-  const route = routes[location.hash] || 'dashboard';
+  const currentRoute = location.hash || '#/';
+  if (currentRoute === lastRoute) {
+    return; // Prevent reloading the same route
+  }
+  lastRoute = currentRoute;
+
+  const route = routes[currentRoute] || 'dashboard';
   const main = document.getElementById('app');
   main.innerHTML = `<${route}></${route}>`;
 }

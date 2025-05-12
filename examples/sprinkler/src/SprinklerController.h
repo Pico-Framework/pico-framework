@@ -25,6 +25,8 @@ public:
         : FrameworkController("SprinklerCtrl", router, stackSize, priority), zoneModel(&zm){};
 
     void initRoutes() override;
+    void onStart() override;
+    void poll() override;
 
     void setZoneModel(ZoneModel *zm)
     {

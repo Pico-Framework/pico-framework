@@ -1,4 +1,5 @@
-[
+{
+  "items": [
     {
       "name": "Morning Watering",
       "start": "06:30",
@@ -17,4 +18,4 @@
       ]
     }
   ]
-  
+}

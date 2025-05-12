@@ -24,6 +24,7 @@ using json = nlohmann::json;
 #include <optional>
 #include "storage/JsonService.h"
 #include "storage/StorageManager.h"
+#include "framework/AppContext.h"
 
 /**
  * @brief Provides a basic JSON-backed record model.
@@ -125,8 +126,14 @@ public:
      * @return Value from JSON or default
      */
     template <typename T>
-    T getValue(const std::string &key, const T &defaultValue = T()) const
+    T getValue(const std::string &key, const T &defaultValue = T()) 
     {
+        jsonService = AppContext::get<JsonService>();
+        if(!jsonService)
+        {
+            printf("[FrameworkModel] JsonService not available\n");
+            return defaultValue;
+        }
         const auto &data = jsonService->data();
         if (data.contains(key))
         {
@@ -146,8 +153,17 @@ public:
     template <typename T>
     void setValue(const std::string &key, const T &value)
     {
+        printf("[FrameworkModel] Setting value for key '%s' to '%s'\n", key.c_str(),(bool)&value);
+        jsonService = AppContext::get<JsonService>();
+        if(!jsonService)
+        {
+            printf("[FrameworkModel] JsonService not available\n");
+            return;
+        }
         jsonService->data()[key] = value;
+        printf("[FrameworkModel] Value set successfully\n");
     }
+
 
 protected:
     /**
@@ -160,6 +176,6 @@ protected:
     nlohmann::json collection = nlohmann::json::array(); ///< In-memory array of records
 
 private:
-    JsonService* jsonService; ///< Underlying JSON persistence layer
+    JsonService* jsonService = nullptr; ///< Underlying JSON persistence layer       
     std::string storagePath; ///< File path for this model
 };

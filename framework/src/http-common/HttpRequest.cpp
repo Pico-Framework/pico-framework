@@ -14,6 +14,7 @@
  * @license MIT License
  * @copyright Copyright (c) 2025, Ian Archbell
  */
+
 #include "framework_config.h" // Must be included before DebugTrace.h to ensure framework_config.h is processed first
 #include "DebugTrace.h"
 TRACE_INIT(HttpRequest)
@@ -26,6 +27,7 @@ TRACE_INIT(HttpRequest)
 #include <cstring>
 #include <cstdio>
 #include <unordered_map>
+#include "pico/stdlib.h"
 // #include <lwip/sockets.h>
 
 #include "http/HttpServer.h"
@@ -180,11 +182,16 @@ std::optional<std::pair<std::string, std::string>> HttpRequest::receiveUntilHead
     char buffer[HTTP_BUFFER_SIZE];
 
     while (true) {
-        int received = conn->recv(buffer, sizeof(buffer));
+        int counter = 1;
+        printf("Receive Counter: %d\n", counter);
+        vTaskDelay(pdMS_TO_TICKS(10));  // delay to allow for data to be ready
+        int received = conn->recv(buffer, sizeof(buffer), HTTP_RECEIVE_TIMEOUT);
         if (received <= 0) {
-            printf("[HttpRequest] Failed to receive header bytes\n");
+            printf("[HttpRequest] Failed to receive header bytes err: %d\n", received);
             return std::nullopt;
         }
+        printf("Header buffer %d: %s\n", counter, buffer);
+        counter++;
 
         requestText.append(buffer, received);
 
@@ -211,7 +218,7 @@ bool HttpRequest::appendRemainingBody(int expectedLength) {
 
     while (remaining > 0) {
         size_t toRead = std::min(remaining, sizeof(buffer));
-        int received = tcp->recv(buffer, toRead);
+        int received = tcp->recv(buffer, toRead, HTTP_RECEIVE_TIMEOUT); 
         if (received <= 0) {
             printf("Error receiving body chunk\n");
             return false;
@@ -257,12 +264,17 @@ HttpRequest HttpRequest::receive(Tcp *tcp)
     std::string method = {0};                      // Initialize method buffer
     std::string path = {0};               // Initialize path buffer
 
+    absolute_time_t startTime = get_absolute_time(); // Start time for receiving
     auto result = receiveUntilHeadersComplete(tcp);
+    absolute_time_t endTime = get_absolute_time(); // End time for receiving
+    printf("Received headers in %d ms\n", absolute_time_diff_us(startTime, endTime) / 1000);
     if (!result) {
         return HttpRequest("", "", "");
     }
     
     const auto& [rawHeaders, initialBody] = *result;
+    printf("Raw headers: %s\n", rawHeaders.c_str());
+    printf("Initial body: %s\n", initialBody.c_str());
 
     if (!getMethodAndPath(rawHeaders, method, path)) {
         return HttpRequest("", "", "");

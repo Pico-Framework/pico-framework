@@ -10,23 +10,27 @@
 
 void SprinklerController::initRoutes()
 {
+    printf("Router address: %p\n", &router);
+    // This method is called by the base class to initialize HTTP routes.
+    printf("Initializing routes for SprinklerController\n");
     router.addRoute("GET", "/api/v1/zones", [this](HttpRequest &req, HttpResponse &res, const RouteMatch &) {
-        res.json(AppContext::get<ZoneModel>()->all());  // inherited from FrameworkModel
+        res.json(zoneModel->getAllZones());  
     });
     
     router.addRoute("GET", "/api/v1/zones/{name}", [this](HttpRequest &req, HttpResponse &res, const RouteMatch &match) {
         auto name = match.getParam("name");
         if (name.has_value()) {
-            const auto& all = AppContext::get<ZoneModel>()->all();
+            const auto& all = zoneModel->getAllZones();
             for (const auto& zone : all) {
-                if (zone["name"] == name.value()) {
-                    res.json(zone);
+                if (zone.name == name.value()) {
+                    res.json(zone);  // relies on NLOHMANN_DEFINE_TYPE_INTRUSIVE
                     return;
                 }
             }
         }
         res.status(404).text("Zone not found");
     });
+    
     
     router.addRoute("PUT", "/api/v1/zones/{name}", [this](HttpRequest &req, HttpResponse &res, const RouteMatch &match) {
         auto name = match.getParam("name");
@@ -35,18 +39,23 @@ void SprinklerController::initRoutes()
             return;
         }
     
-        auto json = req.json();
-        if (!json.contains("name") || !json.contains("gpioPin") || !json.contains("active")) {
+        const auto& json = req.json();
+    
+        // Validate input types and presence
+        if (!json.is_object() ||
+            !json.contains("name") ||
+            !json.contains("gpioPin") ||
+            !json.contains("active")) {
             res.status(400).text("Missing required fields");
             return;
         }
     
         Zone zone;
-        zone.name = json["name"];
-        zone.gpioPin = json["gpioPin"];
-        zone.active = json["active"];
+        zone.name = json.value("name", "");
+        zone.gpioPin = static_cast<uint8_t>(json.value("gpioPin", 255));
+        zone.active = json.value("active", false);
     
-        if (AppContext::get<ZoneModel>()->updateZone(name.value(), zone)) {
+        if (zoneModel->updateZone(name.value(), zone)) {
             res.text("Zone updated");
         } else {
             res.status(404).text("Zone not found");
@@ -56,7 +65,12 @@ void SprinklerController::initRoutes()
     
     router.addRoute("POST", "/api/v1/zones/{name}/start", [this](HttpRequest &req, HttpResponse &res, const RouteMatch &match) {
         auto name = match.getParam("name");
-        if (name.has_value() && AppContext::get<ZoneModel>()->startZone(name.value())) {
+        if (!name.has_value()) {
+            res.status(400).text("Missing zone name");
+            return;
+        }
+    
+        if (zoneModel->startZone(name.value())) {
             res.text("Zone started");
         } else {
             res.status(404).text("Zone not found");
@@ -65,13 +79,19 @@ void SprinklerController::initRoutes()
     
     router.addRoute("POST", "/api/v1/zones/{name}/stop", [this](HttpRequest &req, HttpResponse &res, const RouteMatch &match) {
         auto name = match.getParam("name");
-        if (name.has_value() && AppContext::get<ZoneModel>()->stopZone(name.value())) {
+        if (!name.has_value()) {
+            res.status(400).text("Missing zone name");
+            return;
+        }
+    
+        if (zoneModel->stopZone(name.value())) {
             res.text("Zone stopped");
         } else {
             res.status(404).text("Zone not found");
         }
     });
     
+    router.printRoutes();
 }
 
 void SprinklerController::onEvent(const Event &event)
@@ -109,4 +129,18 @@ void SprinklerController::onEvent(const Event &event)
             break;
         }
     }
+}
+
+void SprinklerController::onStart()
+{
+    // This method is called when the controller is started.
+    // You can perform any initialization or setup here.
+    printf("SprinklerController started\n");
+}
+
+void SprinklerController::poll()
+{
+    // This method is called periodically to perform any non-blocking tasks.
+    // You can implement any background logic here.
+    vTaskDelay(pdMS_TO_TICKS(10));
 }

@@ -70,6 +70,9 @@
 #define MAX_HTTP_BODY_LENGTH 16 * 1024 ///< Maximum HTTP body size in bytes
 #endif
 
+#define HTTP_IDLE_TIMEOUT 500 ///< Timeout for idle HTTP connections in milliseconds
+#define HTTP_RECEIVE_TIMEOUT 2000 ///< Timeout for receiving HTTP data in milliseconds
+
 #define HTTP_BUFFER_SIZE 1460 ///< Size of the HTTP buffer for request/response data
 
 // === Framework configuration file ===

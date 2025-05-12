@@ -138,7 +138,9 @@ void App::onEvent(const Event &e)
             case SystemNotification::NetworkReady:
                 std::cout << "[App] Network ready. Starting services..." << std::endl;
                 pico.onNetworkReady(); // Notify the PicoModel that the network is ready
+                printf("[App] Network ready. Starting HTTP server...\n");
                 server.start();
+                printf("[App] HTTP server started\n");
                 break;
 
             case SystemNotification::TimeValid:

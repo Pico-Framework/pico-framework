@@ -32,11 +32,11 @@ struct Zone
 class ZoneModel : public FrameworkModel
 {
 public:
-    ZoneModel();
+    explicit ZoneModel(const std::string &path);
 
     // Lifecycle
     bool load();
-    bool save();  // Optional override if needed
+    bool save();  
     bool save(const std::string &id, const json &data);  // Forwarding method
 
 
@@ -67,7 +67,8 @@ public:
 
     void rebuildNameIndex();
 
-private:
+    const std::vector<Zone>& getAllZones() const { return zones; }
+
 private:
     std::vector<Zone> zones;
     std::unordered_map<std::string, Zone *> nameIndex;

@@ -1,14 +1,17 @@
 import { apiGet, apiPost } from '../utils/api.js';
 
 class Dashboard extends HTMLElement {
-  async connectedCallback() {
+  connectedCallback() {
     this.innerHTML = `<section><h2>Sprinkler Dashboard</h2><p>Loading zones...</p></section>`;
-    try {
-      const zones = await apiGet('/api/v1/zones');
-      this.renderZones(zones);
-    } catch (err) {
-      this.innerHTML = `<section><h2>Sprinkler Dashboard</h2><p>Error loading zones.</p></section>`;
-    }
+  
+    setTimeout(async () => {
+      try {
+        const zones = await apiGet('/api/v1/zones');
+        this.renderZones(zones);
+      } catch (err) {
+        this.innerHTML = `<section><h2>Sprinkler Dashboard</h2><p>Error loading zones.</p></section>`;
+      }
+    }, 100);
   }
 
   renderZones(zones) {

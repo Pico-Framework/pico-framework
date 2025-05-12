@@ -33,16 +33,29 @@ float PicoModel::getTemperature()
 
 void PicoModel::setLedState(bool state)
 {
+    printf("[PicoModel] Setting Wi-Fi LED state to %s\n", state ? "ON" : "OFF");
     cyw43_arch_gpio_put(0, state ? 1 : 0); // Set GPIO 0 for LED state
+    printf("[PicoModel] Wi-Fi LED state set to %s\n", state ? "ON" : "OFF");
     setValue("led", getLedState());
+    printf("[PicoModel] LED state saved to model\n");
     if (!suppressSave)
     {
+        printf("[PicoModel] Saving state...\n");
         saveState(); // Only save if not restoring
+        printf("[PicoModel] State saved\n");
     }
+    printf("[PicoModel] end of LED state set to %s\n", state ? "ON" : "OFF");
 }
 bool PicoModel::getLedState()
 {
-    return cyw43_arch_gpio_get(0); // Get GPIO 0 state for LED
+    if (cyw43_is_initialized){
+        printf("[PicoModel] Getting Wi-Fi LED state\n");
+        return cyw43_arch_gpio_get(0); // Get GPIO 0 state for LED
+    }
+    else{
+        printf("[PicoModel] Wi-Fi LED not initialized\n");
+        return false; // Return false if Wi-Fi is not initialized
+    }
 }
 
 bool PicoModel::getGpioState(int pin)
@@ -82,9 +95,13 @@ void PicoModel::onNetworkReady()
 {
     // This method is called when the network is ready
     // Initialize the LED state based on the stored value
+    printf("[PicoModel] Network is ready, initializing LED state...\n");
     bool ledState = getValue("led", false);
+    printf("[PicoModel] Restoring LED state: %s\n", ledState ? "ON" : "OFF");
     WithFlag _(suppressSave); // Suppress saving during initialization
+    printf("[PicoModel] Setting LED state: %s\n", ledState ? "ON" : "OFF");
     setLedState(ledState);
+    printf("[PicoModel] LED state set to %s\n", ledState ? "ON" : "OFF");
     printf("[PicoModel] Network ready, LED state initialized to %s\n", ledState ? "ON" : "OFF");
 }
 

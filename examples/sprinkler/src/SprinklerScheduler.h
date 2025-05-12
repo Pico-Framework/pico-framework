@@ -25,15 +25,12 @@ public:
      * @brief Construct the scheduler with a reference to the program model.
      * @param model ProgramModel reference
      */
-    SprinklerScheduler(Router router, ProgramModel &model, uint16_t stackSize = 1024, UBaseType_t priority = tskIDLE_PRIORITY + 1)
+    SprinklerScheduler(Router &router, ProgramModel &model, uint16_t stackSize = 1024, UBaseType_t priority = tskIDLE_PRIORITY + 2)
         : FrameworkController("SprinklerScheduler", router, stackSize, priority), programModel(&model) {};
 
     void initRoutes() override;
     void onStart() override;
-    void poll() override final
-    {
-        // No polling needed, all work is done in the run() method.
-    }
+    void poll() override;
 
     void setProgramModel(ProgramModel *pm)
     {

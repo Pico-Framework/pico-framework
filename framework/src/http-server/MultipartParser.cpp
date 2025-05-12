@@ -96,7 +96,7 @@ bool MultipartParser::handleMultipart(HttpRequest& req, HttpResponse& res)
     }
 
     // Stream remaining data from socket
-    while ((len = tcp->recv(buf, sizeof(buf) - 1)) > 0)
+    while ((len = tcp->recv(buf, sizeof(buf) - 1, HTTP_RECEIVE_TIMEOUT)) > 0)
     {
         buf[len] = '\0';
         std::string chunk(buf, len);
