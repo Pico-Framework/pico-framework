@@ -10,9 +10,8 @@
 
 void SprinklerController::initRoutes()
 {
-    printf("Router address: %p\n", &router);
-    // This method is called by the base class to initialize HTTP routes.
-    printf("Initializing routes for SprinklerController\n");
+    // This function is called by the base class to initialize HTTP routes.
+    printf("[SprinklerController] Initializing routes\n");
     router.addRoute("GET", "/api/v1/zones", [this](HttpRequest &req, HttpResponse &res, const RouteMatch &) {
         res.json(zoneModel->getAllZones());  
     });
@@ -91,7 +90,6 @@ void SprinklerController::initRoutes()
         }
     });
     
-    router.printRoutes();
 }
 
 void SprinklerController::onEvent(const Event &event)
@@ -135,7 +133,7 @@ void SprinklerController::onStart()
 {
     // This method is called when the controller is started.
     // You can perform any initialization or setup here.
-    printf("SprinklerController started\n");
+    printf("\n[SprinklerController] Started\n");
 }
 
 void SprinklerController::poll()

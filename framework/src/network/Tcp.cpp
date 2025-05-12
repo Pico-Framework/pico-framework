@@ -303,11 +303,7 @@ int Tcp::send(const char *buffer, size_t size)
 
     // After sending ALL chunks: yield and delay for TCP flush
     taskYIELD();
-    vTaskDelay(pdMS_TO_TICKS(20)); // Give lwIP time to transmit
-
-    //absolute_time_t endTime = get_absolute_time(); // 
-    //int64_t elapsedMs = to_ms_since_boot(endTime - startTime);
-    //printf("[Tcp] Sent %zu bytes in %lld ms\n", totalSent, elapsedMs);
+    vTaskDelay(pdMS_TO_TICKS(20)); // Give lwIP time to transmit the data
 
     return static_cast<int>(size); // Report success
 }

@@ -123,20 +123,14 @@ void HttpServer::run()
     while (true)
     {
         TRACE("[HttpServer] Waiting for client connection...\n");
-        //int64_t start = to_ms_since_boot(get_absolute_time());
         Tcp* conn = listener->accept();
         if (conn)
         {
-            //int64_t accept_end = to_ms_since_boot(get_absolute_time());
-            //printf("[HttpServer] Accept waited %lld ms\n", accept_end - start);
+            QUIET_PRINTF("\n===== HTTP CLIENT ACCEPTED ====\n");
             QUIET_PRINTF("[HttpServer] Accepted client connection\n");
-            //int64_t start = to_ms_since_boot(get_absolute_time());
             startHandlingClient(conn);
-            //int64_t end = to_ms_since_boot(get_absolute_time());
-            //printf("[HttpServer] Client handled in %lld ms\n", end - start);
             vTaskDelay(pdMS_TO_TICKS(10));
             
-
             QUIET_PRINTF("[HttpServer] Client connection handled\n");
             QUIET_PRINTF("===============================\n\n");
             #if !defined(HTTP_SERVER_USE_TASK_PER_CLIENT)
@@ -229,7 +223,7 @@ void HttpServer::handleClient(Tcp* conn)
     HttpRequest req = HttpRequest::receive(conn);
     if (req.getMethod().empty())
     {
-        warning("[HttpServer] Empty HTTP method — client likely closed connection\n");
+        TRACE("[HttpServer] Empty HTTP method — client either closed connection or it is Safari trying to reuse closed socket\n");
         return;
     }
     TRACE("HttpRequest received: %s, %s\n", req.getMethod().c_str(), req.getPath().c_str());
@@ -271,7 +265,6 @@ void HttpServer::handleClient(Tcp* conn)
 
     TRACE("HttpRequest body: %s\n", req.getBody().c_str());
 
-    QUIET_PRINTF("\n===== HTTP CLIENT REQUEST =====\n");
     QUIET_PRINTF("[HttpServer] Client request received: %s, path: %s\n", req.getMethod().c_str(), req.getPath().c_str());
 
     HttpResponse res(conn);

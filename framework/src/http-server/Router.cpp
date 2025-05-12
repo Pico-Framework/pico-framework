@@ -146,7 +146,7 @@ void Router::addRoute(const std::string &method,
                       RouteHandler handler,
                       std::vector<Middleware> middleware)
 {
-    printf("Adding route: %s %s\n", method.c_str(), path.c_str());
+    TRACE("Adding route: %s %s\n", method.c_str(), path.c_str());
 
     std::string regex_pattern = "^" + path;
     bool is_dynamic = false;
@@ -259,15 +259,15 @@ bool Router::handleRequest(HttpRequest &req, HttpResponse &res)
 /// @copydoc Router::iprintRoutes
 void Router::printRoutes()
 {
-    printf("Routes:\n");
+    TRACE("Routes:\n");
     withRoutes([&](auto &r)
                {
         for (const auto &method_pair : routes)
         {
-            printf("Method: %s\n", method_pair.first.c_str());
+            TRACE("Method: %s\n", method_pair.first.c_str());
             for (const auto &route : method_pair.second)
             {
-                printf("  Route: %s, Dynamic: %s, Requires Auth: %s\n",
+                TRACE("  Route: %s, Dynamic: %s, Requires Auth: %s\n",
                     route.path.c_str(),
                     route.isDynamic ? "true" : "false",
                     route.requiresAuth ? "true" : "false");
@@ -294,19 +294,15 @@ void Router::listDirectory(HttpRequest &req, HttpResponse &res, const RouteMatch
 void Router::withRoutes(const std::function<void(std::unordered_map<std::string, std::vector<Route>> &)> &fn)
 {
     const char* taskName = pcTaskGetName(nullptr);
-    printf("Router: [%s] waiting for lock\n", taskName);
 
     if (xSemaphoreTakeRecursive(lock_, pdMS_TO_TICKS(5000)) != pdTRUE)
     {
-        printf("Router: [%s] ERROR - failed to acquire lock within timeout\n", taskName);
+        printf("[Router] [%s] ERROR - failed to acquire lock within timeout\n", taskName);
         return;
     }
 
-    printf("Router: [%s] acquired lock\n", taskName);
-
     fn(routes);  
 
-    printf("Router: [%s] releasing lock\n", taskName);
     xSemaphoreGiveRecursive(lock_);
     vTaskDelay(pdMS_TO_TICKS(1));  // Give any pending route-registration task a chance to run
 }

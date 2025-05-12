@@ -115,6 +115,7 @@
 #define TRACE_FatFsStorageManager 0
 #define TRACE_FrameworkApp        0
 #define TRACE_FrameworkController 0
+#define TRACE_FrameworkModel      0
 #define TRACE_FrameworkTask       0
 #define TRACE_FrameworkManager    0
 #define TRACE_HttpClient          0

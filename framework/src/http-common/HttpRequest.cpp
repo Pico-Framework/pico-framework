@@ -159,7 +159,7 @@ void HttpRequest::parseHeaders(const char *raw)
  */
 bool HttpRequest::getMethodAndPath(const std::string& rawHeaders, std::string& method, std::string& path)
 {
-    printf("Parsing request data: %s\n", rawHeaders.c_str());
+    TRACE("Parsing request data: %s\n", rawHeaders.c_str());
     std::istringstream stream(rawHeaders);
     std::string requestLine;
     if (!std::getline(stream, requestLine)) {
@@ -182,16 +182,11 @@ std::optional<std::pair<std::string, std::string>> HttpRequest::receiveUntilHead
     char buffer[HTTP_BUFFER_SIZE];
 
     while (true) {
-        int counter = 1;
-        printf("Receive Counter: %d\n", counter);
-        vTaskDelay(pdMS_TO_TICKS(10));  // delay to allow for data to be ready
         int received = conn->recv(buffer, sizeof(buffer), HTTP_RECEIVE_TIMEOUT);
         if (received <= 0) {
-            printf("[HttpRequest] Failed to receive header bytes err: %d\n", received);
+            printf("[HttpRequest] Failed to receive header - usually Safari reusing socket it shouldn't\n");
             return std::nullopt;
         }
-        printf("Header buffer %d: %s\n", counter, buffer);
-        counter++;
 
         requestText.append(buffer, received);
 
@@ -264,17 +259,12 @@ HttpRequest HttpRequest::receive(Tcp *tcp)
     std::string method = {0};                      // Initialize method buffer
     std::string path = {0};               // Initialize path buffer
 
-    absolute_time_t startTime = get_absolute_time(); // Start time for receiving
     auto result = receiveUntilHeadersComplete(tcp);
-    absolute_time_t endTime = get_absolute_time(); // End time for receiving
-    printf("Received headers in %d ms\n", absolute_time_diff_us(startTime, endTime) / 1000);
     if (!result) {
         return HttpRequest("", "", "");
     }
     
     const auto& [rawHeaders, initialBody] = *result;
-    printf("Raw headers: %s\n", rawHeaders.c_str());
-    printf("Initial body: %s\n", initialBody.c_str());
 
     if (!getMethodAndPath(rawHeaders, method, path)) {
         return HttpRequest("", "", "");

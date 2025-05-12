@@ -93,7 +93,6 @@ bool ZoneModel::isZoneRunning(const std::string& name) const {
 }
 
 bool ZoneModel::load() {
-    printf("Loading zones\n");
 
     if (!FrameworkModel::load())
         return false;
@@ -122,7 +121,7 @@ bool ZoneModel::load() {
     }
 
     rebuildNameIndex();
-    printf("Loaded %zu zones\n", zones.size());
+    printf("[ZoneModel] Loaded %zu zones\n", zones.size());
     return true;
 }
 

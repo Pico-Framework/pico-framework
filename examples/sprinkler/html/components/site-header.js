@@ -10,4 +10,14 @@ class SiteHeader extends HTMLElement {
     }
   }
   customElements.define('site-header', SiteHeader);
+
+  document.querySelectorAll('nav a').forEach(link => {
+    link.addEventListener('click', e => {
+      if (link.getAttribute('href') === location.hash) {
+        e.preventDefault(); // Stop navigation entirely
+        console.log('Ignoring redundant route click');
+      }
+    });
+  });
+  
   

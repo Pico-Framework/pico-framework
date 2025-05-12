@@ -158,7 +158,7 @@ bool ProgramModel::load() {
     }
 
     rebuildNameIndex();
-    printf("Loaded %zu programs\n", programs.size());
+    printf("[ProgramModel] Loaded %zu programs\n", programs.size());
     return true;
 }
 

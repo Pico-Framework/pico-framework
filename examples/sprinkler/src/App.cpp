@@ -22,7 +22,6 @@ void App::initRoutes()
     // See the GpioController and DashboardController classes for examples.
     // Add a simple route for testing
     printf("Initializing routes for App\n");
-    printf("Router address: %p\n", &router);
     router.addRoute("GET", "/hello", [](HttpRequest &req, HttpResponse &res, const auto &)
                     { res.send("Welcome to PicoFramework!"); });
     
@@ -123,7 +122,7 @@ void App::poll()
     static int count = 0;
     if (count == 0)
     {
-        printf("[App] Starting main polling loop...\n");
+        printf("\n[App] Starting main polling loop...\n");
     }
     count++;
     vTaskDelay(pdMS_TO_TICKS(100)); // Yield to other tasks
@@ -132,7 +131,7 @@ void App::poll()
 
     runEvery(15000, [&]()
              { 
-            printf("[App] Running main polling loop...\n"); 
+            printf("\n[App] Running main polling loop...\n"); 
             // Yield to other tasks
             // This is where you can do non-blocking work, like checking sensors or updating state.
             // You can also use this to run periodic tasks.
