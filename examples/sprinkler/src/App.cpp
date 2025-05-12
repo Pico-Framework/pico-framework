@@ -25,9 +25,11 @@ void App::initRoutes()
     router.addRoute("GET", "/hello", [](HttpRequest &req, HttpResponse &res, const auto &)
                     { res.send("Welcome to PicoFramework!"); });
     
-    router.addRoute("GET", "/ls(.*)", [](HttpRequest &req, HttpResponse &res, const auto &) {
+    // This is useful to check the filesystem, it will match any path
+    // and return the contents of the directory
+    router.addRoute("GET", "/ls(.*)", [](HttpRequest &req, HttpResponse &res, const auto &match) {
                         std::vector<FileInfo> files;
-                        AppContext::get<StorageManager>()->listDirectory("/", files);
+                        AppContext::get<StorageManager>()->listDirectory(match.ordered[0], files);
                         res.json(files);                  
     });
 

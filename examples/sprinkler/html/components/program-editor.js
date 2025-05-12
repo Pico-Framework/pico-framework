@@ -8,7 +8,17 @@ class ProgramEditor extends HTMLElement {
   
     setTimeout(async () => {
       try {
-        const program = await apiGet(`/api/v1/programs/${encodeURIComponent(this.programName)}`);
+        let program = {
+          name: '',
+          start: '',
+          days: [],
+          zones: []
+        };
+  
+        if (this.programName) {
+          program = await apiGet(`/api/v1/programs/${encodeURIComponent(this.programName)}`);
+        }
+  
         this.render(program);
       } catch (err) {
         console.error('Fetch failed:', err);
@@ -16,6 +26,7 @@ class ProgramEditor extends HTMLElement {
       }
     }, 100);
   }
+  
   
   
   render(program) {
@@ -75,26 +86,36 @@ class ProgramEditor extends HTMLElement {
       e.preventDefault();
       const form = e.target;
       const formData = new FormData(form);
-
+    
       const newName = formData.get('name').trim();
       const start = formData.get('start');
       const days = [...form.querySelectorAll('input[name="days"]:checked')]
         .map(cb => parseInt(cb.value)).reduce((a, b) => a | b, 0);
-
+    
       const zones = [...form.querySelectorAll('.zone-row')].map(row => ({
         zone: row.querySelector('input[name="zone"]').value.trim(),
         duration: parseInt(row.querySelector('input[name="duration"]').value)
       }));
-
+    
       const payload = { name: newName, start, days, zones };
-
+    
+      if (!newName) {
+        alert('Program name is required.');
+        return;
+      }
+    
       try {
-        await apiPut(`/api/v1/programs/${encodeURIComponent(this.programName)}`, payload);
+        if (this.programName) {
+          await apiPut(`/api/v1/programs/${encodeURIComponent(this.programName)}`, payload);
+        } else {
+          await apiPost('/api/v1/programs', payload);
+        }
         location.hash = '#/programs';
       } catch (err) {
+        console.error('Save failed', err);
         alert('Failed to save program.');
       }
-    });
+    });    
   }
 }
 

@@ -73,4 +73,27 @@ struct Event
     Event(uint8_t userCode, const void *data = nullptr, size_t size = 0,
           void *source = nullptr, FrameworkTask *target = nullptr)
         : notification(userCode), data(data), size(size), source(source), target(target) {}
+
+
+    /// @brief Returns true if this is a user-defined event
+    inline bool isUser() const {
+        return notification.kind == NotificationKind::User;
+    }
+
+    /// @brief Returns true if this is a system-defined event
+    inline bool isSystem() const {
+        return notification.kind == NotificationKind::System;
+    }
+
+    /// @brief Returns the raw user-defined code (safe to cast in app code)
+    inline uint8_t userCode() const {
+        return notification.user_code;
+    }
+
+    /// @brief Returns the system-defined enum value
+    inline SystemNotification systemCode() const {
+        return notification.system;
+    }
+
+               
 };

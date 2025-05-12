@@ -15,6 +15,7 @@ let lastRoute = null;
 
 function loadRoute() {
   const currentRoute = location.hash || '#/';
+  updateActiveNav(currentRoute);
   if (currentRoute === lastRoute) {
     return; // Prevent reloading the same route
   }
@@ -27,3 +28,11 @@ function loadRoute() {
 
 window.addEventListener('hashchange', loadRoute);
 window.addEventListener('DOMContentLoaded', loadRoute);
+
+function updateActiveNav(route) {
+  document.querySelectorAll('nav button').forEach(btn => {
+    btn.classList.remove('active');
+    const target = btn.dataset.route;
+    if (target === route) btn.classList.add('active');
+  });
+}

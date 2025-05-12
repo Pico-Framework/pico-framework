@@ -39,6 +39,7 @@
 #pragma once
 
 #include <vector>
+#include <type_traits>
 #include <FreeRTOS.h>
 #include <task.h>
 #include <semphr.h>
@@ -85,11 +86,20 @@ public:
      *
      * @param eventMask Bitmask of `(1 << event.notification.code())`.
      * @param controller Pointer to the FrameworkController to notify.
-     * 
+     *
      * @note All EventManager::subscribe() for thread safety, calls must complete before interrupts are enabled."
      */
     void subscribe(uint32_t eventMask, FrameworkController *controller);
 
+    /**
+     * @brief Post a notification to the queue and notify matching subscribers.
+     *
+     * Safe to call from task or ISR context.
+     *
+     * @param n The notification to post.
+     * @param target Optional specific controller to notify (nullptr for all).
+     */
+    void postEvent(const Event &e);
 
     /**
      * @brief Post a notification to the queue and notify matching subscribers.
@@ -99,17 +109,7 @@ public:
      * @param n The notification to post.
      * @param target Optional specific controller to notify (nullptr for all).
      */
-    void postEvent(const Event& e);
-
-    /**
-     * @brief Post a notification to the queue and notify matching subscribers.
-     *
-     * Safe to call from task or ISR context.
-     *
-     * @param n The notification to post.
-     * @param target Optional specific controller to notify (nullptr for all).
-     */
-    void postNotification(const Notification& n, FrameworkTask* target);
+    void postNotification(const Notification &n, FrameworkTask *target);
 
     /**
      * @brief Post an event to the queue and notify matching subscribers.
@@ -128,6 +128,16 @@ public:
      */
     bool hasPendingEvents(FrameworkController *controller) const;
 
+    template<typename Enum, typename... Rest>
+    inline void subscribeTo(FrameworkController* ctrl, Enum first, Rest... rest) {
+        static_assert(
+            (std::is_same_v<Enum, Rest> && ...),
+            "All event types must be of the same enum class (UserNotification or SystemNotification)"
+        );
+    
+        subscribe(eventMask(first, rest...), ctrl);
+    }
+
 private:
     struct Subscriber
     {
@@ -139,15 +149,14 @@ private:
     static StaticSemaphore_t lockBuffer_;
 
     std::vector<Subscriber> subscribers_;
-    
-    void withSubscribers(const std::function<void(std::vector<Subscriber>&)>& fn);
+
+    void withSubscribers(const std::function<void(std::vector<Subscriber> &)> &fn);
     /**
      * @brief Provides read-only access to subscribers from ISR context (no locking).
      *
      * WARNING: Call only from ISR context. Must not modify the list.
      */
-    void withSubscribersFromISR(const std::function<void(std::vector<Subscriber>&)>& fn);
-
+    void withSubscribersFromISR(const std::function<void(std::vector<Subscriber> &)> &fn);
 };
 
 #endif // EVENT_MANAGER_H

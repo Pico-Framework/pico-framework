@@ -16,30 +16,57 @@ class Dashboard extends HTMLElement {
 
   renderZones(zones) {
     const list = zones.map(zone => `
-      <div class="zone-card ${zone.active ? 'active' : ''}">
-        <h3>${zone.name}</h3>
+      <div class="zone-card ${zone.active ? 'active-zone' : ''}">
+        <div class="zone-image">
+          <img 
+            src="/uploads/${encodeURIComponent(zone.name)}.jpg" 
+            alt="${zone.name}" 
+            class="zone-img"
+            onerror="this.style.display='none'"
+          />
+          <span class="zone-name-placeholder">${zone.name || 'Unnamed Zone'}</span>
+        </div>
+        <p class="last-run">Last run: <span>--</span></p>
         <p>GPIO: ${zone.gpioPin}</p>
-        <button data-action="start" data-name="${zone.name}">Start</button>
-        <button data-action="stop" data-name="${zone.name}">Stop</button>
+        <div class="zone-controls">
+          <button data-action="start" data-name="${zone.name}">Start</button>
+          <button data-action="stop" data-name="${zone.name}">Stop</button>
+        </div>
       </div>
     `).join('');
-
+  
     this.innerHTML = `
-      <section>
+      <section class="dashboard-summary">
         <h2>Sprinkler Dashboard</h2>
+        <div class="next-run">
+          <strong>Next Scheduled:</strong> <span id="next-program">None</span> at <span id="next-start-time">--:--</span>
+        </div>
+      </section>
+      <section>
         <div class="zone-grid">${list}</div>
       </section>
     `;
-
-    this.querySelectorAll('button').forEach(btn => {
+  
+    // Safe now that #next-program exists
+    this.querySelector('#next-program').textContent = 'Morning Watering';
+    this.querySelector('#next-start-time').textContent = '06:00';
+  
+    this.querySelectorAll('button[data-action]').forEach(btn => {
       btn.addEventListener('click', async () => {
         const name = btn.dataset.name;
         const action = btn.dataset.action;
-        await apiPost(`/api/v1/zones/${name}/${action}`, {});
-        location.reload(); // simple refresh for now
+        try {
+          await apiPost(`/api/v1/zones/${encodeURIComponent(name)}/${encodeURIComponent(action)}`, {});
+          location.reload(); // until live update added
+        } catch (err) {
+          console.warn('Zone action failed', err);
+        }
       });
     });
   }
-}
+  
+} 
+document.getElementById('next-program').textContent = 'Morning Watering';
+document.getElementById('next-start-time').textContent = '06:00';
 
 customElements.define('sprinkler-dashboard', Dashboard);

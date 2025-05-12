@@ -19,8 +19,10 @@ class ProgramList extends HTMLElement {
     const html = programs.map(p => `
       <div class="program-card">
         <h3>${p.name}</h3>
-        <p><strong>Start:</strong> ${p.start}</p>
-        <p><strong>Days:</strong> ${this.daysToText(p.days)}</p>
+        <div class="program-days">
+          <div><strong>Start:</strong> ${p.start}</div>
+          <div><strong>Days:</strong> ${this.daysToText(p.days)}</div>
+        </div>
         <ul>
           ${p.zones.map(z => `<li>${z.zone} – ${z.duration}s</li>`).join('')}
         </ul>
@@ -32,14 +34,19 @@ class ProgramList extends HTMLElement {
         </div>
       </div>
     `).join('');
-
+  
     this.innerHTML = `
       <section>
         <h2>Program List</h2>
+        <button id="add-program-btn">➕ Add Program</button>
         <div class="program-grid">${html}</div>
       </section>
     `;
-
+  
+    this.querySelector('#add-program-btn')?.addEventListener('click', () => {
+      location.hash = '#/programs/edit';
+    });
+  
     this.querySelectorAll('.delete').forEach(button => {
       button.addEventListener('click', async () => {
         const name = button.dataset.name;
@@ -53,7 +60,7 @@ class ProgramList extends HTMLElement {
         }
       });
     });
-  }
+  }  
 
   daysToText(mask) {
     const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];

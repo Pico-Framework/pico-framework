@@ -295,8 +295,6 @@ void HttpServer::handleClient(Tcp* conn)
     conn->close();
     int64_t end = to_ms_since_boot(get_absolute_time());
     TRACE("[HttpServer] Client handled in %lld ms\n", end - start);
-    QUIET_PRINTF("[HttpServer] Client connection handled\n");
-    QUIET_PRINTF("===============================\n\n");
 }
 
 

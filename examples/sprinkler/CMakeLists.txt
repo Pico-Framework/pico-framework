@@ -120,6 +120,7 @@ add_executable(pico_example_app
     src/ZoneModel.cpp
     src/SprinklerController.cpp
     src/SprinklerScheduler.cpp
+    src/LogController.cpp
 )
 
 if(PICO_HTTP_ENABLE_LITTLEFS)
