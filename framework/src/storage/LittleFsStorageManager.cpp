@@ -1,4 +1,5 @@
 #include "storage/LittleFsStorageManager.h"
+#include "storage/LittleFsFileReader.h"
 #include <hardware/flash.h>           // for flash_range_program, flash_range_erase
 #include <hardware/sync.h>            // for save_and_disable_interrupts, restore_interrupts
 #include <pico/multicore.h>           // for multicore_lockout_start_blocking / end_blocking
@@ -443,4 +444,12 @@ bool LittleFsStorageManager::formatStorage()
         printf("[LittleFs] Format failed\n");
     }
     return result;
+}
+
+std::unique_ptr<StorageFileReader> LittleFsStorageManager::openReader(const std::string& path) {
+    if (!mount()) return nullptr;
+
+    auto reader = std::make_unique<LittleFsFileReader>(&lfs);
+    if (!reader->open(path)) return nullptr;
+    return reader;
 }

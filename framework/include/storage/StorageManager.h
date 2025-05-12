@@ -20,6 +20,7 @@
 #include <functional>
 #include <cstdint>
 #include <nlohmann/json.hpp>
+#include "storage/StorageFileReader.h"
 
 /**
  * @brief Structure representing metadata for a file or directory.
@@ -98,4 +99,11 @@ public:
 
     /** @brief Format the storage (if applicable). */
     virtual bool formatStorage() = 0;
+
+    /**
+     * @brief Open a file for streaming read access.
+     * @param path The file path
+     * @return A new reader object, or nullptr on failure
+     */
+    virtual std::unique_ptr<StorageFileReader> openReader(const std::string& path) = 0;
 };

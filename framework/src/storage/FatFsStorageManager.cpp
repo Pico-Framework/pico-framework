@@ -19,6 +19,7 @@
 TRACE_INIT(FatFsStorageManager)
 
 #include "storage/FatFsStorageManager.h"
+#include "storage/FatFsFileReader.h"
 #include <ff_utils.h>
 #include <ff_stdio.h>
 
@@ -394,4 +395,15 @@ bool FatFsStorageManager::readFileString(const std::string &path, uint32_t start
 
     return true;
 }
+
+#include "storage/FatFsFileReader.h"
+
+std::unique_ptr<StorageFileReader> FatFsStorageManager::openReader(const std::string& path) {
+    if (!ensureMounted()) return nullptr;
+
+    auto reader = std::make_unique<FatFsFileReader>();
+    if (!reader->open(resolvePath(path))) return nullptr;
+    return reader;
+}
+
 

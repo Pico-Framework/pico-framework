@@ -98,3 +98,22 @@ const char *Logger::levelToString(LogLevel level)
         return "???";
     }
 }
+
+bool Logger::forEachLine(const std::function<void(const char* line)>& handler) {
+    if (logPath.empty()) return false;
+
+    auto* storage = AppContext::get<StorageManager>();
+    auto reader = storage->openReader(logPath);
+    if (!reader) return false;
+
+    char line[128];
+    while (reader->readLine(line, sizeof(line))) {
+        handler(line);
+    }
+
+    reader->close();
+    return true;
+}
+
+
+

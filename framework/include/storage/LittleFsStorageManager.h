@@ -30,6 +30,9 @@ public:
      */
     LittleFsStorageManager();
 
+    /// @brief open a file for streaming read line access.
+    std::unique_ptr<StorageFileReader> openReader(const std::string& path) override;
+
     /**
      * @brief Mount the LittleFS filesystem.
      * @return true if mounted successfully.

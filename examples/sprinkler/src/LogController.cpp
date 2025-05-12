@@ -9,6 +9,12 @@
 LogController::LogController(Router &r)
     : FrameworkController("LogController", r) {}
 
+    void LogController::initRoutes() {
+        router.addRoute("GET", "/api/v1/logs/summary", [this](HttpRequest& req, HttpResponse& res, const RouteMatch&) {
+            handleSummary(req, res);
+        });
+    }   
+
 void LogController::onStart()
 {
     EventManager *eventManager = AppContext::get<EventManager>();
@@ -21,43 +27,84 @@ void LogController::onStart()
         this);
 }
 
-void LogController::onEvent(const Event &event)
-{
+void LogController::onEvent(const Event& event) {
+    if (!event.isUser()) return;
+
     char msg[128] = {};
-    const char *ts = ""; // Timestamping is done by Logger internally
-    if (event.notification.kind == NotificationKind::User)
-    {
-        switch (static_cast<UserNotification>(event.notification.user_code))
-        {
+    const char* ts = "";  // Timestamp from Logger, or could add PicoTime if needed
 
-            case UserNotification::ProgramStarted:
-            {
-                const char *name = static_cast<const char *>(event.data);
-                snprintf(msg, sizeof(msg), "Program \"%s\" started", name);
-                break;
-            }
-            case UserNotification::ProgramCompleted:
-            {
-                const char *name = static_cast<const char *>(event.data);
-                snprintf(msg, sizeof(msg), "Program \"%s\" completed", name);
-                break;
-            }
-            case UserNotification::RunZoneStart:
-            {
-                const RunZone *rz = static_cast<const RunZone *>(event.data);
-                snprintf(msg, sizeof(msg), "Zone \"%s\" started", rz->zone.c_str());
-                break;
-            }
-            case UserNotification::RunZoneCompleted:
-            {
-                const RunZone *rz = static_cast<const RunZone *>(event.data);
-                snprintf(msg, sizeof(msg), "Zone \"%s\" completed", rz->zone.c_str());
-                break;
-            }
-            default:
-                return;
-            }
-
-            Logger::info(msg);
+    switch (static_cast<UserNotification>(event.userCode())) {
+        case UserNotification::ProgramStarted: {
+            const char* name = static_cast<const char*>(event.data);
+            snprintf(msg, sizeof(msg), "Program \"%s\" started", name);
+            break;
         }
+        case UserNotification::ProgramCompleted: {
+            const char* name = static_cast<const char*>(event.data);
+            snprintf(msg, sizeof(msg), "Program \"%s\" completed", name);
+            break;
+        }
+        case UserNotification::RunZoneStart: {
+            const RunZone* rz = static_cast<const RunZone*>(event.data);
+            snprintf(msg, sizeof(msg), "Zone \"%s\" started", rz->zone.c_str());
+            break;
+        }
+        case UserNotification::RunZoneCompleted: {
+            const RunZone* rz = static_cast<const RunZone*>(event.data);
+            snprintf(msg, sizeof(msg), "Zone \"%s\" completed", rz->zone.c_str());
+            break;
+        }
+        default:
+            return;
+    }
+
+    Logger::info(msg);
+}
+
+void LogController::handleSummary(HttpRequest& req, HttpResponse& res) {
+    auto* storage = AppContext::get<StorageManager>();
+    auto file = storage->open("/log/system.log", FileOpenMode::Read);
+    if (!file || !file->isOpen()) {
+        res.status(500).json({{"error", "Unable to open log file"}});
+        return;
+    }
+
+    std::map<std::string, std::string> programTimes;
+    std::map<std::string, std::string> zoneTimes;
+
+    char line[128];
+    while (file->readLine(line, sizeof(line))) {
+        // Timestamp format: [YYYY-MM-DD HH:MM:SS]
+        const char* timeStart = strchr(line, '[');
+        const char* timeEnd = strchr(line, ']');
+        if (!timeStart || !timeEnd || timeEnd <= timeStart + 1) continue;
+
+        std::string timestamp(timeStart + 1, timeEnd);
+        std::string view(line + (timeEnd - line) + 2);
+
+        if (view.find("Program \"") == 0 && view.find("completed") != std::string::npos) {
+            size_t q1 = view.find('"');
+            size_t q2 = view.find('"', q1 + 1);
+            if (q1 != std::string::npos && q2 != std::string::npos)
+                programTimes[view.substr(q1 + 1, q2 - q1 - 1)] = timestamp;
+        }
+
+        if (view.find("Zone \"") == 0 && view.find("completed") != std::string::npos) {
+            size_t q1 = view.find('"');
+            size_t q2 = view.find('"', q1 + 1);
+            if (q1 != std::string::npos && q2 != std::string::npos)
+                zoneTimes[view.substr(q1 + 1, q2 - q1 - 1)] = timestamp;
+        }
+    }
+
+    file->close();
+
+    JsonObject obj;
+    auto programs = obj.createNestedObject("programs");
+    for (const auto& [k, v] : programTimes) programs[k] = v;
+
+    auto zones = obj.createNestedObject("zones");
+    for (const auto& [k, v] : zoneTimes) zones[k] = v;
+
+    res.json(obj);
 }

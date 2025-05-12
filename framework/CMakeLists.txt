@@ -137,6 +137,7 @@ if(PICO_HTTP_ENABLE_LITTLEFS)
         lib/littlefs/lfs.c
         lib/littlefs/lfs_util.c
         src/storage/LittleFsStorageManager.cpp
+        src/storage/LittleFsFileReader.cpp
         src/port/idleMemory.c
         src/port/cppMemory.cpp
     )
@@ -147,6 +148,7 @@ else()
     message(STATUS "[framework] FatFs support enabled")
     target_sources(pico_framework PRIVATE 
         src/storage/FatFsStorageManager.cpp
+        src/storage/FatFsFileReader.cpp
         src/port/hw_config.c
         )
     target_link_libraries(pico_framework PUBLIC FreeRTOS+FAT+CLI)

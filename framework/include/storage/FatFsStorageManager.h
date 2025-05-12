@@ -169,6 +169,14 @@ public:
      */
     bool formatStorage() override;
 
+    /**
+     * @brief open a file for streaming read access.
+     * @param path The file path
+     * @return A new reader object, or nullptr on failure
+     */
+    std::unique_ptr<StorageFileReader> openReader(const std::string& path) override;
+
+
 private:
     bool mounted = false;           ///< Indicates if the filesystem is currently mounted
     std::string mountPoint = "sd0"; ///< Default mount point

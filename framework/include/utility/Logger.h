@@ -78,6 +78,14 @@
       * @param path Path to the log file on SD card (e.g. "/log/system.log").
       */
      static void enableFileLogging(const std::string& path);
+
+     /**
+     * @brief Streams each line of the log file to the provided handler.
+     * @param handler Function to call with each line (null-terminated C-string).
+     * @return false if the log file could not be opened, true otherwise.
+     */
+    static bool forEachLine(const std::function<void(const char* line)>& handler);
+
  
  private:
      static LogLevel minLevel;
