@@ -1,6 +1,7 @@
 {
   "items": [
     {
+      "id": 1,
       "name": "Morning Watering",
       "start": "06:30",
       "days": 62,
@@ -10,6 +11,7 @@
       ]
     },
     {
+      "id": 2,
       "name": "Evening Watering",
       "start": "19:00",
       "days": 65,

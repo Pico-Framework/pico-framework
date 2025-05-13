@@ -15,14 +15,20 @@ export async function apiGet(path) {
   }
   
   export async function apiPut(path, data) {
+    console.log('apiPut', path, data);
     const res = await fetch(path, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data)
     });
+  
     if (!res.ok) throw new Error(`PUT ${path} failed`);
-    return res.json();
+  
+    const json = await res.json();    // ✅ read it once
+    console.log('apiPut response:', json);
+    return json;
   }
+  
   
   export async function apiDelete(path) {
     const res = await fetch(path, { method: 'DELETE' });

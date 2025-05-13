@@ -43,8 +43,6 @@ bool ZoneModel::startZone(const std::string& name, uint32_t durationSeconds) {
     return true;
 }
 
-
-
 bool ZoneModel::stopZone(const std::string& name) {
     auto it = nameIndex.find(name);
     if (it == nameIndex.end()) {
@@ -70,7 +68,22 @@ void ZoneModel::rebuildNameIndex() {
     }
 }
 
-bool ZoneModel::updateZone(const std::string& name, const Zone& data) {
+bool ZoneModel::updateZone(const std::string& id, const Zone& data) {
+    for (auto& z : zones) {
+        if (z.id == id) {
+            // id and gpioPin are immutable
+            z.name = data.name;
+            z.active = data.active;
+            z.image = data.image; // optional, if updating image too
+
+            rebuildNameIndex(); // in case name changed
+            return true;
+        }
+    }
+    return false;
+}
+
+bool ZoneModel::updateZoneByName(const std::string& name, const Zone& data) {
     auto it = nameIndex.find(name);
     if (it != nameIndex.end()) {
         Zone* z = it->second;
@@ -106,8 +119,11 @@ bool ZoneModel::load() {
         }
 
         Zone z;
+        z.id = entry.value("id", "0");
         z.name = entry.value("name", "Unnamed");
-
+        z.name = z.name.substr(0, 32); // limit name length
+        z.image = entry.value("image", "default.jpg");
+    
         int pin = entry.value("gpioPin", -1);
         if (pin < 0 || pin > 255) {
             printf("ZoneModel: Skipping zone with invalid gpioPin: %d\n", pin);
@@ -116,6 +132,8 @@ bool ZoneModel::load() {
         z.gpioPin = static_cast<uint8_t>(pin);
 
         z.active = entry.value("active", false);
+
+        printf("ZoneModel: Loaded zone id: %s, %s (GPIO %d), image: %s\n", z.id.c_str(), z.name.c_str(), z.gpioPin, z.image.c_str());
         zones.push_back(z);
         collection.push_back(z);  // keep collection in sync
     }

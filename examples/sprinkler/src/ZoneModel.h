@@ -22,11 +22,13 @@
 
 struct Zone
 {
+    std::string id;
     std::string name;
     uint8_t gpioPin;
     bool active = false;
+    std::string image; 
 
-    NLOHMANN_DEFINE_TYPE_INTRUSIVE(Zone, name, gpioPin, active)
+    NLOHMANN_DEFINE_TYPE_INTRUSIVE(Zone, id, name, gpioPin, active, image)
 };
 
 class ZoneModel : public FrameworkModel
@@ -63,7 +65,8 @@ public:
     }
 
     // Zone update only — no add/remove
-    bool updateZone(const std::string &name, const Zone &data);
+    bool updateZone(const std::string& id, const Zone &data);
+    bool updateZoneByName(const std::string& name, const Zone &data);
 
     void rebuildNameIndex();
 

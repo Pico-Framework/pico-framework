@@ -19,7 +19,7 @@ class Dashboard extends HTMLElement {
       <div class="zone-card ${zone.active ? 'active-zone' : ''}">
         <div class="zone-image">
           <img 
-            src="/uploads/${encodeURIComponent(zone.name)}.jpg" 
+            src="/uploads/${encodeURIComponent(zone.image)}" 
             alt="${zone.name}" 
             class="zone-img"
             onerror="this.style.display='none'"

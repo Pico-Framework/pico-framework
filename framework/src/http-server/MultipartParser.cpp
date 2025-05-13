@@ -122,7 +122,8 @@ bool MultipartParser::handleMultipart(HttpRequest& req, HttpResponse& res)
 
     // Only send 200 when we're truly done
     TRACE("Multipart: Successfully received file '%s'\n", filename.c_str());
-    sendHttpResponse(200, "File uploaded successfully");
+    std::string filenameOnly = filename.substr(filename.find_last_of('/') + 1);
+    sendHttpResponse(200, filenameOnly);
     return true;
 }
 
@@ -238,16 +239,8 @@ bool MultipartParser::handleChunk(std::string &chunkData)
 
             chunkData = chunkData.substr(skip);
 
-            // Any non-final boundary = unsupported multiple parts
-            if (!isFinal)
-            {
-                TRACE("ERROR: Multipart contains multiple file parts — unsupported\n");
-                sendHttpResponse(400, "Multiple file upload not supported");
-                return false;
-            }
-
             TRACE("Final boundary reached — exiting multipart parser\n");
-            currentState = COMPLETE; // ✅ <== this was missing
+            currentState = COMPLETE; 
             break;
 
             TRACE("Final boundary reached — exiting multipart parser\n");
@@ -351,26 +344,29 @@ bool MultipartParser::handleFinalBoundary(std::string &fileData)
 }
 
 /// @copydoc MultipartParser::sendHttpResponse
-void MultipartParser::sendHttpResponse(int statusCode, const std::string &message)
-{
-    std::string code = std::to_string(statusCode);
-    std::string success = (statusCode >= 200 && statusCode < 300) ? "true" : "false";
-    std::string body = R"({"success":)" + success + R"(,"error":{"code":")" + code +
-                       R"(","message":")" + message + R"("}})";
-
+void MultipartParser::sendHttpResponse(int statusCode, const std::string &messageOrFilename) {
     std::ostringstream oss;
-    oss << "HTTP/1.1 " << statusCode << " Bad Request\r\n"
+    std::string body;
+
+    if (statusCode >= 200 && statusCode < 300) {
+        // Success: treat message as filename
+        body = R"({"success":true,"image":")" + messageOrFilename + R"("})";
+    } else {
+        std::string code = std::to_string(statusCode);
+        body = R"({"success":false,"error":{"code":")" + code + R"(","message":")" + messageOrFilename + R"("}})";
+    }
+
+    oss << "HTTP/1.1 " << statusCode << (statusCode == 200 ? " OK" : " Bad Request") << "\r\n"
         << "Content-Type: application/json\r\n"
         << "Content-Length: " << body.length() << "\r\n"
-        << "Connection: close\r\n"
-        << "\r\n"
+        << "Connection: close\r\n\r\n"
         << body;
 
     std::string response = oss.str();
     if (!tcp || !tcp->isConnected()) {
         panic("Attempted to send on invalid socket");
     }
-    runTimeStats();
+
     tcp->send(response.c_str(), response.length());
-    vTaskDelay(pdMS_TO_TICKS(50)); // yield to allow send to complete
+    vTaskDelay(pdMS_TO_TICKS(50));
 }
