@@ -7,7 +7,7 @@ PROJECT_BRIEF          = "A web-first embedded framework for C++"
 PROJECT_NUMBER         = 0.1.0
 OUTPUT_DIRECTORY       = docs
 OUTPUT_LANGUAGE        = English
-INPUT                  = ../../framework/src ../../framework/include
+INPUT                  = pico-framework/framework/src pico-framework/framework/include
 FILE_PATTERNS          = *.cpp *.h
 RECURSIVE              = YES
 DISABLE_INDEX          = YES
@@ -29,7 +29,7 @@ REFERENCES_RELATION    = YES
 HIDE_UNDOC_MEMBERS     = NO
 JAVADOC_AUTOBRIEF      = YES
 FULL_PATH_NAMES        = NO
-STRIP_FROM_PATH        = ../../framework/src ../../framework/include
+STRIP_FROM_PATH        = pico-framework/framework/src pico-framework/framework/include
 OUTPUT_DIRECTORY = ../api
 
 #---------------------------------------------------------------------------
