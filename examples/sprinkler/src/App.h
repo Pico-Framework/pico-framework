@@ -21,6 +21,7 @@
 #include "ProgramModel.h"
 #include "SprinklerScheduler.h"
 #include "SprinklerController.h"
+#include "LogController.h"
 
 class App : public FrameworkApp
 {
@@ -38,6 +39,7 @@ private:
     ProgramModel  programModel = ProgramModel("/json/programs.json");
     SprinklerScheduler scheduler = SprinklerScheduler(router, programModel);
     SprinklerController controller = SprinklerController(router, zoneModel);
+    LogController logController = LogController(router);
 };
 
 #endif

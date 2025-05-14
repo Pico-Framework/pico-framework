@@ -26,5 +26,6 @@ protected:
      * 
      */
     static void handleSummary(HttpRequest& req, HttpResponse& res);
+    static void handleSummaryJson(HttpRequest& req, HttpResponse& res);
 
 };

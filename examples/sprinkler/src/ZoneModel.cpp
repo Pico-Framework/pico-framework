@@ -3,6 +3,8 @@
 #include "hardware/gpio.h"
 #include "framework/AppContext.h"
 #include "events/EventManager.h"
+#include "events/Notification.h"
+#include "events/Event.h"
 #include "events/TimerService.h"
 #include "framework/FrameworkModel.h"
 #include "UserNotification.h"
@@ -23,21 +25,20 @@ bool ZoneModel::startZone(const std::string& name) {
     gpio_put(z->gpioPin, 1);
     z->active = true;
 
-    printf("Zone '%s' started on GPIO %d", z->name.c_str(), z->gpioPin);
-    Event e(eventMask(UserNotification::ZoneStarted));
-    AppContext::get<EventManager>()->postEvent(e);
+    printf("[ZoneModel] Zone '%s' started on GPIO %d\n", z->name.c_str(), z->gpioPin);
+    AppContext::get<EventManager>()->postEvent(userEvent(UserNotification::ZoneStarted, name));
     return true;
 }
 
 bool ZoneModel::startZone(const std::string& name, uint32_t durationSeconds) {
     if (!startZone(name)) return false;
+    AppContext::get<EventManager>()->postEvent(userEvent(UserNotification::RunZoneStarted, name));
 
     time_t when = time(NULL) + durationSeconds;
-    AppContext::get<TimerService>()->scheduleCallbackAt(when, [name, durationSeconds]() {
-        AppContext::get<ZoneModel>()->stopZone(name);
-        printf("Zone '%s' auto-stopped after %u seconds", name.c_str(), durationSeconds);
-        Event e(eventMask(UserNotification::RunZoneCompleted));
-        AppContext::get<EventManager>()->postEvent(e);
+    AppContext::get<TimerService>()->scheduleCallbackAt(when, [name, durationSeconds, this]() {
+        this->stopZone(name);
+        printf("Zone '%s' auto-stopped after %u seconds\n", name.c_str(), durationSeconds);
+        AppContext::get<EventManager>()->postEvent(userEvent(UserNotification::RunZoneCompleted, name));
     });
 
     return true;
@@ -46,7 +47,7 @@ bool ZoneModel::startZone(const std::string& name, uint32_t durationSeconds) {
 bool ZoneModel::stopZone(const std::string& name) {
     auto it = nameIndex.find(name);
     if (it == nameIndex.end()) {
-        printf("Zone '%s' not found", name.c_str());
+        printf("Zone '%s' not found\n", name.c_str());
         return false;
     }
 
@@ -54,9 +55,8 @@ bool ZoneModel::stopZone(const std::string& name) {
     gpio_put(z->gpioPin, 0);
     z->active = false;
 
-    printf("Zone '%s' stopped on GPIO %d", z->name.c_str(), z->gpioPin);
-    Event e(eventMask(UserNotification::ZoneStopped));
-    AppContext::get<EventManager>()->postEvent(e);
+    printf("Zone '%s' stopped on GPIO %d\n", z->name.c_str(), z->gpioPin);
+    AppContext::get<EventManager>()->postEvent(userEvent(UserNotification::ZoneStopped, name));
     return true;
 }
 

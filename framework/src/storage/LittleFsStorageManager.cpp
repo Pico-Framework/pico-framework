@@ -448,8 +448,10 @@ bool LittleFsStorageManager::formatStorage()
 
 std::unique_ptr<StorageFileReader> LittleFsStorageManager::openReader(const std::string& path) {
     if (!mount()) return nullptr;
-
     auto reader = std::make_unique<LittleFsFileReader>(&lfs);
+    if (!reader) {
+        return nullptr;
+    }
     if (!reader->open(path)) return nullptr;
     return reader;
 }

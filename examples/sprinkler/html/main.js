@@ -3,12 +3,14 @@ import './components/sprinkler-dashboard.js';
 import './components/zone-editor.js';
 import './components/program-list.js';
 import './components/program-editor.js';
+import './components/sprinkler-log.js';
 
 const routes = {
   '#/': 'sprinkler-dashboard',
   '#/zones': 'zone-editor',
   '#/programs': 'program-list',
-  '#/programs/edit': 'program-editor'
+  '#/programs/edit': 'program-editor',
+  '#/log': 'sprinkler-log'
 };
 
 let lastRoute = null;

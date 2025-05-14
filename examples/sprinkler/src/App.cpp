@@ -8,6 +8,7 @@
 #include "events/Event.h"
 #include "events/Notification.h"
 #include "UserNotification.h"
+#include "LogController.h"
 
 App::App(int port) : FrameworkApp(port, "AppTask", 1024, 3)
 {
@@ -54,6 +55,7 @@ void App::onStart()
     // Start controller and scheduler tasks
     controller.start();
     scheduler.start();
+    logController.start();
 
     // Post initial scheduling event
     Event startupEvent;

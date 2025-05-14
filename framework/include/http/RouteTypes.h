@@ -57,4 +57,5 @@ struct Route
         : method(m), path(p), compiledRegex(p), handler(h), isDynamic(dynamic), requiresAuth(auth), paramNames(params)
     {
     }
+    Route() = default;
 };

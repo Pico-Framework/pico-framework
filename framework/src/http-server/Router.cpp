@@ -200,6 +200,31 @@ void Router::addRoute(const std::string &method,
     });
 }
 
+void Router::addCatchAllGetRoute(RouteHandler handler, std::vector<Middleware> middleware)
+{
+    TRACE("Adding catch-all GET route\n");
+
+    RouteHandler finalHandler = [handler, this, middleware](HttpRequest &req, HttpResponse &res, const RouteMatch &match) {
+        for (const auto &mw : globalMiddleware)
+            if (!mw(req, res, match)) return;
+        for (const auto &mw : middleware)
+            if (!mw(req, res, match)) return;
+        handler(req, res, match);
+    };
+
+    withRoutes([&](auto &) {
+        catchallGetRoute = Route(
+            "GET",
+            "/(.*)",
+            finalHandler,
+            true,                          // authRequired
+            !middleware.empty(),           // hasMiddleware
+            {}                             // vector<string>
+        );
+        hasCatchallGetRoute = true;
+    });
+}
+
 bool Router::handleRequest(HttpRequest &req, HttpResponse &res)
 {
     TRACE("Router::handleRequest: %s %s\n", req.getMethod().c_str(), req.getPath().c_str());
@@ -250,7 +275,16 @@ bool Router::handleRequest(HttpRequest &req, HttpResponse &res)
         return true;
     }
 
-    TRACE("No matching route found\n");
+    TRACE("No matching regular route found\n");
+
+    if (req.getMethod() == "GET" && hasCatchallGetRoute)
+    {
+        TRACE("Falling back to catch-all GET route\n");
+        RouteMatch dummyMatch; // Dummy match for catch-all route
+        catchallGetRoute.handler(req, res, dummyMatch);
+        return true;
+    }
+    
     printRoutes();
     return false;
 }

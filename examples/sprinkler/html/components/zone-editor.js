@@ -20,7 +20,6 @@ class ZoneEditor extends HTMLElement {
     const id = form.dataset.id;
     const name = form.querySelector('input[name="name"]').value.trim();
     const gpioPin = parseInt(form.querySelector('input[name="gpioPin"]').value, 10);
-    const active = form.querySelector('input[name="active"]').checked;
 
     const img = form.querySelector('img.zone-preview');
     const image = imageOverride || img.src.split('/').pop().split('?')[0];
@@ -29,7 +28,6 @@ class ZoneEditor extends HTMLElement {
       id,
       name,
       gpioPin,
-      active,
       image
     };
   }
@@ -68,32 +66,44 @@ class ZoneEditor extends HTMLElement {
     this.querySelectorAll('input[type="file"][name="image"]').forEach(input => {
       input.addEventListener('change', async e => {
         const id = input.dataset.id;
-        const image = input.files[0].name;
         const file = input.files[0];
         if (!file) return;
-
+        
+        const MAX_SIZE = 30 * 1024; // 30KB
+        if (file.size > MAX_SIZE) {
+          alert(`Image too large. Maximum size is 20KB.`);
+          input.value = ''; // reset file input
+          return;
+        }
+    
         const form = input.closest('form');
         const img = form.querySelector('img.zone-preview');
-
+    
         const formData = new FormData();
         formData.append('file', file);
         formData.append('id', id);
-        formData.append('image', image);
-
-        try {
-          const response = await fetch('/api/v1/upload', {
-            method: 'POST',
-            body: formData
-          });
-
-          if (!response.ok) {
-            throw new Error(`HTTP ${response.status}`);
+        formData.append('image', file.name);
+    
+        // Check if image already exists
+        try{
+          const { result } = await apiGet(`/api/v1/image_exists/${encodeURIComponent(file.name)}`);
+          if (result.exists) {
+            alert(`An image named "${file.name}" already exists. Please rename or choose a different file.`);
+            return;
           }
+        } catch (err) {
+          console.log('Error getting file status', err);
+        }
 
+        try {    
+          // Proceed to upload the file
+          const response = await fetch('/api/v1/upload', { method: 'POST', body: formData });
+          if (!response.ok) throw new Error(`HTTP ${response.status}`);
+          
           const result = await response.json();
-          if (result && result.image) {
+          if (result?.image) {
             // Update the preview image without reload
-            img.src = `/uploads/${encodeURIComponent(result.image)}?t=${Date.now()}`; // cache-bust
+            img.src = `/uploads/${encodeURIComponent(result.image)}?t=${Date.now()}`; // cache-busting
             alert(`Image ${result.image} uploaded for zone ID ${id}.`);
           } else {
             alert('Upload succeeded, but no image info returned.');
@@ -103,7 +113,7 @@ class ZoneEditor extends HTMLElement {
           alert('Failed to upload image.');
         }
       });
-    });
+    });    
 
     this.querySelectorAll('.zone-editor-form').forEach(form => {
       form.addEventListener('submit', async e => {

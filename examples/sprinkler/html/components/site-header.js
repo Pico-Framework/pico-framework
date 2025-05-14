@@ -5,6 +5,7 @@ class SiteHeader extends HTMLElement {
           <a href="#/">Dashboard</a>
           <a href="#/zones">Zones</a>
           <a href="#/programs">Programs</a>
+          <a href="#/log">Log</a>
         </nav>
       `;
     }

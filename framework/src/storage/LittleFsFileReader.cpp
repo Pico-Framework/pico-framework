@@ -9,6 +9,10 @@ bool LittleFsFileReader::open(const std::string &path)
     if (!lfs)
         return false;
     isOpen = (lfs_file_open(lfs, &file, path.c_str(), LFS_O_RDONLY) == 0);
+    if (!isOpen)
+    {
+        return false;
+    }
     return isOpen;
 }
 

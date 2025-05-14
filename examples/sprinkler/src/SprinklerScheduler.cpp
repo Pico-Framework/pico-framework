@@ -99,7 +99,7 @@ void SprinklerScheduler::initRoutes()
         }
     });
 
-    router.addRoute("GET", "/(.*)", [this](HttpRequest &req, HttpResponse &res, const RouteMatch &match) {
+    router.addCatchAllGetRoute([this](HttpRequest &req, HttpResponse &res, const RouteMatch &match) {
         this->router.serveStatic(req, res, match);
     });
     
@@ -132,8 +132,8 @@ void SprinklerScheduler::activateProgram(const SprinklerProgram &program)
 {
     for (const auto &zone : program.zones)
     {
-        Event e(static_cast<uint8_t>(UserNotification::RunZoneStart), &zone, sizeof(zone));
-        AppContext::get<EventManager>()->postEvent(e);
+        AppContext::get<EventManager>()->postEvent(userEvent(UserNotification::ProgramStarted));
+        AppContext::get<EventManager>()->postEvent(userEvent(UserNotification::RunZoneStart));;
     }
 }
 

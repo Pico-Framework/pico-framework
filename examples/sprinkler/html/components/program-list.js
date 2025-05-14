@@ -53,7 +53,9 @@ class ProgramList extends HTMLElement {
         if (confirm(`Delete program "${name}"?`)) {
           try {
             await apiDelete(`/api/v1/programs/${encodeURIComponent(name)}`);
-            location.reload();
+            const card = button.closest('.program-card');
+            card.classList.add('fade-out');
+            setTimeout(() => card.remove(), 400);
           } catch {
             alert('Failed to delete program.');
           }

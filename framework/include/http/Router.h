@@ -84,8 +84,15 @@ public:
                   RouteHandler handler,
                   std::vector<Middleware> middleware = {});
 
-
-    
+    /**
+     * @brief Register a catch-all route with optional middleware.
+     * @param method HTTP method
+     * @param path URL path (can include {params})
+     * @param handler Handler to invoke on match
+     * @param middleware Optional list of middleware specific to this route
+     */
+    void addCatchAllGetRoute(RouteHandler handler, std::vector<Middleware> middleware = {});
+         
     // Optional 2-argument route handler overload for convenience
     inline void addRoute(Router& router,
             const std::string& method,
@@ -167,6 +174,8 @@ public:
 private:
     HttpFileserver fileServer; ///< Internal file server instance
     std::unordered_map<std::string, std::vector<Route>> routes;
+    Route catchallGetRoute;///< Catch-all route for unmatched requests
+    bool hasCatchallGetRoute = false; ///< Flag to indicate if a catch-all route exists
     std::string cached_token; ///< Cached Bearer token
     std::vector<Middleware> globalMiddleware;
     

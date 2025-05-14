@@ -1,6 +1,8 @@
 #pragma once
 #include <stdint.h>
 
+//      * @param userCode User-defined notification code
+
 /**
  * @brief Identifies the source of a notification.
  */
@@ -91,3 +93,4 @@ template<typename Enum, typename... Rest>
 inline constexpr uint32_t eventMask(Enum first, Rest... rest) {
     return eventMask(first) | eventMask(rest...);
 }
+

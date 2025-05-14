@@ -6,6 +6,7 @@
 #include "SprinklerController.h"
 #include "ZoneModel.h"
 #include "framework/AppContext.h"
+#include "Framework_config.h"
 
 void SprinklerController::initRoutes()
 {
@@ -102,6 +103,26 @@ void SprinklerController::initRoutes()
     router.addRoute("POST", "/api/v1/upload", [this](auto &req, auto &res, const auto &)
                     { req.handle_multipart(res); });
 
+    router.addRoute("GET", "/api/v1/image_exists/{name}", [](HttpRequest &req, HttpResponse &res, const RouteMatch &match) {
+        std::string filename = match.getParam("name").value_or("");
+        if(filename.empty()) {
+            res.status(400).json({ {"success", false}, {"message", "Missing filename"} });
+            return;
+        }
+        printf("Checking if file exists: %s\n", filename.c_str());
+        std::string path = std::string(MULTIPART_UPLOAD_PATH) + "/" + filename;
+        printf("Full path: %s\n", path.c_str()); 
+    
+        auto storage = AppContext::get<StorageManager>();
+        if (!storage || !storage->isMounted()) {
+            res.status(500).json({ {"success", false}, {"message", "Storage unavailable"} });
+            return;
+        }
+    
+        bool exists = storage->exists(path);
+        res.json({ {"success", true}, {"exists", exists} });
+    });                
+
 }
 
 void SprinklerController::onEvent(const Event &event)
@@ -115,7 +136,6 @@ void SprinklerController::onEvent(const Event &event)
             case UserNotification::RunZoneStart:
             {
                 const RunZone &runZone = *static_cast<const RunZone *>(event.data);
-
                 zoneModel->startZone(runZone.zone, runZone.duration);
                 break;
             }

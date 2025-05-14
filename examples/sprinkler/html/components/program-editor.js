@@ -70,8 +70,8 @@ class ProgramEditor extends HTMLElement {
       const div = document.createElement('div');
       div.className = 'zone-row';
       div.innerHTML = `
-        <input type="text" name="zone" placeholder="Zone name" />
-        <input type="number" name="duration" placeholder="Duration (s)" />
+        <input type="text" name="zone" placeholder="Flower Bed" />
+        <input type="number" name="duration" value="0" placeholder="Duration (s)" />
         <button type="button" class="remove-zone">✕</button>
       `;
       container.appendChild(div);

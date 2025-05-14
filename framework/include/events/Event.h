@@ -94,6 +94,33 @@ struct Event
     inline SystemNotification systemCode() const {
         return notification.system;
     }
-
-               
+           
 };
+
+// global scope for convenience
+
+/**
+ * @brief Helper to create a user-defined Event with no payload.
+ * 
+ * @tparam Enum The enum type used for user-defined notifications.
+ * @param e The enum value.
+ * @return Event The constructed user event.
+ */
+template<typename Enum>
+inline Event userEvent(Enum e) {
+    return Event(static_cast<uint8_t>(e), nullptr, 0);
+}
+
+/**
+ * @brief Helper to create a user-defined Event with a payload.
+ * 
+ * @tparam Enum The enum type.
+ * @tparam T The data type of the payload.
+ * @param e The enum value.
+ * @param data The data to attach.
+ * @return Event The constructed user event with payload.
+ */
+template<typename Enum, typename T>
+inline Event userEvent(Enum e, const T& data) {
+    return Event(static_cast<uint8_t>(e), &data, sizeof(T));
+}

@@ -18,19 +18,26 @@ class Dashboard extends HTMLElement {
     const list = zones.map(zone => `
       <div class="zone-card ${zone.active ? 'active-zone' : ''}">
         <div class="zone-image">
-          <img 
-            src="/uploads/${encodeURIComponent(zone.image)}" 
-            alt="${zone.name}" 
-            class="zone-img"
-            onerror="this.style.display='none'"
-          />
-          <span class="zone-name-placeholder">${zone.name || 'Unnamed Zone'}</span>
+          ${zone.image ? `
+            <img 
+              src="/uploads/${encodeURIComponent(zone.image)}" 
+              alt="${zone.name}" 
+              class="zone-preview"
+              onerror="this.style.display='none'"
+            />
+          ` : `
+            <span class="zone-name-placeholder">${zone.name || 'Unnamed Zone'}</span>
+          `}
         </div>
         <p class="last-run">Last run: <span>--</span></p>
         <p>GPIO: ${zone.gpioPin}</p>
-        <div class="zone-controls">
-          <button data-action="start" data-name="${zone.name}">Start</button>
-          <button data-action="stop" data-name="${zone.name}">Stop</button>
+
+        <div class="zone">
+          <span class="led ${zone.running ? 'led-on' : 'led-off'}"></span>
+          <span class="zone-name">${zone.name || 'Unnamed Zone'}</span>
+          <button data-name="${zone.name}" class="zone-toggle">
+            ${zone.running ? 'Stop' : 'Start'}
+          </button>
         </div>
       </div>
     `).join('');
@@ -51,15 +58,23 @@ class Dashboard extends HTMLElement {
     this.querySelector('#next-program').textContent = 'Morning Watering';
     this.querySelector('#next-start-time').textContent = '06:00';
   
-    this.querySelectorAll('button[data-action]').forEach(btn => {
+    this.querySelectorAll('button.zone-toggle').forEach(btn => {
       btn.addEventListener('click', async () => {
         const name = btn.dataset.name;
-        const action = btn.dataset.action;
+        const action = btn.textContent.trim().toLowerCase();
         try {
-          await apiPost(`/api/v1/zones/${encodeURIComponent(name)}/${encodeURIComponent(action)}`, {});
-          location.reload(); // until live update added
+          await apiPost(`/api/v1/zones/${name}/${action}`);
+          const running = action === 'start';
+    
+          const card = btn.closest('.zone-card');
+          const led = card.querySelector('.led');
+          const toggle = card.querySelector('.zone-toggle');
+    
+          if (led) led.className = `led ${running ? 'led-on' : 'led-off'}`;
+          if (toggle) toggle.textContent = running ? 'Stop' : 'Start';
+    
         } catch (err) {
-          console.warn('Zone action failed', err);
+          alert(`Failed to ${action} zone`);
         }
       });
     });
