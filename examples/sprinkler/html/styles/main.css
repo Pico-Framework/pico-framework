@@ -23,7 +23,7 @@ main {
     background: var(--bg);
     padding: 1rem 2rem;
     display: flex;
-    gap: 2rem;
+    gap: 1rem;
     box-shadow: inset 2px 2px 5px var(--shadow-dark),
         inset -2px -2px 5px var(--shadow-light);
     border-radius: var(--radius);
@@ -150,33 +150,41 @@ fieldset {
     flex-wrap: wrap;
 }
 
-nav button.active {
+nav button:hover {
+    background: #cfd8e3;
+    /* slightly darker than var(--bg) */
+}
+
+nav button:active {
     background-color: #ddd;
     border-radius: 6px;
+    box-shadow: inset 2px 2px 4px var(--shadow-dark),
+        inset -2px -2px 4px var(--shadow-light);
 }
 
 .zone-image {
     width: 100%;
-    height: 240px; /* or 150px if preferred */
+    height: 240px;
+    /* or 150px if preferred */
     background-color: #d0d4da;
     border-radius: var(--radius);
     overflow: hidden;
     box-shadow: inset 4px 4px 8px var(--shadow-dark),
-                inset -4px -4px 8px var(--shadow-light);
+        inset -4px -4px 8px var(--shadow-light);
     display: flex;
     align-items: center;
     justify-content: center;
-  }
-  
-  .zone-image img.zone-img {
+}
+
+.zone-image img.zone-img {
     width: 100%;
     height: 100%;
     object-fit: cover;
     border-radius: var(--radius);
-  }
+}
 
 
-  .zone-name {  
+.zone-name {
     padding: 0.5rem 1rem;
     border-radius: 6px;
 }
@@ -195,11 +203,11 @@ nav button.active {
 
 .zone-controls {
     display: flex;
-    align-items: center;     
+    align-items: center;
     justify-content: center;
     gap: 0.5rem;
     margin-top: 0.5rem;
-    flex-wrap: nowrap;       
+    flex-wrap: nowrap;
 }
 
 .zone-controls button {
@@ -223,12 +231,14 @@ nav button.active {
 
 .zone-preview {
     width: 100%;
-    height: 240px; /* fixed height — roughly double */
-    object-fit: cover; /* maintains aspect ratio with smart cropping */
+    height: 240px;
+    /* fixed height — roughly double */
+    object-fit: cover;
+    /* maintains aspect ratio with smart cropping */
     margin: 0.5rem 0;
     border-radius: var(--radius);
     box-shadow: 4px 4px 8px var(--shadow-dark),
-                -4px -4px 8px var(--shadow-light);
+        -4px -4px 8px var(--shadow-light);
 }
 
 .upload-label {
@@ -259,7 +269,7 @@ nav button.active {
     background: var(--bg);
     border-radius: var(--radius);
     box-shadow: inset 2px 2px 5px var(--shadow-dark),
-                inset -2px -2px 5px var(--shadow-light);
+        inset -2px -2px 5px var(--shadow-light);
 }
 
 .zone-card.active-zone {
@@ -280,30 +290,38 @@ nav button.active {
     display: inline-block;
     margin-right: 6px;
     vertical-align: middle;
-  }
-  
-  .led-on {
+}
+
+.led-on {
     background-color: #4caf50;
     box-shadow: 0 0 6px #4caf50;
     animation: pulse 1s infinite;
-  }
-  
-  .led-off {
-    background-color: #ccc;
-  }
-  
-  @keyframes pulse {
-    0% { box-shadow: 0 0 6px #4caf50; }
-    50% { box-shadow: 0 0 12px #4caf50; }
-    100% { box-shadow: 0 0 6px #4caf50; }
-  }
+}
 
-  .program-card.fade-out {
+.led-off {
+    background-color: #ccc;
+}
+
+@keyframes pulse {
+    0% {
+        box-shadow: 0 0 6px #4caf50;
+    }
+
+    50% {
+        box-shadow: 0 0 12px #4caf50;
+    }
+
+    100% {
+        box-shadow: 0 0 6px #4caf50;
+    }
+}
+
+.program-card.fade-out {
     opacity: 0;
     transition: opacity 0.4s ease;
-  }
-  
-  .log-output {
+}
+
+.log-output {
     background: #f4f6f9;
     color: #333;
     padding: 1em;
@@ -312,9 +330,33 @@ nav button.active {
     font-family: 'Courier New', monospace;
     border-radius: var(--radius);
     box-shadow: inset 3px 3px 8px var(--shadow-dark),
-                inset -3px -3px 8px var(--shadow-light);
+        inset -3px -3px 8px var(--shadow-light);
     white-space: pre-wrap;
     font-size: 0.9rem;
 }
 
-   
+nav.site-header button {
+    all: unset; /* Remove all native button styling */
+    font-family: inherit;
+    font-size: 1rem;
+    font-weight: bold;
+    color: var(--accent);
+    padding: 0.5rem 1rem;
+    cursor: pointer;
+    border-radius: var(--radius);
+    transition: background 0.2s ease, box-shadow 0.1s ease;
+  }
+  
+  nav.site-header button:hover {
+    background: #c3ccd7; /* subtle background on hover */
+  }
+  
+  nav.site-header button:active {
+    box-shadow: inset 2px 2px 4px var(--shadow-dark),
+                inset -2px -2px 4px var(--shadow-light);
+  }
+  
+  nav.site-header button.active {
+    background-color: #ddd;
+  }
+  

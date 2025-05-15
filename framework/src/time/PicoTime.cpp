@@ -128,6 +128,15 @@ void PicoTime::print(const struct tm *t)
     printf("%s\n", buf);
 }
 
+std::string PicoTime::formatIso8601(time_t t)
+{
+    struct tm tm;
+    localtime_r(&t, &tm);
+    char buf[32];
+    strftime(buf, sizeof(buf), "%Y-%m-%dT%H:%M:%S", &tm);
+    return std::string(buf);
+}
+
 /// @copydoc PicoTime::print(const datetime_t*)
 #if defined(PICO_RP2040)
 void PicoTime::print(const datetime_t *dt)

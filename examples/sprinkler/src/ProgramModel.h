@@ -121,7 +121,8 @@ public:
     void remove(const std::string &name);
 
     std::vector<ProgramEvent> flattenScheduleForDay(Day day) const;
-    const ProgramEvent *getNextEvent(uint32_t now) const;
+    const ProgramEvent *getNextEventForToday(uint32_t now) const;
+    const ProgramEvent* getNextEvent(uint32_t now) const;
     bool isEventDue(uint32_t now) const;
 
     void rebuildNameIndex();

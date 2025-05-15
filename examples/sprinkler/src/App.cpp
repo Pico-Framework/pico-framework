@@ -57,13 +57,6 @@ void App::onStart()
     scheduler.start();
     logController.start();
 
-    // Post initial scheduling event
-    Event startupEvent;
-    startupEvent.notification.kind = NotificationKind::User;
-    startupEvent.notification.user_code = static_cast<uintptr_t>(UserNotification::SchedulerCheck); 
-    AppContext::get<EventManager>()->postEvent(startupEvent);
-
-
     EventManager *eventManager = AppContext::get<EventManager>();
     eventManager->subscribe(
         eventMask(

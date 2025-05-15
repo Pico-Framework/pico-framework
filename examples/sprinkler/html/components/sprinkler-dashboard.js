@@ -16,7 +16,7 @@ class Dashboard extends HTMLElement {
 
   renderZones(zones) {
     const list = zones.map(zone => `
-      <div class="zone-card ${zone.active ? 'active-zone' : ''}">
+      <div class="zone-card ${zone.active ? 'active-zone' : ''}" data-name="${zone.name}">
         <div class="zone-image">
           ${zone.image ? `
             <img 
@@ -29,7 +29,7 @@ class Dashboard extends HTMLElement {
             <span class="zone-name-placeholder">${zone.name || 'Unnamed Zone'}</span>
           `}
         </div>
-        <p class="last-run">Last run: <span>--</span></p>
+        <p class="last-status">Last event: <span>--</span></p>
         <p>GPIO: ${zone.gpioPin}</p>
 
         <div class="zone">
@@ -54,10 +54,6 @@ class Dashboard extends HTMLElement {
       </section>
     `;
   
-    // Safe now that #next-program exists
-    this.querySelector('#next-program').textContent = 'Morning Watering';
-    this.querySelector('#next-start-time').textContent = '06:00';
-  
     this.querySelectorAll('button.zone-toggle').forEach(btn => {
       btn.addEventListener('click', async () => {
         const name = btn.dataset.name;
@@ -76,16 +72,53 @@ class Dashboard extends HTMLElement {
         } catch (err) {
           alert(`Failed to ${action} zone`);
         }
+        try {
+          const logSummary = await apiGet('/api/v1/logs/summaryJson'); 
+        
+          Object.entries(logSummary.zones || {}).forEach(([zoneName, data]) => {
+            const card = this.querySelector(`.zone-card[data-name="${zoneName}"]`);
+            if (!card) return;
+          
+            const statusEl = card.querySelector('.last-status span'); 
+          
+            if (statusEl && data.time && data.status) {
+              const ts = new Date(data.time);
+              const formatted = `${data.status} at ${ts.getFullYear()}-${(ts.getMonth() + 1).toString().padStart(2, '0')}-${ts.getDate().toString().padStart(2, '0')} ${ts.getHours().toString().padStart(2, '0')}:${ts.getMinutes().toString().padStart(2, '0')}`;
+              statusEl.textContent = formatted;
+            }
+          });
+        } catch (err) {
+          console.warn('Failed to fetch log summary:', err);
+        }
       });
     });
+    this.fetchNextSchedule();
+  }
+
+  async fetchNextSchedule() {
+    try {
+      const programEl = this.querySelector('#next-program');
+      const timeEl = this.querySelector('#next-start-time');
+  
+      const data = await apiGet('/api/v1/next-schedule');
+      if (data.status === 'scheduled') {
+        const ts = new Date(data.time);
+        const timeString = ts.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        programEl.textContent = data.name;
+        timeEl.textContent = timeString;
+      } else {
+        programEl.textContent = 'None';
+        timeEl.textContent = '--:--';
+      }
+    } catch (err) {
+      console.error('Failed to fetch next schedule:', err);
+      const programEl = this.querySelector('#next-program');
+      const timeEl = this.querySelector('#next-start-time');
+      if (programEl) programEl.textContent = 'Error';
+      if (timeEl) timeEl.textContent = '--:--';
+    }
   }
   
 } 
-const programEl = document.getElementById('next-program');
-if (programEl) programEl.textContent = 'Morning Watering';
-
-const timeEl = document.getElementById('next-start-time');
-if (timeEl) timeEl.textContent = '06:00';
-
 
 customElements.define('sprinkler-dashboard', Dashboard);

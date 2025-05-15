@@ -7,6 +7,8 @@
 #include "ZoneModel.h"
 #include "framework/AppContext.h"
 #include "Framework_config.h"
+#include "events/EventManager.h"
+#include "events/Event.h"
 
 void SprinklerController::initRoutes()
 {
@@ -135,7 +137,8 @@ void SprinklerController::onEvent(const Event &event)
             {
             case UserNotification::RunZoneStart:
             {
-                const RunZone &runZone = *static_cast<const RunZone *>(event.data);
+                printf("[SprinklerController] RunZoneStart event\n");
+                const RunZone* runZone = *static_cast<const RunZone *>(event.data);
                 zoneModel->startZone(runZone.zone, runZone.duration);
                 break;
             }
@@ -164,9 +167,15 @@ void SprinklerController::onEvent(const Event &event)
 
 void SprinklerController::onStart()
 {
-        // This method is called when the controller is started.
-        // You can perform any initialization or setup here.
-        printf("\n[SprinklerController] Started\n");
+    // This method is called when the controller is started.
+    // You can perform any initialization or setup here.
+    printf("\n[SprinklerController] Started\n");
+    auto *eventManager = AppContext::get<EventManager>();
+    eventManager->subscribe(eventMask(UserNotification::RunZoneStart, 
+                                        UserNotification::RunZoneStop,
+                                        UserNotification::RunZoneStarted, 
+                                        UserNotification::RunZoneCompleted),
+                                this);
 }
 
 void SprinklerController::poll()

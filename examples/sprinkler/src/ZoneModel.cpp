@@ -30,14 +30,15 @@ bool ZoneModel::startZone(const std::string& name) {
     return true;
 }
 
-bool ZoneModel::startZone(const std::string& name, uint32_t durationSeconds) {
+bool ZoneModel::startZone(const std::string* name, uint32_t durationSeconds) {
+    printf("[ZoneModel] Starting zone '%s' for %u seconds\n", name->c_str(), durationSeconds);
     if (!startZone(name)) return false;
     AppContext::get<EventManager>()->postEvent(userEvent(UserNotification::RunZoneStarted, name));
-
+    printf("[ZoneModel] Scheduling auto-stop for zone '%s' in %u seconds\n", name.c_str(), durationSeconds);
     time_t when = time(NULL) + durationSeconds;
     AppContext::get<TimerService>()->scheduleCallbackAt(when, [name, durationSeconds, this]() {
         this->stopZone(name);
-        printf("Zone '%s' auto-stopped after %u seconds\n", name.c_str(), durationSeconds);
+        printf("[ZoneModel] Zone '%s' auto-stopped after %u seconds\n", name.c_str(), durationSeconds);
         AppContext::get<EventManager>()->postEvent(userEvent(UserNotification::RunZoneCompleted, name));
     });
 

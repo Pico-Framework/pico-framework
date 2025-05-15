@@ -1,15 +1,16 @@
 #pragma once
 
 enum class UserNotification : uint8_t {
-    SchedulerCheck = 0x01,
-    RunZoneStart = 0x02,
-    RunZoneStop = 0x03,
-    RunZoneStarted = 0x04,
-    ZoneStarted = 0x05,
-    ZoneStopped = 0x06,
-    RunZoneCompleted = 0x07,
-    ProgramStarted = 0x08,
-    ProgramCompleted = 0x09,
+  
+    RunZoneStart = 0x01,
+    RunZoneStop = 0x02,
+    RunZoneStarted = 0x03,
+    ZoneStarted = 0x04,
+    ZoneStopped = 0x05,
+    RunZoneCompleted = 0x06,
+    ProgramStarted = 0x07,
+    ProgramCompleted = 0x08,
+    RunProgram = 0x09
 };
 
 

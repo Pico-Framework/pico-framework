@@ -110,7 +110,7 @@ public:
         time_t t = static_cast<time_t>(timestamp);
         struct tm tm;
         localtime_r(&t, &tm);
-        return TimeOfDay{ static_cast<uint8_t>(tm.tm_hour), static_cast<uint8_t>(tm.tm_min) };
+        return TimeOfDay{ static_cast<uint8_t>(tm.tm_hour), static_cast<uint8_t>(tm.tm_min), static_cast<uint8_t>(tm.tm_sec) };
     }
     
     static DaysOfWeek dayOfWeekBitmask(uint32_t timestamp) {
@@ -124,4 +124,7 @@ public:
         uint8_t weekday = (days + 4) % 7;  // Sunday = 0
         return static_cast<Day>(1u << weekday);
     }
+
+    static std::string formatIso8601(time_t t);  // e.g., "2025-05-15T06:00:00"
+
 };

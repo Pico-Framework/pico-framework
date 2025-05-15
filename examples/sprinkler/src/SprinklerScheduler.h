@@ -11,6 +11,7 @@
 #pragma once
 
 #include "framework/FrameworkController.h"
+#include <queue>
 #include "ProgramModel.h"
 #include "time/PicoTime.h"
 #include "events/Event.h"
@@ -37,25 +38,31 @@ public:
         this->programModel = pm;
     }
 
+    /**
+     * @brief Return the next scheduled program name and timestamp, or null if none.
+     * @return std::optional<std::pair<std::string, time_t>>
+     */
+    std::optional<std::pair<std::string, time_t>> getNextScheduledProgramToday() const;
+    std::optional<std::pair<std::string, time_t>> getNextScheduledProgram() const;
+
 private:
-    ProgramModel* programModel = nullptr;
+    ProgramModel *programModel = nullptr;
     uint32_t lastCheckMinute = 0;
     std::string runningProgramName;
-    int pendingZones = 0;
-
+    std::queue<const RunZone*> zoneQueue;
 
     /**
-     * @brief Check all programs and activate those scheduled to start now.
+     * @brief Check all programs and schedule their start times.
      */
-    void checkPrograms();
+    void scheduleAllPrograms();
+    void rescheduleAll();
 
     /**
      * @brief Trigger events for the given program and its zones.
      * @param program Program to activate
      */
-    void activateProgram(const SprinklerProgram &program);
+    void activateProgram(const SprinklerProgram* program);
 
     void onEvent(const Event &e) override;
 
-    void checkSchedule();
 };

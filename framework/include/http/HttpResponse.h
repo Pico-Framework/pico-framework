@@ -217,9 +217,6 @@ public:
     HttpResponse &json(const std::string &jsonString);
     HttpResponse &json(const nlohmann::json &jsonObj);
     HttpResponse &jsonFormatted(const nlohmann::json &jsonObj);
-    inline HttpResponse &json(std::initializer_list<nlohmann::json::value_type> init) {
-        return json(nlohmann::json(init));
-    }
 
     /**
      * @brief Send a plain text string with correct content type.

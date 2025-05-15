@@ -19,6 +19,9 @@ void LogController::initRoutes() {
     router.addRoute("GET", "/api/v1/logs/summary", [this](HttpRequest& req, HttpResponse& res, const RouteMatch&) {
         handleSummary(req, res);
     });
+    router.addRoute("GET", "/api/v1/logs/summaryJson", [this](HttpRequest& req, HttpResponse& res, const RouteMatch&) {
+        handleSummaryJson(req, res);
+    });
 }   
 
 void LogController::onStart()
@@ -33,7 +36,10 @@ void LogController::onStart()
             UserNotification::RunZoneStart,
             UserNotification::RunZoneCompleted,
             UserNotification::ZoneStarted, // manually started
-            UserNotification::ZoneStopped), // manually stopped,
+            UserNotification::ZoneStopped, // manually stopped,
+            UserNotification::RunZoneStarted,
+            UserNotification::RunZoneCompleted,
+            UserNotification::RunProgram),
         this);       
     AppContext::get<Logger>()->enableFileLogging("log.txt");
 }
@@ -47,34 +53,44 @@ void LogController::onEvent(const Event& event) {
 
     switch (static_cast<UserNotification>(event.userCode())) {
         case UserNotification::ProgramStarted: {
-            const char* name = static_cast<const char*>(event.data);
-            snprintf(msg, sizeof(msg), "Program \"%s\" started", name);
+            const std::string* name = static_cast<const std::string*>(event.data);
+            snprintf(msg, sizeof(msg), "[ProgramStarted] Program \"%s\" started", name);
             break;
         }
         case UserNotification::ProgramCompleted: {
-            const char* name = static_cast<const char*>(event.data);
-            snprintf(msg, sizeof(msg), "Program \"%s\" completed", name);
+            const std::string* name = static_cast<const std::string*>(event.data);
+            snprintf(msg, sizeof(msg), "[ProgramCompleted] Program \"%s\" completed", name);
             break;
         }
         case UserNotification::RunZoneStart: {
-            const std::string* name = static_cast<const std::string*>(event.data);
-            snprintf(msg, sizeof(msg), "Zone \"%s\" begun", name->c_str());
+            const Zone* zone = static_cast<const Zone*>(event.data);
+            snprintf(msg, sizeof(msg), "[RunZoneStart] Zone \"%s\" begun", zone->name.c_str());
             break;
         }
         case UserNotification::RunZoneCompleted: {
             const std::string* name = static_cast<const std::string*>(event.data);
-            snprintf(msg, sizeof(msg), "Zone \"%s\" completed", name->c_str());
+            snprintf(msg, sizeof(msg), "[RunZoneStartCompleted] Zone \"%s\" completed", name->c_str());
             break;
         }
         case UserNotification::ZoneStarted: {
             const std::string* name = static_cast<const std::string*>(event.data);
-            snprintf(msg, sizeof(msg), "Zone \"%s\" started", name->c_str());
+            snprintf(msg, sizeof(msg), "[RunZoneStarted] Zone \"%s\" started", name->c_str());
             break;
         }
         case UserNotification::ZoneStopped: {
             const std::string* name = static_cast<const std::string*>(event.data);
-            snprintf(msg, sizeof(msg), "Zone \"%s\" stopped", name->c_str());
+            snprintf(msg, sizeof(msg), "[ZoneStopped] Zone \"%s\" stopped", name->c_str());
             break;
+        }
+        case UserNotification::RunZoneStarted: {
+            const RunZone* zone = static_cast<const RunZone*>(event.data);
+            snprintf(msg, sizeof(msg), "[RunZoneStarted] RunZone \"%s\" started for %d seconds", zone->zone.c_str(), zone->duration);
+            break;
+        }
+        case UserNotification::RunProgram: {
+            const std::string* name = static_cast<const std::string*>(event.data);
+            snprintf(msg, sizeof(msg), "[RunProgram] Run program \"%s\"", name->c_str());
+            break;  
         }
         default:
             return;

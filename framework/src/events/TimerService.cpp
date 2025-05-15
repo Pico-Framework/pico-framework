@@ -118,6 +118,13 @@ void TimerService::scheduleAt(time_t unixTime, const Event &event, const std::st
     if (handle)
     {
         withLock([&]() {
+            // Cancel and delete old timer if it exists
+            auto it = scheduledJobs.find(jobId);
+            if (it != scheduledJobs.end()) {
+                xTimerStop(it->second, 0);
+                xTimerDelete(it->second, 0);
+                scheduledJobs.erase(it);
+            }
             scheduledJobs[jobId] = handle;
         });
         xTimerStart(handle, 0);

@@ -17,15 +17,16 @@ void SprinklerScheduler::initRoutes()
 {
     // This function is called by the base class to initialize HTTP routes.
     printf("[SprinklerScheduler] Initializing routes\n");
-    router.addRoute("GET", "/api/v1/programs", [this](HttpRequest &req, HttpResponse &res, const RouteMatch &) {
+    router.addRoute("GET", "/api/v1/programs", [this](HttpRequest &req, HttpResponse &res, const RouteMatch &)
+                    {
         json arr = json::array();
         for (const auto& prog : programModel->getPrograms()) {
             arr.push_back(prog.toJson());
         }
-        res.json(arr);
-    });
-    
-    router.addRoute("GET", "/api/v1/programs/{name}", [this](HttpRequest &req, HttpResponse &res, const RouteMatch &match) {
+        res.json(arr); });
+
+    router.addRoute("GET", "/api/v1/programs/{name}", [this](HttpRequest &req, HttpResponse &res, const RouteMatch &match)
+                    {
         auto name = match.getParam("name");
         if (name.has_value()) {
             const SprinklerProgram* prog = programModel->get(name.value());
@@ -34,14 +35,14 @@ void SprinklerScheduler::initRoutes()
                 return;
             }
         }
-        res.status(404).text("Program not found");
-    });
-    
-    router.addRoute("POST", "/api/v1/programs", [this](HttpRequest &req, HttpResponse &res, const RouteMatch &) {
+        res.status(404).json({ { "success", false }, { "message", "Program not found" }}); });
+
+    router.addRoute("POST", "/api/v1/programs", [this](HttpRequest &req, HttpResponse &res, const RouteMatch &)
+                    {
         auto json = req.json();
     
         if (!json.contains("name") || !json.contains("start") || !json.contains("days") || !json.contains("zones")) {
-            res.status(400).text("Missing required fields");
+            res.status(400).json({ { "success", false }, { "message", "Missing required fields" }});
             return;
         }
     
@@ -57,20 +58,21 @@ void SprinklerScheduler::initRoutes()
         }
     
         programModel->saveOrUpdate(prog);
-        res.text("Program saved");
-    });
-    
-    router.addRoute("PUT", "/api/v1/programs/{name}", [this](HttpRequest &req, HttpResponse &res, const RouteMatch &match) {
+        rescheduleAll();
+        res.status(200).json({ { "success", true }, { "message", "Program saved" }}); });
+
+    router.addRoute("PUT", "/api/v1/programs/{name}", [this](HttpRequest &req, HttpResponse &res, const RouteMatch &match)
+                    {
         auto name = match.getParam("name");
         auto json = req.json();
     
         if (!name.has_value()) {
-            res.status(400).text("Missing program name");
+            res.status(400).json({ { "success", false }, { "message", "Missing program name" }});
             return;
         }
     
         if (!json.contains("start") || !json.contains("days") || !json.contains("zones")) {
-            res.status(400).text("Missing required fields");
+            res.status(400).json({ { "success", false }, { "message", "Missing required fields" }});
             return;
         }
     
@@ -86,54 +88,120 @@ void SprinklerScheduler::initRoutes()
         }
     
         programModel->saveOrUpdate(prog);
-        res.text("Program updated");
-    });
-   
-    router.addRoute("DELETE", "/api/v1/programs/{name}", [this](HttpRequest &req, HttpResponse &res, const RouteMatch &match) {
+        rescheduleAll();
+        res.status(200).json({ { "success", true }, { "message", "Program updated" }}); });
+
+    router.addRoute("DELETE", "/api/v1/programs/{name}", [this](HttpRequest &req, HttpResponse &res, const RouteMatch &match)
+                    {
         auto name = match.getParam("name");
         if (name.has_value()) {
             programModel->remove(name.value());
-            res.text("Program deleted");
+            rescheduleAll();
+            res.status(200).json({ { "success", true }, { "message", "Program deleted" }});
         } else {
-            res.status(400).text("Missing program name");
-        }
-    });
+            res.status(400).json({ { "success", false }, { "message", "Missing program name" }});
+        } });
 
-    router.addCatchAllGetRoute([this](HttpRequest &req, HttpResponse &res, const RouteMatch &match) {
-        this->router.serveStatic(req, res, match);
+    router.addRoute("GET", "/api/v1/next-schedule", [this](HttpRequest &req, HttpResponse &res, const RouteMatch &)
+                    {
+        auto next = getNextScheduledProgram();
+        if (next.has_value()) {
+            res.json({
+                {"status", "scheduled"},
+                {"name", next->first},
+                {"time", PicoTime::formatIso8601(next->second)}
+            });
+        } else {
+            res.json({
+                {"status", "none"}
+            });
+        } });
+
+    // Test route to schedule a program for 15 seconds from now    
+    router.addRoute("GET", "/api/v1/test-program", [this](HttpRequest &req, HttpResponse &res, const RouteMatch &) {
+        SprinklerProgram test;
+        test.name = "TestRun";
+        test.zones.push_back({ "Front Lawn", 5 });
+        test.days = 0x7F;
+    
+        // Schedule for the next full minute
+        struct tm t = PicoTime::nowTm();
+        t.tm_sec = 0;
+        t.tm_min += 1;
+        time_t ts = mktime(&t);
+        test.start = PicoTime::toTimeOfDay(ts);
+    
+        programModel->saveOrUpdate(test);
+        rescheduleAll();
+    
+        char buf[64];
+        strftime(buf, sizeof(buf), "%H:%M:%S", &t);
+        res.json({ {"scheduled", buf}, {"success", true} });
     });
     
+
+    router.addCatchAllGetRoute([this](HttpRequest &req, HttpResponse &res, const RouteMatch &match)
+                               { this->router.serveStatic(req, res, match); });
 }
 
-void SprinklerScheduler::checkPrograms()
+void SprinklerScheduler::rescheduleAll()
 {
-    auto now = PicoTime::now();
-    auto tod = PicoTime::toTimeOfDay(now);
-    uint32_t today = PicoTime::dayOfWeekBitmask(now);
+    // No cancel needed — jobId reuse overwrites
+    scheduleAllPrograms();
+}
 
-    // Only run once per actual minute
-    uint32_t currentMinute = tod.hour * 60 + tod.minute;
-    if (currentMinute == lastCheckMinute)
-        return;
-    lastCheckMinute = currentMinute;
 
-    for (const auto &program : programModel->getPrograms())
+void SprinklerScheduler::scheduleAllPrograms()
+{
+    if (!programModel) return;
+
+    auto& timerService = *AppContext::get<TimerService>();
+    time_t now = PicoTime::now();
+
+    for (const auto& program : programModel->getPrograms())
     {
-        if ((program.days & today) == 0)
-            continue;
-        if (program.start.hour == tod.hour && program.start.minute == tod.minute)
+        for (int i = 0; i < 7; ++i)
         {
-            activateProgram(program);
+            Day day = static_cast<Day>((static_cast<int>(PicoTime::dayOfWeek(now)) + i) % 7);
+            if (!(program.days & static_cast<uint8_t>(day)))
+                continue;
+
+            struct tm t = PicoTime::nowTm();
+            t.tm_hour = program.start.hour;
+            t.tm_min = program.start.minute;
+            t.tm_sec = 0;
+            t.tm_mday += i;
+
+            time_t ts = mktime(&t);
+            if (ts > now)
+            {
+                Event e(static_cast<uint8_t>(UserNotification::RunProgram), &program.name, sizeof(program.name));
+                printf("[Scheduler] Scheduling program: %s at %s\n", program.name.c_str(), PicoTime::formatIso8601(ts).c_str());
+                timerService.scheduleAt(ts, e, program.name);  // use name as job ID
+                break;
+            }
         }
     }
 }
 
-void SprinklerScheduler::activateProgram(const SprinklerProgram &program)
+void SprinklerScheduler::activateProgram(const SprinklerProgram* program)
 {
-    for (const auto &zone : program.zones)
+    runningProgramName = program->name;
+
+    // Load zones into queue
+    while (!zoneQueue.empty()) zoneQueue.pop();
+    for (const auto &zone : program->zones)
+        zoneQueue.push(&zone);
+
+    // Post ProgramStarted once
+    AppContext::get<EventManager>()->postEvent(userEvent(UserNotification::ProgramStarted, program->name));
+
+    // Start first zone
+    if (!zoneQueue.empty())
     {
-        AppContext::get<EventManager>()->postEvent(userEvent(UserNotification::ProgramStarted));
-        AppContext::get<EventManager>()->postEvent(userEvent(UserNotification::RunZoneStart));;
+        const RunZone* next = zoneQueue.front();
+        Event e(static_cast<uint8_t>(UserNotification::RunZoneStart), next, sizeof(RunZone));
+        AppContext::get<EventManager>()->postEvent(e);
     }
 }
 
@@ -143,9 +211,6 @@ void SprinklerScheduler::onEvent(const Event &evt)
 
         switch (static_cast<UserNotification>(evt.notification.user_code))
         {
-        case UserNotification::SchedulerCheck:
-            checkSchedule();
-            break;
 
         case UserNotification::RunZoneStart:
             // Handle RunZoneStart event
@@ -164,19 +229,39 @@ void SprinklerScheduler::onEvent(const Event &evt)
             break;
 
         case UserNotification::RunZoneCompleted:
-            if (--pendingZones <= 0) {
-                Event e(static_cast<uint8_t>(UserNotification::ProgramCompleted));
+        {
+            if (!zoneQueue.empty()) zoneQueue.pop();
+        
+            if (!zoneQueue.empty())
+            {
+                const RunZone* next = zoneQueue.front();
+                Event e(static_cast<uint8_t>(UserNotification::RunZoneStart), next, sizeof(RunZone));
                 AppContext::get<EventManager>()->postEvent(e);
             }
+            else
+            {
+                AppContext::get<EventManager>()->postEvent(userEvent(UserNotification::ProgramCompleted, runningProgramName));
+                runningProgramName.clear();
+            }
             break;
-
+        }
+            
+        case UserNotification::RunProgram:
+        {
+            const SprinklerProgram *prog = static_cast<const SprinklerProgram *>(evt.data);
+            if (prog)
+            {
+                printf("[Scheduler] Activating program: %s\n", prog->name.c_str());
+                activateProgram(prog);
+            }
+            break;
+        }
         case UserNotification::ProgramStarted:
             // Handle ProgramStarted event
             break;
 
         case UserNotification::ProgramCompleted:
             // Handle ProgramCompleted event
-            checkSchedule();
             break;
 
         default:
@@ -184,58 +269,69 @@ void SprinklerScheduler::onEvent(const Event &evt)
         }
 }
 
-void SprinklerScheduler::checkSchedule()
-{
-    if (!programModel)
-        return;
-
-    static time_t lastCheckTime = 0;
-    time_t now = PicoTime::now();
-    Day currentDay = PicoTime::dayOfWeek(now);
-    TimeOfDay currentTime = PicoTime::toTimeOfDay(now);
-
-    auto programs = programModel->all();
-    for (const auto &progJson : programs)
-    {
-        if (!progJson.contains("name") || !progJson.contains("start") || !progJson.contains("zones"))
-            continue;
-
-        std::string name = progJson["name"];
-        TimeOfDay startTime = TimeOfDay::fromString(progJson["start"].get<std::string>().c_str());
-
-        // Check if today is in the days list
-        if (progJson.contains("days"))
-        {
-            const auto &days = progJson["days"];
-            if (std::find(days.begin(), days.end(), currentDay) == days.end())
-                continue;
-        }
-
-        // Skip if current time hasn't reached startTime
-        if (currentTime < startTime)
-            continue;
-
-        // Optional: check if this program already ran today (not implemented yet)
-        runningProgramName = name;
-        pendingZones = progJson["zones"].size();
-
-        // Post events for each zone
-        for (const auto &zoneEntry : progJson["zones"])
-        {
-            const RunZone run = zoneEntry.get<RunZone>();
-            Event e(static_cast<uint8_t>(UserNotification::RunZoneStart), &run, sizeof(run));
-            AppContext::get<EventManager>()->postEvent(e);
-        }
-    }
-}
-
 void SprinklerScheduler::onStart()
 {
     printf("\n[SprinklerScheduler] Started\n");
+    auto *eventManager = AppContext::get<EventManager>();
+    eventManager->subscribe(eventMask(UserNotification::RunZoneStart, UserNotification::RunZoneStop,
+                                       UserNotification::RunZoneStarted, UserNotification::RunZoneCompleted,
+                                       UserNotification::ProgramStarted, UserNotification::ProgramCompleted,
+                                       UserNotification::RunProgram),
+                             this);
+    while (!zoneQueue.empty()) zoneQueue.pop();
+    runningProgramName.clear();
+    scheduleAllPrograms();
 }
 
 void SprinklerScheduler::poll()
 {
     // Polling logic here
     vTaskDelay(pdMS_TO_TICKS(10));
+}
+
+std::optional<std::pair<std::string, time_t>> SprinklerScheduler::getNextScheduledProgramToday() const
+{
+    if (!programModel)
+        return std::nullopt;
+
+    uint32_t now = PicoTime::now();
+    const ProgramEvent *next = programModel->getNextEvent(now);
+    if (!next)
+        return std::nullopt;
+
+    struct tm t = PicoTime::nowTm();
+    t.tm_hour = next->start.hour;
+    t.tm_min = next->start.minute;
+    t.tm_sec = 0;
+    time_t ts = mktime(&t);
+    return std::make_pair(next->programName, ts);
+}
+
+std::optional<std::pair<std::string, time_t>> SprinklerScheduler::getNextScheduledProgram() const
+{
+    if (!programModel)
+        return std::nullopt;
+
+    time_t now = PicoTime::now();
+    const ProgramEvent *next = programModel->getNextEvent(now);
+    if (!next)
+        return std::nullopt;
+
+    for (int i = 0; i < 7; ++i)
+    {
+        Day day = static_cast<Day>((static_cast<int>(PicoTime::dayOfWeek(now)) + i) % 7);
+        if (!(programModel->get(next->programName)->days & static_cast<uint8_t>(day)))
+            continue;
+
+        struct tm t = PicoTime::nowTm();
+        t.tm_hour = next->start.hour;
+        t.tm_min = next->start.minute;
+        t.tm_sec = 0;
+        t.tm_mday += i;
+        time_t ts = mktime(&t);
+        if (ts > now)
+            return std::make_pair(next->programName, ts);
+    }
+
+    return std::nullopt;
 }

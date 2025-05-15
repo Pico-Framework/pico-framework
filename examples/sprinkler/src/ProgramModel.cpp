@@ -79,7 +79,7 @@ std::vector<ProgramEvent> ProgramModel::flattenScheduleForDay(Day day) const
     return events;
 }
 
-const ProgramEvent* ProgramModel::getNextEvent(uint32_t now) const {
+const ProgramEvent* ProgramModel::getNextEventForToday(uint32_t now) const {
     static std::vector<ProgramEvent> events;
     static uint32_t cachedDay = 0xFF;
 
@@ -99,6 +99,44 @@ const ProgramEvent* ProgramModel::getNextEvent(uint32_t now) const {
     }
     return nullptr;
 }
+
+const ProgramEvent* ProgramModel::getNextEvent(uint32_t now) const {
+    static std::vector<ProgramEvent> cachedEvents;
+    static uint32_t lastGenerated = 0;
+    static time_t lastNow = 0;
+
+    if (cachedEvents.empty() || now < lastNow || now > lastNow + 60) {
+        cachedEvents.clear();
+        for (int i = 0; i < 7; ++i) {
+            Day day = static_cast<Day>((static_cast<int>(PicoTime::dayOfWeek(now)) + i) % 7);
+            auto daily = flattenScheduleForDay(day);
+
+            for (const auto& e : daily) {
+                struct tm t = PicoTime::nowTm();
+                t.tm_hour = e.start.hour;
+                t.tm_min = e.start.minute;
+                t.tm_sec = 0;
+                t.tm_mday += i;  // Advance day by offset
+                time_t when = mktime(&t);
+                if (when > static_cast<time_t>(now)) {
+                    ProgramEvent future = e;
+                    cachedEvents.push_back(future);
+                }
+            }
+        }
+        std::sort(cachedEvents.begin(), cachedEvents.end(), [&](const ProgramEvent& a, const ProgramEvent& b) {
+            struct tm ta = PicoTime::nowTm();
+            struct tm tb = ta;
+            ta.tm_hour = a.start.hour; ta.tm_min = a.start.minute; ta.tm_sec = 0;
+            tb.tm_hour = b.start.hour; tb.tm_min = b.start.minute; tb.tm_sec = 0;
+            return mktime(&ta) < mktime(&tb);
+        });
+        lastNow = now;
+    }
+
+    return cachedEvents.empty() ? nullptr : &cachedEvents[0];
+}
+
 
 bool ProgramModel::isEventDue(uint32_t now) const {
     TimeOfDay current = PicoTime::toTimeOfDay(now);
