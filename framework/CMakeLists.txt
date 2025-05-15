@@ -116,6 +116,10 @@ target_sources(pico_framework PRIVATE
 
     #Storage - littlefs or fatfs are only included conditionally
     src/storage/JsonService.cpp
+
+    #json
+    src/json/json.cpp
+    src/json/NlohmannJsonImpl.cpp
 )
 
 #------------------------------------------------------------------------------
