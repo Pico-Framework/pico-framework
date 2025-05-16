@@ -1,4 +1,5 @@
 import { apiGet, apiPut } from '../utils/api.js';
+import { utcToLocalTimeString } from '../utils/time.js';
 
 class ProgramEditor extends HTMLElement {
   connectedCallback() {
@@ -52,7 +53,7 @@ class ProgramEditor extends HTMLElement {
           <input type="text" name="name" value="${program.name}" />
 
           <label>Start Time</label>
-          <input type="time" name="start" value="${program.start}" />
+          <input type="time" name="start" value="${utcToLocalTimeString(program.start)}" />
 
           <fieldset><legend>Days</legend>${daysCheckboxes}</fieldset>
 
@@ -88,7 +89,8 @@ class ProgramEditor extends HTMLElement {
       const formData = new FormData(form);
     
       const newName = formData.get('name').trim();
-      const start = formData.get('start');
+      const localTime = formData.get('start');
+      const start = localTimeToUTCString(localTime);
       const days = [...form.querySelectorAll('input[name="days"]:checked')]
         .map(cb => parseInt(cb.value)).reduce((a, b) => a | b, 0);
     

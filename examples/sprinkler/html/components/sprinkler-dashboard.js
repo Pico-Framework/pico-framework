@@ -1,4 +1,6 @@
 import { apiGet, apiPost } from '../utils/api.js';
+import { utcToLocalString } from '../utils/time.js';
+import { isoUtcToLocalTimeString } from '../utils/time.js';
 
 class Dashboard extends HTMLElement {
   connectedCallback() {
@@ -96,7 +98,14 @@ class Dashboard extends HTMLElement {
           
             if (statusEl && data.time && data.status) {
               const ts = new Date(data.time);
-              const formatted = `${data.status} at ${ts.getFullYear()}-${(ts.getMonth() + 1).toString().padStart(2, '0')}-${ts.getDate().toString().padStart(2, '0')} ${ts.getHours().toString().padStart(2, '0')}:${ts.getMinutes().toString().padStart(2, '0')}`;
+              const formatted = `${data.status} at ${utcToLocalString(data.time, {
+                hour: '2-digit',
+                minute: '2-digit',
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit',
+                timeZoneName: 'short'
+              })}`;
               statusEl.textContent = formatted;
             }
           });
@@ -123,8 +132,14 @@ class Dashboard extends HTMLElement {
         const statusEl = card.querySelector('.last-status span');
   
         if (statusEl && data.time && data.status) {
-          const ts = new Date(data.time);
-          const formatted = `${data.status} at ${ts.getFullYear()}-${(ts.getMonth() + 1).toString().padStart(2, '0')}-${ts.getDate().toString().padStart(2, '0')} ${ts.getHours().toString().padStart(2, '0')}:${ts.getMinutes().toString().padStart(2, '0')}`;
+          const formatted = `${data.status} at ${utcToLocalString(data.time, {
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+            hour: '2-digit',
+            minute: '2-digit',
+            timeZoneName: 'short'
+          })}`;
           statusEl.textContent = formatted;
         }
       });
@@ -140,8 +155,8 @@ class Dashboard extends HTMLElement {
   
       const data = await apiGet('/api/v1/next-schedule');
       if (data.status === 'scheduled') {
-        const ts = new Date(data.time);
-        const timeString = ts.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        const timeString = isoUtcToLocalTimeString(data.time);
+
         programEl.textContent = data.name;
         timeEl.textContent = timeString;
       } else {

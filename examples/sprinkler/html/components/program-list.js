@@ -1,4 +1,5 @@
 import { apiGet, apiDelete } from '../utils/api.js';
+import { utcToLocalTimeString } from '../utils/time.js';
 
 class ProgramList extends HTMLElement {
   connectedCallback() {
@@ -20,7 +21,7 @@ class ProgramList extends HTMLElement {
       <div class="program-card">
         <h3>${p.name}</h3>
         <div class="program-days">
-          <div><strong>Start:</strong> ${p.start}</div>
+          <div><strong>Start:</strong> ${utcToLocalTimeString(p.start)}</div>
           <div><strong>Days:</strong> ${this.daysToText(p.days)}</div>
         </div>
         <ul>

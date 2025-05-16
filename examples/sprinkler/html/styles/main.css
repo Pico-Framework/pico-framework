@@ -95,8 +95,8 @@ h2 {
 }
 
 .zone-card.active {
-    border-left: 5px solid var(--accent);
-}
+    border-left: 5px solid #ccc; /* light gray */
+  }
 
 .zone-editor-list {
     display: grid;
@@ -270,11 +270,6 @@ nav button:active {
     border-radius: var(--radius);
     box-shadow: inset 2px 2px 5px var(--shadow-dark),
         inset -2px -2px 5px var(--shadow-light);
-}
-
-.zone-card.active-zone {
-    border-left: 5px solid var(--accent);
-    /* no background-color */
 }
 
 .last-run {
