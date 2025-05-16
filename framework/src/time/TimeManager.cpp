@@ -124,11 +124,6 @@ void TimeManager::setTime(timespec *ts)
         return;
     }
 
-    #include <stddef.h>
-    printf("sizeof(timespec) = %zu\n", sizeof(timespec));
-    printf("offsetof(tv_sec)  = %zu\n", offsetof(timespec, tv_sec));
-    printf("offsetof(tv_nsec) = %zu\n", offsetof(timespec, tv_nsec));
-
     // Initialize the RTC if necessary
 
     // Set the system time using the provided timespec

@@ -137,7 +137,6 @@ void SprinklerController::onEvent(const Event &event)
             {
             case UserNotification::RunZoneStart:
             {
-                printf("[SprinklerController] RunZoneStart event\n");
                 const RunZone* runZone = static_cast<const RunZone *>(event.data);
                 zoneModel->startZone(runZone->zone, runZone->duration);
                 break;

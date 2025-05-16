@@ -46,7 +46,6 @@ void LogController::onStart()
 
 void LogController::onEvent(const Event& event) {
     if (!event.isUser()) return;
-    printf("[LogController] Event: %d\n", event.userCode());
     
     char msg[128] = {};
     const char* ts = "";  // Timestamp from Logger, or could add PicoTime if needed
@@ -95,7 +94,6 @@ void LogController::onEvent(const Event& event) {
         default:
             return;
     }
-    printf("[LogController] %s\n", msg);
     AppContext::get<Logger>()->info(msg); 
 }
 

@@ -306,7 +306,6 @@ void TimerService::scheduleCallbackAt(time_t when, std::function<void()> callbac
 
     if (handle) {
         xTimerStart(handle, 0);
-        printf("[TimerService] Callback scheduled in %u ms (at %lld)\n", delayMs, when);
     } else {
         printf("[TimerService] ERROR: Failed to create xTimer\n");
         delete cb;

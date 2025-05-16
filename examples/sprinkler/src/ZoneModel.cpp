@@ -26,35 +26,25 @@ bool ZoneModel::startZone(const std::string& name) {
     gpio_put(z->gpioPin, 1);
     z->active = true;
 
-    printf("[ZoneModel] Zone '%s' started on GPIO %d\n", z->name.c_str(), z->gpioPin);
     AppContext::get<EventManager>()->postEvent(userEvent(UserNotification::ZoneStarted, name));
     return true;
 }
 
 
 bool ZoneModel::startZone(const std::string& name, uint32_t durationSeconds) {
-    printf("[ZoneModel] Starting zone '%s' for %u seconds\n", name.c_str(), durationSeconds);
     if (!startZone(name)) return false;
     AppContext::get<EventManager>()->postEvent(userEvent(UserNotification::RunZoneStarted, name));
-    printf("[ZoneModel] Scheduling auto-stop for zone '%s' in %u seconds\n", name.c_str(), durationSeconds);
     time_t when = PicoTime::now() + durationSeconds;
-    printf("[ZoneModel] Current time: %lld\n",  PicoTime::now());
-    printf("[ZoneModel] Scheduled stop time: %lld\n", when);
     time_t now = PicoTime::now();
-    printf("[ZoneModel] PicoTime::now() = %lld\n", now);
 
     struct timespec t;
     aon_timer_get_time(&t);
-    printf("[ZoneModel] aon_timer_get_time() = {%lld, %ld}\n", t.tv_sec, t.tv_nsec);
 
     std::function<void()> stopCallback = [this, name]() {
-        printf("[ZoneModel] Auto-stop callback for zone '%s'\n", name.c_str());
         this->stopZone(name);
-        printf("[ZoneModel] Zone '%s' auto-stopped\n", name.c_str());
         AppContext::get<EventManager>()->postEvent(userEvent(UserNotification::RunZoneCompleted, name));
     };
     AppContext::get<TimerService>()->scheduleCallbackAt(when, stopCallback);
-    printf("[ZoneModel] Timer scheduled for zone '%s' at %lld\n", name.c_str(), when);
     return true;
 }
 
@@ -69,7 +59,6 @@ bool ZoneModel::stopZone(const std::string& name) {
     gpio_put(z->gpioPin, 0);
     z->active = false;
 
-    printf("Zone '%s' stopped on GPIO %d\n", z->name.c_str(), z->gpioPin);
     AppContext::get<EventManager>()->postEvent(userEvent(UserNotification::ZoneStopped, name));
     return true;
 }

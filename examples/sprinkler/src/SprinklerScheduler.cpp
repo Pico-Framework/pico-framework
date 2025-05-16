@@ -243,18 +243,13 @@ void SprinklerScheduler::onEvent(const Event &evt)
             }
             else
             {
-                printf("[Scheduler] Program %s completed\n", runningProgramName.c_str());
                 lastProgramRunName = runningProgramName;
-                // Event e(static_cast<uint8_t>(UserNotification::ProgramCompleted), &lastProgramRunName, sizeof(lastProgramRunName));
-                // AppContext::get<EventManager>()->postEvent(e);
-                //AppContext::get<EventManager>()->postEvent(Event(static_cast<uint8_t>(UserNotification::ProgramCompleted, &lastProgramRunName, sizeof(lastProgramRunName))));
                 AppContext::get<EventManager>()->postEvent(
                     Event(static_cast<uint8_t>(UserNotification::ProgramCompleted),
                           &lastProgramRunName,
                           sizeof(lastProgramRunName))
                 );
                 
-                printf("[Scheduler] Posted ProgramCompleted, last program run: %s\n", runningProgramName.c_str());
                 runningProgramName.clear();
             }
             break;
@@ -265,7 +260,6 @@ void SprinklerScheduler::onEvent(const Event &evt)
             const SprinklerProgram *prog = static_cast<const SprinklerProgram *>(evt.data);
             if (prog)
             {
-                printf("[Scheduler] Activating program: %s\n", prog->name.c_str());
                 activateProgram(prog);
             }
             break;
