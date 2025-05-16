@@ -8,6 +8,7 @@
 #include "events/TimerService.h"
 #include "framework/FrameworkModel.h"
 #include "UserNotification.h"
+#include "time/PicoTime.h"
 
 ZoneModel::ZoneModel(const std::string &path)
     : FrameworkModel(path) {}
@@ -30,18 +31,30 @@ bool ZoneModel::startZone(const std::string& name) {
     return true;
 }
 
-bool ZoneModel::startZone(const std::string* name, uint32_t durationSeconds) {
-    printf("[ZoneModel] Starting zone '%s' for %u seconds\n", name->c_str(), durationSeconds);
+
+bool ZoneModel::startZone(const std::string& name, uint32_t durationSeconds) {
+    printf("[ZoneModel] Starting zone '%s' for %u seconds\n", name.c_str(), durationSeconds);
     if (!startZone(name)) return false;
     AppContext::get<EventManager>()->postEvent(userEvent(UserNotification::RunZoneStarted, name));
     printf("[ZoneModel] Scheduling auto-stop for zone '%s' in %u seconds\n", name.c_str(), durationSeconds);
-    time_t when = time(NULL) + durationSeconds;
-    AppContext::get<TimerService>()->scheduleCallbackAt(when, [name, durationSeconds, this]() {
-        this->stopZone(name);
-        printf("[ZoneModel] Zone '%s' auto-stopped after %u seconds\n", name.c_str(), durationSeconds);
-        AppContext::get<EventManager>()->postEvent(userEvent(UserNotification::RunZoneCompleted, name));
-    });
+    time_t when = PicoTime::now() + durationSeconds;
+    printf("[ZoneModel] Current time: %lld\n",  PicoTime::now());
+    printf("[ZoneModel] Scheduled stop time: %lld\n", when);
+    time_t now = PicoTime::now();
+    printf("[ZoneModel] PicoTime::now() = %lld\n", now);
 
+    struct timespec t;
+    aon_timer_get_time(&t);
+    printf("[ZoneModel] aon_timer_get_time() = {%lld, %ld}\n", t.tv_sec, t.tv_nsec);
+
+    std::function<void()> stopCallback = [this, name]() {
+        printf("[ZoneModel] Auto-stop callback for zone '%s'\n", name.c_str());
+        this->stopZone(name);
+        printf("[ZoneModel] Zone '%s' auto-stopped\n", name.c_str());
+        AppContext::get<EventManager>()->postEvent(userEvent(UserNotification::RunZoneCompleted, name));
+    };
+    AppContext::get<TimerService>()->scheduleCallbackAt(when, stopCallback);
+    printf("[ZoneModel] Timer scheduled for zone '%s' at %lld\n", name.c_str(), when);
     return true;
 }
 

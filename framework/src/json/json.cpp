@@ -91,6 +91,23 @@ const nlohmann::json& json::raw() const {
     return backend->raw();
 }
 
+json::json(std::initializer_list<std::pair<std::string, json>> init)
+    : impl(std::make_shared<NlohmannJsonImpl>())
+{
+    auto& j = static_cast<NlohmannJsonImpl&>(*impl).raw();
+    for (const auto& [k, v] : init)
+        j[k] = v.raw();  // get internal nlohmann::json
+}
+
+json& json::operator=(std::initializer_list<std::pair<std::string, json>> init)
+{
+    auto& j = static_cast<NlohmannJsonImpl&>(*impl).raw();
+    j = nlohmann::json::object();  // clear and prepare as object
+    for (const auto& [k, v] : init)
+        j[k] = v.raw();
+    return *this;
+}
+
 
 }  // namespace Framework
 

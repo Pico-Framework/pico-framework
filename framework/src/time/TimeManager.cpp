@@ -17,7 +17,7 @@
 #include "http/HttpResponse.h"
 #include "framework_config.h"
 #include "DebugTrace.h"
-
+TRACE_INIT(TimeManager);
 
 #if defined(PICO_RP2040)
 #include "hardware/rtc.h"
@@ -29,12 +29,10 @@
 #include "FreeRTOS_time.h"
 #endif
 
-TRACE_INIT(TimeManager);
-
 // Set system time from SNTP - this callback is defined in lwipopts.h
 extern "C" void sntp_set_system_time(uint32_t sec)
 {
-    TRACE("[SNTP] callback made\n");
+    //TRACE("[SNTP] callback made\n");
     AppContext::get<TimeManager>()->setTimeFromEpoch(sec);
 }
 
@@ -42,7 +40,7 @@ void TimeManager::initNtpClient()
 {
     if (!sntp_enabled())
     {
-        TRACE("[Time Manager] Initializing SNTP client...\n");
+        //TRACE("[Time Manager] Initializing SNTP client...\n");
         sntp_setoperatingmode(SNTP_OPMODE_POLL);
         sntp_setservername(0, "pool.ntp.org");
         sntp_init();
@@ -97,8 +95,8 @@ bool TimeManager::syncTimeWithNtp(int timeoutSeconds)
 
 void TimeManager::setTimeFromEpoch(uint32_t epoch)
 {
-    TRACE("[TimeManager] Setting system time from epoch: %u\n", epoch);
-    struct timespec ts = {
+    printf("[TimeManager] Setting system time from epoch: %u\n", epoch);
+    timespec ts = {
         .tv_sec = epoch,
         .tv_nsec = 0};
     setTime(&ts);
@@ -106,7 +104,7 @@ void TimeManager::setTimeFromEpoch(uint32_t epoch)
     Event event;
     event.notification = SystemNotification::TimeSync;
     AppContext::get<EventManager>()->postEvent(event);
-    TRACE("[TimeManager] System time set to: %s\n", ctime(&ts.tv_sec));
+    printf("[TimeManager] System time set to: %s\n", ctime(&ts.tv_sec));
 }
 
 /**
@@ -126,10 +124,15 @@ void TimeManager::setTime(timespec *ts)
         return;
     }
 
+    #include <stddef.h>
+    printf("sizeof(timespec) = %zu\n", sizeof(timespec));
+    printf("offsetof(tv_sec)  = %zu\n", offsetof(timespec, tv_sec));
+    printf("offsetof(tv_nsec) = %zu\n", offsetof(timespec, tv_nsec));
+
     // Initialize the RTC if necessary
 
     // Set the system time using the provided timespec
-    TRACE("[TimeManager] Setting time: %ld seconds, %ld nanoseconds\n", ts->tv_sec, ts->tv_nsec);
+    printf("[TimeManager] Setting time: %lld seconds, %ld nanoseconds\n", ts->tv_sec, ts->tv_nsec);
         // if the AON timer is not running, start it
     if (!aon_timer_is_running()){
         printf("[TimeManager] AON timer is not running, starting it...\n");
@@ -140,22 +143,23 @@ void TimeManager::setTime(timespec *ts)
         printf("[TimeManager] AON timer is running, syncing time...\n");
         aon_timer_set_time(ts);
     }
-    if(!aon_timer_get_time(ts))
+    timespec currentTime;
+    if(!aon_timer_get_time(&currentTime))
     {
         printf("[TimeManager] Failed to get system time from AON timer.\n");
         return;
     }
     else{
-        TRACE("[TimeManager] System time set to: %ld seconds, %ld nanoseconds\n", ts->tv_sec, ts->tv_nsec);
+        printf("[TimeManager] System time set to: %lld seconds, %ld nanoseconds\n", currentTime.tv_sec, currentTime.tv_nsec);
         time_t secs = PicoTime::now();
-        TRACE("[TimeManager] Current time: %s\n", ctime(&secs));
+        printf("[TimeManager] Current time: %s\n", ctime(&secs));
         AppContext::get<EventManager>()->postEvent({SystemNotification::TimeValid});
     }
 }
 
 void TimeManager::applyFixedTimezoneOffset(int offsetSeconds, const char *stdName, const char *dstName)
 {
-    TRACE("[TimeManager] Setting timezone offset: %d seconds\n", offsetSeconds);
+    printf("[TimeManager] Setting timezone offset: %d seconds\n", offsetSeconds);
     printf("[TimeManager] Standard timezone: %s, DST timezone: %s\n", stdName, dstName);
     timezoneOffsetSeconds = offsetSeconds;
     timezoneName = stdName;

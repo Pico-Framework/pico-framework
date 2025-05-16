@@ -72,6 +72,11 @@ public:
     nlohmann::json& raw();
     const nlohmann::json& raw() const;
 
+    json(std::initializer_list<std::pair<std::string, json>> init);
+    json& operator=(std::initializer_list<std::pair<std::string, json>> init);
+
+
+
 
 private:
     explicit json(std::shared_ptr<IJsonImpl> impl);

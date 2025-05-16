@@ -122,6 +122,7 @@ void SprinklerScheduler::initRoutes()
         SprinklerProgram test;
         test.name = "TestRun";
         test.zones.push_back({ "Front Lawn", 5 });
+        test.zones.push_back({ "Back Garden", 8 });
         test.days = 0x7F;
     
         // Schedule for the next full minute
@@ -194,7 +195,9 @@ void SprinklerScheduler::activateProgram(const SprinklerProgram* program)
         zoneQueue.push(&zone);
 
     // Post ProgramStarted once
-    AppContext::get<EventManager>()->postEvent(userEvent(UserNotification::ProgramStarted, program->name));
+    Event e(static_cast<uint8_t>(UserNotification::ProgramStarted), &runningProgramName, sizeof(runningProgramName));
+    AppContext::get<EventManager>()->postEvent(e);
+    // Post RunZoneStarted for each zone
 
     // Start first zone
     if (!zoneQueue.empty())
@@ -240,7 +243,18 @@ void SprinklerScheduler::onEvent(const Event &evt)
             }
             else
             {
-                AppContext::get<EventManager>()->postEvent(userEvent(UserNotification::ProgramCompleted, runningProgramName));
+                printf("[Scheduler] Program %s completed\n", runningProgramName.c_str());
+                lastProgramRunName = runningProgramName;
+                // Event e(static_cast<uint8_t>(UserNotification::ProgramCompleted), &lastProgramRunName, sizeof(lastProgramRunName));
+                // AppContext::get<EventManager>()->postEvent(e);
+                //AppContext::get<EventManager>()->postEvent(Event(static_cast<uint8_t>(UserNotification::ProgramCompleted, &lastProgramRunName, sizeof(lastProgramRunName))));
+                AppContext::get<EventManager>()->postEvent(
+                    Event(static_cast<uint8_t>(UserNotification::ProgramCompleted),
+                          &lastProgramRunName,
+                          sizeof(lastProgramRunName))
+                );
+                
+                printf("[Scheduler] Posted ProgramCompleted, last program run: %s\n", runningProgramName.c_str());
                 runningProgramName.clear();
             }
             break;

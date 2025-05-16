@@ -285,8 +285,32 @@ void TimerService::rescheduleDailyJob(const TimerJob &)
 }
 
 void TimerService::scheduleCallbackAt(time_t when, std::function<void()> callback) {
+    time_t now = PicoTime::now();
+    if (when <= now) {
+        printf("[TimerService] WARNING: scheduled time is in the past (%lld <= %lld)\n", when, now);
+        return;
+    }
+
     auto* cb = new std::function<void()>(std::move(callback));
-    Event evt(0 /* userCode 0 for internal use */, cb, sizeof(cb), this);
-    scheduleAt(when, evt);
+    uint32_t delayMs = static_cast<uint32_t>((when - now) * 1000);
+
+    TimerHandle_t handle = xTimerCreate("CbTimer", pdMS_TO_TICKS(delayMs), pdFALSE, cb,
+        [](TimerHandle_t xTimer) {
+            auto* fn = static_cast<std::function<void()>*>(pvTimerGetTimerID(xTimer));
+            if (fn) {
+                (*fn)();    // 🔥 fire the user callback
+                delete fn;  // ✅ clean up
+            }
+            xTimerDelete(xTimer, 0);
+        });
+
+    if (handle) {
+        xTimerStart(handle, 0);
+        printf("[TimerService] Callback scheduled in %u ms (at %lld)\n", delayMs, when);
+    } else {
+        printf("[TimerService] ERROR: Failed to create xTimer\n");
+        delete cb;
+    }
 }
+
 

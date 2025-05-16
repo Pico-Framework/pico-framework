@@ -43,8 +43,8 @@ public:
 
 
     // Core functionality
-    bool startZone(const std::string &name);
-    bool startZone(const std::string &name, uint32_t duration);
+    bool startZone(const std::string& name);
+    bool startZone(const std::string& name, uint32_t duration);
     bool stopZone(const std::string &name);
     bool isZoneRunning(const std::string &name) const;
     bool isRunning() const

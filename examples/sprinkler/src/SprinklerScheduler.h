@@ -49,6 +49,7 @@ private:
     ProgramModel *programModel = nullptr;
     uint32_t lastCheckMinute = 0;
     std::string runningProgramName;
+    std::string lastProgramRunName;
     std::queue<const RunZone*> zoneQueue;
 
     /**

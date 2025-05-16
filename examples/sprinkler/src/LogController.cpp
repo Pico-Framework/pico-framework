@@ -54,27 +54,27 @@ void LogController::onEvent(const Event& event) {
     switch (static_cast<UserNotification>(event.userCode())) {
         case UserNotification::ProgramStarted: {
             const std::string* name = static_cast<const std::string*>(event.data);
-            snprintf(msg, sizeof(msg), "[ProgramStarted] Program \"%s\" started", name);
+            snprintf(msg, sizeof(msg), "[ProgramStarted] Program \"%s\" started", name->c_str());
             break;
         }
         case UserNotification::ProgramCompleted: {
             const std::string* name = static_cast<const std::string*>(event.data);
-            snprintf(msg, sizeof(msg), "[ProgramCompleted] Program \"%s\" completed", name);
+            snprintf(msg, sizeof(msg), "[ProgramCompleted] Program \"%s\" completed", name->c_str());
             break;
         }
         case UserNotification::RunZoneStart: {
-            const Zone* zone = static_cast<const Zone*>(event.data);
-            snprintf(msg, sizeof(msg), "[RunZoneStart] Zone \"%s\" begun", zone->name.c_str());
+            const RunZone* rz = static_cast<const RunZone*>(event.data);
+            snprintf(msg, sizeof(msg), "[RunZoneStart] Zone \"%s\" begun", rz->zone.c_str());
             break;
         }
         case UserNotification::RunZoneCompleted: {
-            const std::string* name = static_cast<const std::string*>(event.data);
-            snprintf(msg, sizeof(msg), "[RunZoneStartCompleted] Zone \"%s\" completed", name->c_str());
+            const RunZone* rz = static_cast<const RunZone*>(event.data);
+            snprintf(msg, sizeof(msg), "[RunZoneCompleted] Zone \"%s\" completed", rz->zone.c_str());
             break;
         }
         case UserNotification::ZoneStarted: {
             const std::string* name = static_cast<const std::string*>(event.data);
-            snprintf(msg, sizeof(msg), "[RunZoneStarted] Zone \"%s\" started", name->c_str());
+            snprintf(msg, sizeof(msg), "[ZoneStarted] Zone \"%s\" started", name->c_str());
             break;
         }
         case UserNotification::ZoneStopped: {

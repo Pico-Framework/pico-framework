@@ -10,6 +10,8 @@
 #pragma once
 #include <cstdint>
 #include <cstddef>
+#include <type_traits>
+#include <string>
 #include "events/Notification.h"
 #include "events/GpioEvent.h"
 
@@ -100,18 +102,6 @@ struct Event
 // global scope for convenience
 
 /**
- * @brief Helper to create a user-defined Event with no payload.
- * 
- * @tparam Enum The enum type used for user-defined notifications.
- * @param e The enum value.
- * @return Event The constructed user event.
- */
-template<typename Enum>
-inline Event userEvent(Enum e) {
-    return Event(static_cast<uint8_t>(e), nullptr, 0);
-}
-
-/**
  * @brief Helper to create a user-defined Event with a payload.
  * 
  * @tparam Enum The enum type.
@@ -123,4 +113,10 @@ inline Event userEvent(Enum e) {
 template<typename Enum, typename T>
 inline Event userEvent(Enum e, const T& data) {
     return Event(static_cast<uint8_t>(e), &data, sizeof(T));
+}
+
+template<typename Enum>
+inline Event userEvent(Enum e, const char* data, size_t size) {
+    static_assert(std::is_enum<Enum>::value, "Enum type required");
+    return Event(static_cast<uint8_t>(e), data, size);
 }
