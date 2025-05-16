@@ -170,6 +170,5 @@ void LogController::handleSummaryJson(HttpRequest& req, HttpResponse& res) {
         };
     }
 
-    printf("[LogController] Returning %zu zone entries\n", zoneEvents.size());
     res.json(obj);
 }
