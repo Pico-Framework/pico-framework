@@ -31,6 +31,7 @@ struct ProgramEvent
     std::string zone;        ///< Zone to activate
     TimeOfDay start;         ///< Time of day for activation
     uint32_t duration;       ///< Duration in seconds
+    time_t when;             ///< absolute scheduled time for sorting
 };
 
 /**
@@ -120,14 +121,20 @@ public:
      */
     void remove(const std::string &name);
 
-    std::vector<ProgramEvent> flattenScheduleForDay(Day day) const;
-    const ProgramEvent *getNextEventForToday(uint32_t now) const;
-    const ProgramEvent* getNextEvent(uint32_t now) const;
     bool isEventDue(uint32_t now) const;
 
-    void rebuildNameIndex();
+    const ProgramEvent *getNextEventForToday(uint32_t now) const;
+    const ProgramEvent* getNextEvent(uint32_t now) const;
 
 private:
+    std::vector<ProgramEvent> flattenScheduleForDay(Day day) const;
+    mutable std::vector<ProgramEvent> cachedEvents;
+    mutable time_t lastGenerated = 0;
+    mutable std::vector<ProgramEvent> cachedTodayEvents;
+    mutable uint8_t cachedToday = 0xFF;
     std::vector<SprinklerProgram> programs;
     std::unordered_map<std::string, SprinklerProgram *> nameIndex;
+    
+    void clearScheduleCache();
+    void rebuildNameIndex();
 };

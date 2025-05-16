@@ -33,18 +33,22 @@ const SprinklerProgram *ProgramModel::get(const std::string &name) const
 
 void ProgramModel::saveOrUpdate(const SprinklerProgram &program)
 {
+    clearScheduleCache();  // clear cache first
+
     for (auto &p : programs)
     {
         if (p.name == program.name)
         {
             p = program;
-            save();
+            save();  
             return;
         }
     }
+
     programs.push_back(program);
-    FrameworkModel::save();
+    save();  // 
 }
+
 
 void ProgramModel::remove(const std::string &name)
 {
@@ -53,6 +57,7 @@ void ProgramModel::remove(const std::string &name)
                        [&](const SprinklerProgram &p)
                        { return p.name == name; }),
         programs.end());
+    clearScheduleCache();
     save();
 }
 
@@ -80,19 +85,15 @@ std::vector<ProgramEvent> ProgramModel::flattenScheduleForDay(Day day) const
 }
 
 const ProgramEvent* ProgramModel::getNextEventForToday(uint32_t now) const {
-    static std::vector<ProgramEvent> events;
-    static uint32_t cachedDay = 0xFF;
-
     TimeOfDay current = PicoTime::toTimeOfDay(now);
     Day today = PicoTime::dayOfWeek(now);
 
-    // Refresh cache if day changed
-    if (cachedDay != static_cast<uint8_t>(today)) {
-        events = flattenScheduleForDay(today);
-        cachedDay = static_cast<uint8_t>(today);
+    if (cachedToday != static_cast<uint8_t>(today)) {
+        cachedTodayEvents = flattenScheduleForDay(today);
+        cachedToday = static_cast<uint8_t>(today);
     }
 
-    for (const auto& e : events) {
+    for (const auto& e : cachedTodayEvents) {
         if (current < e.start) {
             return &e;
         }
@@ -100,15 +101,15 @@ const ProgramEvent* ProgramModel::getNextEventForToday(uint32_t now) const {
     return nullptr;
 }
 
-const ProgramEvent* ProgramModel::getNextEvent(uint32_t now) const {
-    static std::vector<ProgramEvent> cachedEvents;
-    static uint32_t lastGenerated = 0;
-    static time_t lastNow = 0;
 
-    if (cachedEvents.empty() || now < lastNow || now > lastNow + 60) {
+const ProgramEvent* ProgramModel::getNextEvent(uint32_t now) const {
+
+    if (cachedEvents.empty() || now < lastGenerated || now > lastGenerated + 60) {
         cachedEvents.clear();
+
         for (int i = 0; i < 7; ++i) {
             Day day = static_cast<Day>((static_cast<int>(PicoTime::dayOfWeek(now)) + i) % 7);
+
             auto daily = flattenScheduleForDay(day);
 
             for (const auto& e : daily) {
@@ -116,22 +117,31 @@ const ProgramEvent* ProgramModel::getNextEvent(uint32_t now) const {
                 t.tm_hour = e.start.hour;
                 t.tm_min = e.start.minute;
                 t.tm_sec = 0;
-                t.tm_mday += i;  // Advance day by offset
+                t.tm_mday += i;
                 time_t when = mktime(&t);
-                if (when > static_cast<time_t>(now)) {
+                  
+                if (when > (time_t)now) {
                     ProgramEvent future = e;
+                    future.when = when;  // attach absolute timestamp
                     cachedEvents.push_back(future);
                 }
             }
         }
-        std::sort(cachedEvents.begin(), cachedEvents.end(), [&](const ProgramEvent& a, const ProgramEvent& b) {
-            struct tm ta = PicoTime::nowTm();
-            struct tm tb = ta;
-            ta.tm_hour = a.start.hour; ta.tm_min = a.start.minute; ta.tm_sec = 0;
-            tb.tm_hour = b.start.hour; tb.tm_min = b.start.minute; tb.tm_sec = 0;
-            return mktime(&ta) < mktime(&tb);
+
+        std::sort(cachedEvents.begin(), cachedEvents.end(), [](const ProgramEvent& a, const ProgramEvent& b) {
+            return a.when < b.when;
         });
-        lastNow = now;
+
+        lastGenerated = now;
+    }
+
+    if (!cachedEvents.empty()) {
+        const auto& first = cachedEvents[0];
+               first.programName.c_str(),
+               first.zone.c_str(),
+               first.start.hour, first.start.minute;
+    } else {
+        printf("[ProgramModel] No future events cached\n");
     }
 
     return cachedEvents.empty() ? nullptr : &cachedEvents[0];
@@ -219,4 +229,9 @@ void ProgramModel::rebuildNameIndex() {
     }
 }
 
-
+void ProgramModel::clearScheduleCache() {
+    cachedEvents.clear();
+    lastGenerated = 0;
+    cachedTodayEvents.clear();
+    cachedToday = 0xFF;
+}

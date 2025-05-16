@@ -52,8 +52,21 @@ class Dashboard extends HTMLElement {
       <section>
         <div class="zone-grid">${list}</div>
       </section>
+      <button id="test-run-btn">Run Test Program</button>
     `;
-  
+
+    this.querySelector('#test-run-btn')?.addEventListener('click', async () => {
+      try {
+        await apiPost('/api/v1/test-program', { name: 'TestRun' });
+        alert('Test program queued successfully.');
+        await this.fetchNextSchedule(); // Refresh display
+      } catch (err) {
+        console.error('Test run failed:', err);
+        alert(err.message); // Will show "POST /api/v1/test-program failed"
+      }
+    });
+    
+    
     this.querySelectorAll('button.zone-toggle').forEach(btn => {
       btn.addEventListener('click', async () => {
         const name = btn.dataset.name;
@@ -93,8 +106,33 @@ class Dashboard extends HTMLElement {
       });
     });
     this.fetchNextSchedule();
+    // Start periodic log summary refresh
+    this._logRefreshTimer = setInterval(() => {
+      this.updateZoneStatusFromLog();
+    }, 10000); // every 10 seconds
   }
 
+  async updateZoneStatusFromLog() {
+    try {
+      const logSummary = await apiGet('/api/v1/logs/summaryJson');
+  
+      Object.entries(logSummary.zones || {}).forEach(([zoneName, data]) => {
+        const card = this.querySelector(`.zone-card[data-name="${zoneName}"]`);
+        if (!card) return;
+  
+        const statusEl = card.querySelector('.last-status span');
+  
+        if (statusEl && data.time && data.status) {
+          const ts = new Date(data.time);
+          const formatted = `${data.status} at ${ts.getFullYear()}-${(ts.getMonth() + 1).toString().padStart(2, '0')}-${ts.getDate().toString().padStart(2, '0')} ${ts.getHours().toString().padStart(2, '0')}:${ts.getMinutes().toString().padStart(2, '0')}`;
+          statusEl.textContent = formatted;
+        }
+      });
+    } catch (err) {
+      console.warn('Failed to refresh log summary:', err);
+    }
+  }
+  
   async fetchNextSchedule() {
     try {
       const programEl = this.querySelector('#next-program');

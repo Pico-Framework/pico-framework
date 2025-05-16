@@ -117,8 +117,8 @@ void SprinklerScheduler::initRoutes()
             });
         } });
 
-    // Test route to schedule a program for 15 seconds from now    
-    router.addRoute("GET", "/api/v1/test-program", [this](HttpRequest &req, HttpResponse &res, const RouteMatch &) {
+    // Test route to schedule a program at the next minute rollover   
+    router.addRoute("POST", "/api/v1/test-program", [this](HttpRequest &req, HttpResponse &res, const RouteMatch &) {
         SprinklerProgram test;
         test.name = "TestRun";
         test.zones.push_back({ "Front Lawn", 5 });

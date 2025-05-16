@@ -116,7 +116,6 @@ void LogController::handleSummary(HttpRequest& req, HttpResponse& res) {
     res.setContentType("text/plain").send(logText);
 }
 
-
 void LogController::handleSummaryJson(HttpRequest& req, HttpResponse& res) {
     auto* storage = AppContext::get<StorageManager>();
     auto reader = storage->openReader("log.txt");
@@ -125,64 +124,52 @@ void LogController::handleSummaryJson(HttpRequest& req, HttpResponse& res) {
         return;
     }
 
-    std::map<std::string, std::pair<std::string, std::string>> zoneEvents;    // name → (time, status)
-    std::map<std::string, std::pair<std::string, std::string>> programEvents;
-    
+    std::map<std::string, std::pair<std::string, std::string>> zoneEvents;
+
     char line[128];
     while (reader->readLine(line, sizeof(line))) {
-        printf("[LogController] Read line: %s\n", line);
-    
         const char* firstBracket = strchr(line, '[');
         const char* firstClose   = strchr(firstBracket, ']');
         if (!firstBracket || !firstClose) continue;
-    
+
         const char* secondBracket = strchr(firstClose + 1, '[');
         const char* secondClose   = strchr(secondBracket, ']');
         if (!secondBracket || !secondClose) continue;
-    
+
         std::string timestamp(firstBracket + 1, firstClose);
-        std::string view(secondClose + 2);  // skip space after [INFO]
-    
-        const char* keywords[] = {"started", "stopped", "begun", "completed"};
-        std::string matchedStatus;
-    
-        for (const char* kw : keywords) {
-            if (view.find(kw) != std::string::npos) {
-                matchedStatus = kw;
-                break;
-            }
-        }
-        if (matchedStatus.empty()) continue;
-    
-        if (view.find("Program \"") == 0) {
+        std::string view(secondClose + 2);  // skip space after second [INFO]
+
+        // Only interested in ZoneStarted and ZoneStopped
+        if (view.find("ZoneStarted") == std::string::npos &&
+            view.find("ZoneStopped") == std::string::npos)
+            continue;
+
+        // Now extract the zone name: e.g., Zone "Front Lawn" started
+        if (view.find("Zone \"") != std::string::npos) {
             size_t q1 = view.find('"');
             size_t q2 = view.find('"', q1 + 1);
             if (q1 != std::string::npos && q2 != std::string::npos) {
                 std::string name = view.substr(q1 + 1, q2 - q1 - 1);
-                programEvents[name] = {timestamp, matchedStatus};
-            }
-        }
-    
-        if (view.find("Zone \"") == 0) {
-            size_t q1 = view.find('"');
-            size_t q2 = view.find('"', q1 + 1);
-            if (q1 != std::string::npos && q2 != std::string::npos) {
-                std::string name = view.substr(q1 + 1, q2 - q1 - 1);
-                zoneEvents[name] = {timestamp, matchedStatus};
+                std::string status = (view.find("ZoneStarted") != std::string::npos) ? "started" : "stopped";
+                zoneEvents[name] = {timestamp, status};
             }
         }
     }
-    
 
     reader->close();
 
-    json obj;
+    json obj = {
+        {"zones", json::object()},
+        {"programs", json::object()}  // included for consistency even if unused
+    };
 
-    for (const auto& [k, v] : programEvents)
-        obj["programs"][k] = {{"time", v.first}, {"status", v.second}};
+    for (const auto& [name, entry] : zoneEvents) {
+        obj["zones"][name] = {
+            {"time", entry.first},
+            {"status", entry.second}
+        };
+    }
 
-    for (const auto& [k, v] : zoneEvents)
-        obj["zones"][k] = {{"time", v.first}, {"status", v.second}};
-
+    printf("[LogController] Returning %zu zone entries\n", zoneEvents.size());
     res.json(obj);
 }
