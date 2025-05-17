@@ -56,7 +56,7 @@ void Logger::log(LogLevel level, const char *msg)
     if (level < minLevel)
         return;
 
-    char timeBuf[20];
+    char timeBuf[32];
     getTimeString(timeBuf, sizeof(timeBuf));
     const char *levelStr = levelToString(level);
 
@@ -79,8 +79,8 @@ void Logger::log(LogLevel level, const char *msg)
 void Logger::getTimeString(char *buffer, size_t len)
 {
     time_t now = PicoTime::now();
-    struct tm *t = localtime(&now);
-    strftime(buffer, len, "%Y-%m-%d %H:%M:%S", t);
+    struct tm *t = gmtime(&now); // Use UTC
+    strftime(buffer, len, "%Y-%m-%dT%H:%M:%SZ", t); // ISO format
 }
 
 /// @copydoc Logger::levelToString

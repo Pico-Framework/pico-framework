@@ -21,6 +21,8 @@ option(PICO_HTTP_TLS_VERIFY          "Enable certificate verification for TLS co
 # 2. Environment-based Config (Wi-Fi, JWT Secret)
 #------------------------------------------------------------------------------
 
+add_library(pico_framework INTERFACE)
+
 # JWT Secret
 if(DEFINED ENV{JWT_SECRET})
     set(JWT_SECRET_VALUE "$ENV{JWT_SECRET}")
@@ -28,7 +30,9 @@ else()
     set(JWT_SECRET_VALUE "your_secret")
     message(WARNING "JWT_SECRET not set. Using fallback value.")
 endif()
-add_definitions(-DJWT_SECRET="${JWT_SECRET_VALUE}")
+target_compile_definitions(pico_framework INTERFACE
+  JWT_SECRET="${JWT_SECRET_VALUE}"
+)
 
 # Wi-Fi SSID/PASSWORD
 if(DEFINED ENV{WIFI_SSID})
@@ -44,13 +48,13 @@ endif()
 # 3. Framework Library and Core Sources
 #------------------------------------------------------------------------------
 
-add_library(pico_framework)
 
-target_compile_features(pico_framework PUBLIC cxx_std_17)
+target_compile_features(pico_framework INTERFACE cxx_std_17)
 
 # Disable allocation overrides for C++ (because we redefine new/delete by the FAT library if enabled) or by the framework itself )
-target_compile_definitions(pico_framework PUBLIC
-PICO_CXX_DISABLE_ALLOCATION_OVERRIDES=1 
+target_compile_definitions(pico_framework INTERFACE
+    PICO_CXX_DISABLE_ALLOCATION_OVERRIDES=1
+    PICO_GPIO_IRQ_HANDLER_MAX=8 
     WIFI_SSID=\"${WIFI_SSID}\"
     WIFI_PASSWORD=\"${WIFI_PASSWORD}\"
     CYW43_HOST_NAME="Pico-Framework"
@@ -65,7 +69,7 @@ else()
 endif()
 
 # Core sources
-target_sources(pico_framework PRIVATE
+target_sources(pico_framework INTERFACE
     # App and core structure
     src/framework/AppContext.cpp
     src/framework/FrameworkApp.cpp
@@ -127,17 +131,17 @@ target_sources(pico_framework PRIVATE
 #------------------------------------------------------------------------------
 
 if(PICO_HTTP_ENABLE_JWT)
-    target_sources(pico_framework PRIVATE
+    target_sources(pico_framework INTERFACE
         src/http-server/JwtAuthenticator.cpp
         src/framework/PasswordHasher.cpp
     )
-    target_compile_definitions(pico_framework PUBLIC PICO_HTTP_ENABLE_JWT=1)
+    target_compile_definitions(pico_framework INTERFACE PICO_HTTP_ENABLE_JWT=1)
 endif()
 
 # Storage (select one)
 if(PICO_HTTP_ENABLE_LITTLEFS)
     message(STATUS "[framework] LittleFS support enabled")
-    target_sources(pico_framework PRIVATE
+    target_sources(pico_framework INTERFACE
         lib/littlefs/lfs.c
         lib/littlefs/lfs_util.c
         src/storage/LittleFsStorageManager.cpp
@@ -145,44 +149,44 @@ if(PICO_HTTP_ENABLE_LITTLEFS)
         src/port/idleMemory.c
         src/port/cppMemory.cpp
     )
-    target_include_directories(pico_framework PUBLIC lib/littlefs)
-    target_compile_definitions(pico_framework PUBLIC PICO_HTTP_ENABLE_LITTLEFS=1)
-    target_compile_definitions(pico_framework PUBLIC LFS_THREADSAFE=1)
+    target_include_directories(pico_framework INTERFACE lib/littlefs)
+    target_compile_definitions(pico_framework INTERFACE PICO_HTTP_ENABLE_LITTLEFS=1)
+    target_compile_definitions(pico_framework INTERFACE LFS_THREADSAFE=1)
 else()
     message(STATUS "[framework] FatFs support enabled")
-    target_sources(pico_framework PRIVATE 
+    target_sources(pico_framework INTERFACE 
         src/storage/FatFsStorageManager.cpp
         src/storage/FatFsFileReader.cpp
-        src/port/hw_config.c
+        #src/port/hw_config.c
         )
-    target_link_libraries(pico_framework PUBLIC FreeRTOS+FAT+CLI)
+    target_link_libraries(pico_framework INTERFACE FreeRTOS+FAT+CLI)
 endif()
 
 if(PICO_HTTP_ENABLE_HTTP_CLIENT)
     message(STATUS "[framework] HttpClient support enabled")
-    target_sources(pico_framework PRIVATE
+    target_sources(pico_framework INTERFACE
         src/http-client/HttpClient.cpp
         src/http-client/ChunkedDecoder.cpp
     )
-    target_compile_definitions(pico_framework PUBLIC PICO_HTTP_ENABLE_HTTP_CLIENT=1)
+    target_compile_definitions(pico_framework INTERFACE PICO_HTTP_ENABLE_HTTP_CLIENT=1)
 endif()
 
 if(PICO_HTTP_CLIENT_ENABLE_TLS)
     message(STATUS "[framework] HttpClient TLS support enabled")
-    target_compile_definitions(pico_framework PUBLIC PICO_HTTP_CLIENT_ENABLE_TLS=1)
+    target_compile_definitions(pico_framework INTERFACE PICO_HTTP_CLIENT_ENABLE_TLS=1)
 endif()
 
 #------------------------------------------------------------------------------
 # 5. Includes and Libraries
 #------------------------------------------------------------------------------
 
-target_include_directories(pico_framework PUBLIC
+target_include_directories(pico_framework INTERFACE
     ${CMAKE_CURRENT_SOURCE_DIR}/include
     ${CMAKE_CURRENT_SOURCE_DIR}/include/port
     ${CMAKE_CURRENT_SOURCE_DIR}/lib/json/single_include
 )
 
-target_link_libraries(pico_framework PUBLIC
+target_link_libraries(pico_framework INTERFACE
     cmsis_core
     pico_async_context_freertos
     FreeRTOS-Kernel-Heap4
@@ -194,15 +198,15 @@ target_link_libraries(pico_framework PUBLIC
 ) 
 
 if(PICO_PLATFORM STREQUAL "rp2040")
-    target_link_libraries(pico_framework PUBLIC hardware_rtc)
+    target_link_libraries(pico_framework INTERFACEC hardware_rtc)
 endif()
 
 if(PICO_HTTP_ENABLE_JWT OR PICO_HTTP_CLIENT_ENABLE_TLS)
-    target_link_libraries(pico_framework PUBLIC pico_mbedtls)
+    target_link_libraries(pico_framework INTERFACE pico_mbedtls)
 endif()
 
 if(PICO_HTTP_CLIENT_ENABLE_TLS)
-    target_link_libraries(pico_framework PUBLIC pico_lwip_mbedtls)
+    target_link_libraries(pico_framework INTERFACE pico_lwip_mbedtls)
 endif()
 
 #------------------------------------------------------------------------------
@@ -214,7 +218,7 @@ add_compile_options(
   -Wno-unused-result
 )
 
-target_compile_options(pico_framework PRIVATE -Wno-psabi)
+target_compile_options(pico_framework INTERFACE -Wno-psabi)
 
 if(PICO_HTTP_CLIENT_ENABLE_TLS)
     set_source_files_properties(

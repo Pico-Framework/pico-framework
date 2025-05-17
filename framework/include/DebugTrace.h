@@ -105,6 +105,9 @@ inline std::string getFormattedTimestamp()
 
     if (tm)
     {
+        printf("TimeManager available\n");
+        std::string formatted = tm->currentTimeForTrace();
+        printf("Formatted time: %s\n", formatted.c_str());
         return tm->currentTimeForTrace();
     }
     else

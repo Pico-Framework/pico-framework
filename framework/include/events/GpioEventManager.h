@@ -77,6 +77,7 @@ public:
 
 private:
     GpioEventManager() = default;
+    bool handler_set = false;
     
     static void gpio_event_handler(uint gpio, uint32_t events);
 

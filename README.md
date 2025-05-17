@@ -64,7 +64,7 @@ PicoFramework is designed from the ground up to feel familiar to web developers,
 ## Getting Started
 
 Visit the GitHub repository:  
-👉 [https://github.com/ianarchbell/PicoFramework](https://github.com/ianarchbell/PicoFramework)
+👉 [https://github.com/ianarchbell/Pico-Framework](https://github.com/ianarchbell/Pico-Framework)
 
 You'll find:
 - Quick start guides
