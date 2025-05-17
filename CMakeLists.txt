@@ -107,6 +107,8 @@ target_compile_definitions(framework_test PUBLIC
     PICO_CXX_DISABLE_ALLOCATION_OVERRIDES=1
 )
 
+add_compile_definitions(PICO_MAX_SHARED_IRQ_HANDLERS=8)
+
 # ---------------------------------------------------------------
 # Compiler Warnings and Options
 # ---------------------------------------------------------------

@@ -83,8 +83,8 @@
      .type = SD_IF_SDIO,
      .sdio_if_p = &sdio_if,
      .use_card_detect = false,
-     .card_detect_gpio = 9,
-     .card_detected_true = 0
+     //.card_detect_gpio = 9,
+     //.card_detected_true = 0
  };
  
  /**

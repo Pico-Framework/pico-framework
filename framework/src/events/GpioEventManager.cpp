@@ -7,14 +7,13 @@
 #include "framework/AppContext.h"
 #include "framework_config.h"
 
-
 GpioEventManager& GpioEventManager::getInstance() {
     static GpioEventManager instance;
     return instance;
 }
 
 void GpioEventManager::enableInterrupt(uint pin, uint32_t edgeMask) {
-    if(!handler_set){
+     if(!handler_set){
         gpio_set_irq_callback(gpio_event_handler);
         handler_set = true;
     }
