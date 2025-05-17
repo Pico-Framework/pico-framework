@@ -127,7 +127,7 @@ void TimeManager::setTime(timespec *ts)
     // Initialize the RTC if necessary
 
     // Set the system time using the provided timespec
-    printf("[TimeManager] Setting time: %lld seconds, %ld nanoseconds\n", ts->tv_sec, ts->tv_nsec);
+    TRACE("[TimeManager] Setting time: %lld seconds, %ld nanoseconds\n", ts->tv_sec, ts->tv_nsec);
         // if the AON timer is not running, start it
     if (!aon_timer_is_running()){
         printf("[TimeManager] AON timer is not running, starting it...\n");
@@ -147,7 +147,7 @@ void TimeManager::setTime(timespec *ts)
     else{
         printf("[TimeManager] System time set to: %lld seconds, %ld nanoseconds\n", currentTime.tv_sec, currentTime.tv_nsec);
         time_t secs = PicoTime::now();
-        printf("[TimeManager] Current time: %s\n", ctime(&secs));
+        TRACE("[TimeManager] Current time: %s\n", ctime(&secs));
         AppContext::get<EventManager>()->postEvent({SystemNotification::TimeValid});
     }
 }

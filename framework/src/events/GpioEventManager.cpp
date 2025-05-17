@@ -17,9 +17,7 @@ void GpioEventManager::enableInterrupt(uint pin, uint32_t edgeMask) {
         gpio_set_irq_callback(gpio_event_handler);
         handler_set = true;
     }
-    printf("GpioEventManager::enableInterrupt(%u, %u)\n", pin, edgeMask);
     gpio_set_irq_enabled(pin, edgeMask, true);
-    printf("GpioEventManager::enableInterrupt (%u, %u) done\n", pin, edgeMask);
 }
 
 void GpioEventManager::disableInterrupt(uint pin) {

@@ -153,7 +153,6 @@ public:
     template <typename T>
     void setValue(const std::string &key, const T &value)
     {
-        printf("[FrameworkModel] Setting value for key '%s' to '%s'\n", key.c_str(),(bool)&value);
         jsonService = AppContext::get<JsonService>();
         if(!jsonService)
         {
@@ -161,7 +160,6 @@ public:
             return;
         }
         jsonService->data()[key] = value;
-        printf("[FrameworkModel] Value set successfully\n");
     }
 
 

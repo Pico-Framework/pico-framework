@@ -63,16 +63,13 @@ void App::onStart()
     std::cout << "[App] Initializing application..." << std::endl;
 
     static GpioController gpioController(router, pico);
-    printf("[App] Starting GPIO controller...\n");
     gpioController.start();
     static DashboardController dashboardController(router, pico);
-    printf("[App] Starting Dashboard controller...\n");
     dashboardController.start();
 
     // Here we are setting up event handlers - we get the EventManager and GpioEventManager from the AppContext.
     EventManager* eventManager = AppContext::get<EventManager>();
     GpioEventManager* gpioEventManager = AppContext::get<GpioEventManager>();
-    printf("GpioEventManager = %p\n", gpioEventManager);
 
     // Subscribe to GPIO change events
     // This will call onEvent() in this App class when a GPIO change event occurs.
@@ -142,7 +139,6 @@ void App::onEvent(const Event &e)
                 pico.onNetworkReady(); // Notify the PicoModel that the network is ready
                 printf("[App] Network ready. Starting HTTP server...\n");
                 server.start();
-                printf("[App] HTTP server started\n");
                 break;
 
             case SystemNotification::TimeValid:
