@@ -143,13 +143,18 @@ void App::onEvent(const Event &e)
 
             case SystemNotification::TimeValid: {
                 std::cout << "[App] Time is valid." << std::endl;
-                // at this point local time will equal UTC time
-                std::string utcTime = AppContext::get<TimeManager>()->formatTimeWithZone();
-                printf("[App] UTC time: %s\n", utcTime.c_str());
+                // at this point local time may equal UTC time or it may be the local time zone
+                // depending on whether the local timezone has been acquired (async)
+                // This example turns on that example, it is off by default
+                std::string localTime = AppContext::get<TimeManager>()->formatTimeWithZone();
+                printf("[App] UTC time: %s\n", localTime.c_str());
                 break;
             }
             
             case SystemNotification::LocalTimeValid: {
+                // This event is sent when the local time zone has been acquired
+                // It will not occur if the DETECT_LOCAL_TIMEZONE flag is not set
+                // in framework_user_config.h
                 std::cout << "[App] Local Time is valid." << std::endl;
                 std::string localTime = AppContext::get<TimeManager>()->formatTimeWithZone();
                 printf("[App] Local time: %s\n", localTime.c_str());
@@ -158,7 +163,10 @@ void App::onEvent(const Event &e)
 
             case SystemNotification::TimeSync:
             std::cout << "[App] SNTP Time Sync event." << std::endl;
-            // no need to do anything here, the time is valid - these occur every hour
+            // No need to do anything here, the time is valid - these occur every hour
+            // SNTP time sync events are sent every hour by default
+            // You can change the interval in framework_user_config.h
+            // by setting the SNTP_SYNC_INTERVAL to a different value
             break;
 
             case SystemNotification::TimeInvalid:
