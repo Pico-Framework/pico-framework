@@ -133,7 +133,6 @@ target_sources(pico_framework INTERFACE
 if(PICO_HTTP_ENABLE_JWT)
     target_sources(pico_framework INTERFACE
         src/http-server/JwtAuthenticator.cpp
-        src/framework/PasswordHasher.cpp
     )
     target_compile_definitions(pico_framework INTERFACE PICO_HTTP_ENABLE_JWT=1)
 endif()
