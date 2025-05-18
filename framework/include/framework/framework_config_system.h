@@ -26,6 +26,9 @@
 #define NTP_TIMEOUT_SECONDS 15
 #endif
 
+#ifndef DETECT_LOCAL_TIMEZONE
+#define DETECT_LOCAL_TIMEZONE 0 ///< Set to 1 to enable timezone detection, 0 to disable
+#endif
 
 #ifndef EVENT_QUEUE_LENGTH
 #define EVENT_QUEUE_LENGTH 8 // Default max bufferred events in the queues

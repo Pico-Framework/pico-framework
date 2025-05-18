@@ -19,6 +19,7 @@ enum class SystemNotification : uint8_t {
     NetworkReady,
     NetworkDown,
     TimeValid,
+    LocalTimeValid,
     TimeSync,
     TimeInvalid,
     WaitForTimeout,
@@ -85,8 +86,9 @@ struct Notification {
  */
 template<typename Enum>
 inline constexpr uint32_t eventMask(Enum e) {
-    return 1u << static_cast<uint8_t>(e);
+    return 1u << static_cast<uint32_t>(static_cast<std::underlying_type_t<Enum>>(e));
 }
+
 
 // Multi-value variadic overload
 template<typename Enum, typename... Rest>

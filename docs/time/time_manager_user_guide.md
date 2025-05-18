@@ -80,21 +80,17 @@ Sanity checks ensure that bogus responses (e.g., year 1970) are rejected.
 
 ---
 
-## 6. Timezone Detection and Offset
+### Automatic Timezone Detection (Optional)
 
-After startup, TimeManager uses `http://ip-api.com/json` to get a rough geolocation based on your public IP. It then queries the Open-Meteo forecast API to get the UTC offset in seconds and apply it.
+This framework supports automatic timezone detection using third-party services such as [Open-Meteo](https://open-meteo.com/) or IP-based geolocation (e.g. ip-api.com).
 
-```cpp
-tm->detectAndApplyTimezone();
-```
+This feature is **disabled by default**, as these services may require a commercial license or usage agreement when used in production or commercial products.
 
-You can also manually apply a known offset:
+To enable automatic timezone detection:
 
-```cpp
-tm->applyFixedTimezoneOffset(3600, "CET", "CEST");
-```
+-  `#define DETECT_LOCAL_TIMEZONE 1` in `framework_config_user.h`
+- Ensure you understand and comply with the terms of any third-party services you depend on
 
-This changes the formatted string output for logs and UIs.
 
 ---
 

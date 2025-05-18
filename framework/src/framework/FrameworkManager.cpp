@@ -71,6 +71,9 @@ void FrameworkManager::onStart()
     configASSERT(timeMgr); // Will hard fault early if registration failed
     timeMgr->start();      // If AON timer is running it will post a TimerValid event
 
+    // TimeManager will handle the time sync and timezone detection
+    AppContext::get<EventManager>()->subscribe(eventMask(SystemNotification::HttpServerStarted), this);
+
     if(!Network::initialize())
     {
         printf("[Framework Manager] Failed to initialize network stack.\n");
@@ -99,21 +102,6 @@ void FrameworkManager::onStart()
     Event event;
     event.notification = SystemNotification::NetworkReady;
     AppContext::get<EventManager>()->postEvent(event);
-
-    // Timemenager will handle the time sync and timezone detection
-    AppContext::get<EventManager>()->subscribe(eventMask(SystemNotification::HttpServerStarted), this);
-
-    while (true)
-    {
-        vTaskDelay(pdMS_TO_TICKS(1000)); // Keep the task alive
-        // we are going to delegate events
-        // look after the wifi
-        // etc here
-    }
-
-    // This point should never be reached, but if it is, clean up
-    printf("[Framework Manager] Network task exiting unexpectedly.\n");
-    vTaskDelete(nullptr);
 }
 
 /// @copydoc FrameworkManager::app_task
@@ -128,6 +116,7 @@ void FrameworkManager::onEvent(const Event &event)
     if (event.notification.kind == NotificationKind::System &&
         event.notification.system == SystemNotification::HttpServerStarted)
     {
+        printf("[FrameworkManager] HttpServer started, notifying TimeManager...\n");
         AppContext::get<TimeManager>()->onHttpServerStarted();
     }
 }
@@ -140,7 +129,6 @@ void FrameworkManager::onEvent(const Event &event)
 void FrameworkManager::poll()
 {
 #if WIFI_MONITOR_INTERVAL_MS > 0
-    printf("[FrameworkManager] Polling for Wi-Fi status...\n");
     static uint32_t lastCheck = 0;
     static int networkFailures = 0; // Track consecutive failures
     uint32_t now = xTaskGetTickCount() * portTICK_PERIOD_MS;
@@ -148,6 +136,7 @@ void FrameworkManager::poll()
     if (now - lastCheck >= WIFI_MONITOR_INTERVAL_MS)
     {
         lastCheck = now;
+        printf("[FrameworkManager] Polling for Wi-Fi status...\n");
 
         if (!Network::checkAndReconnect())
         {

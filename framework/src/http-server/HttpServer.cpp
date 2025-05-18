@@ -178,6 +178,9 @@ Tcp* HttpServer::initListener()
     if (!listener.bindAndListen(port)) {
         return nullptr;
     }
+    // Once server is listening
+    Event e(SystemNotification::HttpServerStarted);
+    AppContext::get<EventManager>()->postEvent(e); // tell others that we are up
     return &listener;
 }
 

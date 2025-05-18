@@ -124,11 +124,7 @@ void TimeManager::setTime(timespec *ts)
         return;
     }
 
-    // Initialize the RTC if necessary
-
-    // Set the system time using the provided timespec
-    TRACE("[TimeManager] Setting time: %lld seconds, %ld nanoseconds\n", ts->tv_sec, ts->tv_nsec);
-        // if the AON timer is not running, start it
+    // if the AON timer is not running, start it
     if (!aon_timer_is_running()){
         printf("[TimeManager] AON timer is not running, starting it...\n");
         aon_timer_start(ts);
@@ -145,19 +141,17 @@ void TimeManager::setTime(timespec *ts)
         return;
     }
     else{
-        printf("[TimeManager] System time set to: %lld seconds, %ld nanoseconds\n", currentTime.tv_sec, currentTime.tv_nsec);
-        time_t secs = PicoTime::now();
-        TRACE("[TimeManager] Current time: %s\n", ctime(&secs));
         AppContext::get<EventManager>()->postEvent({SystemNotification::TimeValid});
     }
 }
 
 void TimeManager::applyFixedTimezoneOffset(int offsetSeconds, const char *stdName, const char *dstName)
 {
-    printf("[TimeManager] Setting timezone offset: %d seconds\n", offsetSeconds);
-    printf("[TimeManager] Standard timezone: %s, DST timezone: %s\n", stdName, dstName);
     timezoneOffsetSeconds = offsetSeconds;
     timezoneName = stdName;
+
+    Event e(eventMask(SystemNotification::LocalTimeValid));
+    AppContext::get<EventManager>()->postEvent(e);
 
     // Log for trace/debug purposes
     printf("[TimeManager] Timezone set to UTC %+d:00 (%s)\n",
@@ -215,8 +209,6 @@ void TimeManager::fetchAndApplyTimezoneFromOpenMeteo(float lat, float lon, const
              "http://api.open-meteo.com/v1/forecast?latitude=%.4f&longitude=%.4f&current_weather=true&timezone=auto",
              lat, lon);
 
-    TRACE("url: %s\n", url);
-
     HttpRequest req;
     HttpResponse res = req.get(url);
 
@@ -240,7 +232,7 @@ void TimeManager::fetchAndApplyTimezoneFromOpenMeteo(float lat, float lon, const
             end = body.size();
         offsetSeconds = std::stoi(body.substr(offsetPos, end - offsetPos));
     }
-    TRACE("[TimeManager] Timezone: %s, UTC offset: %d sec\n", tzName.c_str(), offsetSeconds);
+   TRACE("[TimeManager] Timezone: %s, UTC offset: %d sec\n", tzName.c_str(), offsetSeconds);
     applyFixedTimezoneOffset(offsetSeconds, tzName.c_str(), tzName.c_str());
 }
 
@@ -251,6 +243,7 @@ void TimeManager::detectAndApplyTimezone()
 
     if (getLocationFromIp(tzName, lat, lon))
     {
+        printf("[TimeManager] Location detected: lat=%.4f, lon=%.4f\n", lat, lon);
         fetchAndApplyTimezoneFromOpenMeteo(lat, lon, tzName);
     }
     else
@@ -262,27 +255,27 @@ void TimeManager::detectAndApplyTimezone()
 
 std::string TimeManager::formatTimeWithZone(time_t utcTime) const
 {
+    if (utcTime == 0) {
+        utcTime = PicoTime::now();  // Use the system time
+    }
+    
     time_t localTime = utcTime + timezoneOffsetSeconds;
-    TRACE("[TimeManager : formatWithZone] Offset: %d\n", timezoneOffsetSeconds);
-    TRACE("Timzeone: %s\n", timezoneName.c_str());
     struct tm tmBuf;
     gmtime_r(&localTime, &tmBuf); // Adjusted time treated as UTC
 
     char timeBuf[16] = {0};
     strftime(timeBuf, sizeof(timeBuf), "%H:%M:%S", &tmBuf);
-    TRACE("[TimeManager : formatWithZone] Time: %s\n", timeBuf);
 
     const char *zone = timezoneName.empty() ? "?" : timezoneName.c_str();
 
     char formatted[48] = {0};
     snprintf(formatted, sizeof(formatted), "[%s %s]", timeBuf, zone);
-
     return std::string(formatted);
 }
 
 std::string TimeManager::currentTimeForTrace() const
 {
-    return formatTimeWithZone(time(nullptr));
+    return formatTimeWithZone(PicoTime::now());
 }
 
 void TimeManager::start() {
@@ -302,5 +295,12 @@ void TimeManager::onNetworkReady()
 }
 
 void TimeManager::onHttpServerStarted(){
-    detectAndApplyTimezone(); // Ensure timezone is set when HTTP server starts
+    if (DETECT_LOCAL_TIMEZONE)
+    {
+        detectAndApplyTimezone();
+    }
+    else
+    {   
+        applyFixedTimezoneOffset(0, "UTC", "UTC");
+    }
 }

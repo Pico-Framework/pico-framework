@@ -57,7 +57,7 @@ public:
      */
     const char* getTimezoneName() const { return timezoneName.c_str(); }
 
-    std::string formatTimeWithZone(time_t rawTime) const;
+    std::string formatTimeWithZone(time_t rawTime = 0) const;
 
     /**
      * @brief Get the current time formatted as a string.

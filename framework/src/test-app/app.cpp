@@ -16,6 +16,7 @@
 #include "http/HttpFileserver.h"
 #include "http/JsonResponse.h"
 #include "http/Router.h"
+#include "time/TimeManager.h"
 
 #include "GpioController.h"
 #include "DashboardController.h"
@@ -100,11 +101,10 @@ void App::onStart()
             SystemNotification::NetworkReady,
             SystemNotification::TimeValid,
             SystemNotification::TimeSync,
-            SystemNotification::TimeInvalid
+            SystemNotification::TimeInvalid,
+            SystemNotification::LocalTimeValid
         ),
         this);
-
-
 }
 
 void App::onEvent(const Event &e)
@@ -139,17 +139,27 @@ void App::onEvent(const Event &e)
                 pico.onNetworkReady(); // Notify the PicoModel that the network is ready
                 printf("[App] Network ready. Starting HTTP server...\n");
                 server.start();
-                break;
+                break;    
 
-            case SystemNotification::TimeValid:
-                std::cout << "[App] Time is valid. Scheduler can be initialized here." << std::endl;
-                // scheduler.start();  // <- placeholder for future logic
+            case SystemNotification::TimeValid: {
+                std::cout << "[App] Time is valid." << std::endl;
+                // at this point local time will equal UTC time
+                std::string utcTime = AppContext::get<TimeManager>()->formatTimeWithZone();
+                printf("[App] UTC time: %s\n", utcTime.c_str());
                 break;
+            }
             
-                case SystemNotification::TimeSync:
-                std::cout << "[App] SNTP Time Sync event." << std::endl;
-                // no need to do anything here, the time is valid - these occur every hour
+            case SystemNotification::LocalTimeValid: {
+                std::cout << "[App] Local Time is valid." << std::endl;
+                std::string localTime = AppContext::get<TimeManager>()->formatTimeWithZone();
+                printf("[App] Local time: %s\n", localTime.c_str());
                 break;
+            }
+
+            case SystemNotification::TimeSync:
+            std::cout << "[App] SNTP Time Sync event." << std::endl;
+            // no need to do anything here, the time is valid - these occur every hour
+            break;
 
             case SystemNotification::TimeInvalid:
                 std::cout << "[App] Time is invalid. Running in degraded mode." << std::endl;
