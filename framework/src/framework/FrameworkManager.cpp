@@ -79,6 +79,8 @@ void FrameworkManager::onStart()
         printf("[Framework Manager] Failed to initialize network stack.\n");
     }
 
+    warmUp(); // Warm up the JSON parser and other components
+
     // needs to be started after scheduler running to ensure full use of FreeRTOS
     app->start(); // Starts the app task 
 
@@ -103,6 +105,32 @@ void FrameworkManager::onStart()
     event.notification = SystemNotification::NetworkReady;
     AppContext::get<EventManager>()->postEvent(event);
 }
+
+/// @copydoc FrameworkManager::warmUp
+void FrameworkManager::warmUp()
+{
+    // Warm up JSON parser
+    {
+        nlohmann::json j = nlohmann::json::parse("{\"warmup\":true}", nullptr, false);
+        (void)j.dump(); // Force stringify
+    }
+
+    // Warm up HttpRequest 
+    {
+        HttpRequest dummy;
+        dummy.setMethod("GET");
+        dummy.setPath("/warmup");
+        dummy.setHeader("X-Warmup", "true");
+        (void)dummy.getHeader("X-Warmup");
+    }
+
+    // Force common string ops
+    std::string("warmup");
+
+    // Force a task yield
+    vTaskDelay(pdMS_TO_TICKS(1));
+}
+
 
 /// @copydoc FrameworkManager::app_task
 void FrameworkManager::app_task(void *params)

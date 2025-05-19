@@ -292,7 +292,7 @@ void App::initRoutes()
  * It is a good place to initialize resources, start services, etc.
  */
 void App::onStart()
-{
+{  
     std::cout << "[App] Waiting for network..." << std::endl;
 
     // Subscribe to the network ready event

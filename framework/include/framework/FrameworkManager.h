@@ -82,6 +82,8 @@ private:
      */
     void onStart();
 
+    void warmUp();
+
     /**
      * @brief Polling function for the FrameworkManager.
      * 
