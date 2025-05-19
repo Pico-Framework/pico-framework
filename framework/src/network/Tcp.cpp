@@ -279,10 +279,10 @@ bool Tcp::connectTls(const ip_addr_t &ip, int port)
 int Tcp::send(const char *buffer, size_t size)
 {
     TRACE("[Tcp] Sending %zu bytes\n", size);
-#if PICO_TCP_ENABLE_TLS
-    if (!buffer || size == 0 || !connected || (use_tls && !tls_pcb))
+    #if PICO_TCP_ENABLE_TLS
+    if ((!buffer && size > 0) || !connected || (use_tls && !tls_pcb))
 #else
-    if (!buffer || size == 0 || !connected)
+    if ((!buffer && size > 0) || !connected)
 #endif
     {
         printf("[Tcp] Invalid buffer, size, or connection\n");

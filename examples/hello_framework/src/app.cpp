@@ -24,6 +24,10 @@
  * AppContext allows components to access shared services such as the EventManager (used in this example),
  * JsonService, and persistent storage interfaces.
  * 
+ * Lastly, don't be put off by the size of this file. The actual code is quite small.
+ * The rest of the file is documentation and comments. The framework is designed to be easy to use and understand.
+ * It is also designed to be easy to extend and modify.
+ * 
  */
 
 #include "app.h"
@@ -58,10 +62,24 @@ App::App(int port) : FrameworkApp(port, "AppTask", 2048, 1)
  * This method sets up the routing table for the HTTP server.
  * The routes are defined using the router object, which is a member of the App class.
  * The routes are defined using lambda functions that take a request and response object as parameters.
+ * They do not have to be lamdba functions, but it is the most common way to define routes as it
+ * is concise and easy to read.
  * The routes can handle different HTTP methods (GET, POST, PUT, DELETE) and can have parameters in the URL.
  * The routes can also return JSON data or plain text responses.
  * initRoutes is called by the framework when the app is started but before the task is running.
  * Both the router and server are dependency injected in Framework::App, so both are available to App.
+ * 
+ * All routes have the following signature:
+ * 
+ * void routeHandler(HttpRequest &req, HttpResponse &res, const RouteMatch &match);
+ * 
+ * - req: The request object that contains the request data, headers, body, etc.
+ * - res: The response object that is used to send the response back to the client.
+ * - match: The route match object that contains the matched route parameters.
+ * 
+ * The matched route parameters are passed as a map to the route handler and can be accessed using the match object.
+ * The parameter name is the key and the value is the value of the parameter. You can also get an ordered list of the parameters.
+ * See the examples below for more details.
  */
 void App::initRoutes()
 {
@@ -84,7 +102,7 @@ void App::initRoutes()
      * Parameters are passed as a map to the route handler. The parameter name is the key and the value is the value of the parameter.
      * For example, if the route is /{name} and the request is /John, the parameter name will be "name" and the value will be "John".
      */
-    router.addRoute("GET", "/{name}", [this](HttpRequest &req, HttpResponse &res, const RouteMatch &match)
+    router.addRoute("GET", "/name/{name}", [this](HttpRequest &req, HttpResponse &res, const RouteMatch &match)
     {
         std::string name = match.getParam("name").value_or("World");
         res.send("Hello " + name + "!"); 
@@ -185,6 +203,7 @@ void App::initRoutes()
      */
     router.addRoute("GET", "/api/header", [this](HttpRequest &req, HttpResponse &res, const RouteMatch &)
     {
+        req.printHeaders();
         auto userAgent = req.getHeader("User-Agent");
         res.json({{"user-agent", userAgent}}); 
     });
@@ -229,7 +248,39 @@ void App::initRoutes()
      */
     router.addCatchAllGetRoute([this](HttpRequest &req, HttpResponse &res, const RouteMatch &match)
     {
+        printf("Catch-all GET route: %s\n", req.getPath().c_str());
+        // You can also use req.getPath() to get the full path of the request
         res.status(404).send("Not Found"); 
+    });
+
+    /**
+     * @brief OPTIONS method for CORS preflight requests. Returns allowed methods.
+     * This is useful for CORS (Cross-Origin Resource Sharing) preflight requests.
+     * It allows the client to check which HTTP methods are allowed for a specific resource.
+     * In this example, we will allow GET, POST and OPTIONS methods.
+     * 
+     * @note You can also use middleware to handle CORS requests globally or for specific routes.
+     * See the ping_pong example or authorization for more details on middleware.
+     */
+    router.addRoute("OPTIONS", "/api/data", [](HttpRequest& req, HttpResponse& res, const RouteMatch&) {
+        res.setHeader("Allow", "GET,POST,OPTIONS").status(204).send();
+    });
+
+    /**
+     * @brief Example of a HEAD request. Returns 200 OK with headers, no body.
+     * HEAD requests are used to retrieve the headers of a resource without the body.
+     * This is useful for checking if a resource exists, its size, type, etc. without downloading it.
+     * In this example, we will return a 200 OK status and some custom headers.
+     */
+    router.addRoute("HEAD", "/status", [](HttpRequest& req, HttpResponse& res, const RouteMatch&) {
+        // @brief Responds to a HEAD request with 200 OK and appropriate headers, no body.
+        
+        // You can include headers as you would for GET
+        res.setHeader("Content-Type", "text/plain");
+        res.setHeader("X-Framework", "PicoFramework");
+    
+        // For HEAD, we send only the headers and status — no body
+        res.status(200).send();
     });
 
     // Add more routes as needed
@@ -268,18 +319,15 @@ void App::onStart()
     {
         std::cerr << "[App] Failed to start HTTP server." << std::endl;
     }
-
-    while (true)
-    {
-        vTaskDelay(pdMS_TO_TICKS(1000));
-    }
 }
+
 /**
  * @brief This method is called when an event is received in the FrameworkController event queue.
  * There is one event queue per controller.
  * It is a good place to handle events that are not directly related to HTTP requests.
  * For example, you can handle system events, user events etc.
- * The onEvent method is called by the framework when an event is received..
+ * The onEvent method is called by the framework when an event is received.
+ * System notifications are defined in notification.h.
  */
 void App::onEvent(Event &e)
 {
@@ -310,6 +358,11 @@ void App::onEvent(Event &e)
 void App::poll()
 {
     // For example, you can check the status of sensors, etc.
+    runEvery(1000, []()
+    {
+        // This will run every 1000ms
+        std::cout << "[App] Polling..." << std::endl;
+    });
 }
 
 /**
@@ -328,5 +381,5 @@ void App::poll()
  */
 TickType_t App::getPollIntervalTicks()
 {
-    return pdMS_TO_TICKS(100); // Default: 100ms
+    return pdMS_TO_TICKS(15000); // Default: 100ms
 }

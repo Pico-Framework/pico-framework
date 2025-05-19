@@ -139,6 +139,12 @@ public:
      */
     void send(const std::string &body);
 
+    void send(){
+        send("");  // delegate to the existing one-arg version with empty body
+    }
+    
+    void send(std::nullptr_t) = delete; // prevent sending null
+
     void send(const FrameworkView& view) {
         send(view, {});  // delegate to the existing two-arg version with empty context
     }

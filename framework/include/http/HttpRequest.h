@@ -268,8 +268,7 @@ public:
      */
     inline nlohmann::json json() const
     {
-        auto parsed = nlohmann::json::parse(getBody(), nullptr, false);
-        return parsed.is_discarded() ? nlohmann::json::object() : parsed;
+        return nlohmann::json::parse(getBody(), nullptr, false);
     }
 
     // ─────────────────────────────────────────────────────────────────────────────
