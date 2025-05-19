@@ -136,7 +136,7 @@ extern void sntp_set_system_time(uint32_t sec);
 // -----------------------------------------------------------------------------
 // ALTCP / Secure Sockets / TLS Support
 // -----------------------------------------------------------------------------
-#ifdef PICO_HTTP_CLIENT_ENABLE_TLS
+#ifdef PICO_TCP_ENABLE_TLS
 #define LWIP_ALTCP 1             // Enable the ALTCP abstraction layer
 #define LWIP_ALTCP_TLS 1         // Enable TLS support for ALTCP
 #define LWIP_ALTCP_TLS_MBEDTLS 1 // Enable mbedTLS support for ALTCP

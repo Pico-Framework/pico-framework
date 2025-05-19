@@ -1,20 +1,21 @@
 #include "app.h"
 #include <iostream>
-#include "FrameworkNotification.h"
+#include "events/Notification.h"
+#include "http/Router.h"
 
 App::App(int port) : FrameworkApp(port, "AppTask", 2048, 1) {
     std::cout << "App constructed" << std::endl;
 }
 
 void App::initRoutes() {
-    router.addRoute("GET", "/", [this](HttpRequest& req, HttpResponse& res, const std::vector<std::string>&) {
+    router.addRoute("GET", "/", [this](HttpRequest& req, HttpResponse& res, const RouteMatch& match) {
         req.printHeaders();
         res.send("Hello from Ian Archbell!");
     });
     // Add more routes as needed
 }
 
-void App::run() {
+void App::onStart() {
     std::cout << "[App] Waiting for network..." << std::endl;
     
     waitFor(SystemNotification::NetworkReady);

@@ -14,8 +14,10 @@
 #include <cstdint>
 #include <lwip/ip_addr.h>
 #include <lwip/sockets.h>
+#if PICO_TCP_ENABLE_TLS
 #include <lwip/altcp.h>
 #include <lwip/altcp_tls.h>
+#endif
 
 
 enum class SocketEvent : uint8_t {
@@ -68,9 +70,11 @@ public:
      * @return true on success, false on failure.
      */
     bool connect(const char* host, int port, bool useTls = false);
+    #if PICO_TCP_ENABLE_TLS
     bool connectTls(const char* host, int port);
     static err_t onConnected(void* arg, struct altcp_pcb* conn, err_t err);
     static void onError(void* arg, err_t err);
+    #endif
 
     /**
      * @brief Send data over the connection.
@@ -103,8 +107,12 @@ public:
     /**
      * @brief Check if the socket is valid.
      */
+    #if PICO_TCP_ENABLE_TLS
     bool isValid() const { return sockfd >= 0 || tls_pcb != nullptr; }
-
+    #else
+    bool isValid() const { return sockfd >= 0; }
+    #endif
+    
     /**
      * @brief Check if the socket is connected.
      */
@@ -139,9 +147,11 @@ private:
 
     std::string root_ca_cert;
 
+    #if PICO_TCP_ENABLE_TLS
     // TLS state (client)
     struct altcp_tls_config* tls_config = nullptr;
     struct altcp_pcb* tls_pcb = nullptr;
+    #endif
     struct pbuf* recv_buffer = nullptr; ///< Buffer for TLS receive
     size_t recv_offset = 0;
 

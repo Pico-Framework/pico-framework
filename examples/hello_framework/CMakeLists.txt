@@ -56,11 +56,11 @@ else()
 endif()
 
 # Pico Framework Feature Options
-option(PICO_HTTP_ENABLE_LITTLEFS "Enable LittleFS-based StorageManager" ON)
-option(PICO_HTTP_ENABLE_HTTP_CLIENT "Enable HttpClient" ON)
-option(PICO_TCP_ENABLE_TLS "Enable TLS support in HttpClient" ON)
-option(PICO_HTTP_ENABLE_JWT "Enable JWT authentication support" ON)
-option(PICO_HTTP_TLS_VERIFY "Enable certificate verification for TLS connections" ON)
+option(PICO_HTTP_ENABLE_LITTLEFS "Enable LittleFS-based StorageManager" OFF)
+option(PICO_HTTP_ENABLE_HTTP_CLIENT "Enable HttpClient" OFF)
+option(PICO_TCP_ENABLE_TLS "Enable TLS support in HttpClient" OFF)
+option(PICO_HTTP_ENABLE_JWT "Enable JWT authentication support" OFF)
+option(PICO_HTTP_TLS_VERIFY "Enable certificate verification for TLS connections" OFF)
 
 # ---------------------------------------------------------------
 # SDK and Framework Setup
@@ -116,11 +116,6 @@ add_custom_command(
 add_executable(pico_example_app
     src/main.cpp
     src/App.cpp
-    src/ProgramModel.cpp
-    src/ZoneModel.cpp
-    src/SprinklerController.cpp
-    src/SprinklerScheduler.cpp
-    src/LogController.cpp
 )
 
 if(PICO_HTTP_ENABLE_LITTLEFS)

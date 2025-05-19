@@ -13,7 +13,7 @@ project(pico_framework)
 # Framework Feature Options - if already set by user, use those values
 option(PICO_HTTP_ENABLE_LITTLEFS     "Enable LittleFS-based StorageManager" ON)
 option(PICO_HTTP_ENABLE_HTTP_CLIENT  "Enable HttpClient" ON)
-option(PICO_HTTP_CLIENT_ENABLE_TLS   "Enable TLS support in HttpClient" ON)
+option(PICO_TCP_ENABLE_TLS   "Enable TLS support in HttpClient" ON)
 option(PICO_HTTP_ENABLE_JWT          "Enable JWT authentication support" ON)
 option(PICO_HTTP_TLS_VERIFY          "Enable certificate verification for TLS connections" ON)
 
@@ -170,9 +170,9 @@ if(PICO_HTTP_ENABLE_HTTP_CLIENT)
     target_compile_definitions(pico_framework INTERFACE PICO_HTTP_ENABLE_HTTP_CLIENT=1)
 endif()
 
-if(PICO_HTTP_CLIENT_ENABLE_TLS)
+if(PICO_TCP_ENABLE_TLS)
     message(STATUS "[framework] HttpClient TLS support enabled")
-    target_compile_definitions(pico_framework INTERFACE PICO_HTTP_CLIENT_ENABLE_TLS=1)
+    target_compile_definitions(pico_framework INTERFACE PICO_TCP_ENABLE_TLS=1)
 endif()
 
 #------------------------------------------------------------------------------
@@ -200,11 +200,11 @@ if(PICO_PLATFORM STREQUAL "rp2040")
     target_link_libraries(pico_framework INTERFACEC hardware_rtc)
 endif()
 
-if(PICO_HTTP_ENABLE_JWT OR PICO_HTTP_CLIENT_ENABLE_TLS)
+if(PICO_HTTP_ENABLE_JWT OR PICO_TCP_ENABLE_TLS)
     target_link_libraries(pico_framework INTERFACE pico_mbedtls)
 endif()
 
-if(PICO_HTTP_CLIENT_ENABLE_TLS)
+if(PICO_TCP_ENABLE_TLS)
     target_link_libraries(pico_framework INTERFACE pico_lwip_mbedtls)
 endif()
 
@@ -219,7 +219,7 @@ add_compile_options(
 
 target_compile_options(pico_framework INTERFACE -Wno-psabi)
 
-if(PICO_HTTP_CLIENT_ENABLE_TLS)
+if(PICO_TCP_ENABLE_TLS)
     set_source_files_properties(
         ${PICO_LWIP_PATH}/src/apps/altcp_tls/altcp_tls_mbedtls.c
         PROPERTIES COMPILE_OPTIONS "-Wno-unused-result"

@@ -1,8 +1,6 @@
 #include "network/Tcp.h"
 
 #include <lwip/dns.h>
-#include <lwip/altcp.h>
-#include <lwip/altcp_tls.h>
 #include <lwip/api.h>
 #include <lwip/sockets.h>
 #include <lwip/inet.h>
@@ -12,22 +10,36 @@
 #include <task.h>
 #include <pico/stdlib.h>
 #include "utility/utility.h"
-
 #include "network/lwip_dns_resolver.h"
+
+#if PICO_TCP_ENABLE_TLS
+#include <lwip/altcp.h>
+#include <lwip/altcp_tls.h>
+#endif
 
 #include "framework_config.h"
 #include "DebugTrace.h"
 TRACE_INIT(Tcp);
 
 Tcp::Tcp()
-    : sockfd(-1), connected(false), use_tls(false),
+    : sockfd(-1), connected(false), use_tls(false)
+#if PICO_TCP_ENABLE_TLS
+      ,
       tls_config(nullptr), server_tls_config(nullptr),
-      tls_pcb(nullptr) {}
+      tls_pcb(nullptr)
+#endif
+{
+}
 
 Tcp::Tcp(int fd)
-    : sockfd(fd), connected(true), use_tls(false),
+    : sockfd(fd), connected(true), use_tls(false)
+#if PICO_TCP_ENABLE_TLS
+      ,
       tls_config(nullptr), server_tls_config(nullptr),
-      tls_pcb(nullptr) {}
+      tls_pcb(nullptr)
+#endif
+{
+}
 
 Tcp::~Tcp()
 {
@@ -44,17 +56,21 @@ Tcp &Tcp::operator=(Tcp &&other) noexcept
     if (this != &other)
     {
         sockfd = other.sockfd;
+    #if PICO_TCP_ENABLE_TLS
         tls_pcb = other.tls_pcb;
         tls_config = other.tls_config;
         server_tls_config = other.server_tls_config;
+    #endif
         connected = other.connected;
         use_tls = other.use_tls;
         recv_buffer = other.recv_buffer;
 
         other.sockfd = -1;
+    #if PICO_TCP_ENABLE_TLS
         other.tls_pcb = nullptr;
         other.tls_config = nullptr;
         other.server_tls_config = nullptr;
+    #endif    
         other.recv_buffer = nullptr;
     }
     return *this;
@@ -64,7 +80,7 @@ std::string Tcp::getPeerIp() const
 {
     sockaddr_in addr;
     socklen_t len = sizeof(addr);
-    if (lwip_getpeername(sockfd, reinterpret_cast<sockaddr*>(&addr), &len) == 0)
+    if (lwip_getpeername(sockfd, reinterpret_cast<sockaddr *>(&addr), &len) == 0)
     {
         ip_addr_t ip;
         ip.addr = addr.sin_addr.s_addr;
@@ -73,10 +89,12 @@ std::string Tcp::getPeerIp() const
     return "0.0.0.0";
 }
 
+#if PICO_TCP_ENABLE_TLS
 void Tcp::setRootCACertificate(const std::string &pem)
 {
     root_ca_cert = pem;
 }
+
 
 void Tcp::setServerTlsConfig(const std::string &cert, const std::string &key)
 {
@@ -93,6 +111,7 @@ void Tcp::setServerTlsConfig(const std::string &cert, const std::string &key)
         printf("[Tcp] Failed to create TLS server config\n");
     }
 }
+#endif
 
 bool Tcp::connect(const char *host, int port, bool use_tls)
 {
@@ -104,8 +123,11 @@ bool Tcp::connect(const char *host, int port, bool use_tls)
         printf("[Tcp] DNS resolution failed for %s\n", host);
         return false;
     }
-
+#if PICO_TCP_ENABLE_TLS
     return use_tls ? connectTls(ip, port) : connectPlain(ip, port);
+#else
+    return connectPlain(ip, port);
+#endif
 }
 
 bool Tcp::connectPlain(const ip_addr_t &ip, int port)
@@ -135,6 +157,7 @@ bool Tcp::connectPlain(const ip_addr_t &ip, int port)
     return true;
 }
 
+#if PICO_TCP_ENABLE_TLS
 bool Tcp::connectTls(const char *host, int port)
 {
     ip_addr_t ip;
@@ -152,7 +175,7 @@ err_t Tcp::onConnected(void *arg, struct altcp_pcb *conn, err_t err)
     if (err != ERR_OK)
     {
         printf("[Tcp] Connection failed: %d\n", err);
-     
+
         return err;
     }
     // Set the context for the callbacks
@@ -162,21 +185,23 @@ err_t Tcp::onConnected(void *arg, struct altcp_pcb *conn, err_t err)
 
     if (self->connectingTask)
     {
-       TRACE("TLS Connection State in onConnect: %d\n", conn->state);
+        TRACE("TLS Connection State in onConnect: %d\n", conn->state);
         xTaskNotifyGiveIndexed(self->connectingTask, NotifyConnect);
     }
 
     return ERR_OK;
 }
 
-void Tcp::onError(void* arg, err_t err) {
-    auto* self = static_cast<Tcp*>(arg);
+void Tcp::onError(void *arg, err_t err)
+{
+    auto *self = static_cast<Tcp *>(arg);
     printf("[Tcp] altcp error: %d\n", err);
 
     self->connectResult = err;
 
     // Notify the waiting task (e.g. to break ulTaskNotifyTakeIndexed)
-    if (self->connectingTask) {
+    if (self->connectingTask)
+    {
         xTaskNotifyGiveIndexed(self->connectingTask, NotifyConnect);
     }
 
@@ -191,7 +216,7 @@ bool Tcp::connectTls(const ip_addr_t &ip, int port)
         tls_config = altcp_tls_create_config_client(
             reinterpret_cast<const uint8_t *>(root_ca_cert.c_str()),
             root_ca_cert.size() + 1); // +1 for null terminator
-        //tls_config = altcp_tls_create_config_client(nullptr, 0);
+        // tls_config = altcp_tls_create_config_client(nullptr, 0);
         if (!tls_config)
         {
             printf("[Tcp] TLS config creation failed %d\n", tls_config);
@@ -200,7 +225,7 @@ bool Tcp::connectTls(const ip_addr_t &ip, int port)
         TRACE("[Tcp] TLS config created\n");
     }
     tls_pcb = altcp_tls_new(tls_config, IPADDR_TYPE_ANY);
-    //tls_pcb = altcp_tls_new(tls_config, IP_GET_TYPE(&ip));
+    // tls_pcb = altcp_tls_new(tls_config, IP_GET_TYPE(&ip));
     if (!tls_pcb)
     {
         printf("[Tcp] Failed to create TLS connection\n");
@@ -209,7 +234,7 @@ bool Tcp::connectTls(const ip_addr_t &ip, int port)
     TRACE("Setting tls hostname: %s\n", hostname);
 
     // Because altcp_tls_context() returns void*, we must cast to correct type in C++
-    auto* ssl_ctx = static_cast<mbedtls_ssl_context*>(altcp_tls_context(tls_pcb));
+    auto *ssl_ctx = static_cast<mbedtls_ssl_context *>(altcp_tls_context(tls_pcb));
     mbedtls_ssl_set_hostname(ssl_ctx, hostname);
 
     // Register recv callback *before* connect
@@ -234,24 +259,31 @@ bool Tcp::connectTls(const ip_addr_t &ip, int port)
     // Wait for notification that TLS handshake completed
     ulTaskNotifyTakeIndexed(NotifyConnect, pdTRUE, pdMS_TO_TICKS(portMAX_DELAY));
     TRACE("[Tcp] TLS handshake completed\n");
-    if (connectResult == ERR_OK){
+    if (connectResult == ERR_OK)
+    {
         printf("[Tcp] TLS connection established\n");
         connected = true;
     }
-    else{
+    else
+    {
         printf("[Tcp] TLS connection failed %d\n", connectResult);
         altcp_close(tls_pcb);
         tls_pcb = nullptr;
-        return false;   
+        return false;
     }
     use_tls = true;
     return true;
 }
+#endif
 
 int Tcp::send(const char *buffer, size_t size)
 {
     TRACE("[Tcp] Sending %zu bytes\n", size);
+#if PICO_TCP_ENABLE_TLS
     if (!buffer || size == 0 || !connected || (use_tls && !tls_pcb))
+#else
+    if (!buffer || size == 0 || !connected)
+#endif
     {
         printf("[Tcp] Invalid buffer, size, or connection\n");
         return -1;
@@ -260,33 +292,40 @@ int Tcp::send(const char *buffer, size_t size)
     constexpr size_t chunkSize = HTTP_BUFFER_SIZE;
     size_t totalSent = 0;
 
-    //absolute_time_t startTime = get_absolute_time(); // <-- your timing starts here
+    // absolute_time_t startTime = get_absolute_time(); // <-- your timing starts here
 
     while (totalSent < size)
     {
         size_t toSend = (size - totalSent > chunkSize) ? chunkSize : (size - totalSent);
-
+    #if PICO_TCP_ENABLE_TLS
         if (use_tls && tls_pcb)
         {
-            if (tls_pcb->state == nullptr) {
+
+            if (tls_pcb->state == nullptr)
+            {
                 printf("[Tcp] TLS connection is not established\n");
                 return -1;
             }
 
             err_t err = altcp_write(tls_pcb, buffer + totalSent, toSend, TCP_WRITE_FLAG_COPY);
-            if (err != ERR_OK) {
+            if (err != ERR_OK)
+            {
                 printf("[Tcp] altcp_write failed: %d\n", err);
                 return -1;
             }
-            if (altcp_output(tls_pcb) != ERR_OK) {
+            if (altcp_output(tls_pcb) != ERR_OK)
+            {
                 printf("[Tcp] altcp_output failed\n");
                 return -1;
             }
-        }
-        else if (sockfd >= 0)
+
+        else
+    #endif        
+        if (sockfd >= 0)
         {
             int ret = lwip_send(sockfd, buffer + totalSent, toSend, 0);
-            if (ret <= 0) {
+            if (ret <= 0)
+            {
                 warning("[Tcp] lwip_send failed: ", ret);
                 return -1;
             }
@@ -307,7 +346,6 @@ int Tcp::send(const char *buffer, size_t size)
 
     return static_cast<int>(size); // Report success
 }
-
 
 err_t Tcp::tlsRecvCallback(void *arg, struct altcp_pcb *conn, struct pbuf *p, err_t err)
 {
@@ -353,7 +391,7 @@ int Tcp::recv(char *buffer, size_t size, uint32_t timeout_ms)
     {
         TRACE("Plain recv: %zu bytes\n", size);
         int received = lwip_recv(sockfd, buffer, size, 0);
-        if(received < 0)
+        if (received < 0)
         {
             TRACE("Plain recv error: %d, %s\n", errno, strerror(errno));
             return received;
@@ -361,6 +399,7 @@ int Tcp::recv(char *buffer, size_t size, uint32_t timeout_ms)
         return received;
     }
 
+#if PICO_TCP_ENABLE_TLS
     if (!tls_pcb || !buffer || size == 0)
     {
         return -1;
@@ -372,7 +411,7 @@ int Tcp::recv(char *buffer, size_t size, uint32_t timeout_ms)
         waiting_task = xTaskGetCurrentTaskHandle();
         BaseType_t result = ulTaskNotifyTakeIndexed(NotifyRecv, pdTRUE, pdMS_TO_TICKS(timeout_ms));
         if (result == 0 || !recv_buffer)
-            return 0;  // timeout or nothing delivered
+            return 0; // timeout or nothing delivered
     }
 
     if (!recv_buffer)
@@ -394,17 +433,24 @@ int Tcp::recv(char *buffer, size_t size, uint32_t timeout_ms)
         recv_offset = 0;
     }
     return static_cast<int>(to_copy);
+#else
+    printf("[Tcp] TLS not enabled in this build\n");
+    return -1;
+#endif
 }
 
 int Tcp::close()
 {
     int result = 0;
+    #if PICO_TCP_ENABLE_TLS
     if (use_tls && tls_pcb)
     {
         altcp_close(tls_pcb);
         tls_pcb = nullptr;
     }
-    else if (sockfd >= 0)
+    else 
+    #endif
+    if (sockfd >= 0)
     {
         result = lwip_close(sockfd);
         sockfd = -1;
@@ -441,10 +487,11 @@ err_t Tcp::acceptCallback(void *arg, struct altcp_pcb *new_conn, err_t err)
     return ERR_OK;
 }
 
-Tcp* Tcp::accept()
+Tcp *Tcp::accept()
 {
     if (use_tls)
     {
+        #if PICO_TCP_ENABLE_TLS
         pending_client = nullptr;
         waiting_task = xTaskGetCurrentTaskHandle();
         ulTaskNotifyTakeIndexed(NotifyAccept, pdTRUE, portMAX_DELAY);
@@ -452,7 +499,7 @@ Tcp* Tcp::accept()
 
         if (pending_client)
         {
-            Tcp* client = new Tcp();
+            Tcp *client = new Tcp();
             client->tls_pcb = pending_client;
             client->use_tls = true;
             client->connected = true;
@@ -460,6 +507,10 @@ Tcp* Tcp::accept()
             return client;
         }
         return nullptr;
+        #else
+        printf("[Tcp] TLS not enabled in this build\n");
+        return nullptr;
+        #endif
     }
 
     // For plain TCP, use lwIP accept directly
@@ -472,14 +523,14 @@ Tcp* Tcp::accept()
     if (client_fd >= 0)
     {
         // Set receive timeout
-        struct timeval recv_timeout = { .tv_sec = 0, .tv_usec = 100000 };
+        struct timeval recv_timeout = {.tv_sec = 0, .tv_usec = 100000};
         lwip_setsockopt(client_fd, SOL_SOCKET, SO_RCVTIMEO, &recv_timeout, sizeof(recv_timeout));
 
         // Optional: Force-close on disconnect (RST on close)
-        struct linger so_linger = { .l_onoff = 1, .l_linger = 0 };
+        struct linger so_linger = {.l_onoff = 1, .l_linger = 0};
         lwip_setsockopt(client_fd, SOL_SOCKET, SO_LINGER, &so_linger, sizeof(so_linger));
 
-        Tcp* client = new Tcp(client_fd);
+        Tcp *client = new Tcp(client_fd);
         return client;
     }
 
@@ -489,10 +540,14 @@ Tcp* Tcp::accept()
 
 bool Tcp::bindAndListen(int port)
 {
+    #if PICO_TCP_ENABLE_TLS
     return server_tls_config ? bindAndListenTls(port) : bindAndListenPlain(port);
+    #else
+    return bindAndListenPlain(port);
+    #endif
 }
 
-#include <fcntl.h>  // needed for O_NONBLOCK
+#include <fcntl.h> // needed for O_NONBLOCK
 bool Tcp::bindAndListenPlain(int port)
 {
     sockfd = lwip_socket(AF_INET, SOCK_STREAM, 0);
@@ -533,7 +588,7 @@ bool Tcp::bindAndListenPlain(int port)
     connected = true;
     return true;
 }
-
+#if PICO_TCP_ENABLE_TLS
 bool Tcp::bindAndListenTls(int port)
 {
     if (!server_tls_config)
@@ -568,3 +623,4 @@ bool Tcp::bindAndListenTls(int port)
     connected = true;
     return true;
 }
+#endif
