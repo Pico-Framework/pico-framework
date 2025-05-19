@@ -245,6 +245,10 @@ void App::initRoutes()
      * 
      * You can use it to serve static files, redirect to a default page, etc.
      * In this simple example, we will just return a 404.
+     * 
+     * @note This is a catch-all route, so it will match any GET request that does not match any other route.
+     * Be careful with catch-all routes, as they can match unintended requests. 
+     * e.g /{name} would also match /something-else, use /name/{name} to match /name/John
      */
     router.addCatchAllGetRoute([this](HttpRequest &req, HttpResponse &res, const RouteMatch &match)
     {
