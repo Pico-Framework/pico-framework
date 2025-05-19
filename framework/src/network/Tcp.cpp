@@ -318,6 +318,7 @@ int Tcp::send(const char *buffer, size_t size)
                 printf("[Tcp] altcp_output failed\n");
                 return -1;
             }
+        }
 
         else
     #endif        

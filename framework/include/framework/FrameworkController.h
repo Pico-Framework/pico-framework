@@ -111,6 +111,15 @@ protected:
      */
     virtual void onEvent(const Event &event);
 
+
+    /**
+     * @brief Returns the polling interval in ticks used in run().
+     * Override this in subclasses if different polling frequency is needed.
+     */
+    virtual TickType_t getPollIntervalTicks() {
+        return pdMS_TO_TICKS(100); // Default: 100ms
+    }
+
     /**
      * @brief Called during every loop iteration for non-blocking background logic.
      *

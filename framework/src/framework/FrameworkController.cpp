@@ -48,7 +48,7 @@ void FrameworkController::run()
     onStart();           // Call onStart() to initialize controller state
     while (true)
     {
-        waitAndDispatch(100); // Wait for notifications or timeout
+        waitAndDispatch(getPollIntervalTicks()); // Wait for notifications or timeout
         poll();               // Call user logic
     }
 }

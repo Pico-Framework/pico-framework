@@ -57,8 +57,8 @@ endif()
 
 # Pico Framework Feature Options
 option(PICO_HTTP_ENABLE_LITTLEFS "Enable LittleFS-based StorageManager" OFF)
-option(PICO_HTTP_ENABLE_HTTP_CLIENT "Enable HttpClient" OFF)
-option(PICO_TCP_ENABLE_TLS "Enable TLS support in HttpClient" OFF)
+option(PICO_HTTP_ENABLE_HTTP_CLIENT "Enable HttpClient" ON)
+option(PICO_TCP_ENABLE_TLS "Enable TLS support in TCP" ON)
 option(PICO_HTTP_ENABLE_JWT "Enable JWT authentication support" OFF)
 option(PICO_HTTP_TLS_VERIFY "Enable certificate verification for TLS connections" OFF)
 
