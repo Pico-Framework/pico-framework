@@ -3,6 +3,8 @@
 #include "events/Notification.h"
 #include "framework/AppContext.h"
 #include "http/HttpServer.h"
+#include "events/EventManager.h"
+#include "events/Notification.h"
 #include "weather_html.h"
 #include "weather.h"
 
@@ -30,10 +32,13 @@ void App::onStart() {
     
     FrameworkApp::onStart();
 
-    printf("[MyApp] Starting Storage App...\n");
+    printf("[MyApp] Starting Weather App...\n");
+
+    AppContext::get<EventManager>()->subscribe(eventMask(SystemNotification::NetworkReady), this);
 
     // Wait for network
     printf("[MyApp] Waiting for network...\n");
+
     waitFor(SystemNotification::NetworkReady);
 
     // Start server once network is ready

@@ -23,10 +23,10 @@ endif()
 # Chip-specific memory map and flash offset for LittleFS
 
 if(${PICO_BOARD} STREQUAL "pico2_w")
-    set(LFS_FLASH_OFFSET 0x101E0000)
+    set(LFS_FLASH_OFFSET 0x101C0000)
     set(MEMMAP_FRAGMENT ${CMAKE_SOURCE_DIR}/memmap_lfs_fragment_rp2350.ld)
 else()
-    set(LFS_FLASH_OFFSET 0x1E0000)
+    set(LFS_FLASH_OFFSET 0x1C0000)
     set(MEMMAP_FRAGMENT ${CMAKE_SOURCE_DIR}/memmap_lfs_fragment_rp2040.ld)
 endif()
 message(STATUS "Using LittleFS offset: ${LFS_FLASH_OFFSET}")
@@ -38,27 +38,6 @@ message(STATUS "Using flash method: ${FLASH_METHOD}")
 if(${FLASH_METHOD} STREQUAL "usb")
     message(WARNING "USB flashing requires BOOTSEL mode. Hold BOOTSEL while plugging in.")
 endif()
-
-# Host identity for ping-pong demo
-# Allow THISHOST to be overridden
-set(THISHOST "ping-a" CACHE STRING "Name of this device (ping-a or ping-b)")
-message(STATUS "Using THISHOST: ${THISHOST}")
-
-# Allow THATHOST override or auto-infer
-if(DEFINED ENV{THATHOST})
-    set(THATHOST $ENV{THATHOST})
-    message(STATUS "Overriding THATHOST from env: ${THATHOST}")
-elseif(NOT DEFINED THATHOST)
-    if(${THISHOST} STREQUAL "ping-a")
-        set(THATHOST "ping-b")
-    elseif(${THISHOST} STREQUAL "ping-b")
-        set(THATHOST "ping-a")
-    else()
-        message(FATAL_ERROR "THISHOST must be either 'ping-a' or 'ping-b'")
-    endif()
-endif()
-
-message(STATUS "Building as ${THISHOST}, targeting ${THATHOST}")
 
 # Wi-Fi credentials (optional from environment)
 if(DEFINED ENV{WIFI_SSID})
@@ -77,11 +56,11 @@ else()
 endif()
 
 # Pico Framework Feature Options
-option(PICO_HTTP_ENABLE_LITTLEFS "Enable LittleFS-based StorageManager" ON)
+option(PICO_HTTP_ENABLE_LITTLEFS "Enable LittleFS-based StorageManager" OFF)
 option(PICO_HTTP_ENABLE_HTTP_CLIENT "Enable HttpClient" ON)
-option(PICO_TCP_ENABLE_TLS "Enable TLS support in HttpClient" ON)
-option(PICO_HTTP_ENABLE_JWT "Enable JWT authentication support" ON)
-option(PICO_HTTP_TLS_VERIFY "Enable certificate verification for TLS connections" ON)
+option(PICO_TCP_ENABLE_TLS "Enable TLS support in TCP" ON)
+option(PICO_HTTP_ENABLE_JWT "Enable JWT authentication support" OFF)
+option(PICO_HTTP_TLS_VERIFY "Enable certificate verification for TLS connections" OFF)
 
 # ---------------------------------------------------------------
 # SDK and Framework Setup
@@ -124,7 +103,7 @@ add_custom_command(
     COMMAND ${CMAKE_COMMAND} -E echo "Building LittleFS image..."
     COMMAND ${MKLITTLEFS_TOOL}
             -c ${LFS_SOURCE_DIR}
-            -b 4096 -p 256 -s 131072
+            -b 4096 -p 256 -s 262144
             ${LFS_IMAGE}
     DEPENDS ${HTML_FILES}
     COMMENT "Generating ${LFS_IMAGE} from ${LFS_SOURCE_DIR}"
@@ -137,7 +116,6 @@ add_custom_command(
 add_executable(pico_example_app
     src/main.cpp
     src/App.cpp
-    src/PingPongController.cpp
 )
 
 if(PICO_HTTP_ENABLE_LITTLEFS)
@@ -172,8 +150,6 @@ target_compile_definitions(pico_example_app PUBLIC
     CYW43_HOST_NAME="Pico-Framework"
     ALTCP_MBEDTLS_AUTHMODE=MBEDTLS_SSL_VERIFY_REQUIRED
     NO_SYS=0
-    THISHOST=\"${THISHOST}\"
-    THATHOST=\"${THATHOST}\"
 )
 
 
@@ -199,7 +175,7 @@ if(${FLASH_METHOD} STREQUAL "usb")
         COMMAND ${CMAKE_COMMAND} -E sleep 2
         COMMAND ${CMAKE_COMMAND} -E echo "Flashing firmware via USB..."
         COMMAND picotool load ${CMAKE_BINARY_DIR}/pico_example_app.uf2
-        COMMAND ${CMAKE_COMMAND} -E echo "Flashing LittleFS image to 0x1E0000 via USB..."
+        COMMAND ${CMAKE_COMMAND} -E echo "Flashing LittleFS image via USB..."
         COMMAND ${CMAKE_COMMAND} -E copy ${LFS_IMAGE} ${CMAKE_BINARY_DIR}/littlefs.bin
         COMMAND picotool load ${CMAKE_BINARY_DIR}/littlefs.bin --offset ${LFS_FLASH_OFFSET} 
     )

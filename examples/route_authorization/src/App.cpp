@@ -8,6 +8,8 @@
 #include "events/Event.h"
 #include "events/Notification.h"
 #include "UserController.h"
+#include "framework/AppContext.h"
+#include "storage/StorageManager.h"
 
 App::App(int port) : FrameworkApp(port, "AppTask", 1024, 3)
 {
@@ -34,6 +36,9 @@ void App::onStart()
     // declared static so it doesn't get destroyed when this function exits
     static UserController controller(router);
     controller.start();
+
+    StorageManager *storageManager = AppContext::get<StorageManager>();
+    storageManager->mount();
 
     EventManager *eventManager = AppContext::get<EventManager>();
     eventManager->subscribe(

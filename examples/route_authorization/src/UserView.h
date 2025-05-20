@@ -12,8 +12,7 @@ public:
     UserView();
 
 private:
-    static constexpr const char *login_html = R"rawliteral(
-    <!DOCTYPE html>
+    static constexpr const char *login_html = R"rawliteral(<!DOCTYPE html>
     <html lang="en">
     
     <head>

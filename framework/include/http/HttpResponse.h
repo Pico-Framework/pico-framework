@@ -332,7 +332,7 @@ public:
     HttpResponse& sendError(int statusCode, const std::string& message);  // simpler form
 
     //#if defined(PICO_HTTP_ENABLE_STORAGE)
-    bool toFile(const std::string& path, StorageManager* storage) const;
+    HttpResponse& toFile(const std::string& path, StorageManager* storage);
     //#endif
 
 private:

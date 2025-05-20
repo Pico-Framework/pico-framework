@@ -42,14 +42,12 @@ void App::initRoutes()
                     { res.send(DashboardView()); });
     router.addRoute("GET", "/hello", [](HttpRequest &req, HttpResponse &res, const auto &)
                     { res.send("Welcome to PicoFramework!"); });
-    router.addRoute("GET", "/zones/{name}", [](HttpRequest& req, HttpResponse& res, const RouteMatch& match) {
-        if (auto name = match.getParam("name")) {
-            printf("Named zone: %s\n", name->c_str());
-            JsonResponse::sendSuccess(res, {{"zone", *name}});
-        } else {
-            JsonResponse::sendError(res, 400, "MISSING_NAME", "No zone name provided");
-        }
-    });
+    // Return the contents of the directory
+    router.addRoute("GET", "/ls(.*)", [](HttpRequest &req, HttpResponse &res, const auto &match) {
+            std::vector<FileInfo> files;
+            AppContext::get<StorageManager>()->listDirectory(match.ordered[0], files);
+            res.json(files);                  
+    });                
 }
 
 void App::onStart()

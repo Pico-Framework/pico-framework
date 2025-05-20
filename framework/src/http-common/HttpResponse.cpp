@@ -449,14 +449,15 @@ HttpResponse& HttpResponse::sendError(int statusCode, const std::string& message
 }
 
 //#if defined(PICO_HTTP_ENABLE_STORAGE)
-bool HttpResponse::toFile(const std::string& path, StorageManager* storage) const
+HttpResponse& HttpResponse::toFile(const std::string& path, StorageManager* storage)
 {
     if (!storage || body.empty())
-        return false;
+        return *this;
 
-    return storage->writeFile(path,
-                              reinterpret_cast<const unsigned char*>(body.data()),
-                              body.size());
+    storage->writeFile(path,
+                reinterpret_cast<const unsigned char*>(body.data()),
+                body.size());
+                return *this;
 }
 //#endif
 

@@ -135,7 +135,6 @@ protected:
      * @param id Unique ID for this timed function (used to track last execution).
      */
     void runEvery(uint32_t intervalMs, const std::function<void()> &fn, const char *id);
-    void runEvery(uint32_t intervalMs, const std::function<void()> &fn);
 
     Router& router;    ///< Handles path-to-handler mapping - reference to shared Router instance
 

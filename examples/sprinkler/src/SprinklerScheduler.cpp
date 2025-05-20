@@ -95,8 +95,11 @@ void SprinklerScheduler::initRoutes()
                     {
         auto name = match.getParam("name");
         if (name.has_value()) {
+            printf("[SprinklerScheduler] Deleting program: %s\n", name.value().c_str());
             programModel->remove(name.value());
+            printf("[SprinklerScheduler] Program deleted: %s\n", name.value().c_str());
             rescheduleAll();
+            printf("[SprinklerScheduler] All programs rescheduled\n");
             res.status(200).json({ { "success", true }, { "message", "Program deleted" }});
         } else {
             res.status(400).json({ { "success", false }, { "message", "Missing program name" }});
@@ -328,6 +331,14 @@ std::optional<std::pair<std::string, time_t>> SprinklerScheduler::getNextSchedul
     for (int i = 0; i < 7; ++i)
     {
         Day day = static_cast<Day>((static_cast<int>(PicoTime::dayOfWeek(now)) + i) % 7);
+
+        // check we don't have a stale program to avoid potential trap
+        auto prog = programModel->get(next->programName);
+        if (!prog)
+            continue;  // or optionally: log a warning
+        if (!(prog->days & static_cast<uint8_t>(day)))
+            continue;
+
         if (!(programModel->get(next->programName)->days & static_cast<uint8_t>(day)))
             continue;
 
