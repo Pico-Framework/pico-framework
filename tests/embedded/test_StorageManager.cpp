@@ -6,6 +6,7 @@
 #include <CppUTest/TestHarness.h>
 #include <vector>
 #include <string>
+#include <pico/stdlib.h>
 #include "storage/StorageManager.h"
 
 #if PICO_HTTP_ENABLE_LITTLEFS
@@ -26,20 +27,17 @@ static const std::string testContent = "Embedded test content";
 TEST_GROUP(StorageManagerInterface){
 
     void setup(){
-
         CHECK_TRUE(storage->mount());
         storage->remove(testFile);
         storage->remove(renamedFile);
-}
+    }
 
-void teardown()
-{
-    storage->remove(testFile);
-    storage->remove(renamedFile);
-}
-}
-;
-
+    void teardown()
+    {
+        storage->remove(testFile);
+        storage->remove(renamedFile);
+    }
+};
 
 TEST(StorageManagerInterface, WriteAndReadBackFile)
 {
@@ -125,3 +123,5 @@ TEST(StorageManagerInterface, FormatClearsStorage)
     CHECK_TRUE(storage->formatStorage());
     CHECK_FALSE(storage->exists(testFile));
 }
+
+  

@@ -192,8 +192,8 @@ void LittleFsStorageManager::configure()
     config.lock = lfs_lock;
     config.unlock = lfs_unlock;
 #endif
-    printf("[LittleFS] Configured, flash base: 0x%08x, size: %zu bytes (%zu blocks)\n",
-           static_cast<unsigned>(flashBase), flashSize, config.block_count);
+    // printf("[LittleFS] Configured, flash base: 0x%08x, size: %zu bytes (%zu blocks)\n",
+    //        static_cast<unsigned>(flashBase), flashSize, config.block_count);
 }
 
 bool LittleFsStorageManager::mount()
