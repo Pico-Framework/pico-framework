@@ -2,12 +2,12 @@
 #include "CppUTest/TestHarness.h"
 #include <vector>\
 
-#include "StorageManager.h"
-#include "JsonService.h"
+#include "storage/StorageManager.h"
+#include "storage/JsonService.h"
 
 TEST_GROUP(FatFsStorageManager)
 {
-    StorageManager storage;
+
     const std::string testFile = "/testfile.txt";
     const std::string renamedFile = "/renamed.txt";
 

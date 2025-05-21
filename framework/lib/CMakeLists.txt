@@ -56,14 +56,14 @@ target_sources(FreeRTOS+FAT+CLI PRIVATE
     ${PORTABLE_PATH}/SDIO/sd_card_sdio.c
     ${PORTABLE_PATH}/SDIO/rp2040_sdio.c
 
-    ${SRC_PATH}/crash.c
+    ${SRC_PATH}/crash.c # I may replace this
     ${SRC_PATH}/crc.c
     ${SRC_PATH}/ff_utils.c
     ${SRC_PATH}/file_stream.c
     ${SRC_PATH}/freertos_callbacks.c
     ${SRC_PATH}/FreeRTOS_strerror.c
     ${SRC_PATH}/FreeRTOS_time.c
-    ${SRC_PATH}/my_debug.c
+    ${SRC_PATH}/my_debug.c # I may replace this
     ${SRC_PATH}/sd_timeouts.c
     ${SRC_PATH}/util.c
 )

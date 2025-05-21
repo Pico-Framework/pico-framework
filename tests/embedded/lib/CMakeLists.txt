@@ -17,16 +17,16 @@ set(CPPUTEST_USE_LONG_LONG 1 CACHE BOOL "Enable long long support in CppUTest")
 
 add_subdirectory(cpputest)
 
-# Force long long support and disable CppUTest's operator new/delete
-target_compile_definitions(CppUTest PUBLIC
+add_compile_definitions(
     CPPUTEST_USE_LONG_LONG=1
     CPPUTEST_USE_MEM_LEAK_DETECTION=0
-    FatFsStorageManagerTest PRIVATE CPPUTEST_USE_STD_CPP_LIB=0
+    CPPUTEST_USE_STD_CPP_LIB=1
 )
+
+# Force long long support and disable CppUTest's operator new/delete)
 target_compile_definitions(CppUTestExt PUBLIC
     CPPUTEST_USE_LONG_LONG=1
-    CPPUTEST_USE_MEM_LEAK_DETECTION=0
-    FatFsStorageManagerTest PRIVATE CPPUTEST_USE_STD_CPP_LIB=0
+    CPPUTEST_MEM_LEAK_DETECTION_DISABLED=1
 )
 
 # Go up one level from tests/embedded/lib/ to tests/embedded/

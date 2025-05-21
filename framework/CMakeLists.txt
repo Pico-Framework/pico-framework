@@ -118,12 +118,9 @@ target_sources(pico_framework INTERFACE
     src/utility/Logger.cpp
     src/utility/utility.cpp
 
-    #Storage - littlefs or fatfs are only included conditionally
+    #Storage - littlefs or fatfs are included conditionally
     src/storage/JsonService.cpp
 
-    #json v0.2
-    #src/json/json.cpp
-    #src/json/NlohmannJsonImpl.cpp
 )
 
 #------------------------------------------------------------------------------
@@ -156,7 +153,7 @@ else()
     target_sources(pico_framework INTERFACE 
         src/storage/FatFsStorageManager.cpp
         src/storage/FatFsFileReader.cpp
-        #src/port/hw_config.c
+        #src/port/hw_config.c - needs to be provided by user application
         )
     target_link_libraries(pico_framework INTERFACE FreeRTOS+FAT+CLI)
 endif()
