@@ -61,8 +61,18 @@ void DashboardController::initRoutes()
     router.addRoute("GET", "/api/v1/ls(.*)", [this](HttpRequest &req, HttpResponse &res, const RouteMatch &match)
                     { this->router.listDirectory(req, res, match); });
 
-    // Catch-all route for static files
-    router.addRoute("GET", "/(.*)", [this](HttpRequest &req, HttpResponse &res, const RouteMatch &match)
+//     Catch-all route for static files
+//     router.addRoute("GET", "/(.*)", [this](HttpRequest &req, HttpResponse &res, const RouteMatch &match)
+//                     { this->router.serveStatic(req, res, match); });
+
+    // Catch-all route for static files - this is equiavalent to the commented-out line above
+    // It will match any GET request that doesn't match a specific route
+    // This is useful for serving static files like HTML, CSS, JS, etc.
+    // It will also match the root path ("/") and serve the index.html file if it exists
+
+    // Note: this is provided so that you don't have to worry about a catchall regex "eating" 
+    // your other routes if it is ahead of them. It will only be called if no other GET route matches.
+    router.addCatchAllGetRoute([this](HttpRequest &req, HttpResponse &res, const RouteMatch &match)
                     { this->router.serveStatic(req, res, match); });
 }
 
