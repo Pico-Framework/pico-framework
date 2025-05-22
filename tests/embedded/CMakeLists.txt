@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.13)
 set(PICO_BOARD pico2_w)
 
 # Pico Framework Feature Options
-option(PICO_HTTP_ENABLE_LITTLEFS "Enable LittleFS-based StorageManager" OFF)
+option(PICO_HTTP_ENABLE_LITTLEFS "Enable LittleFS-based StorageManager" ON)
 option(PICO_HTTP_ENABLE_HTTP_CLIENT "Enable HttpClient" ON)
 option(PICO_TCP_ENABLE_TLS "Enable TLS support" ON)
 option(PICO_HTTP_ENABLE_JWT "Enable JWT authentication support" ON)
@@ -70,7 +70,6 @@ add_executable(EmbeddedTest
     UTestPlatform.cpp
     TestRunner.cpp
     test_StorageManager.cpp
-    #test_FatFsStorageManager.cpp
     ${TESTS_DIR}/host/mocks/test_stub_waitpid.c
 )
 

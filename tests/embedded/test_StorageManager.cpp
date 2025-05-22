@@ -7,7 +7,9 @@
 #include <vector>
 #include <string>
 #include <pico/stdlib.h>
+#include <stdio.h>
 #include "storage/StorageManager.h"
+
 
 #if PICO_HTTP_ENABLE_LITTLEFS
 #include "storage/LittleFsStorageManager.h"
@@ -169,6 +171,12 @@ void test_FormatClearsStorage()
 
 extern "C" void runStorageManagerTests()
 {
+    #if PICO_HTTP_ENABLE_LITTLEFS
+    printf("Using LittleFS storage manager.\n");
+    #else
+    printf("Using FatFS storage manager.\n");
+    #endif
+    
     printf("Mounting storage...\n");
     CHECK_TRUE(storage->mount());
     printf("Storage mounted.\n");
