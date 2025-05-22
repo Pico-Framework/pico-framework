@@ -84,9 +84,9 @@ void test_AppendToFile()
 
 void test_ExistsAndRemove()
 {
-    std::string testFile = "test_file.txt";
-    CHECK_FALSE(storage->exists(testFile));
+    std::string testFile = "exists_test.txt";  // unique per test
 
+    CHECK_FALSE(storage->exists(testFile));
     CHECK_TRUE(storage->writeFile(testFile,
         reinterpret_cast<const uint8_t*>("x"), 1));
     CHECK_TRUE(storage->exists(testFile));
