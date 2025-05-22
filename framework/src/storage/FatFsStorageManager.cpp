@@ -368,8 +368,9 @@ bool FatFsStorageManager::formatStorage()
     return mounted;
 }
 
-bool FatFsStorageManager::readFileString(const std::string &path, uint32_t startPosition, uint32_t length, std::string &buffer){
-    if (!mounted)
+bool FatFsStorageManager::readFileString(const std::string &path, uint32_t startPosition, uint32_t length, std::string &buffer)
+{
+    if (!ensureMounted())
     {
         TRACE("SD card not mounted — cannot read file string: %s\n", path.c_str());
         return false;
@@ -382,19 +383,31 @@ bool FatFsStorageManager::readFileString(const std::string &path, uint32_t start
         return false;
     }
 
+    ff_fseek(file, 0, SEEK_END);
+    size_t fileSize = ff_ftell(file);
+    if (startPosition >= fileSize)
+    {
+        ff_fclose(file);
+        buffer.clear();
+        return true;
+    }
+
+    size_t readLength = std::min<size_t>(length, fileSize - startPosition);
     ff_fseek(file, startPosition, SEEK_SET);
-    buffer.resize(length);
-    size_t bytesRead = ff_fread(buffer.data(), 1, length, file);
+
+    buffer.resize(readLength);
+    size_t bytesRead = ff_fread(buffer.data(), 1, readLength, file);
     ff_fclose(file);
 
-    if (bytesRead < length)
+    if (bytesRead != readLength)
     {
-        buffer.resize(bytesRead); // Trim to actual size read
+        buffer.resize(bytesRead);
         TRACE("Read only %zu bytes from file: %s\n", bytesRead, path.c_str());
     }
 
     return true;
 }
+
 
 #include "storage/FatFsFileReader.h"
 

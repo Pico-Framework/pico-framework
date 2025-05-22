@@ -1,5 +1,6 @@
 #pragma once
 #include <stdint.h>
+#include "port/FreeRTOSConfig.h"
 
 //      * @param userCode User-defined notification code
 

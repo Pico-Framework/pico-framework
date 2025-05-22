@@ -27,6 +27,9 @@ set(FREERTOS_KERNEL_PATH $ENV{FREERTOS_KERNEL_PATH} CACHE PATH "Path to FreeRTOS
 set(PICO_NO_MBEDTLS TRUE)
 set(PICO_HTTP_ENABLE_HTTP_CLIENT ON CACHE BOOL "" FORCE)
 
+# enabling exceptions for tests
+set(PICO_CXX_ENABLE_EXCEPTIONS 1)
+
 pico_sdk_init()
 
 set(PICO_FRAMEWORK_DIR /Users/ianarchbell/Documents/pico-framework)
@@ -34,34 +37,61 @@ set(FRAMEWORK_DIR ${PICO_FRAMEWORK_DIR}/framework)
 set(FREERTOS_FAT_CLI_DIR ${FRAMEWORK_DIR}/lib/FreeRTOS-FAT-CLI-for-RPi-Pico/src/)
 set(TESTS_DIR ${PICO_FRAMEWORK_DIR}/tests)
 
-# Set options BEFORE FetchContent_MakeAvailable
-set(CPPUTEST_PLATFORM OFF CACHE BOOL "Providing FreeRTOS platform")
-set(CPPUTEST_USE_STD_CPP_LIB ON CACHE BOOL "Using C++ standard library")
-set(CPPUTEST_USE_NEW_MACROS 0 CACHE BOOL "Disabling use of new macros")
-set(CPPUTEST_USE_LONG_LONG ON CACHE BOOL "Need long long support" FORCE)
-set(CPPUTEST_USE_MEM_LEAK_DETECTION OFF CACHE BOOL "Redefined New/Delete mean we have to turn this off" FORCE)
-set(TESTS OFF CACHE BOOL "No need to build host tests" FORCE)
-set(EXAMPLES OFF CACHE BOOL "No need to build host examples" FORCE)
-
 # === CppUTest Setup ===
 include(FetchContent)
 FetchContent_Declare(
   CppUTest
   GIT_REPOSITORY https://github.com/cpputest/cpputest.git
   GIT_TAG        v4.0
-  SOURCE_SUBDIR  .
-  OVERRIDE_FIND_PACKAGE
+)
+
+# Set options BEFORE FetchContent_MakeAvailable
+option(MEMORY_LEAK_DETECTION "Enable memory leak detection" OFF) # this works!
+option(LONGLONG "Support long long" ON)
+option(STD_CPP "Use the standard C++ library" ON)
+option(TESTS "Compile and make tests for the code?" OFF)
+option(EXAMPLES "Compile and make examples?" OFF)
+option(C++11 "Compile with C++11 support" ON)
+
+#set(CPPUTEST_USE_LONG_LONG 1 CACHE BOOL "Use long long")
+
+#set(CPPUTEST_PLATFORM OFF CACHE BOOL "Providing FreeRTOS platform")
+
+add_compile_definitions(EmbeddedTest PRIVATE
+    PICO_CXX_DISABLE_ALLOCATION_OVERRIDES
+    CPPUTEST_USE_MEM_LEAK_DETECTION=0
+    CPPUTEST_USE_LONG_LONG=1
 )
 
 FetchContent_MakeAvailable(CppUTest)
 
-# Export headers and libs for embedded inclusion
-install(TARGETS CppUTest CppUTestExt
-    ARCHIVE DESTINATION ${TESTS_DIR}/embedded/lib
+# === Test target ===
+add_executable(EmbeddedTest
+    UTestPlatform.cpp
+    TestRunner.cpp
+    test_StorageManager.cpp
+    #test_FatFsStorageManager.cpp
+    ${TESTS_DIR}/host/mocks/test_stub_waitpid.c
 )
-install(DIRECTORY ${cpputest_SOURCE_DIR}/include/
-    DESTINATION ${TESTS_DIR}/embedded/include
+
+unset(CPPUTEST_USE_NEW_MACROS)
+
+# After FetchContent_MakeAvailable(CppUTest)
+add_library(CppUTest::CppUTest ALIAS CppUTest)
+add_library(CppUTest::CppUTestExt ALIAS CppUTestExt)
+
+target_link_libraries(EmbeddedTest PRIVATE
+    pico_framework
+    CppUTest::CppUTest
+    CppUTest::CppUTestExt
+    hardware_spi
 )
+
+include(CTest) # Enable testing
+
+# automatically discover CppUTest tests
+include(${CMAKE_CURRENT_SOURCE_DIR}/lib/cpputest/cmake/Modules/CppUTest.cmake)
+cpputest_discover_tests(EmbeddedTest)
 
 include_directories(
     ${FRAMEWORK_DIR}/include
@@ -71,14 +101,6 @@ include_directories(
 
 add_subdirectory(${FRAMEWORK_DIR} pico_framework)
 
-# === Test target ===
-add_executable(EmbeddedTest
-    #UTestPlatform.cpp
-    TestRunner.cpp
-    test_StorageManager.cpp
-    #test_FatFsStorageManager.cpp
-    ${TESTS_DIR}/host/mocks/test_stub_waitpid.c
-)
 
 target_include_directories(EmbeddedTest PRIVATE
     ${FRAMEWORK_DIR}/include
@@ -90,19 +112,6 @@ target_include_directories(EmbeddedTest PRIVATE
     ${cpputest_BINARY_DIR}  # for generated headers like config.h
 )
 
-target_compile_definitions(EmbeddedTest PRIVATE
-    CPPUTEST_USE_LONG_LONG=1
-    CPPUTEST_USE_STD_CPP_LIB=1
-    CPPUTEST_MEM_LEAK_DETECTION_DISABLED=1
-    CPPUTEST_USE_NEW_MACROS=0
-)
-
-target_link_libraries(EmbeddedTest
-    pico_framework
-    CppUTest
-    CppUTestExt
-    hardware_spi
-)
 
 # Memory map fragment if LittleFS is enabled
 if(PICO_HTTP_ENABLE_LITTLEFS)
