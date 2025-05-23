@@ -1,7 +1,7 @@
 #pragma once
-#include "framework/HtmlTemplateView.h"
+#include "framework/StaticView.h"
 
-class DashboardView : public HtmlTemplateView {
+class DashboardView : public StaticView {
 public:
     DashboardView();
 

@@ -271,6 +271,7 @@ void HttpServer::handleClient(Tcp* conn)
     QUIET_PRINTF("[HttpServer] Client request received: %s, path: %s\n", req.getMethod().c_str(), req.getPath().c_str());
 
     HttpResponse res(conn);
+    TRACE("HttpResponse created\n");
     res.setHeader("Connection", "close"); // Close the connection 
 
     bool ok = router.handleRequest(req, res);

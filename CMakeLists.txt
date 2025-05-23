@@ -5,11 +5,11 @@ cmake_minimum_required(VERSION 3.13)
 # ---------------------------------------------------------------
 
 # Board selection (allow override via environment)
-if(DEFINED ENV{PICO_BOARD})
-    set(PICO_BOARD $ENV{PICO_BOARD})
-else()
-    set(PICO_BOARD pico2_w)
-endif()
+# if(DEFINED ENV{PICO_BOARD})
+#     set(PICO_BOARD $ENV{PICO_BOARD})
+# else()
+    set(PICO_BOARD pico_w)
+#endif()
 
 # Pico Framework Feature Options
 option(PICO_HTTP_ENABLE_LITTLEFS "Enable LittleFS-based StorageManager" OFF)
@@ -141,11 +141,11 @@ add_custom_command(
         TARGET framework_test
         POST_BUILD
         COMMAND ${CMAKE_SIZE} $<TARGET_FILE:framework_test>
-        COMMENT "📊 Printing memory usage for framework_test"
+        COMMENT "Printing memory usage for framework_test"
     )
 
 if(PICO_PRINT_MEM_USAGE STREQUAL "ON")
-    message(STATUS "📊 Memory usage report enabled")
+    message(STATUS "Memory usage report enabled")
     find_program(CMAKE_OBJDUMP arm-none-eabi-objdump)
     if (NOT CMAKE_OBJDUMP)
         message(FATAL_ERROR "CMAKE_OBJDUMP (arm-none-eabi-objdump) not found")
@@ -159,6 +159,12 @@ if(PICO_PRINT_MEM_USAGE STREQUAL "ON")
             -DPATH_TO_ELF=$<TARGET_FILE:framework_test>
             -DCMAKE_OBJDUMP=${CMAKE_OBJDUMP}
             -P ${CMAKE_CURRENT_SOURCE_DIR}/tools/report_memory.cmake
-        COMMENT "📊 Running Framework RAM usage analysis..."
+        COMMENT "Running Framework RAM usage analysis..."
     )
 endif()
+
+add_custom_target(flash
+    COMMAND ${CMAKE_CURRENT_BINARY_DIR}/picotool load test-app.uf2 -f
+    DEPENDS test-app.uf2
+    COMMENT "Flashing test-app.uf2 using picotool"
+)

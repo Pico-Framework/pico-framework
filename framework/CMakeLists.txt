@@ -194,7 +194,7 @@ target_link_libraries(pico_framework INTERFACE
 ) 
 
 if(PICO_PLATFORM STREQUAL "rp2040")
-    target_link_libraries(pico_framework INTERFACEC hardware_rtc)
+    target_link_libraries(pico_framework INTERFACE hardware_rtc)
 endif()
 
 if(PICO_HTTP_ENABLE_JWT OR PICO_TCP_ENABLE_TLS)
