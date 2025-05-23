@@ -164,7 +164,7 @@ if(PICO_PRINT_MEM_USAGE STREQUAL "ON")
 endif()
 
 add_custom_target(flash
-    COMMAND ${CMAKE_CURRENT_BINARY_DIR}/picotool load test-app.uf2 -f
-    DEPENDS test-app.uf2
+    COMMAND ${CMAKE_CURRENT_BINARY_DIR}/picotool load framework_test.uf2 -f
+    DEPENDS framework_test.uf2
     COMMENT "Flashing test-app.uf2 using picotool"
 )
