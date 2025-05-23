@@ -366,7 +366,7 @@ void App::poll()
     {
         // This will run every 1000ms
         std::cout << "[App] Polling..." << std::endl;
-    });
+    }, "polling");
 }
 
 /**
