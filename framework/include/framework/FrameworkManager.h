@@ -53,12 +53,6 @@ private:
 
     Network network; ///< Network management
 
-    // Static task allocation buffers
-    static StaticTask_t xApplicationTaskBuffer;
-    static StaticTask_t xNetworkTaskBuffer;
-    static StackType_t xNetworkStack[NETWORK_STACK_SIZE];
-    static StackType_t xApplicationStack[APPLICATION_STACK_SIZE];
-
     /**
      * @brief Placeholder for an application-level task, if used.
      */

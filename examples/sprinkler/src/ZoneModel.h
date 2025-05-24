@@ -36,6 +36,8 @@ class ZoneModel : public FrameworkModel
 public:
     explicit ZoneModel(const std::string &path);
 
+    ZoneModel() = delete;
+
     // Lifecycle
     bool load();
     bool save();  

@@ -78,6 +78,8 @@ public:
      */
     explicit ProgramModel(const std::string &path);
 
+    ProgramModel() = delete; // Prevent default constructor
+
     /**
      * @brief Load all programs from persistent storage.
      * @return true if loaded successfully

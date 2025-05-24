@@ -35,12 +35,15 @@ bool FrameworkModel::load()
         printf("Failed to get JsonService\n");
         return false;
     }
+    if(storagePath.empty())
+    {
+        printf("[FrameworkModel] No storage path set, cannot load data\n");
+        return false;
+    }
+    TRACE("[FrameworkModel] Loading data from %s\n", storagePath.c_str());
     if (!jsonService->load(storagePath))
         return false;
-    TRACE("Loaded %s\n", storagePath.c_str());
-    TRACE("JSON data: %s\n", jsonService->data().dump(4).c_str());
     collection = jsonService->data().value("items", nlohmann::json::array());
-    TRACE("Loaded %zu items\n", collection.size());
     if (collection.empty())
     {
         TRACE("No items found in %s\n", storagePath.c_str());

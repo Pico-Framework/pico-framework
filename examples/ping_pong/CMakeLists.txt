@@ -20,10 +20,20 @@ else()
     set(PICO_BOARD pico_w)
 endif()
 
+if(${PICO_BOARD} STREQUAL "pico_w")
+    set(OPENOCD_TARGET "rp2040.cfg")
+elseif(${PICO_BOARD} STREQUAL "pico2_w")
+    set(OPENOCD_TARGET "rp2350.cfg")
+else()
+    message(FATAL_ERROR "Unsupported PICO_BOARD: ${PICO_BOARD}")
+endif()
+
+message(STATUS "Using OpenOCD target: ${OPENOCD_TARGET}")
+
 # Chip-specific memory map and flash offset for LittleFS
 
 if(${PICO_BOARD} STREQUAL "pico2_w")
-    set(LFS_FLASH_OFFSET 0x103E000)
+    set(LFS_FLASH_OFFSET 0x103E0000)
     set(MEMMAP_FRAGMENT ${CMAKE_SOURCE_DIR}/memmap_lfs_fragment_rp2350.ld)
 else()
     set(LFS_FLASH_OFFSET 0x101E0000)
@@ -208,7 +218,7 @@ else()
         COMMAND ${CMAKE_COMMAND} -E echo "Flashing firmware and filesystem via OpenOCD..."
         COMMAND ${PICO_OPENOCD_EXECUTABLE}
                 -f ${PICO_OPENOCD_SCRIPTS}/interface/cmsis-dap.cfg
-                -f ${PICO_OPENOCD_SCRIPTS}/target/rp2350.cfg
+                -f ${PICO_OPENOCD_SCRIPTS}/target/${OPENOCD_TARGET}
                 -c "adapter speed 5000"
                 -c "init"
                 -c "reset init"

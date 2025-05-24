@@ -40,11 +40,6 @@ TRACE_INIT(FrameworkManager); // Initialize tracing for this module
 #include "http/JwtAuthenticator.h"
 #endif // PICO_HTTP_ENABLE_JWT
 
-/// @copydoc FrameworkManager::xNetworkTaskBuffer
-StaticTask_t FrameworkManager::xNetworkTaskBuffer;
-
-/// @copydoc FrameworkManager::xNetworkStack
-StackType_t FrameworkManager::xNetworkStack[NETWORK_STACK_SIZE];
 
 /// @copydoc FrameworkManager::FrameworkManager
 FrameworkManager::FrameworkManager(FrameworkApp *app, Router &router)
@@ -52,7 +47,6 @@ FrameworkManager::FrameworkManager(FrameworkApp *app, Router &router)
       app(app),
       networkTaskHandle(nullptr)
 {
-
 }
 
 /// @copydoc FrameworkManager::onStart()
@@ -65,8 +59,7 @@ void FrameworkManager::onStart()
     // before we start using it in the Framework.
     // For example EventManager and other application service must be available for the user in onStart();
     AppContext::getInstance().initFrameworkServices();
-    
-   
+
     TimeManager *timeMgr = AppContext::get<TimeManager>();
     configASSERT(timeMgr); // Will hard fault early if registration failed
     timeMgr->start();      // If AON timer is running it will post a TimerValid event
@@ -74,7 +67,7 @@ void FrameworkManager::onStart()
     // TimeManager will handle the time sync and timezone detection
     AppContext::get<EventManager>()->subscribe(eventMask(SystemNotification::HttpServerStarted), this);
 
-    if(!Network::initialize())
+    if (!Network::initialize())
     {
         printf("[Framework Manager] Failed to initialize network stack.\n");
     }
@@ -84,8 +77,7 @@ void FrameworkManager::onStart()
     // needs to be started after scheduler running to ensure full use of FreeRTOS
     app->start(); // Starts the app task 
 
-    printf("[Framework Manager] Starting WiFi...\n");
-    if (!network.startWifiWithResilience())
+   if (!network.startWifiWithResilience())
     {
 #if WIFI_REBOOT_ON_FAILURE
         printf("[Framework Manager] WiFi failed — rebooting...\n");
@@ -115,7 +107,7 @@ void FrameworkManager::warmUp()
         (void)j.dump(); // Force stringify
     }
 
-    // Warm up HttpRequest 
+    // Warm up HttpRequest
     {
         HttpRequest dummy;
         dummy.setMethod("GET");
@@ -130,7 +122,6 @@ void FrameworkManager::warmUp()
     // Force a task yield
     vTaskDelay(pdMS_TO_TICKS(1));
 }
-
 
 /// @copydoc FrameworkManager::app_task
 void FrameworkManager::app_task(void *params)

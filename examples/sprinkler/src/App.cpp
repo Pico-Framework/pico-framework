@@ -10,9 +10,16 @@
 #include "UserNotification.h"
 #include "LogController.h"
 
-App::App(int port) : FrameworkApp(port, "AppTask", 1024, 3)
+
+App::App(int port) : FrameworkApp(port, "AppTask", 1024, 3),    
+    zoneModel("json/zones.json"), // Initialize ZoneModel with a JSON file for persistent storage
+    programModel("json/programs.json"), // Initialize ProgramModel with a JSON file for persistent storage
+    scheduler(router, programModel), // Initialize SprinklerScheduler
+    controller(router, zoneModel), // Initialize SprinklerController
+    logController(router) // Initialize LogController
 {
 }
+
 
 void App::initRoutes()
 {
@@ -22,7 +29,7 @@ void App::initRoutes()
     // when the application starts, so you can add routes in your controllers.
     // See the GpioController and DashboardController classes for examples.
     // Add a simple route for testing
-    printf("Initializing routes for App\n");
+    //printf("Initializing routes for App\n");
     router.addRoute("GET", "/hello", [](HttpRequest &req, HttpResponse &res, const auto &)
                     { res.send("Welcome to PicoFramework!"); });
     
@@ -34,7 +41,7 @@ void App::initRoutes()
                         res.json(files);                  
     });
 
-    router.printRoutes();
+    //router.printRoutes();
                     
 }
 
@@ -48,14 +55,20 @@ void App::onStart()
     scheduler.setProgramModel(&programModel);
     controller.setZoneModel(&zoneModel);
 
+    printf("[App] Initializing ZoneModel and ProgramModel...\n");
+
     // Load persisted state
     zoneModel.load();
     programModel.load();
+
+    printf("[App] ZoneModel and ProgramModel loaded successfully.\n");
 
     // Start controller and scheduler tasks
     controller.start();
     scheduler.start();
     logController.start();
+
+    printf("[App] Controller and Scheduler started successfully.\n");
 
     EventManager *eventManager = AppContext::get<EventManager>();
     eventManager->subscribe(
