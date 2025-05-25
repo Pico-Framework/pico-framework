@@ -24,7 +24,6 @@ if(NOT FREERTOS_KERNEL_PATH AND NOT DEFINED ENV{FREERTOS_KERNEL_PATH})
     message(FATAL_ERROR "FREERTOS_KERNEL_PATH is not set.")
 endif()
 
-
 include(${CMAKE_SOURCE_DIR}/../../cmake/FreeRTOS_Kernel_import.cmake)
 
 # ----------------------------------------------------------------------------------
@@ -41,26 +40,64 @@ add_subdirectory(${CMAKE_SOURCE_DIR}/../../framework pico_framework)
 add_executable(${APP_NAME} ${APP_SOURCES})
 
 # ----------------------------------------------------------------------------------
-# LittleFS offset and linker fragment (always assigned if feature is enabled)
+# LittleFS offset and linker fragment (generated if feature is enabled)
 # ----------------------------------------------------------------------------------
 
 set(HAS_VALID_LFS_CONFIG FALSE)
 
 if(PICO_HTTP_ENABLE_LITTLEFS)
+
+    # Define flash size per board
     if(${PICO_BOARD} STREQUAL "pico2_w")
-        set(LFS_FLASH_OFFSET 0x103C0000)
-        set(MEMMAP_FRAGMENT ${CMAKE_SOURCE_DIR}/memmap_lfs_fragment_rp2350.ld)
+        set(FLASH_TOTAL_SIZE 0x400000)  # 4MB
         set(PICO_TARGET_CFG_FILE "rp2350.cfg")
-    else()
-        set(LFS_FLASH_OFFSET 0x101C0000)
-        set(MEMMAP_FRAGMENT ${CMAKE_SOURCE_DIR}/memmap_lfs_fragment_rp2040.ld)
+    elseif(${PICO_BOARD} STREQUAL "pico_w")
+        set(FLASH_TOTAL_SIZE 0x200000)  # 2MB
         set(PICO_TARGET_CFG_FILE "rp2040.cfg")
+    else()
+        message(FATAL_ERROR "Unsupported board: ${PICO_BOARD}")
     endif()
 
-    message(STATUS "[framework] Using LittleFS offset: ${LFS_FLASH_OFFSET}")
-    message(STATUS "[framework] Using linker fragment: ${MEMMAP_FRAGMENT}")
+    # Compute absolute flash region
+    math(EXPR LFS_FLASH_END "0x10000000 + ${FLASH_TOTAL_SIZE}")
+    math(EXPR LFS_FLASH_START "${LFS_FLASH_END} - ${LFS_PARTITION_SIZE}")
 
-    # Check if html/ exists for image build
+    # Convert to proper hex strings
+    execute_process(
+        COMMAND printf "0x%08X" ${LFS_FLASH_START}
+        OUTPUT_VARIABLE LFS_FLASH_START_HEX
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+    )
+    execute_process(
+        COMMAND printf "0x%X" ${LFS_PARTITION_SIZE}
+        OUTPUT_VARIABLE LFS_PARTITION_SIZE_HEX
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+    )
+    execute_process(
+        COMMAND printf "0x%08X" ${LFS_FLASH_END}
+        OUTPUT_VARIABLE LFS_FLASH_END_HEX
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+    )
+
+    # Generate the linker fragment
+    set(GENERATED_LD "${CMAKE_BINARY_DIR}/generated_lfs_fragment.ld")
+    file(WRITE ${GENERATED_LD}
+        "MEMORY {\n"
+        "  LFS (r) : ORIGIN = ${LFS_FLASH_START_HEX}, LENGTH = ${LFS_PARTITION_SIZE_HEX}\n"
+        "}\n"
+        "__flash_lfs_start = ORIGIN(LFS);\n"
+        "__flash_lfs_end = ORIGIN(LFS) + LENGTH(LFS);\n"
+    )
+
+    message(STATUS "Using generated linker fragment: ${GENERATED_LD}")
+    message(STATUS "Using LittleFS start: ${LFS_FLASH_START_HEX}")
+    message(STATUS "Using LittleFS end:   ${LFS_FLASH_END_HEX}")
+
+    set(MEMMAP_FRAGMENT ${GENERATED_LD})
+    set(LFS_FLASH_OFFSET ${LFS_FLASH_START_HEX})
+    set(HAS_VALID_LFS_CONFIG TRUE)
+
+    # Optionally build the image if html/ exists
     set(MKLITTLEFS_TOOL "${CMAKE_SOURCE_DIR}/../../tools/mklittlefs/mklittlefs")
     set(LFS_IMAGE "${CMAKE_BINARY_DIR}/littlefs.img")
     set(LFS_SOURCE_DIR "${CMAKE_SOURCE_DIR}/html")
@@ -80,9 +117,8 @@ if(PICO_HTTP_ENABLE_LITTLEFS)
         )
 
         add_custom_target(build_lfs_image ALL DEPENDS ${LFS_IMAGE})
-        set(HAS_VALID_LFS_CONFIG TRUE)
     else()
-        message(STATUS "[framework] html/ not found, skipping LFS image build.")
+        message(STATUS "[framework] html/ not found, skipping LFS image build but keeping linker symbols.")
     endif()
 endif()
 
@@ -110,7 +146,10 @@ target_link_libraries(${APP_NAME}
 )
 
 if(PICO_HTTP_ENABLE_LITTLEFS)
-    target_link_options(${APP_NAME} PRIVATE "-T${MEMMAP_FRAGMENT}")
+    message(STATUS "Linking with MEMMAP_FRAGMENT: ${MEMMAP_FRAGMENT}")
+    if(DEFINED MEMMAP_FRAGMENT)
+        target_link_options(${APP_NAME} PRIVATE "-T${MEMMAP_FRAGMENT}")
+    endif()
 endif()
 
 # ----------------------------------------------------------------------------------

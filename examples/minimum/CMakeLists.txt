@@ -9,7 +9,7 @@ set(PICO_BOARD pico2_w) # valid: pico_w or pico2_w
 # This will set the flash method, which is used to flash the application
 # valid: picoprobe or usb, openocd will be used if you have a picoprobe connected via swd
 # picotool will be used if you have a USB connection to the Pico W
-set(FLASH_METHOD usb)   # valid: picoprobe or usb
+set(FLASH_METHOD usb) # valid: picoprobe or usb
 
 #include the pico sdk
 include(../../cmake/pico_sdk_import.cmake)
@@ -25,7 +25,7 @@ pico_sdk_init()
 set(LFS_PARTITION_SIZE 262144) # 256K
 
 # Feature options - do a clean build if you change these
-option(PICO_HTTP_ENABLE_LITTLEFS "Enable LittleFS-based StorageManager" OFF)
+option(PICO_HTTP_ENABLE_LITTLEFS "Enable LittleFS-based StorageManager" ON)
 option(PICO_HTTP_ENABLE_HTTP_CLIENT "Enable HttpClient" OFF)
 option(PICO_TCP_ENABLE_TLS "Enable TLS support in TCP" OFF)
 option(PICO_HTTP_ENABLE_JWT "Enable JWT authentication support" OFF)
@@ -55,8 +55,14 @@ endif()
 set(APP_SOURCES
     src/main.cpp
     src/app.cpp
-    src/hw_config.c
 )
+
+# Conditionally include the hw_config.c file if building for SD card
+if(NOT PICO_HTTP_ENABLE_LITTLEFS)
+    list(APPEND APP_SOURCES
+        src/hw_config.c
+    )
+endif()
 
 # Shared framework setup, flashing, build logic
 # Thisis designed to remove complexity and duplication from the CMakeLists.txt
