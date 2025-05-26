@@ -91,7 +91,7 @@ void App::onEvent(Event &e)
 void App::poll()
 {
     // For example, you can check the status of sensors, etc.
-    runEvery(1000, []()
+    runEvery(15000, []()
     {
         // This will execute once every 1000ms
         std::cout << "[App] Polling..." << std::endl;
