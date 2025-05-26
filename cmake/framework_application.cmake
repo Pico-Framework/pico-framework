@@ -198,6 +198,11 @@ if(PICO_HTTP_ENABLE_LITTLEFS)
     set(LFS_SOURCE_DIR "${CMAKE_SOURCE_DIR}/html")
 
     if(EXISTS ${LFS_SOURCE_DIR})
+        if (DEFINED ENV{MKLITTLEFS_EXECUTABLE})
+            message(STATUS "Using MKLITTLEFS_EXECUTABLE from environment: $ENV{MKLITTLEFS_EXECUTABLE}")
+            set(MKLITTLEFS_EXECUTABLE $ENV{MKLITTLEFS_EXECUTABLE})
+        endif()
+
         if(NOT DEFINED MKLITTLEFS_EXECUTABLE)
             find_program(MKLITTLEFS_EXECUTABLE NAMES mklittlefs)
         endif()
@@ -276,6 +281,58 @@ target_compile_options(${APP_NAME} PRIVATE
     -Wno-psabi
 )
 
+
+# ------------------------------------------------------------------------------
+# OpenOCD Script Directory Resolution
+# ------------------------------------------------------------------------------
+
+# Allow user override
+if(NOT DEFINED PICO_OPENOCD_SCRIPTS)
+
+    # Try system-installed openocd (Homebrew, Linux package, etc.)
+    find_program(OPENOCD_EXECUTABLE NAMES openocd)
+    if(NOT OPENOCD_EXECUTABLE)
+        message(FATAL_ERROR "OpenOCD executable not found. Please install or add to PATH.")
+    endif()
+
+    # Try calling openocd with no -s, just to test if it can find scripts
+    execute_process(
+        COMMAND ${OPENOCD_EXECUTABLE}
+                -f interface/cmsis-dap.cfg
+                -c "exit"
+        RESULT_VARIABLE OPENOCD_PROBE_RESULT
+        OUTPUT_QUIET ERROR_QUIET
+    )
+
+    if(OPENOCD_PROBE_RESULT EQUAL 0)
+        message(STATUS "OpenOCD appears to find its scripts automatically. No script path override will be set.")
+        # Do NOT set PICO_OPENOCD_SCRIPTS
+    else()
+        # Try relative to OpenOCD binary
+        get_filename_component(OPENOCD_DIR ${OPENOCD_EXECUTABLE} DIRECTORY)
+        set(POSSIBLE_SCRIPT_DIR "${OPENOCD_DIR}/../share/openocd/scripts")
+
+        if(EXISTS "${POSSIBLE_SCRIPT_DIR}/interface/cmsis-dap.cfg")
+            set(PICO_OPENOCD_SCRIPTS "${POSSIBLE_SCRIPT_DIR}")
+            message(STATUS "Using OpenOCD scripts from: ${PICO_OPENOCD_SCRIPTS}")
+        endif()
+
+        # Try vendored fallback if needed
+        if(NOT DEFINED PICO_OPENOCD_SCRIPTS)
+            set(VENDORED_OCD_DIR "${CMAKE_SOURCE_DIR}/../../framework/tools/openocd-scripts")
+            if(EXISTS "${VENDORED_OCD_DIR}/interface/cmsis-dap.cfg")
+                set(PICO_OPENOCD_SCRIPTS "${VENDORED_OCD_DIR}")
+                message(STATUS "Using vendored OpenOCD scripts from: ${PICO_OPENOCD_SCRIPTS}")
+            endif()
+        endif()
+
+        if(NOT DEFINED PICO_OPENOCD_SCRIPTS)
+            message(WARNING "OpenOCD could not locate its scripts. Set PICO_OPENOCD_SCRIPTS manually if flashing fails.")
+        endif()
+    endif()
+
+endif()
+
 # ----------------------------------------------------------------------------------
 # Flash Target
 # ----------------------------------------------------------------------------------
@@ -312,24 +369,23 @@ if(NOT TARGET flash_all)
         endif()
     else()
 
-        # Derive OpenOCD script path from PICO_SDK_PATH if not provided
-        if(NOT DEFINED PICO_OPENOCD_SCRIPTS)
-            if(NOT DEFINED PICO_SDK_PATH)
-                message(FATAL_ERROR "PICO_SDK_PATH must be set to locate OpenOCD scripts when using FLASH_METHOD=openocd")
-            endif()
-            get_filename_component(PICO_SDK_PARENT_DIR ${PICO_SDK_PATH} DIRECTORY)
-            set(PICO_OPENOCD_SCRIPTS ${PICO_SDK_PARENT_DIR}/openocd/scripts)
-        endif()
-
         message(STATUS "Using OpenOCD scripts from: ${PICO_OPENOCD_SCRIPTS}")
+
+        if(DEFINED PICO_OPENOCD_SCRIPTS)
+            set(OCD_INTERFACE_FILE "${PICO_OPENOCD_SCRIPTS}/interface/cmsis-dap.cfg")
+            set(OCD_TARGET_FILE "${PICO_OPENOCD_SCRIPTS}/target/${PICO_TARGET_CFG_FILE}")
+        else()
+            set(OCD_INTERFACE_FILE "interface/cmsis-dap.cfg")
+            set(OCD_TARGET_FILE "target/${PICO_TARGET_CFG_FILE}")
+        endif()
         
         if(INCLUDE_FS_FLASH)
         
             add_custom_command(TARGET flash_all POST_BUILD
                 COMMAND ${CMAKE_COMMAND} -E echo "Flashing application via OpenOCD..."
                 COMMAND ${OPENOCD_EXECUTABLE}
-                        -f ${PICO_OPENOCD_SCRIPTS}/interface/cmsis-dap.cfg
-                        -f ${PICO_OPENOCD_SCRIPTS}/target/${PICO_TARGET_CFG_FILE}
+                        -f ${OCD_INTERFACE_FILE}
+                        -f ${OCD_TARGET_FILE}
                         -c "adapter speed 5000"
                         -c "init"
                         -c "reset init"
@@ -343,8 +399,8 @@ if(NOT TARGET flash_all)
             add_custom_command(TARGET flash_all POST_BUILD
                 COMMAND ${CMAKE_COMMAND} -E echo "Flashing application via OpenOCD..."
                 COMMAND ${OPENOCD_EXECUTABLE}
-                        -f ${PICO_OPENOCD_SCRIPTS}/interface/cmsis-dap.cfg
-                        -f ${PICO_OPENOCD_SCRIPTS}/target/${PICO_TARGET_CFG_FILE}
+                        -f ${OCD_INTERFACE_FILE}
+                        -f ${OCD_TARGET_FILE}
                         -c "adapter speed 5000"
                         -c "init"
                         -c "reset init"

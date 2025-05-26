@@ -1,218 +1,167 @@
+# CMakeLists.txt 
+# author: Ian Archbell
+# date: 2025-05-25
+# description: CMakeLists.txt for a minimal Pico application using the Pico SDK
+# This file is part of the Pico HTTP framework. 
+# It uses framework_application.cmake to simplify the build process.
+# This file is designed to be used as a template for your own applications.
+# license: MIT License
+
+# ------------------------------------------------------------------------------
+# Toolchain and Dependencies (Must Be Installed by the User)
+# ------------------------------------------------------------------------------
+
+# - CMake (version 3.13 or later)
+#   Required for configuring and generating project build files.
+#   Not installed by default on most platforms:
+#     - macOS: install via Homebrew (`brew install cmake`)
+#     - Linux: install via package manager (e.g. `sudo apt install cmake`)
+#              May be an older version — consider building manually if needed
+#     - Windows: install from https://cmake.org/download or via Chocolatey (`choco install cmake`)
+#   Ensure CMake is available in your system PATH.
+
+# - GNU Arm Embedded Toolchain (version 10.3 or later)
+#   Required to compile firmware for RP2040-based boards.
+#   Download from: https://developer.arm.com/downloads/-/gnu-rm
+#   Install and ensure `arm-none-eabi-gcc` and related tools are in your PATH.
+
+# - Pico SDK (version 1.5.0 or later)
+#   Core SDK for Raspberry Pi Pico development.
+#   Must be cloned and available for CMake to reference.
+#   Repository: https://github.com/raspberrypi/pico-sdk
+
+# - FreeRTOS Kernel (official version, latest stable)
+#   Required for all framework-based applications.
+#   Clone from the official repository:
+#     https://github.com/FreeRTOS/FreeRTOS-Kernel
+#   Set the FREERTOS_KERNEL_PATH environment variable or CMake variable
+#   to point to the kernel source directory (not the root of the full FreeRTOS repo).
+
+# - Picotool
+#   Used to flash UF2 binaries to the Pico via USB.
+#   Will be installed automatically by the Pico SDK. Alternatively, you can download a pre-built binary from:
+#   https://github.com/raspberrypi/pico-sdk-tools/releases
+#   Must be on your system PATH.
+
+# - OpenOCD (Raspberry Pi fork)
+#   Used to flash and debug via SWD using a programmer like Picoprobe.
+#   Do not use Homebrew or upstream OpenOCD — they may not support RPxxxx fully.
+#   Use the version from: https://github.com/raspberrypi/pico-sdk-tools/releases
+#   Must include `scripts/interface/cmsis-dap.cfg` and `scripts/target/rp2040.cfg` / `rp2350.cfg`
+
+# - PicoProbe or other CMSIS-DAP compatible SWD programmer
+#   Required for SWD flashing/debugging using OpenOCD.
+#   A second Raspberry Pi Pico can be flashed as a Picoprobe.
+
+# - mklittlefs
+#   Used to generate LittleFS filesystem images.
+#   Required if PICO_HTTP_ENABLE_LITTLEFS is ON.
+#   Repository: https://github.com/earlephilhower/mklittlefs
+#   Must be built and available on your PATH.
+
+# - pioasm
+#   Used to assemble PIO programs. Will be installed automatically by the Pico SDK.
+#   If you need a specific version, you can find binaries at:
+#   https://github.com/raspberrypi/pico-sdk-tools/releases
+#   But pico_sdk_import.cmake and pico_sdk_init() will install it automatically
+
+
+# ------------------------------------------------------------------------------
+
 cmake_minimum_required(VERSION 3.13)
 
-# ---------------------------------------------------------------
-# User Configurable Section
-# ---------------------------------------------------------------
+# Application name (used for project, target, image, etc.)
+set(APP_NAME minimum)
 
-# Check if PICO_FRAMEWORK_PATH is set via environment
-if(DEFINED ENV{PICO_FRAMEWORK_PATH})
-    set(PICO_FRAMEWORK_PATH $ENV{PICO_FRAMEWORK_PATH})
-    message(STATUS "Using PICO_FRAMEWORK_PATH from environment: ${PICO_FRAMEWORK_PATH}")
-else()
-    get_filename_component(PICO_FRAMEWORK_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../../" ABSOLUTE)
-    message(STATUS "Using default PICO_FRAMEWORK_PATH: ${PICO_FRAMEWORK_PATH}")
+# This will set the board and the platform
+# Perform a clean build if you change this
+set(PICO_BOARD pico_w) # valid: pico_w or pico2_w
+
+if(NOT PICO_BOARD STREQUAL "pico_w" AND NOT PICO_BOARD STREQUAL "pico2_w")
+    message(FATAL_ERROR "Unsupported PICO_BOARD: ${PICO_BOARD}")
 endif()
 
-# Board selection (default to pico2_w)
-if(DEFINED ENV{PICO_BOARD})
-    set(PICO_BOARD $ENV{PICO_BOARD})
-else()
-    set(PICO_BOARD pico2_w)
-endif()
+# This will set the flash method, which is used to flash the application
+# valid: openocd or usb, openocd will be used if you have a picoprobe connected via swd
+# picotool will be used if you have a USB connection to the Pico W
+set(FLASH_METHOD openocd) # valid: picoprobe or usb
 
-# Chip-specific memory map and flash offset for LittleFS
+#include the pico sdk
+include(../../cmake/pico_sdk_import.cmake)
 
-if(${PICO_BOARD} STREQUAL "pico2_w")
-    set(LFS_FLASH_OFFSET 0x101C0000)
-    set(MEMMAP_FRAGMENT ${CMAKE_SOURCE_DIR}/memmap_lfs_fragment_rp2350.ld)
-else()
-    set(LFS_FLASH_OFFSET 0x1C0000)
-    set(MEMMAP_FRAGMENT ${CMAKE_SOURCE_DIR}/memmap_lfs_fragment_rp2040.ld)
-endif()
-message(STATUS "Using LittleFS offset: ${LFS_FLASH_OFFSET}")
+project(${APP_NAME} CXX C)
 
-# Flashing method: 'picoprobe' (default) or 'usb'
-set(FLASH_METHOD "picoprobe" CACHE STRING "Select flashing method: picoprobe or usb")
-message(STATUS "Using flash method: ${FLASH_METHOD}")
+# Initialize the pico sdk
+pico_sdk_init()
 
-if(${FLASH_METHOD} STREQUAL "usb")
-    message(WARNING "USB flashing requires BOOTSEL mode. Hold BOOTSEL while plugging in.")
-endif()
+# Size of LittleFS partition (used to calculate offset), unused in this example
+# littlefs partition is at the top of flash, so we need to reserve space for it
+# offset is calculated as (total flash size - partition size)
+set(LFS_PARTITION_SIZE 262144) # 256K
 
-# Wi-Fi credentials (optional from environment)
-if(DEFINED ENV{WIFI_SSID})
-    set(WIFI_SSID $ENV{WIFI_SSID})
-endif()
-if(DEFINED ENV{WIFI_PASSWORD})
-    set(WIFI_PASSWORD $ENV{WIFI_PASSWORD})
-endif()
-
-# JWT secret (optional from environment)
-if(DEFINED ENV{JWT_SECRET})
-    set(JWT_SECRET_VALUE "$ENV{JWT_SECRET}")
-else()
-    set(JWT_SECRET_VALUE "your_secret")
-    message(WARNING "JWT_SECRET environment variable not set. Using fallback value.")
-endif()
-
-# Pico Framework Feature Options
+# Feature options - do a clean build if you change these
 option(PICO_HTTP_ENABLE_LITTLEFS "Enable LittleFS-based StorageManager" OFF)
-option(PICO_HTTP_ENABLE_HTTP_CLIENT "Enable HttpClient" ON)
-option(PICO_TCP_ENABLE_TLS "Enable TLS support in TCP" ON)
+option(PICO_HTTP_ENABLE_HTTP_CLIENT "Enable HttpClient" OFF)
+option(PICO_TCP_ENABLE_TLS "Enable TLS support in TCP" OFF)
 option(PICO_HTTP_ENABLE_JWT "Enable JWT authentication support" OFF)
 option(PICO_HTTP_TLS_VERIFY "Enable certificate verification for TLS connections" OFF)
 
-# ---------------------------------------------------------------
-# SDK and Framework Setup
-# ---------------------------------------------------------------
-
-if(NOT PICO_SDK_PATH AND NOT DEFINED ENV{PICO_SDK_PATH})
-    message(FATAL_ERROR "PICO_SDK_PATH is not set.")
+# Credentials (override via env vars if needed)
+if(DEFINED ENV{WIFI_SSID})
+    set(WIFI_SSID $ENV{WIFI_SSID})
+else()
+    set(WIFI_SSID "ssid")
 endif()
 
-if(NOT FREERTOS_KERNEL_PATH AND NOT DEFINED ENV{FREERTOS_KERNEL_PATH})
-    message(FATAL_ERROR "FREERTOS_KERNEL_PATH is not set.")
+if(DEFINED ENV{WIFI_PASSWORD})
+    set(WIFI_PASSWORD $ENV{WIFI_PASSWORD})
+else()
+    set(WIFI_PASSWORD "password")
 endif()
 
-include(../../cmake/pico_sdk_import.cmake)
-include(../../cmake/FreeRTOS_Kernel_import.cmake)
+# Needed for JWT token generation and authentication, if used
+if(DEFINED ENV{JWT_SECRET})
+    set(JWT_SECRET_VALUE $ENV{JWT_SECRET})
+else()
+    set(JWT_SECRET_VALUE "secret")
+endif()
 
-pico_sdk_init()
-set(FREERTOS_CONFIG_FILE_DIRECTORY ../../framework/include/port)
-add_subdirectory(../../framework pico_framework)
-
-project(pico_example_app C CXX ASM)
-set(CMAKE_C_STANDARD 11)
-set(CMAKE_CXX_STANDARD 17)
-
-# ---------------------------------------------------------------
-# LittleFS Image Setup
-# ---------------------------------------------------------------
-
-set(MKLITTLEFS_TOOL "${PICO_FRAMEWORK_PATH}/tools/mklittlefs/mklittlefs")
-set(LFS_IMAGE "${CMAKE_BINARY_DIR}/littlefs.img")
-set(LFS_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/html")
-set(LFS_TEMP_DIR "${CMAKE_BINARY_DIR}/html_out")
-set(PICO_OPENOCD_EXECUTABLE "/Users/ianarchbell/.pico-sdk/openocd/0.12.0+dev/openocd")
-set(PICO_OPENOCD_SCRIPTS "/Users/ianarchbell/.pico-sdk/openocd/0.12.0+dev/scripts")
-
-file(GLOB_RECURSE HTML_FILES ${LFS_SOURCE_DIR}/*)
-
-add_custom_command(
-    OUTPUT ${LFS_IMAGE}
-    COMMAND ${CMAKE_COMMAND} -E echo "Building LittleFS image..."
-    COMMAND ${MKLITTLEFS_TOOL}
-            -c ${LFS_SOURCE_DIR}
-            -b 4096 -p 256 -s 262144
-            ${LFS_IMAGE}
-    DEPENDS ${HTML_FILES}
-    COMMENT "Generating ${LFS_IMAGE} from ${LFS_SOURCE_DIR}"
-)
-
-# ---------------------------------------------------------------
-# Application Target
-# ---------------------------------------------------------------
-
-add_executable(pico_example_app
+# App source files - your list of source files for the application
+# This is where you would add your application-specific source files.
+set(APP_SOURCES
     src/main.cpp
-    src/App.cpp
+    src/app.cpp
 )
 
-if(PICO_HTTP_ENABLE_LITTLEFS)
-    target_link_options(pico_example_app PRIVATE "-T${MEMMAP_FRAGMENT}")
-else()
-    target_sources(pico_example_app PRIVATE src/hw_config.c)
-endif()
-
-# Include paths
-target_include_directories(pico_example_app PRIVATE
-    ${CMAKE_CURRENT_SOURCE_DIR}/../../framework/include
-    ${CMAKE_CURRENT_SOURCE_DIR}/../../framework/include/port
-)
-
-# Board-specific FreeRTOS port
-if(${PICO_BOARD} STREQUAL "pico2_w")
-    target_include_directories(pico_example_app PRIVATE ${FREERTOS_KERNEL_PATH}/portable/ThirdParty/GCC/RP2350_ARM_NTZ/non_secure/include)
-else()
-    target_include_directories(pico_example_app PRIVATE ${FREERTOS_KERNEL_PATH}/portable/ThirdParty/GCC/RP2040/include)
-endif()
-
-# Linking and defines
-target_link_libraries(pico_example_app
-    pico_stdlib
-    pico_framework
-)
-
-target_compile_definitions(pico_example_app PUBLIC
-    WIFI_SSID=\"${WIFI_SSID}\"
-    WIFI_PASSWORD=\"${WIFI_PASSWORD}\"
-    JWT_SECRET=\"${JWT_SECRET_VALUE}\"
-    CYW43_HOST_NAME="Pico-Framework"
-    ALTCP_MBEDTLS_AUTHMODE=MBEDTLS_SSL_VERIFY_REQUIRED
-    NO_SYS=0
-)
-
-
-target_compile_options(pico_example_app PRIVATE
-    -Wno-unused-result
-    -Wno-psabi
-)
-
-# USB/UART logging
-pico_enable_stdio_usb(pico_example_app 1)
-pico_enable_stdio_uart(pico_example_app 1)
-pico_add_extra_outputs(pico_example_app)
-
-# ---------------------------------------------------------------
-# Flash Target (Unified)
-# ---------------------------------------------------------------
-
-add_custom_target(flash_all DEPENDS pico_example_app ${LFS_IMAGE})
-
-if(${FLASH_METHOD} STREQUAL "usb")
-    add_custom_command(TARGET flash_all POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E echo "Waiting for USB device in BOOTSEL mode..."
-        COMMAND ${CMAKE_COMMAND} -E sleep 2
-        COMMAND ${CMAKE_COMMAND} -E echo "Flashing firmware via USB..."
-        COMMAND picotool load ${CMAKE_BINARY_DIR}/pico_example_app.uf2
-        COMMAND ${CMAKE_COMMAND} -E echo "Flashing LittleFS image via USB..."
-        COMMAND ${CMAKE_COMMAND} -E copy ${LFS_IMAGE} ${CMAKE_BINARY_DIR}/littlefs.bin
-        COMMAND picotool load ${CMAKE_BINARY_DIR}/littlefs.bin --offset ${LFS_FLASH_OFFSET} 
-    )
-else()
-    add_custom_command(TARGET flash_all POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E echo "Flashing firmware and filesystem via OpenOCD..."
-        COMMAND ${PICO_OPENOCD_EXECUTABLE}
-                -f ${PICO_OPENOCD_SCRIPTS}/interface/cmsis-dap.cfg
-                -f ${PICO_OPENOCD_SCRIPTS}/target/rp2350.cfg
-                -c "adapter speed 5000"
-                -c "init"
-                -c "reset init"
-                -c "program ${CMAKE_BINARY_DIR}/pico_example_app.elf verify"
-                -c "flash write_image erase ${LFS_IMAGE} ${LFS_FLASH_OFFSET} bin"
-                -c "verify_image ${LFS_IMAGE} ${LFS_FLASH_OFFSET}"
-                -c "resume"
-                -c "exit"
+# Conditionally include the hw_config.c file if building for SD card
+if(NOT PICO_HTTP_ENABLE_LITTLEFS) #means that we are using SD card instead of LittleFS
+    list(APPEND APP_SOURCES
+        src/hw_config.c
     )
 endif()
 
-# ---------------------------------------------------------------
-# Clean Targets
-# ---------------------------------------------------------------
+# Shared framework setup, flashing, build logic
+# This is designed to remove complexity and duplication from the CMakeLists.txt
+# and allow for easy reuse across multiple applications.
+# You can use this as a template for your own applications.
 
-add_custom_target(clean_fs
-    COMMAND ${CMAKE_COMMAND} -E remove -f ${LFS_IMAGE}
-    COMMENT "Cleaning LittleFS image"
-)
+include(../../cmake/framework_application.cmake)
 
-add_custom_target(clean_all
-    COMMAND ${CMAKE_COMMAND} -E echo "Cleaning all build outputs..."
-    COMMAND ${CMAKE_COMMAND} -E remove -f
-        ${CMAKE_BINARY_DIR}/pico_example_app.uf2
-        ${CMAKE_BINARY_DIR}/pico_example_app.elf
-        ${CMAKE_BINARY_DIR}/pico_example_app.bin
-        ${CMAKE_BINARY_DIR}/pico_example_app.map
-        ${LFS_IMAGE}
-        ${CMAKE_BINARY_DIR}/littlefs.bin
-    COMMENT "Removed app and filesystem images"
-)
+# if you need to add additional libraries, you can do so here
+# For example, if you have a custom driver library, you can add it like this:
+# target_link_libraries(${APP_NAME} my_driver_lib)
+
+# If you have a custom library with headers, you can include it like this:
+# target_include_directories(${APP_NAME} PRIVATE ${CMAKE_SOURCE_DIR}/libfoo/include)
+
+# If you need to define any preprocessor definitions, you can do so here
+# For example, if you want to enable a specific mode in your application, you can define it like this:
+# target_compile_definitions(${APP_NAME} PRIVATE MY_CUSTOM_MODE=1)
+
+# ----------------------------------------------------------------------------------
+# Logging and I/O - enable all as we don't know whether the user is using USB or UART
+# ----------------------------------------------------------------------------------
+
+pico_enable_stdio_usb(${APP_NAME} 1)
+pico_enable_stdio_uart(${APP_NAME} 1)
+pico_add_extra_outputs(${APP_NAME})

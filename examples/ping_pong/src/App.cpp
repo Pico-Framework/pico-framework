@@ -10,9 +10,15 @@
 #include "PingPongController.h"
 
 // Two picos ping-ponging will find each other using their hostname
-// swap these host names for your other pico - now being set in CMakelists.txt or CMAKE command line
-// #define THISHOST "ping-a"
-// #define THATHOST "ping-b"
+#ifndef THISHOST
+    #define THISHOST "ping-a"
+#endif
+#ifndef THATHOST
+    #define THATHOST "ping-b"
+#endif
+// If you want to use different hostnames, you can define them in your CMakeLists.txt
+// or on the command line when building:
+// -DTHISHOST="my-pico-a" -DTHATHOST="my-pico-b"
 
 App::App(int port) : FrameworkApp(port, "AppTask", 1024, 3)
 {
