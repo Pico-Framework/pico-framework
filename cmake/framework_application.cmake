@@ -89,6 +89,7 @@ endif()
 
 if(FLASH_METHOD STREQUAL "openocd")
     if(NOT DEFINED OPENOCD_EXECUTABLE)
+        message(STATUS "System PATH seen by CMake: $ENV{PATH}")
         find_program(OPENOCD_EXECUTABLE NAMES openocd)
     endif()
     if(NOT OPENOCD_EXECUTABLE)
