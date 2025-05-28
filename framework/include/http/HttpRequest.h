@@ -18,7 +18,7 @@
 #include <string>
 #include <map>
 #include <iostream>
-#include "network/tcp.h"
+#include "network/Tcp.h"
 #include "utility/utility.h"
 #include "http/HttpResponse.h"
 
