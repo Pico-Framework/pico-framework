@@ -130,7 +130,7 @@ endif()
 # This is where you would add your application-specific source files.
 set(APP_SOURCES
     src/main.cpp
-    src/app.cpp
+    src/App.cpp
 )
 
 # Conditionally include the hw_config.c file if building for SD card

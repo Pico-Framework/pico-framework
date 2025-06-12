@@ -142,7 +142,7 @@ if(PICO_HTTP_ENABLE_LITTLEFS)
         lib/littlefs/lfs_util.c
         src/storage/LittleFsStorageManager.cpp
         src/storage/LittleFsFileReader.cpp
-        src/port/idleMemory.c
+        src/port/IdleMemory.c
         src/port/cppMemory.cpp
     )
     target_include_directories(pico_framework INTERFACE lib/littlefs)

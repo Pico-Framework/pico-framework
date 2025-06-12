@@ -1,7 +1,7 @@
 #include "pico/stdlib.h"
 #include "FreeRTOS.h"
 #include "task.h"
-#include "app.h"
+#include "App.h"
 
 
 int main() {

@@ -2,7 +2,7 @@
  * @file App.cpp
  */
 
-#include "app.h"
+#include "App.h"
 #include "framework/FrameworkApp.h"
 #include "events/EventManager.h"
 #include "events/Event.h"

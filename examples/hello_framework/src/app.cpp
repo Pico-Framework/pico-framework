@@ -30,7 +30,7 @@
  * 
  */
 
-#include "app.h"
+#include "App.h"
 #include <iostream>
 #include "events/Notification.h"
 #include "events/EventManager.h"

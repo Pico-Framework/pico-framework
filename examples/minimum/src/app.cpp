@@ -12,7 +12,7 @@
 * See the hello_framework example for a heavily commented example that focuses solely on routing.
 */
 
-#include "app.h"
+#include "App.h"
 #include <iostream>
 #include "events/Notification.h"
 #include "events/EventManager.h"

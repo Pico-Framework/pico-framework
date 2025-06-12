@@ -4,7 +4,7 @@
 #include "events/EventManager.h"
 #include "events/TimerService.h"
 #include "events/GpioEventManager.h"
-#include "utility/logger.h"
+#include "utility/Logger.h"
 // Right now its mandatory to have one StorageManager interface 
 #if PICO_HTTP_ENABLE_LITTLEFS
     #include "storage/LittleFsStorageManager.h"

@@ -356,7 +356,7 @@ if(NOT TARGET flash_all)
         if(INCLUDE_FS_FLASH)
             add_custom_command(TARGET flash_all POST_BUILD
                 COMMAND ${CMAKE_COMMAND} -E echo "Flashing application via USB..."
-                COMMAND ${PICOTOOL_EXECUTABLE} load ${CMAKE_BINARY_DIR}/${APP_NAME}.uf2
+                COMMAND ${PICOTOOL_EXECUTABLE} load -f ${CMAKE_BINARY_DIR}/${APP_NAME}.uf2
                 COMMAND ${CMAKE_COMMAND} -E echo "Flashing LittleFS image..."
                 COMMAND ${CMAKE_COMMAND} -E copy ${LFS_IMAGE} ${CMAKE_BINARY_DIR}/littlefs.bin
                 COMMAND ${PICOTOOL_EXECUTABLE} load ${CMAKE_BINARY_DIR}/littlefs.bin --offset ${LFS_FLASH_OFFSET}
@@ -364,7 +364,7 @@ if(NOT TARGET flash_all)
         else()
             add_custom_command(TARGET flash_all POST_BUILD
                 COMMAND ${CMAKE_COMMAND} -E echo "Flashing application via USB..."
-                COMMAND ${PICOTOOL_EXECUTABLE} load ${CMAKE_BINARY_DIR}/${APP_NAME}.uf2
+                COMMAND ${PICOTOOL_EXECUTABLE} load -f ${CMAKE_BINARY_DIR}/${APP_NAME}.uf2
             )
         endif()
     else()

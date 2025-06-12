@@ -6,7 +6,7 @@
 #include "SprinklerController.h"
 #include "ZoneModel.h"
 #include "framework/AppContext.h"
-#include "Framework_config.h"
+#include "framework_config.h"
 #include "events/EventManager.h"
 #include "events/Event.h"
 
