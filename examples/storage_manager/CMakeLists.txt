@@ -130,7 +130,7 @@ endif()
 # This is where you would add your application-specific source files.
 set(APP_SOURCES
     src/main.cpp
-    src/app.cpp
+    src/App.cpp
     src/StorageController.cpp
     src/FileStorage.cpp
 )
