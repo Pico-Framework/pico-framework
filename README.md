@@ -118,7 +118,7 @@ PicoFramework follows a clear and minimal philosophy:
 Clone the framework and build an example:
 
 ```bash
-git clone https://github.com/ianarchbell/Pico-Framework.git
+git clone https://github.com/Pico-Framework/pico-framework.git
 cd Pico-Framework/examples/hello_framework
 # Follow the README inside each example for specific build/setup instructions
 ```
@@ -210,7 +210,7 @@ PicoFramework is released under the **MIT License** to maximize adoption, contri
 ## Contribute or Contact
 
 Want to contribute or collaborate? Open an issue or pull request on GitHub, or email us at:  
-📩 [ian@archbell.com](mailto:ian@archbell.com)
+📩 [ian@pico-framework.com](mailto:ian@pico-framework.com)
 
 ---
 

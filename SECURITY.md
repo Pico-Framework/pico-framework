@@ -11,7 +11,7 @@ We will begin formal vulnerability triage and patching policies starting with v1
 If you discover a security vulnerability in Pico-Framework:
 
 - Please **do not open a GitHub issue**
-- Instead, email Ian Archbell directly at **ian.archbell@gmail.com**
+- Instead, email Ian Archbell directly at **ian@pico-framework.com**
 - Provide as much detail as possible, including reproduction steps
 
 We will acknowledge all valid reports within 48 hours and aim to resolve critical issues promptly.

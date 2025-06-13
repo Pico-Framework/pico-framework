@@ -50,3 +50,6 @@ framework/docs/html/
 
 # === code counter ===
 .VSCodeCounter/
+
+# === vscode ===
+**/.vscode/

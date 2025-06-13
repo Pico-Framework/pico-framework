@@ -32,7 +32,15 @@ set(PICO_CXX_ENABLE_EXCEPTIONS 1)
 
 pico_sdk_init()
 
-set(PICO_FRAMEWORK_DIR /Users/ianarchbell/Documents/pico-framework)
+# Try to set PICO_FRAMEWORK_DIR from environment, or default to relative
+if(NOT DEFINED PICO_FRAMEWORK_DIR)
+    if(DEFINED ENV{PICO_FRAMEWORK_DIR})
+        set(PICO_FRAMEWORK_DIR $ENV{PICO_FRAMEWORK_DIR})
+    else()
+        set(PICO_FRAMEWORK_DIR ${CMAKE_CURRENT_LIST_DIR}/../..) 
+    endif()
+endif()
+
 set(FRAMEWORK_DIR ${PICO_FRAMEWORK_DIR}/framework)
 set(FREERTOS_FAT_CLI_DIR ${FRAMEWORK_DIR}/lib/FreeRTOS-FAT-CLI-for-RPi-Pico/src/)
 set(TESTS_DIR ${PICO_FRAMEWORK_DIR}/tests)
