@@ -36,6 +36,20 @@ public:
     HttpServer(int port, Router &router);
 
     /**
+     * @brief Enable TLS/HTTPS support with certificate and private key.
+     * @param certPem Server certificate in PEM format
+     * @param keyPem Private key in PEM format
+     * @note Must be called before start() to take effect
+     */
+    void enableTLS(const std::string& certPem, const std::string& keyPem);
+
+    /**
+     * @brief Check if TLS is enabled for this server.
+     * @return true if TLS is configured and enabled
+     */
+    bool isTLSEnabled() const;
+
+    /**
      * @brief Start the HTTP server as a FreeRTOS task.
      * @return true if task created successfully.
      */
@@ -111,6 +125,11 @@ private:
     Router &router; ///< Reference to router for dispatching requests.
 
     Tcp listener; // Listening insance of Tcp class
+
+    // TLS configuration
+    bool tlsEnabled = false;
+    std::string serverCert;
+    std::string serverKey;
     static constexpr int BUFFER_SIZE = 1460;
     static constexpr int BOUNDARY_MAX_LEN = 128;
 

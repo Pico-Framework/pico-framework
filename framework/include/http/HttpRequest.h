@@ -245,6 +245,18 @@ public:
     HttpRequest &setBody(const std::string &body); // Enables chaining
 
     /**
+     * @brief Set the body of the request as JSON.
+     * @param json JSON object to set as body.
+     */
+    HttpRequest& setJson(const nlohmann::json &json);
+
+    /**
+     * @brief Set the body of the request as JSON.
+     * @param json JSON string to set as body.
+     */
+    HttpRequest& setJson(const std::string &json); 
+
+    /**
      * @brief Get the Content-Length header as integer.
      * @return Content length in bytes, or 0 if absent.
      */

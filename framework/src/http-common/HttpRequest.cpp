@@ -137,9 +137,23 @@ HttpRequest::HttpRequest(const char *rawHeaders, const std::string &reqMethod, c
     parseHeaders(rawHeaders);
 }
 
-HttpRequest &HttpRequest::setBody(const std::string &b)
+HttpRequest& HttpRequest::setBody(const std::string &b)
 {
     body = b;
+    return *this;
+}
+
+HttpRequest& HttpRequest::setJson(const std::string &json)
+{
+    setHeader("Content-Type", "application/json");
+    body = json;
+    return *this;
+}
+
+HttpRequest& HttpRequest::setJson(const nlohmann::json &json)
+{
+    setHeader("Content-Type", "application/json");
+    body = json.dump();
     return *this;
 }
 

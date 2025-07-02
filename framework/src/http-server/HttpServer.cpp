@@ -80,6 +80,21 @@ HttpServer::HttpServer(int port, Router &router)
 {
 }
 
+/// @copydoc HttpServer::enableTLS
+void HttpServer::enableTLS(const std::string& certPem, const std::string& keyPem)
+{
+    serverCert = certPem;
+    serverKey = keyPem;
+    tlsEnabled = true;
+    printf("[HttpServer] TLS enabled for HTTPS support\n");
+}
+
+/// @copydoc HttpServer::isTLSEnabled
+bool HttpServer::isTLSEnabled() const
+{
+    return tlsEnabled;
+}
+
 /// @copydoc HttpServer::start
 bool HttpServer::start()
 {
@@ -103,7 +118,8 @@ void HttpServer::startServerTask(void *pvParameters)
 void HttpServer::run()
 {
 
-    printf("[HttpServer] Starting HTTP Server on port %d\n", port);
+    printf("[HttpServer] Starting %s Server on port %d\n",
+           tlsEnabled ? "HTTPS" : "HTTP", port);
 
     if (!initNetwork())
     {
@@ -175,9 +191,19 @@ bool HttpServer::initNetwork()
 
 Tcp* HttpServer::initListener()
 {
+    // Configure TLS if enabled
+    if (tlsEnabled) {
+        printf("[HttpServer] Configuring TLS server with certificate and key\n");
+        listener.setServerTlsConfig(serverCert, serverKey);
+    }
+
     if (!listener.bindAndListen(port)) {
         return nullptr;
     }
+
+    printf("[HttpServer] Server listening on port %d (%s)\n",
+           port, tlsEnabled ? "HTTPS" : "HTTP");
+
     // Once server is listening
     Event e(SystemNotification::HttpServerStarted);
     AppContext::get<EventManager>()->postEvent(e); // tell others that we are up
